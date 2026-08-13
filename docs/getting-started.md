@@ -2,23 +2,25 @@
 
 ## Build and Install
 
-The app has been successfully built! You can install it on your Android device.
+Build and install the app on an Android device from the repository root.
 
 ### Install on Connected Device
 
 ```bash
-cd /home/chuck/Desktop/meshcore_wardrive
+flutter pub get
 flutter install
 ```
 
 ### Or Install APK Manually
 
-The APK is located at:
-```
-/home/chuck/Desktop/meshcore_wardrive/build/app/outputs/flutter-apk/app-debug.apk
+Build an APK first:
+
+```bash
+flutter build apk --debug
 ```
 
-Transfer this file to your Android device and install it.
+The output is written to `build/app/outputs/flutter-apk/app-debug.apk`. Transfer
+that file to your Android device and install it.
 
 ## First Launch
 

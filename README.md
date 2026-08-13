@@ -1,6 +1,8 @@
 # MeshCore Wardrive Android App - Source Code
 
-A Flutter-based Android application for mapping MeshCore mesh network coverage in real-time.
+MeshCore Wardrive is an Android application for collecting and visualizing
+MeshCore network coverage. It records GPS samples, communicates with a MeshCore
+companion radio over USB or Bluetooth, and displays coverage on a Flutter map.
 
 ## 📥 Download Pre-built APK
 
@@ -99,93 +101,61 @@ lib/
 └── utils/
     ├── geohash_utils.dart        # Geohash utilities
     └── color_blind_palette.dart  # Accessible color schemes
-```
 
-## 🔧 Configuration
+## Requirements
 
-### Ping Intervals
-Default ping interval can be changed in `lib/services/location_service.dart`:
-```dart
-double _pingIntervalMeters = 805.0; // 0.5 miles
-```
+- Flutter stable with a Dart SDK compatible with `pubspec.yaml`.
+- Android SDK and an Android device or emulator.
+- A physical MeshCore companion radio for LoRa workflows.
 
-### Coverage Grid Precision
-Grid size is set in `lib/utils/geohash_utils.dart`:
-```dart
-static String coverageKey(double lat, double lon) {
-  return geohash.GeoHash.encode(lat, lon, precision: 6); // ~1.2km x 610m
-}
-```
+## Development
 
-### Ping Timeout
-Timeout for ping responses in `lib/services/location_service.dart`:
-```dart
-timeoutSeconds: 20,  // 20 second timeout
-```
-
-## 📚 Documentation
-
-- [LoRa Companion Guide](LORA_COMPANION_GUIDE.md) - Device setup and connectivity
-- [MeshCore Auth Setup](MESHCORE_AUTH_SETUP.md) - Authentication configuration
-- [Quick Start](QUICKSTART.md) - Getting started guide
-
-## 🧪 Testing
-
-Run tests with:
-```bash
+```sh
+flutter pub get
+flutter analyze
 flutter test
+flutter run
 ```
 
-## 📦 Dependencies
+Build a release APK with:
 
-Key packages:
-- `flutter_map` - Map display
-- `flutter_map_cache` - Offline tile caching
-- `flutter_map_heatmap` - Heatmap overlay
-- `fl_chart` - Signal trend charts
-- `geolocator` - GPS tracking
-- `flutter_foreground_task` - Background service
-- `usb_serial` - USB connectivity
-- `flutter_blue_plus` - Bluetooth connectivity
-- `sqflite` - Local database
-- `geohash_plus` - Geohash encoding
-- `pointycastle` - Encryption
-- `share_plus` - Share screenshots & exports
-- `screenshot` / `saver_gallery` - Screenshot capture
+```sh
+flutter build apk --release
+```
 
-See [pubspec.yaml](pubspec.yaml) for complete list.
+The generated APK is written below `build/app/outputs/flutter-apk/`. Publish
+release binaries through [GitHub Releases](https://github.com/mintylinux/Meshcore-Wardrive-Android/releases);
+do not commit them to the repository.
 
-## 🐛 Known Issues
+## Repository layout
 
-- Some Android devices may require "Location Always" permission for background tracking
-- USB connectivity requires OTG cable and data-capable cable
-- #meshwar channel must be joined in MeshCore app before first use
+```text
+android/       Android host project and platform configuration
+assets/        Source assets used during development and packaging
+docs/          User, setup, protocol, and troubleshooting documentation
+lib/           Flutter application source
+  constants/   Application-wide constants
+  models/      Domain and persistence models
+  screens/     UI screens
+  services/    Device, location, storage, and network services
+  utils/       Reusable helpers
+test/          Automated tests
+```
 
-## 🤝 Contributing
+This repository intentionally targets Android. Generated host projects for
+other Flutter platforms are not maintained here.
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes with co-author line:
-   ```
-   git commit -m "Add amazing feature
-   
-   Co-Authored-By: Your Name <your.email@example.com>"
-   ```
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+## Documentation
 
-## 🙏 Credits
+- [Documentation index](docs/README.md)
+- [Getting started](docs/getting-started.md)
+- [Installation](docs/INSTALLATION.md)
+- [LoRa companion guide](docs/guides/lora-companion.md)
+- [MeshCore authentication](docs/guides/meshcore-authentication.md)
+- [Ping debugging](docs/development/debugging-pings.md)
+- [Changelog](CHANGELOG.md)
 
-Built for the MeshCore mesh networking community.
+## Privacy
 
-## 📧 Support
-
-For issues and questions:
-- Open an issue on GitHub
-- Check existing documentation in the repository
-
----
-
-**Current Version:** 1.0.30
-
-**Minimum Android Version:** Android 5.0 (API 21)
+GPS samples are stored locally and are uploaded only when the user explicitly
+chooses to share them.
