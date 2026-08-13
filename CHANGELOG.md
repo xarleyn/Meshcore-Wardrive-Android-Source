@@ -11,6 +11,8 @@
   estimate is visually distinct from the blue GPS position.
 
 ### Fixed
+- Repeater names containing Cyrillic characters or emoji are now decoded and
+  displayed correctly.
 - Radio ping results are now shown as soon as the first ACK or discovery
   response arrives, with the actual response time. Additional repeater
   responses are still collected for radio-position estimation without delaying

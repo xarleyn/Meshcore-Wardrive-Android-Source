@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 /// MeshCore Companion Radio Binary Protocol
@@ -277,8 +278,12 @@ class MeshCoreProtocol {
       String? advName;
       final nameBytes = data.sublist(offset, offset + 32);
       final nullIdx = nameBytes.indexOf(0);
-      if (nullIdx > 0) {
-        advName = String.fromCharCodes(nameBytes.sublist(0, nullIdx));
+      final encodedName = nameBytes.sublist(
+        0,
+        nullIdx >= 0 ? nullIdx : nameBytes.length,
+      );
+      if (encodedName.isNotEmpty) {
+        advName = utf8.decode(encodedName);
       }
       offset += 32;
 
