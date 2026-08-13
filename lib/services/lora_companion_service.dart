@@ -68,6 +68,113 @@ class PingResult {
   };
 }
 
+/// Tracks one discovery ping from transmission through its first response.
+///
+/// The first response completes [result] immediately. Further responses can
+/// still be recorded for a short collection window so radio positioning can
+/// use more than one repeater without delaying user feedback.
+class PingResponseTracker {
+  PingResponseTracker({
+    required this.sentAt,
+    required this.latitude,
+    required this.longitude,
+  });
+
+  final DateTime sentAt;
+  final double latitude;
+  final double longitude;
+  final Completer<PingResult> _completer = Completer<PingResult>();
+  final List<PingResponse> _responses = [];
+
+  bool _acceptingResponses = true;
+  int? _firstResponseTimeMs;
+
+  Future<PingResult> get result => _completer.future;
+  bool get isAcceptingResponses => _acceptingResponses;
+  bool get hasResponse => _firstResponseTimeMs != null;
+  List<PingResponse> get responses => List.unmodifiable(_responses);
+
+  /// Records a response and returns a fresh aggregate result when it changes.
+  /// Returns null for a closed tracker or a weaker duplicate response.
+  PingResult? addResponse(PingResponse response, DateTime receivedAt) {
+    if (!_acceptingResponses) return null;
+
+    final existingIndex = _responses.indexWhere(
+      (existing) => existing.nodeId == response.nodeId,
+    );
+    if (existingIndex == -1) {
+      _responses.add(response);
+    } else if (response.rssi > _responses[existingIndex].rssi) {
+      _responses[existingIndex] = response;
+    } else {
+      return null;
+    }
+
+    _firstResponseTimeMs ??= max(
+      0,
+      receivedAt.difference(sentAt).inMilliseconds,
+    );
+    final pingResult = _successResult(receivedAt);
+    if (!_completer.isCompleted) {
+      _completer.complete(pingResult);
+    }
+    return pingResult;
+  }
+
+  PingResult? timeout(DateTime timedOutAt) {
+    if (!_acceptingResponses || _completer.isCompleted) return null;
+    _acceptingResponses = false;
+    final pingResult = PingResult(
+      timestamp: timedOutAt,
+      status: PingStatus.timeout,
+      latitude: latitude,
+      longitude: longitude,
+      error: 'No repeaters in range - dead zone',
+      responseTimeMs: max(0, timedOutAt.difference(sentAt).inMilliseconds),
+    );
+    _completer.complete(pingResult);
+    return pingResult;
+  }
+
+  PingResult? fail(DateTime failedAt, String error) {
+    if (_completer.isCompleted) {
+      _acceptingResponses = false;
+      return null;
+    }
+    _acceptingResponses = false;
+    final pingResult = PingResult(
+      timestamp: failedAt,
+      status: PingStatus.failed,
+      latitude: latitude,
+      longitude: longitude,
+      error: error,
+    );
+    _completer.complete(pingResult);
+    return pingResult;
+  }
+
+  void close() {
+    _acceptingResponses = false;
+  }
+
+  PingResult _successResult(DateTime receivedAt) {
+    final sortedResponses = List<PingResponse>.of(_responses)
+      ..sort((a, b) => b.snr.compareTo(a.snr));
+    final best = sortedResponses.first;
+    return PingResult(
+      timestamp: receivedAt,
+      status: PingStatus.success,
+      rssi: best.rssi,
+      snr: best.snr,
+      nodeId: best.nodeId,
+      latitude: latitude,
+      longitude: longitude,
+      responseTimeMs: _firstResponseTimeMs,
+      responses: sortedResponses,
+    );
+  }
+}
+
 class LoRaCompanionService {
   // LoRa device connection
   ConnectionType _connectionType = ConnectionType.none;
@@ -80,9 +187,11 @@ class LoRaCompanionService {
 
   // State
   final _pingResultController = StreamController<PingResult>.broadcast();
-  final _pendingPings = <int, Completer<PingResult>>{}; // tag -> completer
-  final Map<int, List<PingResponse>> _pingResponses =
-      {}; // tag -> list of responses
+  static const _pingResponseCollectionWindow = Duration(seconds: 3);
+  final _pendingPings = <int, PingResponseTracker>{};
+  final _pingTimeoutTimers = <int, Timer>{};
+  final _pingCollectionTimers = <int, Timer>{};
+  bool _startingPing = false;
   final _random = Random();
   int? _batteryPercent;
   final _batteryController = StreamController<int?>.broadcast();
@@ -149,6 +258,7 @@ class LoRaCompanionService {
   final _protocol = MeshCoreProtocol();
 
   bool get isDeviceConnected => _connectionType != ConnectionType.none;
+  bool get isPingInProgress => _startingPing || _pendingPings.isNotEmpty;
   ConnectionType get connectionType => _connectionType;
   String? get deviceName => _deviceName;
   Stream<PingResult> get pingResults => _pingResultController.stream;
@@ -651,12 +761,9 @@ class LoRaCompanionService {
     }
   }
 
-  DateTime? _lastPingTime;
-
   /// Send Discovery ping to find nearby repeaters
   /// Uses MeshCore Discovery protocol (DISCOVER_REQ/DISCOVER_RESP)
-  /// Note: _pingInProgress in LocationService prevents overlapping pings.
-  /// No additional rate limit — matches v1.0.33 behavior for fastest coverage.
+  /// ACK responses are untagged, so this service also prevents overlap.
   Future<PingResult> ping({
     double? latitude,
     double? longitude,
@@ -678,9 +785,47 @@ class LoRaCompanionService {
       );
     }
 
+    if (isPingInProgress) {
+      return PingResult(
+        timestamp: DateTime.now(),
+        status: PingStatus.failed,
+        latitude: latitude,
+        longitude: longitude,
+        error: 'Another ping is already in progress',
+      );
+    }
+
+    int? registeredTag;
+    _startingPing = true;
     try {
       // Update device position for proper mesh routing
       await _updateDevicePosition(latitude, longitude);
+
+      // Register before transmitting anything that can ACK. Otherwise a fast
+      // USB/BLE notification can arrive before the pending ping exists.
+      final tag = _random.nextInt(0xFFFFFFFF);
+      final pingSendTime = DateTime.now();
+      final tracker = PingResponseTracker(
+        sentAt: pingSendTime,
+        latitude: latitude,
+        longitude: longitude,
+      );
+      registeredTag = tag;
+      _pendingPings[tag] = tracker;
+      _pingTimeoutTimers[tag] = Timer(Duration(seconds: timeoutSeconds), () {
+        final pending = _pendingPings[tag];
+        if (pending == null) return;
+
+        final result = pending.timeout(DateTime.now());
+        _removePendingPing(tag);
+        if (result != null) {
+          _debugLog.logPing(
+            'Ping timeout after ${result.responseTimeMs}ms. No repeaters responded.',
+          );
+          _pingResultController.add(result);
+        }
+      });
+      _startingPing = false;
 
       // Send zero-hop advertisement to get immediate contact updates
       final zeroHopPayload = Uint8List.fromList([0]); // 0 = zero-hop
@@ -693,9 +838,6 @@ class LoRaCompanionService {
 
       // Small delay to let adverts propagate
       await Future.delayed(const Duration(milliseconds: 100));
-
-      // Generate random tag for this discovery request
-      final tag = _random.nextInt(0xFFFFFFFF);
 
       // Create Discovery request payload (prefixOnly=false to get full 32-byte keys for contact lookup)
       final discoveryPayload = _protocol.createDiscoveryRequestPayload(
@@ -719,8 +861,6 @@ class LoRaCompanionService {
       );
       await _sendBinaryToDevice(controlCmd);
 
-      _lastPingTime = DateTime.now();
-      final pingSendTime = _lastPingTime!;
       _debugLog.logPing('📍 Discovery ping sent at ($latitude, $longitude)');
       _debugLog.logInfo(
         'Note: Repeaters rate-limit to 4 responses per 2 minutes',
@@ -729,115 +869,32 @@ class LoRaCompanionService {
         '📍 Discovery ping sent, tag=0x${tag.toRadixString(16)}, waiting for responses...',
       );
 
-      // Setup response tracking
-      final completer = Completer<PingResult>();
-      _pendingPings[tag] = completer;
-      _pingResponses[tag] = [];
-
-      // Early completion timer: complete after 3 seconds if we have responses
-      Timer(const Duration(seconds: 3), () {
-        if (!completer.isCompleted) {
-          final responses = _pingResponses[tag] ?? [];
-          if (responses.isNotEmpty) {
-            // We have at least one response, complete early
-            _pendingPings.remove(tag);
-            _pingResponses.remove(tag);
-
-            responses.sort((a, b) => b.snr.compareTo(a.snr));
-            final best = responses.first;
-
-            final elapsed = DateTime.now()
-                .difference(pingSendTime)
-                .inMilliseconds;
-            print(
-              '✅ Ping complete (early): ${responses.length} repeater(s) responded in ${elapsed}ms',
-            );
-            _debugLog.logPing(
-              '✅ Best response: ${best.nodeId} (SNR=${best.snr}, RSSI=${best.rssi}, ${elapsed}ms)',
-            );
-
-            final result = PingResult(
-              timestamp: DateTime.now(),
-              status: PingStatus.success,
-              rssi: best.rssi,
-              snr: best.snr,
-              nodeId: best.nodeId,
-              latitude: latitude,
-              longitude: longitude,
-              responseTimeMs: elapsed,
-              responses: responses,
-            );
-            completer.complete(result);
-            _pingResultController.add(result);
-          }
-        }
-      });
-
-      // Final timeout handler: wait full timeout if no responses yet
-      Timer(Duration(seconds: timeoutSeconds), () {
-        if (!completer.isCompleted) {
-          _pendingPings.remove(tag);
-          final responses = _pingResponses.remove(tag) ?? [];
-
-          if (responses.isEmpty) {
-            // No repeaters responded - dead zone
-            final elapsed = DateTime.now()
-                .difference(pingSendTime)
-                .inMilliseconds;
-            print('⏰ Ping timeout after ${elapsed}ms. No repeaters responded.');
-            final result = PingResult(
-              timestamp: DateTime.now(),
-              status: PingStatus.timeout,
-              latitude: latitude,
-              longitude: longitude,
-              error: 'No repeaters in range - dead zone',
-              responseTimeMs: elapsed,
-            );
-            completer.complete(result);
-            _pingResultController.add(result);
-          } else {
-            // Got responses after early timer - use the best one (highest SNR)
-            responses.sort((a, b) => b.snr.compareTo(a.snr));
-            final best = responses.first;
-
-            final elapsed = DateTime.now()
-                .difference(pingSendTime)
-                .inMilliseconds;
-            print(
-              '✅ Ping complete: ${responses.length} repeater(s) responded in ${elapsed}ms',
-            );
-            _debugLog.logPing(
-              '✅ Best response: ${best.nodeId} (SNR=${best.snr}, RSSI=${best.rssi}, ${elapsed}ms)',
-            );
-
-            final result = PingResult(
-              timestamp: DateTime.now(),
-              status: PingStatus.success,
-              rssi: best.rssi,
-              snr: best.snr,
-              nodeId: best.nodeId,
-              latitude: latitude,
-              longitude: longitude,
-              responseTimeMs: elapsed,
-              responses: responses,
-            );
-            completer.complete(result);
-            _pingResultController.add(result);
-          }
-        }
-      });
-
-      return await completer.future;
+      return await tracker.result;
     } catch (e) {
-      final result = PingResult(
-        timestamp: DateTime.now(),
-        status: PingStatus.failed,
-        latitude: latitude,
-        longitude: longitude,
-        error: e.toString(),
-      );
+      final failedAt = DateTime.now();
+      final tracker = registeredTag == null
+          ? null
+          : _pendingPings[registeredTag];
+      if (tracker?.hasResponse == true) {
+        _removePendingPing(registeredTag!);
+        return await tracker!.result;
+      }
+      final result =
+          tracker?.fail(failedAt, e.toString()) ??
+          PingResult(
+            timestamp: failedAt,
+            status: PingStatus.failed,
+            latitude: latitude,
+            longitude: longitude,
+            error: e.toString(),
+          );
+      if (registeredTag != null) {
+        _removePendingPing(registeredTag);
+      }
       _pingResultController.add(result);
       return result;
+    } finally {
+      _startingPing = false;
     }
   }
 
@@ -1059,6 +1116,25 @@ class LoRaCompanionService {
       // Check if this repeater should be ignored (mobile companion)
       final shouldIgnore = _isIgnoredRepeater(pubkeyShort);
 
+      // Record the radio response before any follow-up device request. Contact
+      // lookup writes can be slow over BLE and must not delay ping feedback.
+      if (!shouldIgnore) {
+        final tracker = _pendingPings[tag];
+        if (tracker != null && tracker.isAcceptingResponses) {
+          _addPingResponse(
+            tag,
+            PingResponse(nodeId: pubkeyShort, snr: snr, rssi: rssi),
+          );
+          _debugLog.logPing(
+            '📡 Repeater $pubkeyShort responded (SNR=$snr, RSSI=$rssi)',
+          );
+        } else {
+          _debugLog.logLoRa(
+            '⚠️ Discovery response for unknown/completed tag: 0x${tag.toRadixString(16)}',
+          );
+        }
+      }
+
       // Always request contact details so the pubkey gets cached (needed for Carpeater login)
       if (!_knownRepeaters.containsKey(pubkey) &&
           discovery['pubkey_bytes'] != null) {
@@ -1081,26 +1157,6 @@ class LoRaCompanionService {
           _newRepeaterController.add(pubkeyShort);
           _debugLog.logInfo('🆕 NEW repeater discovered: $pubkeyShort');
         }
-      }
-
-      // Check if this response matches a pending ping
-      final completer = _pendingPings[tag];
-      if (completer != null && !completer.isCompleted) {
-        _addPingResponse(
-          tag,
-          PingResponse(nodeId: pubkeyShort, snr: snr, rssi: rssi),
-        );
-
-        _debugLog.logPing(
-          '📡 Repeater $pubkeyShort responded (SNR=$snr, RSSI=$rssi)',
-        );
-
-        // Note: We don't complete immediately - we wait for timeout to collect all responses
-        // and then pick the best one (highest SNR)
-      } else {
-        _debugLog.logLoRa(
-          '⚠️ Discovery response for unknown/completed tag: 0x${tag.toRadixString(16)}',
-        );
       }
     } catch (e) {
       _debugLog.logError('Error handling control data push: $e');
@@ -1224,6 +1280,19 @@ class LoRaCompanionService {
         return;
       }
 
+      // ACKs are not tagged, so they belong to the sole active ping. Record the
+      // ACK before requesting contact details to keep feedback immediate.
+      if (_pendingPings.isNotEmpty) {
+        final activePing = _pendingPings.entries.last;
+        if (activePing.value.isAcceptingResponses) {
+          _addPingResponse(
+            activePing.key,
+            PingResponse(nodeId: keyPrefix, snr: snr, rssi: rssi),
+          );
+          _debugLog.logPing('📡 Added ACK from $keyPrefix to ping responses');
+        }
+      }
+
       // Request contact info to get repeater position (if we don't already have it)
       if (!_knownRepeaters.containsKey(keyPrefix)) {
         _debugLog.logInfo('📞 Requesting position for $keyPrefix');
@@ -1231,19 +1300,6 @@ class LoRaCompanionService {
       } else {
         // Update signal strength for known repeater
         _updateRepeaterSignal(keyPrefix, snr: snr, rssi: rssi);
-      }
-
-      // If there's a pending ping waiting for responses, add this ACK as a response
-      // Look for the most recent pending ping (should be the active one)
-      if (_pendingPings.isNotEmpty) {
-        final activePing = _pendingPings.entries.last;
-        if (!activePing.value.isCompleted) {
-          _addPingResponse(
-            activePing.key,
-            PingResponse(nodeId: keyPrefix, snr: snr, rssi: rssi),
-          );
-          _debugLog.logPing('📡 Added ACK from $keyPrefix to ping responses');
-        }
       }
     } catch (e) {
       _debugLog.logError('Error parsing ACK frame: $e');
@@ -1296,22 +1352,53 @@ class LoRaCompanionService {
   }
 
   void _addPingResponse(int tag, PingResponse response) {
-    final responses = _pingResponses[tag];
-    if (responses == null) return;
+    final tracker = _pendingPings[tag];
+    if (tracker == null) return;
 
-    final existingIndex = responses.indexWhere(
-      (existing) => existing.nodeId == response.nodeId,
-    );
-    if (existingIndex == -1) {
-      responses.add(response);
-      return;
+    final isFirstResponse = !tracker.hasResponse;
+    final result = tracker.addResponse(response, DateTime.now());
+    if (result == null) return;
+
+    if (isFirstResponse) {
+      _pingTimeoutTimers.remove(tag)?.cancel();
+      _pingCollectionTimers[tag] = Timer(
+        _pingResponseCollectionWindow,
+        () => _removePendingPing(tag),
+      );
+      _debugLog.logPing(
+        'Ping response received in ${result.responseTimeMs}ms; collecting additional responses',
+      );
     }
 
-    // ACK and discovery frames may report the same repeater. Keep the stronger
-    // observation so it contributes only once to radio positioning.
-    if (response.rssi > responses[existingIndex].rssi) {
-      responses[existingIndex] = response;
+    // The first result unblocks ping() immediately. Updated aggregate results
+    // are streamed as more repeaters answer during the collection window.
+    _pingResultController.add(result);
+  }
+
+  void _removePendingPing(int tag) {
+    _pingTimeoutTimers.remove(tag)?.cancel();
+    _pingCollectionTimers.remove(tag)?.cancel();
+    _pendingPings.remove(tag)?.close();
+  }
+
+  void _failPendingPings(String error) {
+    final failedAt = DateTime.now();
+    for (final tracker in _pendingPings.values) {
+      final result = tracker.fail(failedAt, error);
+      if (result != null) {
+        _pingResultController.add(result);
+      }
     }
+    for (final timer in _pingTimeoutTimers.values) {
+      timer.cancel();
+    }
+    for (final timer in _pingCollectionTimers.values) {
+      timer.cancel();
+    }
+    _pingTimeoutTimers.clear();
+    _pingCollectionTimers.clear();
+    _pendingPings.clear();
+    _startingPing = false;
   }
 
   /// Create command frame based on connection type (BLE vs USB)
@@ -1465,20 +1552,7 @@ class LoRaCompanionService {
     _connectionType = ConnectionType.none;
     _deviceName = null;
 
-    // Fail any pending pings
-    for (final entry in _pendingPings.entries) {
-      if (!entry.value.isCompleted) {
-        entry.value.complete(
-          PingResult(
-            timestamp: DateTime.now(),
-            status: PingStatus.failed,
-            error: 'USB connection lost',
-          ),
-        );
-      }
-    }
-    _pendingPings.clear();
-    _pingResponses.clear();
+    _failPendingPings('USB connection lost');
 
     // Notify listeners of disconnect
     _disconnectController.add(null);
@@ -1499,20 +1573,7 @@ class LoRaCompanionService {
     _connectionType = ConnectionType.none;
     _deviceName = null;
 
-    // Fail any pending pings
-    for (final entry in _pendingPings.entries) {
-      if (!entry.value.isCompleted) {
-        entry.value.complete(
-          PingResult(
-            timestamp: DateTime.now(),
-            status: PingStatus.failed,
-            error: 'Bluetooth connection lost',
-          ),
-        );
-      }
-    }
-    _pendingPings.clear();
-    _pingResponses.clear();
+    _failPendingPings('Bluetooth connection lost');
 
     // Notify listeners of disconnect
     _disconnectController.add(null);

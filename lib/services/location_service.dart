@@ -533,7 +533,12 @@ class LocationService {
 
   /// Handle a time-triggered ping
   void _handleTimePing() async {
-    if (!_autoPingEnabled || _carpeaterModeEnabled || _pingInProgress) return;
+    if (!_autoPingEnabled ||
+        _carpeaterModeEnabled ||
+        _pingInProgress ||
+        _loraCompanion.isPingInProgress) {
+      return;
+    }
     if (!_loraCompanion.isDeviceConnected) return;
 
     final position = _lastPosition;
@@ -643,6 +648,8 @@ class LocationService {
     if (_autoPingEnabled &&
         isConnected &&
         !_carpeaterModeEnabled &&
+        !_pingInProgress &&
+        !_loraCompanion.isPingInProgress &&
         _pingMode != 'time') {
       bool shouldPing = false;
 
@@ -668,9 +675,8 @@ class LocationService {
       }
 
       if (shouldPing) {
-        // Fire ping immediately — no _pingInProgress guard.
-        // v1.0.33 allowed overlapping pings for dense coverage.
-        // Each ping has a unique discovery tag so responses correlate correctly.
+        // ACK frames are not tagged, so only one radio ping may be active.
+        _pingInProgress = true;
         _lastPingPosition = latLng;
         _lastPingTimestamp = DateTime.now();
         await _logger.logPingEvent(

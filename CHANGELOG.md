@@ -11,6 +11,11 @@
   estimate is visually distinct from the blue GPS position.
 
 ### Fixed
+- Radio ping results are now shown as soon as the first ACK or discovery
+  response arrives, with the actual response time. Additional repeater
+  responses are still collected for radio-position estimation without delaying
+  feedback, and overlapping untagged ACKs can no longer be assigned to the
+  wrong ping.
 - Update checks now time out quickly and show a concise offline error instead
   of leaving the request hanging.
 - Android location fixes now use the fused provider so GPS, cellular, and

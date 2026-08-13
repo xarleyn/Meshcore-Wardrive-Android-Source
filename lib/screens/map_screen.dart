@@ -2769,6 +2769,11 @@ $placemarks  </Document>
       return;
     }
 
+    if (_locationService.loraCompanion.isPingInProgress) {
+      _showSnackBar('A ping is already in progress');
+      return;
+    }
+
     _showSnackBar('Sending ping...');
     SoundService().playPingSent();
 
@@ -2801,6 +2806,8 @@ $placemarks  </Document>
       rssi: result.rssi,
       snr: result.snr,
       pingSuccess: pingSuccess,
+      responseTimeMs: result.responseTimeMs,
+      deviceId: _locationService.loraCompanion.connectedDeviceId,
     );
 
     await DatabaseService().insertSample(sample);
