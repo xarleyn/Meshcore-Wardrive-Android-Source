@@ -1382,11 +1382,13 @@ $placemarks  </Document>
 
   Future<void> _checkForUpdates() async {
     try {
-      final response = await http.get(
-        Uri.parse(
-          'https://api.github.com/repos/mintylinux/Meshcore-Wardrive-Android/releases/latest',
-        ),
-      );
+      final response = await http
+          .get(
+            Uri.parse(
+              'https://api.github.com/repos/mintylinux/Meshcore-Wardrive-Android/releases/latest',
+            ),
+          )
+          .timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -1426,8 +1428,12 @@ $placemarks  </Document>
       } else {
         _showSnackBar('Could not check for updates');
       }
-    } catch (e) {
-      _showSnackBar('Error checking for updates: $e');
+    } on SocketException {
+      _showSnackBar('No internet connection. Try again when you are online.');
+    } on TimeoutException {
+      _showSnackBar('Update check timed out. Try again later.');
+    } catch (_) {
+      _showSnackBar('Could not check for updates');
     }
   }
 

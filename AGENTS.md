@@ -29,7 +29,26 @@ classes. Do not introduce a new architectural layer for a single use case.
 
 ## Required workflow
 
-Run commands from the repository root:
+This checkout includes a repository-local Flutter, Dart, JDK, and Android SDK
+under `.toolchain/`. On Windows, do not assume `flutter` or `dart` is available
+on the global `PATH`. Dot-source the environment script in every fresh
+PowerShell process before invoking either command:
+
+```powershell
+. .\.toolchain\env.ps1
+flutter --version
+```
+
+Tool calls start fresh PowerShell processes, so source `env.ps1` in the same
+command invocation as the Flutter or Dart command. Run all commands from the
+repository root, for example:
+
+```powershell
+. .\.toolchain\env.ps1
+flutter pub get
+```
+
+Then run the required workflow:
 
 ```sh
 flutter pub get
@@ -37,6 +56,31 @@ dart format --output=none --set-exit-if-changed lib test
 flutter analyze
 flutter test
 ```
+
+`dart format --output=none --set-exit-if-changed` only verifies formatting. If
+it reports changed files, first run `dart format` on the files being edited,
+then repeat the verification command above.
+
+Allow long-running Flutter and Gradle commands to finish; in particular, do
+not launch concurrent release builds. If a build runner was interrupted and a
+subsequent build reports that an intermediate file such as `base.jar` is in
+use, first confirm that no build is still active. A stale Gradle daemon for this
+project can then be stopped from `android/` with `gradlew.bat --stop` before
+retrying once.
+
+The full analyzer may report existing diagnostics outside the current change.
+Still run it, and also use targeted analysis for edited files when needed to
+verify that the change introduces no new diagnostics. Report pre-existing
+diagnostics accurately instead of describing the full analysis as clean.
+
+Use Git commits as recoverable checkpoints during substantial tasks. Commit
+after each important, coherent milestone that leaves the repository in a
+working state, and always create a final commit when the requested task is
+complete. Before every commit, inspect the worktree, stage only files belonging
+to the current task, and run verification appropriate to that milestone. Do
+not commit known-broken intermediate states, unrelated user changes, generated
+build output, or credentials. Do not amend, squash, or rewrite existing commits
+unless the user explicitly requests it.
 
 Use `flutter run` for device validation. For release verification, use
 `flutter build apk --release`; never commit files produced under `build/`.

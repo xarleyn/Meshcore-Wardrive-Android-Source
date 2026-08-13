@@ -2,7 +2,14 @@
 
 ## Unreleased
 
+### Added
+- An app-wide offline banner now detects restricted or unavailable internet
+  access with a short periodic connectivity check. GPS tracking, radio
+  communication, and local sample storage continue while offline.
+
 ### Fixed
+- Update checks now time out quickly and show a concise offline error instead
+  of leaving the request hanging.
 - Android location fixes now use the fused provider so GPS, cellular, and
   nearby Wi-Fi positioning can work together.
 - Very inaccurate fixes and probable in-flight samples are ignored without

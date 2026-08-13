@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/map_screen.dart';
+import 'services/internet_connectivity_service.dart';
+import 'widgets/offline_banner.dart';
 
 void main() {
   // Lock to portrait mode (true north)
@@ -26,18 +28,27 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   ThemeMode _themeMode = ThemeMode.system;
+  late final InternetConnectivityService _connectivityService;
 
   ThemeMode get themeMode => _themeMode;
 
   @override
   void initState() {
     super.initState();
+    _connectivityService = InternetConnectivityService()..start();
     _loadThemeMode();
+  }
+
+  @override
+  void dispose() {
+    _connectivityService.dispose();
+    super.dispose();
   }
 
   Future<void> _loadThemeMode() async {
     final prefs = await SharedPreferences.getInstance();
     final themeModeString = prefs.getString('theme_mode') ?? 'system';
+    if (!mounted) return;
     setState(() {
       _themeMode = ThemeMode.values.firstWhere(
         (e) => e.name == themeModeString,
@@ -58,6 +69,10 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'MeshCore Wardrive',
+      builder: (context, child) => OfflineAppFrame(
+        connectivity: _connectivityService,
+        child: child ?? const SizedBox.shrink(),
+      ),
       themeMode: _themeMode,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
