@@ -50,7 +50,8 @@ that file to your Android device and install it.
 - **Radio position estimate**: After at least three positioned repeaters answer
   the same ping, a temporary grey marker and uncertainty circle show the coarse
   RSSI-weighted estimate. This is not a GPS fix and can be inaccurate because
-  terrain, antennas, and radio propagation strongly affect RSSI.
+  terrain, antennas, and radio propagation strongly affect RSSI. Disable
+  **Show Approximate Position** to hide it without stopping the calculation.
 - **Color Mode**:
   - Quality: Green (excellent) → Red (poor)
   - Age: Green (fresh) → Red (old)

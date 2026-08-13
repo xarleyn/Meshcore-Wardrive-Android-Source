@@ -25,6 +25,7 @@ class SettingsService {
   static const String _showRouteTrailKey = 'show_route_trail';
   static const String _showHeatmapKey = 'show_heatmap';
   static const String _showPredictionRingsKey = 'show_prediction_rings';
+  static const String _showRadioPositionKey = 'show_radio_position';
   static const String _showDuctingKey = 'show_ducting';
   static const String _goalCenterLatKey = 'goal_center_lat';
   static const String _goalCenterLonKey = 'goal_center_lon';
@@ -316,6 +317,17 @@ class SettingsService {
     await prefs.setBool(_showPredictionRingsKey, value);
   }
 
+  /// Whether the already-computed radio position estimate is drawn on the map.
+  Future<bool> getShowRadioPosition() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_showRadioPositionKey) ?? true;
+  }
+
+  Future<void> setShowRadioPosition(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_showRadioPositionKey, value);
+  }
+
   /// Get show ducting monitor setting
   Future<bool> getShowDucting() async {
     final prefs = await SharedPreferences.getInstance();
@@ -541,6 +553,7 @@ class SettingsService {
     _showRouteTrailKey,
     _showHeatmapKey,
     _showPredictionRingsKey,
+    _showRadioPositionKey,
     _showDuctingKey,
     _goalCenterLatKey,
     _goalCenterLonKey,

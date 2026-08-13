@@ -180,6 +180,7 @@ class _MapScreenState extends State<MapScreen> {
 
   // Coverage prediction rings
   bool _showPredictionRings = false;
+  bool _showRadioPosition = true;
 
   // Atmospheric ducting
   bool _showDucting = false;
@@ -442,6 +443,7 @@ class _MapScreenState extends State<MapScreen> {
     final showRouteTrail = await _settingsService.getShowRouteTrail();
     final showHeatmap = await _settingsService.getShowHeatmap();
     final showPredictionRings = await _settingsService.getShowPredictionRings();
+    final showRadioPosition = await _settingsService.getShowRadioPosition();
     final showDucting = await _settingsService.getShowDucting();
 
     setState(() {
@@ -463,6 +465,7 @@ class _MapScreenState extends State<MapScreen> {
       _showRouteTrail = showRouteTrail;
       _showHeatmap = showHeatmap;
       _showPredictionRings = showPredictionRings;
+      _showRadioPosition = showRadioPosition;
       _showDucting = showDucting;
     });
 
@@ -2028,7 +2031,7 @@ $placemarks  </Document>
         if (_showSamples) _buildSampleLayer(),
         if (_showEdges) _buildEdgeLayer(),
         if (_showRepeaters) _buildRepeaterLayer(),
-        ..._buildRadioPositionLayers(),
+        if (_showRadioPosition) ..._buildRadioPositionLayers(),
         _buildPlannedMarkersLayer(),
         if (_currentPosition != null && !_hideUIForScreenshot)
           _buildCurrentLocationLayer(),
@@ -3502,6 +3505,20 @@ $placemarks  </Document>
                         });
                         setModalState(() {});
                         await _settingsService.setShowPredictionRings(value);
+                      },
+                    ),
+                    SwitchListTile(
+                      title: const Text('Show Approximate Position'),
+                      subtitle: const Text(
+                        'Display the grey radio-position estimate',
+                      ),
+                      value: _showRadioPosition,
+                      onChanged: (value) async {
+                        setState(() {
+                          _showRadioPosition = value;
+                        });
+                        setModalState(() {});
+                        await _settingsService.setShowRadioPosition(value);
                       },
                     ),
                     ListTile(

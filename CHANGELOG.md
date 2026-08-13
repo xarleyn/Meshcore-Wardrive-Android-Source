@@ -13,7 +13,8 @@
   communication, and local sample storage continue while offline.
 - Successful pings heard by at least three positioned repeaters now show a
   temporary grey radio-position estimate and its uncertainty circle. The
-  estimate is visually distinct from the blue GPS position.
+  estimate is visually distinct from the blue GPS position and can be hidden
+  in map settings without disabling its calculation.
 
 ### Fixed
 - Repeater names containing Cyrillic characters or emoji are now decoded and

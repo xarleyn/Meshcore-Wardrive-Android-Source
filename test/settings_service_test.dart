@@ -61,4 +61,22 @@ void main() {
       expect(await settings.getKeepScreenOn(), isTrue);
     });
   });
+
+  group('radio position visibility setting', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('defaults to visible', () async {
+      expect(await SettingsService().getShowRadioPosition(), isTrue);
+    });
+
+    test('persists hidden state', () async {
+      final settings = SettingsService();
+
+      await settings.setShowRadioPosition(false);
+
+      expect(await settings.getShowRadioPosition(), isFalse);
+    });
+  });
 }
