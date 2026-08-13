@@ -4,39 +4,102 @@
     {
       "label": "Flutter: Get dependencies",
       "type": "shell",
-      "command": "flutter",
+      "command": "${workspaceFolder}\\.toolchain\\flutter\\bin\\flutter.bat",
       "args": ["pub", "get"],
+      "options": {
+        "env": {
+          "JAVA_HOME": "${workspaceFolder}\\.toolchain\\jdk17",
+          "ANDROID_HOME": "${workspaceFolder}\\.toolchain\\android-sdk",
+          "ANDROID_SDK_ROOT": "${workspaceFolder}\\.toolchain\\android-sdk",
+          "PUB_CACHE": "${workspaceFolder}\\.toolchain\\pub-cache",
+          "GRADLE_USER_HOME": "${workspaceFolder}\\.toolchain\\gradle-cache"
+        }
+      },
       "problemMatcher": []
     },
     {
       "label": "Flutter: Analyze",
       "type": "shell",
-      "command": "flutter",
+      "command": "${workspaceFolder}\\.toolchain\\flutter\\bin\\flutter.bat",
       "args": ["analyze"],
+      "options": {
+        "env": {
+          "JAVA_HOME": "${workspaceFolder}\\.toolchain\\jdk17",
+          "ANDROID_HOME": "${workspaceFolder}\\.toolchain\\android-sdk",
+          "ANDROID_SDK_ROOT": "${workspaceFolder}\\.toolchain\\android-sdk",
+          "PUB_CACHE": "${workspaceFolder}\\.toolchain\\pub-cache",
+          "GRADLE_USER_HOME": "${workspaceFolder}\\.toolchain\\gradle-cache"
+        }
+      },
       "group": "build",
       "problemMatcher": []
     },
     {
       "label": "Flutter: Test",
       "type": "shell",
-      "command": "flutter",
+      "command": "${workspaceFolder}\\.toolchain\\flutter\\bin\\flutter.bat",
       "args": ["test"],
+      "options": {
+        "env": {
+          "JAVA_HOME": "${workspaceFolder}\\.toolchain\\jdk17",
+          "ANDROID_HOME": "${workspaceFolder}\\.toolchain\\android-sdk",
+          "ANDROID_SDK_ROOT": "${workspaceFolder}\\.toolchain\\android-sdk",
+          "PUB_CACHE": "${workspaceFolder}\\.toolchain\\pub-cache",
+          "GRADLE_USER_HOME": "${workspaceFolder}\\.toolchain\\gradle-cache"
+        }
+      },
       "group": "test",
       "problemMatcher": []
     },
     {
       "label": "Flutter: Build release APK",
       "type": "shell",
-      "command": "flutter",
+      "command": "${workspaceFolder}\\.toolchain\\flutter\\bin\\flutter.bat",
       "args": ["build", "apk", "--release"],
+      "options": {
+        "env": {
+          "JAVA_HOME": "${workspaceFolder}\\.toolchain\\jdk17",
+          "ANDROID_HOME": "${workspaceFolder}\\.toolchain\\android-sdk",
+          "ANDROID_SDK_ROOT": "${workspaceFolder}\\.toolchain\\android-sdk",
+          "PUB_CACHE": "${workspaceFolder}\\.toolchain\\pub-cache",
+          "GRADLE_USER_HOME": "${workspaceFolder}\\.toolchain\\gradle-cache"
+        }
+      },
       "group": "build",
       "problemMatcher": []
     },
     {
       "label": "Flutter: Clean",
       "type": "shell",
-      "command": "flutter",
+      "command": "${workspaceFolder}\\.toolchain\\flutter\\bin\\flutter.bat",
       "args": ["clean"],
+      "options": {
+        "env": {
+          "JAVA_HOME": "${workspaceFolder}\\.toolchain\\jdk17",
+          "ANDROID_HOME": "${workspaceFolder}\\.toolchain\\android-sdk",
+          "ANDROID_SDK_ROOT": "${workspaceFolder}\\.toolchain\\android-sdk",
+          "PUB_CACHE": "${workspaceFolder}\\.toolchain\\pub-cache",
+          "GRADLE_USER_HOME": "${workspaceFolder}\\.toolchain\\gradle-cache"
+        }
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Android: List connected devices",
+      "type": "shell",
+      "command": "${workspaceFolder}\\.toolchain\\android-sdk\\platform-tools\\adb.exe",
+      "args": ["devices", "-l"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Android: Install release APK",
+      "type": "shell",
+      "command": "${workspaceFolder}\\.toolchain\\android-sdk\\platform-tools\\adb.exe",
+      "args": [
+        "install",
+        "-r",
+        "${workspaceFolder}\\build\\app\\outputs\\flutter-apk\\app-release.apk"
+      ],
       "problemMatcher": []
     }
   ]
