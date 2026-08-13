@@ -19,11 +19,14 @@
 ### Fixed
 - Repeater names containing Cyrillic characters or emoji are now decoded and
   displayed correctly.
-- Radio ping results are now shown as soon as the first ACK or discovery
+- Radio ping results are now shown as soon as the first tagged discovery
   response arrives, with the actual response time. Additional repeater
   responses are still collected for radio-position estimation without delaying
-  feedback, and overlapping untagged ACKs can no longer be assigned to the
-  wrong ping.
+  feedback, and overlapping discovery cycles are prevented.
+- Companion-radio communication now matches MeshCore protocol version 13:
+  valid app startup and device negotiation, correct contact lookup and advert
+  handling, current packet assignments, and corrected raw/control/login frame
+  parsing. BLE connections now use the official UART UUIDs and request MTU 512.
 - Update checks now time out quickly and show a concise offline error instead
   of leaving the request hanging.
 - Android location fixes now use the fused provider so GPS, cellular, and

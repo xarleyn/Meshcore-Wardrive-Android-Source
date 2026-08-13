@@ -684,7 +684,7 @@ class LocationService {
       }
 
       if (shouldPing) {
-        // ACK frames are not tagged, so only one radio ping may be active.
+        // Keep a single radio ping active so its response window has one owner.
         _pingInProgress = true;
         _lastPingPosition = latLng;
         _lastPingTimestamp = DateTime.now();

@@ -1,8 +1,14 @@
+// Protocol identifiers intentionally mirror the names used by MeshCore.
+// ignore_for_file: constant_identifier_names
+
 import 'dart:convert';
 import 'dart:typed_data';
 
 /// MeshCore Companion Radio Binary Protocol
-/// Protocol spec: https://github.com/meshcore-dev/MeshCore/wiki/Companion-Radio-Protocol
+/// Protocol spec: https://github.com/meshcore-dev/MeshCore/blob/main/docs/companion_protocol.md
+
+/// Highest companion protocol version understood by this client.
+const int COMPANION_PROTOCOL_VERSION = 13;
 
 // Frame delimiters
 const int FRAME_START_OUTBOUND = 0x3E; // '>' - radio -> app
@@ -13,39 +19,80 @@ const int CMD_APP_START = 1;
 const int CMD_SEND_MESSAGE = 2; // CMD_SEND_TXT_MSG
 const int CMD_SEND_CHANNEL_MESSAGE = 3; // CMD_SEND_CHANNEL_TXT_MSG
 const int CMD_GET_CONTACTS = 4;
-const int CMD_SEND_ADVERT = 7; // CMD_SEND_SELF_ADVERT
-const int CMD_SET_CHANNEL = 8; // CMD_SET_ADVERT_NAME
-const int CMD_GET_CHANNEL = 31; // Get channel info by index
-const int CMD_SET_CHANNEL_CONFIG = 32; // Set channel configuration
-const int CMD_SYNC_NEXT_MESSAGE = 10;
+const int CMD_GET_DEVICE_TIME = 5;
+const int CMD_SET_DEVICE_TIME = 6;
+const int CMD_SEND_SELF_ADVERT = 7;
+const int CMD_SET_ADVERT_NAME = 8;
 const int CMD_ADD_UPDATE_CONTACT = 9;
-const int CMD_REMOVE_CONTACT = 15;
-const int CMD_SET_NAME = 19;
+const int CMD_SYNC_NEXT_MESSAGE = 10;
+const int CMD_SET_RADIO_PARAMS = 11;
+const int CMD_SET_RADIO_TX_POWER = 12;
+const int CMD_RESET_PATH = 13;
 const int CMD_SET_ADVERT_LATLON = 14; // Set node lat/lon for adverts
+const int CMD_REMOVE_CONTACT = 15;
+const int CMD_SHARE_CONTACT = 16;
+const int CMD_EXPORT_CONTACT = 17;
+const int CMD_IMPORT_CONTACT = 18;
+const int CMD_REBOOT = 19;
 const int CMD_GET_BATT_AND_STORAGE = 20; // CMD_GET_BATTERY_VOLTAGE
+const int CMD_SET_TUNING_PARAMS = 21;
+const int CMD_DEVICE_QUERY = 22;
+const int CMD_SEND_RAW_DATA = 25;
 const int CMD_SEND_LOGIN = 26; // Send login to repeater/room server
 const int CMD_SEND_STATUS_REQ = 27; // Send status/data request after login
 const int CMD_GET_CONTACT_BY_KEY = 30; // Get contact by public key
+const int CMD_GET_CHANNEL = 31; // Get channel info by index
+const int CMD_SET_CHANNEL = 32; // Set channel configuration
+const int CMD_SEND_TRACE_PATH = 36;
+const int CMD_SET_DEVICE_PIN = 37;
+const int CMD_SET_OTHER_PARAMS = 38;
+const int CMD_SEND_TELEMETRY_REQ = 39;
+const int CMD_GET_CUSTOM_VARS = 40;
+const int CMD_SET_CUSTOM_VAR = 41;
+const int CMD_GET_ADVERT_PATH = 42;
+const int CMD_GET_TUNING_PARAMS = 43;
 const int CMD_SEND_BINARY_REQ =
     50; // Send arbitrary binary request to a contact
+const int CMD_FACTORY_RESET = 51;
 const int CMD_SEND_CONTROL_DATA = 55;
+const int CMD_GET_STATS = 56;
 const int CMD_SEND_ANON_REQ = 57; // Send anonymous request (for basic info)
+const int CMD_SET_AUTOADD_CONFIG = 58;
+const int CMD_GET_AUTOADD_CONFIG = 59;
+const int CMD_GET_ALLOWED_REPEAT_FREQ = 60;
+const int CMD_SET_PATH_HASH_MODE = 61;
+const int CMD_SEND_CHANNEL_DATA = 62;
+const int CMD_SET_DEFAULT_FLOOD_SCOPE = 63;
+const int CMD_GET_DEFAULT_FLOOD_SCOPE = 64;
+const int CMD_SEND_RAW_PACKET = 65;
 
 // Response codes (radio -> app)
 const int RESP_CODE_OK = 0;
 const int RESP_CODE_ERR = 1;
-const int RESP_CODE_APP_START = 2;
+const int RESP_CODE_CONTACTS_START = 2;
 const int RESP_CODE_CONTACT = 3;
 const int RESP_CODE_END_OF_CONTACTS = 4;
 const int RESP_CODE_SELF_INFO = 5;
 const int RESP_CODE_SENT = 6;
-const int RESP_CODE_CHANNEL_INFO = 18;
 const int RESP_CODE_CONTACT_MSG_RECV = 7;
 const int RESP_CODE_CHANNEL_MSG_RECV = 8;
+const int RESP_CODE_CURRENT_TIME = 9;
 const int RESP_CODE_NO_MORE_MESSAGES = 10;
-const int RESP_CODE_CHANNEL_MSG_RECV_V3 = 17;
 const int RESP_CODE_EXPORT_CONTACT = 11;
 const int RESP_CODE_BATT_AND_STORAGE = 12;
+const int RESP_CODE_DEVICE_INFO = 13;
+const int RESP_CODE_DISABLED = 15;
+const int RESP_CODE_CONTACT_MSG_RECV_V3 = 16;
+const int RESP_CODE_CHANNEL_MSG_RECV_V3 = 17;
+const int RESP_CODE_CHANNEL_INFO = 18;
+const int RESP_CODE_CUSTOM_VARS = 21;
+const int RESP_CODE_ADVERT_PATH = 22;
+const int RESP_CODE_TUNING_PARAMS = 23;
+const int RESP_CODE_STATS = 24;
+const int RESP_CODE_AUTOADD_CONFIG = 25;
+const int RESP_CODE_ALLOWED_REPEAT_FREQ = 26;
+const int RESP_CODE_CHANNEL_DATA_RECV = 27;
+const int RESP_CODE_DEFAULT_FLOOD_SCOPE = 28;
 
 // Push codes (radio -> app, unsolicited)
 const int PUSH_CODE_ADVERT = 0x80;
@@ -66,18 +113,19 @@ const int PUSH_CODE_CONTROL_DATA = 0x8E; // Control data packet received
 const int PUSH_CODE_CONTACT_DELETED = 0x8F;
 const int PUSH_CODE_CONTACTS_FULL = 0x90;
 
-// Legacy aliases — kept so existing handlers still compile
-const int PUSH_CODE_NEW_CONTACT = PUSH_CODE_PATH_UPDATED; // 0x81
-const int PUSH_CODE_CONTACT_UPDATED = PUSH_CODE_SEND_CONFIRMED; // 0x82
-const int PUSH_CODE_ACK_RECV = PUSH_CODE_RAW_DATA; // 0x84
-const int PUSH_CODE_CHANNEL_MSG_RECV =
-    PUSH_CODE_LOGIN_SUCCESS; // 0x85 (reused code)
-const int PUSH_CODE_CHANNEL_ECHO = PUSH_CODE_LOG_RX_DATA; // 0x88
+// Error codes carried by RESP_CODE_ERR.
+const int ERR_CODE_UNSUPPORTED_CMD = 1;
+const int ERR_CODE_NOT_FOUND = 2;
+const int ERR_CODE_TABLE_FULL = 3;
+const int ERR_CODE_BAD_STATE = 4;
+const int ERR_CODE_FILE_IO_ERROR = 5;
+const int ERR_CODE_ILLEGAL_ARG = 6;
 
 // Advertisement types
 const int ADV_TYPE_CHAT = 1;
 const int ADV_TYPE_REPEATER = 2;
 const int ADV_TYPE_ROOM_SERVER = 3;
+const int ADV_TYPE_SENSOR = 4;
 
 // Text message types (CMD_SEND_MESSAGE txt_type field)
 const int TXT_TYPE_PLAIN = 0;
@@ -250,10 +298,38 @@ class MeshCoreProtocol {
     return frameData.toBytes();
   }
 
+  /// Create the required CMD_APP_START payload.
+  ///
+  /// Firmware reserves the first seven bytes and rejects frames shorter than
+  /// eight bytes including the command byte.
+  Uint8List createAppStartPayload({String appName = 'MeshCore Wardrive'}) {
+    final payload = BytesBuilder()..add(Uint8List(7));
+    if (appName.isNotEmpty) {
+      payload.add(utf8.encode(appName));
+    }
+    return payload.toBytes();
+  }
+
+  /// Advertise the highest companion protocol version this app can parse.
+  Uint8List createDeviceQueryPayload() =>
+      Uint8List.fromList([COMPANION_PROTOCOL_VERSION]);
+
+  /// Create the payload for a single contact lookup.
+  Uint8List createGetContactByKeyPayload(Uint8List publicKey) {
+    if (publicKey.length != 32) {
+      throw ArgumentError.value(
+        publicKey.length,
+        'publicKey',
+        'must contain exactly 32 bytes',
+      );
+    }
+    return Uint8List.fromList(publicKey);
+  }
+
   /// Parse RESP_CODE_CONTACT frame data
   MeshCoreContact? parseContactFrame(Uint8List data) {
     try {
-      if (data.length < 99) return null; // Minimum size
+      if (data.length < 131) return null; // Required fixed fields
 
       int offset = 0;
 
@@ -369,9 +445,9 @@ class MeshCoreProtocol {
       // Channel name (32 bytes, null-terminated)
       final nameBytes = data.sublist(offset, offset + 32);
       final nullIdx = nameBytes.indexOf(0);
-      final name = nullIdx >= 0
-          ? String.fromCharCodes(nameBytes.sublist(0, nullIdx))
-          : String.fromCharCodes(nameBytes);
+      final name = utf8.decode(
+        nameBytes.sublist(0, nullIdx >= 0 ? nullIdx : nameBytes.length),
+      );
       offset += 32;
 
       // Channel key (16 bytes)
@@ -384,6 +460,57 @@ class MeshCoreProtocol {
       return null;
     }
   }
+
+  /// Parse RESP_CODE_DEVICE_INFO (0x0D).
+  Map<String, dynamic>? parseDeviceInfoFrame(Uint8List data) {
+    if (data.isEmpty) return null;
+
+    final firmwareProtocol = data[0];
+    final result = <String, dynamic>{'firmware_protocol': firmwareProtocol};
+    if (firmwareProtocol >= 3 && data.length >= 79) {
+      result.addAll({
+        'max_contacts': data[1] * 2,
+        'max_channels': data[2],
+        'ble_pin': _readUint32LE(data, 3),
+        'firmware_build': _decodeFixedUtf8(data, 7, 12),
+        'manufacturer': _decodeFixedUtf8(data, 19, 40),
+        'firmware_version': _decodeFixedUtf8(data, 59, 20),
+      });
+    }
+    if (firmwareProtocol >= 9 && data.length >= 80) {
+      result['client_repeat'] = data[79] != 0;
+    }
+    if (firmwareProtocol >= 10 && data.length >= 81) {
+      result['path_hash_mode'] = data[80];
+    }
+    return result;
+  }
+
+  String _decodeFixedUtf8(Uint8List data, int offset, int length) {
+    final bytes = data.sublist(offset, offset + length);
+    final terminator = bytes.indexOf(0);
+    return utf8
+        .decode(bytes.sublist(0, terminator < 0 ? bytes.length : terminator))
+        .trim();
+  }
+
+  Uint8List _encodeUtf8AtMost(String value, int maxBytes) {
+    final result = BytesBuilder();
+    var length = 0;
+    for (final rune in value.runes) {
+      final bytes = utf8.encode(String.fromCharCode(rune));
+      if (length + bytes.length > maxBytes) break;
+      result.add(bytes);
+      length += bytes.length;
+    }
+    return result.toBytes();
+  }
+
+  int _readUint32LE(Uint8List data, int offset) =>
+      data[offset] |
+      (data[offset + 1] << 8) |
+      (data[offset + 2] << 16) |
+      (data[offset + 3] << 24);
 
   /// Create CMD_GET_CHANNEL command to query channel at specific index
   Uint8List createGetChannelPayload(int channelIdx) {
@@ -411,11 +538,9 @@ class MeshCoreProtocol {
 
     // Channel name (32 bytes, null-terminated)
     final nameBytes = Uint8List(32);
-    final encoded = channelName.codeUnits;
-    final len = encoded.length < 31 ? encoded.length : 31;
-    for (int i = 0; i < len; i++) {
-      nameBytes[i] = encoded[i];
-    }
+    final encoded = _encodeUtf8AtMost(channelName, 32);
+    final len = encoded.length;
+    nameBytes.setRange(0, len, encoded);
     payload.add(nameBytes);
 
     // Channel key (16 bytes)
@@ -492,7 +617,8 @@ class MeshCoreProtocol {
       }
 
       // SNR at byte 0 (scaled by 4x in firmware)
-      final snrRaw = data[0];
+      var snrRaw = data[0];
+      if (snrRaw > 127) snrRaw -= 256;
       final snr = (snrRaw / 4.0).round(); // Convert back to actual SNR
 
       // RSSI at byte 1 (raw value)
@@ -595,115 +721,79 @@ class MeshCoreProtocol {
     }
   }
 
-  /// Parse PUSH_CODE_CHANNEL_MSG_RECV or PUSH_CODE_CHANNEL_ECHO frame
-  /// Returns map with 'text', 'repeater' (first repeater public key hex), 'snr', 'rssi'
+  /// Parse PUSH_CODE_RAW_DATA (0x84).
+  ///
+  /// This is an arbitrary radio payload, not a delivery ACK. The companion
+  /// prepends signed SNR*4, signed RSSI, and one reserved byte.
+  Map<String, dynamic>? parseRawDataPush(Uint8List data) {
+    if (data.length < 3) return null;
+
+    var snrRaw = data[0];
+    if (snrRaw > 127) snrRaw -= 256;
+    var rssi = data[1];
+    if (rssi > 127) rssi -= 256;
+    return {
+      'snr': snrRaw / 4.0,
+      'rssi': rssi,
+      'reserved': data[2],
+      'payload': Uint8List.fromList(data.sublist(3)),
+    };
+  }
+
+  /// Parse RESP_CODE_CHANNEL_MSG_RECV (0x08) or its v3 variant (0x11).
   Map<String, dynamic>? parseChannelMessageFrame(
     Uint8List data, {
-    bool isEcho = false,
+    bool version3 = false,
   }) {
-    try {
-      // Debug: dump full payload
-      print(
-        '🔍 Channel msg payload (${data.length} bytes): ${data.map((b) => b.toRadixString(16).padLeft(2, "0")).join(" ")}',
-      );
-
-      int offset = 0;
-
-      // Echo frames have additional header: [seq(2)] [flags(1)] before channel data
-      if (isEcho && data.length >= 3) {
-        final seq = data[offset] | (data[offset + 1] << 8);
-        offset += 2;
-        final flags = data[offset++];
-        print('  echo: seq=$seq flags=0x${flags.toRadixString(16)}');
-      }
-
-      if (data.length < offset + 33) {
-        print(
-          '⚠️ Payload too short: ${data.length} bytes (need at least ${offset + 33})',
-        );
-        print(
-          '⚠️ Raw hex dump: ${data.map((b) => b.toRadixString(16).padLeft(2, "0")).join(" ")}',
-        );
-        print('⚠️ isEcho=$isEcho, offset=$offset after header');
-        return null;
-      }
-
-      // Channel index (1 byte)
-      final channelIdx = data[offset++];
-      print('  channelIdx=$channelIdx');
-
-      // Sender public key (32 bytes)
-      final senderKey = data.sublist(offset, offset + 32);
-      final senderHex = senderKey
-          .map((b) => b.toRadixString(16).padLeft(2, '0'))
-          .join('');
-      print('  sender=${senderHex.substring(0, 8)}');
-      offset += 32;
-
-      // Path length (1 byte)
-      final pathLen = data[offset++];
-      print('  pathLen=$pathLen');
-
-      // Path (pathLen * 32 bytes) - get first repeater
-      String? firstRepeater;
-      Uint8List? firstRepeaterFullKey;
-
-      if (pathLen > 0 && data.length >= offset + 32) {
-        final firstRepeaterKey = data.sublist(offset, offset + 32);
-        firstRepeaterFullKey = Uint8List.fromList(firstRepeaterKey);
-        firstRepeater = firstRepeaterKey
-            .map((b) => b.toRadixString(16).padLeft(2, '0'))
-            .join('')
-            .substring(0, 8)
-            .toUpperCase();
-        print('  repeater=$firstRepeater');
-        offset += pathLen * 32;
-      } else if (pathLen > 0) {
-        // Skip path if not enough data
-        offset += pathLen * 32;
-      }
-
-      // SNR/RSSI always follow path (2 bytes each, signed)
-      int? snr;
-      int? rssi;
-      if (data.length >= offset + 4) {
-        snr = data[offset] | (data[offset + 1] << 8);
-        if (snr > 32767) snr -= 65536; // Convert to signed
-        offset += 2;
-
-        rssi = data[offset] | (data[offset + 1] << 8);
-        if (rssi > 32767) rssi -= 65536; // Convert to signed
-        offset += 2;
-        print('  snr=$snr, rssi=$rssi');
-      }
-
-      // Message text (remaining bytes, null-terminated)
-      String? text;
-      if (offset < data.length) {
-        final textBytes = data.sublist(offset);
-        final nullIdx = textBytes.indexOf(0);
-        if (nullIdx >= 0) {
-          text = String.fromCharCodes(textBytes.sublist(0, nullIdx));
-        } else {
-          text = String.fromCharCodes(textBytes);
-        }
-      }
-
-      return {
-        'channelIdx': channelIdx,
-        'sender': senderHex.substring(0, 8).toUpperCase(),
-        'senderKey': senderKey, // Full 32-byte sender key
-        'text': text,
-        'repeater': firstRepeater,
-        'repeaterKey':
-            firstRepeaterFullKey, // Full 32-byte key for contact requests
-        'snr': snr,
-        'rssi': rssi,
-      };
-    } catch (e) {
-      print('Error parsing channel message frame: $e');
+    var offset = 0;
+    double? snr;
+    if (version3) {
+      if (data.length < 10) return null;
+      var snrRaw = data[offset++];
+      if (snrRaw > 127) snrRaw -= 256;
+      snr = snrRaw / 4.0;
+      offset += 2; // reserved
+    } else if (data.length < 7) {
       return null;
     }
+
+    final channelIdx = data[offset++];
+    final pathLen = data[offset++];
+    final textType = data[offset++];
+    final timestamp = _readUint32LE(data, offset);
+    offset += 4;
+    final textBytes = data.sublist(offset);
+    final terminator = textBytes.indexOf(0);
+    final text = utf8.decode(
+      textBytes.sublist(0, terminator < 0 ? textBytes.length : terminator),
+    );
+
+    return {
+      'channel_idx': channelIdx,
+      'path_len': pathLen,
+      'text_type': textType,
+      'timestamp': timestamp,
+      'text': text,
+      'snr': snr,
+    };
+  }
+
+  /// Parse RESP_CODE_CHANNEL_DATA_RECV (0x1B), excluding its response code.
+  Map<String, dynamic>? parseChannelDataFrame(Uint8List data) {
+    if (data.length < 8) return null;
+
+    var snrRaw = data[0];
+    if (snrRaw > 127) snrRaw -= 256;
+    final dataLength = data[7];
+    if (data.length < 8 + dataLength) return null;
+
+    return {
+      'snr': snrRaw / 4.0,
+      'channel_idx': data[3],
+      'path_len': data[4],
+      'data_type': data[5] | (data[6] << 8),
+      'payload': Uint8List.fromList(data.sublist(8, 8 + dataLength)),
+    };
   }
 
   /// Create CMD_SEND_CONTROL_DATA payload for DISCOVER_REQ
@@ -736,7 +826,7 @@ class MeshCoreProtocol {
   }
 
   /// Parse PUSH_CODE_CONTROL_DATA (0x8E) frame
-  /// Format: [SNR*4 (signed)] [RSSI (signed)] [path_len] [path...] [payload...]
+  /// Format: [SNR*4 (signed)] [RSSI (signed)] [path_len] [payload...]
   /// Returns map with 'snr', 'rssi', 'path_len', 'payload'
   Map<String, dynamic>? parseControlDataPush(Uint8List data) {
     try {
@@ -759,12 +849,8 @@ class MeshCoreProtocol {
       // Path length at byte 2
       final pathLen = data[offset++];
 
-      // Skip path bytes if present
-      if (data.length < offset + pathLen) {
-        print('⚠️ Control data: not enough data for path');
-        return null;
-      }
-      offset += pathLen;
+      // Firmware reports the radio path length but does not include the path
+      // bytes in this companion frame. Payload starts at the current offset.
 
       // Remaining bytes are the payload
       final payload = data.length > offset
@@ -923,13 +1009,13 @@ class MeshCoreProtocol {
     try {
       if (data.length < 7) return null;
       int offset = 0;
-      final isAdmin = data[offset++] != 0;
+      final isAdmin = (data[offset++] & 0x01) != 0;
       final pubkeyPrefix = data.sublist(offset, offset + 6);
       offset += 6;
       int? serverTimestamp;
       int permissions = 0;
       int? firmwareVersion;
-      if (data.length >= 14) {
+      if (data.length >= 13) {
         serverTimestamp =
             data[offset] |
             (data[offset + 1] << 8) |

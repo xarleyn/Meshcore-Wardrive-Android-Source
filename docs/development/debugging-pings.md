@@ -1,215 +1,113 @@
 # Debugging MeshCore Wardrive Ping Responses
 
-## Expected Flow
+## Expected flow
 
-When a ping is sent, this is what should happen:
+After connecting, the app sends a valid `CMD_APP_START`, negotiates companion
+protocol version 13 with `CMD_DEVICE_QUERY`, and loads the contact list. A ping
+then produces logs similar to:
 
-### 1. Ping Sent
-```
+```text
 📍 Updated device position: lat, lon
 📡 Sending zero-hop advertisement
 📡 Sending DISCOVER_REQ with tag=0xXXXXXXXX
-📍 Discovery ping sent at (lat, lon), waiting for responses...
-```
-
-### 2. Raw Data Received
-```
-📶 Raw RX: X bytes - [hex dump of first 20 bytes]
-```
-
-### 3. Frame Parsed
-```
-📥 RX Frame: code=0xXX (decimal) len=X
-```
-
-**Key frame codes to look for:**
-- `0x84` (132 decimal) = **ACK** from repeater (this is what we want!)
-- `0x8E` (142 decimal) = **Control Data** (could contain Discovery response)
-- `0x80` (128 decimal) = Advertisement from repeater
-
-### 4. ACK Processing (if 0x84 received)
-```
-✅ ACK from [REPEATER_ID] (SNR: X, RSSI: Y)
-📞 Requesting position for [REPEATER_ID]
-```
-
-### 5. Discovery Response Processing (if 0x8E received)
-```
-🔍 DISCOVER_RESP: tag=0xXXXXXXXX, node=[ID], type=X, SNR=X, RSSI=X
+🔍 DISCOVER_RESP: tag=0xXXXXXXXX, node=[ID], type=2, SNR=X, RSSI=Y
 📞 Requesting position for [ID]
-```
-
-### 6. Contact Response
-```
 Contact: [NAME] (type: 2)
 ✅ Added to map: [NAME] at (lat, lon)
 ```
 
-### 7. Ping Complete
-```
-✅ Ping complete: X repeater(s) responded
-✅ Best response: [ID] (SNR=X, RSSI=Y)
-```
+The first matching discovery response completes the ping. Further responses
+with the same tag are collected briefly for radio-position estimation.
 
-OR if no responses:
-```
-⏰ Ping timeout. No repeaters responded.
-```
+Key incoming frame codes are:
 
-## Common Issues
+- `0x03`: contact details response.
+- `0x05`: self information returned by `CMD_APP_START`.
+- `0x0D`: device and negotiated-protocol information.
+- `0x80`: advertisement containing a 32-byte public key; the app follows it
+  with `CMD_GET_CONTACT_BY_KEY` (`0x1E`).
+- `0x84`: arbitrary `PUSH_CODE_RAW_DATA`. This is not a delivery ACK and does
+  not count as a wardrive ping response.
+- `0x8A`: newly auto-added contact in the same full layout as `0x03`.
+- `0x8E`: control data, including tagged discovery responses.
 
-### Issue 1: No Raw Data Received
-**Symptom:** No `📶 Raw RX` messages after ping sent
+## Common issues
 
-**Possible causes:**
-- LoRa device not actually connected
-- Device in wrong mode (need to check USB vs BLE)
-- Device not transmitting
-- No repeaters in range
+### No raw data after sending a ping
 
-**Debug:**
-- Check connection status in app
-- Verify device shows as connected
-- Try manual disconnect/reconnect
-- Check device battery
+Check that the device is still connected, has enough battery, is running
+companion firmware, and is in radio range. For BLE, MeshCore must expose service
+`6E400001-B5A3-F393-E0A9-E50E24DCCA9E` with RX `...0002` and TX `...0003`.
 
-### Issue 2: Raw Data Received But Not Parsed
-**Symptom:** See `📶 Raw RX` but no `📥 RX Frame` messages
+### Raw data arrives but no frames are parsed
 
-**Possible causes:**
-- Protocol mode mismatch (BLE vs USB framing)
-- Corrupted data
-- Buffer synchronization issues
+USB radio-to-app frames start with `3E`, followed by a two-byte little-endian
+length. BLE notifications are unwrapped and begin directly with the packet
+code. A USB/BLE mode mismatch or truncated serial data will prevent parsing.
 
-**Debug:**
-- Check if USB or Bluetooth connection
-- USB should have frames starting with `3E` ('>') 
-- BLE should have unwrapped frames
-- Look for parse errors in logs
+### Only command responses arrive
 
-### Issue 3: Frames Parsed But Wrong Type
-**Symptom:** See `📥 RX Frame` but code is not 0x84 or 0x8E
+`0x00` means success, `0x01` means error, and `0x06` means a packet was queued
+for transmission. These confirm local command processing; they do not mean a
+repeater answered the tagged discovery request. Look for `0x8E` and a matching
+tag.
 
-**Common frame codes:**
-- `0x00` (RESP_CODE_OK) - Command acknowledged
-- `0x01` (RESP_CODE_ERR) - Command error
-- `0x02` (RESP_CODE_APP_START) - Handshake complete
-- `0x03` (RESP_CODE_CONTACT) - Contact info response
-- `0x05` (RESP_CODE_SELF_INFO) - Device info
-- `0x06` (RESP_CODE_SENT) - Message sent confirmation
+### Discovery response has an unknown tag
 
-**If seeing only OK/SENT responses:**
-- Pings are being sent but repeaters aren't responding
-- Could be out of range
-- Could be no active repeaters nearby
+The response probably arrived after its ping window ended. Increase the ping
+timeout and confirm the received tag matches the transmitted tag. The app
+allows only one discovery cycle at a time.
 
-### Issue 4: ACKs Received But No Position
-**Symptom:** See `✅ ACK from [ID]` but repeater not added to map
+### A repeater answers but has no map position
 
-**Possible causes:**
-- Contact request not being sent
-- Contact response not received
-- Repeater has no position in its contact info
-- Repeater is filtered (mobile repeater prefix match)
+Look for `Requesting position`, followed by a `0x03` contact response. The
+contact must be a repeater or room server and include latitude and longitude.
+Also check the ignored-repeater-prefix setting.
 
-**Debug:**
-- Look for `📞 Requesting position` message
-- Look for `Contact: [ID]` response
-- Check if position data is present (lat/lon)
-- Check "Ignore Repeater Prefix" setting
+## Current frame layouts
 
-### Issue 5: Discovery Responses With Unknown Tags
-**Symptom:** `⚠️ Discovery response for unknown/completed tag`
+`PUSH_CODE_RAW_DATA` (`0x84`) payload, excluding the packet code:
 
-**Possible causes:**
-- Response arrived after timeout
-- Tag mismatch (endianness issue)
-- Multiple pings overlapping
-
-**Debug:**
-- Increase ping timeout from 10 to 20 seconds
-- Check tag values in logs (should match)
-- Ensure only one ping at a time
-
-## Manual Testing Steps
-
-### Test 1: Check Device Communication
-1. Connect LoRa device
-2. Watch for handshake: `✅ App handshake complete`
-3. Should see: `✅ Command OK` or similar responses
-
-### Test 2: Check Contact List Loading
-1. Look for: `📒 Requesting full contact list...`
-2. Should see: Multiple `Contact: [NAME]` messages
-3. Should see: `Contact list complete`
-4. If you see contacts with positions, device communication is working
-
-### Test 3: Send Manual Ping
-1. Enable auto-ping in app
-2. Watch debug logs during ping
-3. Note which messages appear
-
-### Test 4: Check Response Timing
-- Zero-hop adverts should trigger ACKs within 1-2 seconds
-- Discovery responses may take 2-5 seconds
-- Contact requests take 1-2 seconds per repeater
-- Total expected time: 5-10 seconds per ping
-
-## Protocol Frame Details
-
-### ACK Frame (0x84) Structure
-```
-Byte 0-1:  SNR (signed int16)
-Byte 2-3:  RSSI (signed int16)  
-Byte 4-35: Public key (32 bytes)
+```text
+Byte 0:   SNR * 4 (signed int8)
+Byte 1:   RSSI (signed int8)
+Byte 2:   Reserved
+Byte 3+:  Arbitrary radio payload
 ```
 
-### Control Data Frame (0x8E) Structure
-```
-Byte 0:    SNR/4 (signed int8)
-Byte 1:    RSSI (signed int8)
-Byte 2:    Path length
-Byte 3+:   Path bytes (if any)
-Byte X+:   Payload (Discovery response or other control data)
-```
+`PUSH_CODE_CONTROL_DATA` (`0x8E`) payload, excluding the packet code:
 
-### Discovery Response Payload Structure
-```
-Byte 0:    Flags (upper 4 bits = 0x9 for DISCOVER_RESP, lower 4 bits = node type)
-Byte 1:    SNR/4 (signed int8)
-Byte 2-5:  Tag (uint32 little-endian)
-Byte 6+:   Public key (8 or 32 bytes depending on prefixOnly flag)
+```text
+Byte 0:   SNR * 4 (signed int8)
+Byte 1:   RSSI (signed int8)
+Byte 2:   Reported path length
+Byte 3+:  Control payload
 ```
 
-## Key Settings to Check
+The firmware reports the path length as metadata but does not copy path bytes
+into this companion frame. The control payload always starts at byte 3.
 
-1. **Ping Timeout**: Default 10 seconds (may need 20s in weak coverage)
-2. **Ping Interval**: Default 805m (0.5 miles)
-3. **Ignore Repeater Prefix**: Should be empty unless you have a mobile repeater
-4. **Coverage Precision**: Default 6 (affects grid size, not responses)
+A discovery response control payload is:
 
-## Expected Repeater Response Rate
+```text
+Byte 0:   Upper nibble 0x9 (DISCOVER_RESP), lower nibble node type
+Byte 1:   SNR * 4 (signed int8)
+Byte 2-5: Request tag (uint32 little-endian)
+Byte 6+:  Public key (8-byte prefix or full 32 bytes)
+```
 
-In good conditions:
-- **Direct range (zero-hop)**: 80-100% ACK rate
-- **Via mesh (multi-hop)**: Discovery responses may be slower/unreliable
-- **Urban area**: Expect 1-3 repeaters per ping
-- **Rural area**: May be 0 repeaters (dead zones)
+Wardrive requests full 32-byte keys so it can immediately issue
+`CMD_GET_CONTACT_BY_KEY` and cache a contact for map and Carpeater use.
 
-## Next Steps
+## Manual device checks
 
-If you're still not seeing responses:
-
-1. **Capture full debug log** from one complete ping cycle
-2. **Check what frame types** are being received (codes)
-3. **Verify contact list loads** on initial connection
-4. **Try in known coverage area** to rule out "no repeaters" issue
-5. **Check device firmware** - may need MeshCore companion radio update
-
-## Log Export
-
-The app has a debug log screen. You can:
-1. Go to settings/debug menu
-2. View full log output
-3. Look for the specific messages listed above
-4. Share relevant log sections for further debugging
+1. Connect over USB and verify logs show self info, device info, and a complete
+   contact-list transfer.
+2. Repeat over BLE and verify the negotiated MTU and notifications remain
+   stable while loading contacts.
+3. Send a ping in a known-covered area and confirm one or more tagged `0x8E`
+   responses complete it.
+4. Confirm `0x80` causes a command-30 contact lookup and `0x8A` updates a contact
+   directly.
+5. Capture a full debug log if the firmware returns `0x01`; the following byte
+   is the MeshCore error code.

@@ -11,6 +11,10 @@ import 'debug_log_service.dart';
 import 'meshcore_protocol.dart';
 import '../models/models.dart';
 
+const String _meshCoreServiceUuid = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+const String _meshCoreRxUuid = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
+const String _meshCoreTxUuid = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
+
 enum ConnectionType { usb, bluetooth, none }
 
 enum PingStatus { success, failed, timeout, pending }
@@ -215,14 +219,6 @@ class LoRaCompanionService {
   final Map<String, Repeater> _knownRepeaters =
       {}; // Map of repeater ID -> location from internet map
 
-  // Track recent advertisements for echo correlation
-  final Map<String, DateTime> _recentAdvertisements =
-      {}; // repeaterId -> last seen time
-  final Duration _advertCorrelationWindow = const Duration(
-    minutes: 5,
-  ); // Window for correlating adverts with echoes
-  DateTime _lastAdvertCleanup = DateTime.now();
-
   // Throttle contact lookups to avoid dumping full list repeatedly
   final Map<String, DateTime> _lastContactRequestAt = {}; // keyPrefix -> time
   final Duration _contactRequestCooldown = const Duration(minutes: 5);
@@ -355,15 +351,23 @@ class LoRaCompanionService {
       await device.connect(timeout: const Duration(seconds: 15));
       _bluetoothDevice = device;
 
+      try {
+        await device.requestMtu(512);
+      } catch (e) {
+        _debugLog.logInfo('BLE MTU negotiation unavailable: $e');
+      }
+
       List<BluetoothService> services = await device.discoverServices();
 
-      // Find UART service (Nordic UART or similar)
+      // MeshCore uses the Nordic UART service with fixed RX/TX UUIDs.
       for (BluetoothService service in services) {
-        if (service.uuid.toString().toLowerCase().contains('6e40') ||
-            service.uuid.toString().toLowerCase().contains('ffe0')) {
+        if (service.uuid.toString().toLowerCase() == _meshCoreServiceUuid) {
           for (BluetoothCharacteristic char in service.characteristics) {
-            if (char.properties.write) _txCharacteristic = char;
-            if (char.properties.notify) {
+            final uuid = char.uuid.toString().toLowerCase();
+            if (uuid == _meshCoreRxUuid && char.properties.write) {
+              _txCharacteristic = char;
+            }
+            if (uuid == _meshCoreTxUuid && char.properties.notify) {
               _rxCharacteristic = char;
               await char.setNotifyValue(true);
               _deviceSubscription = char.lastValueStream.listen((value) {
@@ -439,11 +443,9 @@ class LoRaCompanionService {
         // Start periodic battery check if not already getting updates
         _startBatteryMonitoring();
 
-        // Send handshake
+        // Negotiate the protocol and identify the app.
         await Future.delayed(const Duration(milliseconds: 500));
-        final handshake = _createCommandForDevice(CMD_APP_START);
-        await _sendBinaryToDevice(handshake);
-        _debugLog.logInfo('Sent handshake');
+        await _sendProtocolHandshake();
 
         // Load full contact list so repeaters appear on the map
         await Future.delayed(const Duration(milliseconds: 150));
@@ -517,11 +519,9 @@ class LoRaCompanionService {
       _protocol.setBLEMode(false);
       _debugLog.logInfo('Protocol set to USB mode (wrapped frames)');
 
-      // Send handshake
+      // Negotiate the protocol and identify the app.
       await Future.delayed(const Duration(milliseconds: 500));
-      final handshake = _createCommandForDevice(CMD_APP_START);
-      await _sendBinaryToDevice(handshake);
-      _debugLog.logInfo('Sent handshake');
+      await _sendProtocolHandshake();
 
       // Load full contact list so repeaters appear on the map
       await Future.delayed(const Duration(milliseconds: 150));
@@ -745,6 +745,19 @@ class LoRaCompanionService {
     _debugLog.logInfo('Received device self info');
   }
 
+  void _handleDeviceInfo(Uint8List data) {
+    final info = _protocol.parseDeviceInfoFrame(data);
+    if (info == null) {
+      _debugLog.logError('Invalid device info response');
+      return;
+    }
+    _debugLog.logInfo(
+      'MeshCore ${info['firmware_version'] ?? 'firmware'} '
+      '(protocol ${info['firmware_protocol']}, '
+      '${info['manufacturer'] ?? 'unknown device'})',
+    );
+  }
+
   // ============================================================================
   // PING OPERATIONS
   // ============================================================================
@@ -763,7 +776,7 @@ class LoRaCompanionService {
 
   /// Send Discovery ping to find nearby repeaters
   /// Uses MeshCore Discovery protocol (DISCOVER_REQ/DISCOVER_RESP)
-  /// ACK responses are untagged, so this service also prevents overlap.
+  /// This service prevents overlap so each discovery cycle has one owner.
   Future<PingResult> ping({
     double? latitude,
     double? longitude,
@@ -801,8 +814,8 @@ class LoRaCompanionService {
       // Update device position for proper mesh routing
       await _updateDevicePosition(latitude, longitude);
 
-      // Register before transmitting anything that can ACK. Otherwise a fast
-      // USB/BLE notification can arrive before the pending ping exists.
+      // Register before transmitting. Otherwise a fast USB/BLE notification
+      // can arrive before the pending ping exists.
       final tag = _random.nextInt(0xFFFFFFFF);
       final pingSendTime = DateTime.now();
       final tracker = PingResponseTracker(
@@ -830,7 +843,7 @@ class LoRaCompanionService {
       // Send zero-hop advertisement to get immediate contact updates
       final zeroHopPayload = Uint8List.fromList([0]); // 0 = zero-hop
       final zeroHopCmd = _createCommandForDevice(
-        CMD_SEND_ADVERT,
+        CMD_SEND_SELF_ADVERT,
         zeroHopPayload,
       );
       _debugLog.logInfo('📡 Sending zero-hop advertisement');
@@ -936,25 +949,35 @@ class LoRaCompanionService {
 
     switch (frame.code) {
       case PUSH_CODE_ADVERT:
-        _handleAdvertPush(frame.data);
+        unawaited(_handleAdvertPush(frame.data));
         break;
       case RESP_CODE_CONTACT:
         _handleContactResponse(frame.data);
         break;
+      case PUSH_CODE_NEW_ADVERT:
+        _debugLog.logInfo('New contact advertisement received');
+        _handleContactResponse(frame.data);
+        break;
+      case RESP_CODE_CONTACTS_START:
+        _debugLog.logInfo('Contact list transfer started');
+        break;
       case RESP_CODE_END_OF_CONTACTS:
         _debugLog.logInfo('Contact list complete');
         break;
-      case RESP_CODE_APP_START:
-        _debugLog.logInfo('✅ App handshake complete');
-        break;
       case RESP_CODE_SELF_INFO:
         _handleSelfInfo(frame.data);
+        break;
+      case RESP_CODE_DEVICE_INFO:
+        _handleDeviceInfo(frame.data);
         break;
       case RESP_CODE_OK:
         _debugLog.logInfo('✅ Command OK');
         break;
       case RESP_CODE_ERR:
-        _debugLog.logError('❌ Command ERROR');
+        final errorCode = frame.data.isEmpty ? null : frame.data.first;
+        _debugLog.logError(
+          'Command ERROR${errorCode == null ? '' : ' (code $errorCode)'}',
+        );
         break;
       case RESP_CODE_SENT:
         _debugLog.logInfo('✅ Message sent');
@@ -977,14 +1000,20 @@ class LoRaCompanionService {
       case RESP_CODE_BATT_AND_STORAGE:
         _handleBatteryResponse(frame.data);
         break;
-      case PUSH_CODE_ACK_RECV:
-        _debugLog.logLoRa(
-          '✅ ACK received (0x84), payload len=${frame.data.length}',
-        );
-        print(
-          '✅ ACK frame: ${frame.data.take(40).map((b) => b.toRadixString(16).padLeft(2, "0")).join(" ")}',
-        );
-        _handleAckReceived(frame.data);
+      case PUSH_CODE_RAW_DATA:
+        final rawData = _protocol.parseRawDataPush(frame.data);
+        if (rawData == null) {
+          _debugLog.logLoRa('Invalid raw data push (0x84)');
+        } else {
+          final payload = rawData['payload'] as Uint8List;
+          _debugLog.logLoRa(
+            'Raw data received (0x84), SNR=${rawData['snr']}, '
+            'RSSI=${rawData['rssi']}, payload=${payload.length} bytes',
+          );
+        }
+        break;
+      case PUSH_CODE_LOG_RX_DATA:
+        _debugLog.logLoRa('RF log data received (0x88), ignored');
         break;
       case PUSH_CODE_CONTROL_DATA:
         _debugLog.logLoRa(
@@ -1017,21 +1046,9 @@ class LoRaCompanionService {
     final keyPrefix = keyHexFull.substring(0, 8).toUpperCase();
     _debugLog.logInfo('📡 Advertisement from $keyPrefix');
 
-    // Track this advertisement for echo correlation
-    _recentAdvertisements[keyPrefix] = DateTime.now();
-
-    // Periodic cleanup of stale advertisement entries (every 5 minutes)
-    final now = DateTime.now();
-    if (now.difference(_lastAdvertCleanup) > _advertCorrelationWindow) {
-      _recentAdvertisements.removeWhere(
-        (_, time) => now.difference(time) > _advertCorrelationWindow,
-      );
-      _lastAdvertCleanup = now;
-    }
-
-    // Do not request contacts on adverts to avoid full list dumps.
-    // We already load contacts on connect or when user scans.
-    _debugLog.logInfo('ℹ️ Skipping contact request on ADVERT for $keyPrefix');
+    // A regular advert only carries the key. Fetch the updated contact record;
+    // newly auto-added contacts instead arrive as a full 0x8A contact frame.
+    await _requestContactDetails(publicKey);
   }
 
   /// Request full contact list
@@ -1076,7 +1093,8 @@ class LoRaCompanionService {
     print('📞 Requesting contact details for $keyPrefix');
     _debugLog.logInfo('Requesting contact for $keyPrefix');
 
-    final cmd = _createCommandForDevice(CMD_GET_CONTACTS, publicKey);
+    final payload = _protocol.createGetContactByKeyPayload(publicKey);
+    final cmd = _createCommandForDevice(CMD_GET_CONTACT_BY_KEY, payload);
     await _sendBinaryToDevice(cmd);
   }
 
@@ -1105,9 +1123,6 @@ class LoRaCompanionService {
       final nodeType = discovery['node_type'] as int;
       final pubkey = discovery['pubkey'] as String;
       final pubkeyShort = pubkey.substring(0, 8).toUpperCase();
-      final discoverySNR =
-          discovery['snr'] as int; // SNR from discovery payload
-
       _debugLog.logInfo(
         '🔍 DISCOVER_RESP: tag=0x${tag.toRadixString(16)}, node=$pubkeyShort, type=$nodeType, SNR=$snr, RSSI=$rssi',
       );
@@ -1136,7 +1151,7 @@ class LoRaCompanionService {
       }
 
       // Always request contact details so the pubkey gets cached (needed for Carpeater login)
-      if (!_knownRepeaters.containsKey(pubkey) &&
+      if (!_knownRepeaters.containsKey(pubkeyShort) &&
           discovery['pubkey_bytes'] != null) {
         final pubkeyBytes = discovery['pubkey_bytes'] as Uint8List;
         _debugLog.logInfo('📞 Requesting position for $pubkeyShort');
@@ -1249,108 +1264,6 @@ class LoRaCompanionService {
     }
   }
 
-  /// Handle PUSH_CODE_ACK_RECV (0x84) - ACK from zero-hop advertisement
-  /// ACKs indicate a repeater is in direct range and provide SNR/RSSI for coverage mapping
-  Future<void> _handleAckReceived(Uint8List data) async {
-    try {
-      if (data.length < 36) {
-        return;
-      }
-
-      // Parse SNR and RSSI (first 4 bytes)
-      int snr = data[0] | (data[1] << 8);
-      if (snr > 32767) snr -= 65536;
-
-      int rssi = data[2] | (data[3] << 8);
-      if (rssi > 32767) rssi -= 65536;
-
-      // Parse public key (next 32 bytes)
-      final publicKey = Uint8List.fromList(data.sublist(4, 36));
-      final keyHex = publicKey
-          .map((b) => b.toRadixString(16).padLeft(2, '0'))
-          .join('');
-      final keyPrefix = keyHex.substring(0, 8).toUpperCase();
-
-      _debugLog.logInfo('✅ ACK from $keyPrefix (SNR: $snr, RSSI: $rssi)');
-      print('✅ ACK from repeater $keyPrefix (SNR=$snr, RSSI=$rssi)');
-
-      // Check if this repeater should be ignored (mobile companion)
-      if (_isIgnoredRepeater(keyPrefix)) {
-        _debugLog.logInfo('⛔ Ignoring ACK from mobile repeater: $keyPrefix');
-        return;
-      }
-
-      // ACKs are not tagged, so they belong to the sole active ping. Record the
-      // ACK before requesting contact details to keep feedback immediate.
-      if (_pendingPings.isNotEmpty) {
-        final activePing = _pendingPings.entries.last;
-        if (activePing.value.isAcceptingResponses) {
-          _addPingResponse(
-            activePing.key,
-            PingResponse(nodeId: keyPrefix, snr: snr, rssi: rssi),
-          );
-          _debugLog.logPing('📡 Added ACK from $keyPrefix to ping responses');
-        }
-      }
-
-      // Request contact info to get repeater position (if we don't already have it)
-      if (!_knownRepeaters.containsKey(keyPrefix)) {
-        _debugLog.logInfo('📞 Requesting position for $keyPrefix');
-        await _requestContactDetails(publicKey);
-      } else {
-        // Update signal strength for known repeater
-        _updateRepeaterSignal(keyPrefix, snr: snr, rssi: rssi);
-      }
-    } catch (e) {
-      _debugLog.logError('Error parsing ACK frame: $e');
-    }
-  }
-
-  void _updateRepeaterSignal(String repeaterId, {int? snr, int? rssi}) {
-    try {
-      final idx = _discoveredRepeaters.indexWhere((r) => r.id == repeaterId);
-      if (idx != -1) {
-        final c = _discoveredRepeaters[idx];
-        _discoveredRepeaters[idx] = Repeater(
-          id: c.id,
-          position: c.position,
-          elevation: c.elevation,
-          timestamp: DateTime.now(),
-          name: c.name,
-          rssi: rssi ?? c.rssi,
-          snr: snr ?? c.snr,
-          distance: c.distance,
-        );
-      }
-      if (_repeaterContactCache.containsKey(repeaterId)) {
-        final c = _repeaterContactCache[repeaterId]!;
-        _repeaterContactCache[repeaterId] = Repeater(
-          id: c.id,
-          position: c.position,
-          elevation: c.elevation,
-          timestamp: DateTime.now(),
-          name: c.name,
-          rssi: rssi ?? c.rssi,
-          snr: snr ?? c.snr,
-          distance: c.distance,
-        );
-      }
-      if (_knownRepeaters.containsKey(repeaterId)) {
-        final c = _knownRepeaters[repeaterId]!;
-        _knownRepeaters[repeaterId] = Repeater(
-          id: c.id,
-          position: c.position,
-          elevation: c.elevation,
-          timestamp: DateTime.now(),
-          name: c.name,
-          rssi: rssi ?? c.rssi,
-          snr: snr ?? c.snr,
-          distance: c.distance,
-        );
-      }
-    } catch (_) {}
-  }
-
   void _addPingResponse(int tag, PingResponse response) {
     final tracker = _pendingPings[tag];
     if (tracker == null) return;
@@ -1399,6 +1312,22 @@ class LoRaCompanionService {
     _pingCollectionTimers.clear();
     _pendingPings.clear();
     _startingPing = false;
+  }
+
+  Future<void> _sendProtocolHandshake() async {
+    final appStart = _createCommandForDevice(
+      CMD_APP_START,
+      _protocol.createAppStartPayload(),
+    );
+    await _sendBinaryToDevice(appStart);
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    final query = _createCommandForDevice(
+      CMD_DEVICE_QUERY,
+      _protocol.createDeviceQueryPayload(),
+    );
+    await _sendBinaryToDevice(query);
+    _debugLog.logInfo('Sent protocol v$COMPANION_PROTOCOL_VERSION handshake');
   }
 
   /// Create command frame based on connection type (BLE vs USB)
