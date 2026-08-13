@@ -50,6 +50,7 @@ import 'ducting_forecast_screen.dart';
 import 'repeater_health_screen.dart';
 import '../services/achievement_service.dart';
 import '../services/radio_position_estimator.dart';
+import '../services/screen_wake_service.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -139,6 +140,9 @@ class _MapScreenState extends State<MapScreen> {
 
   // Map rotation lock
   bool _lockRotationNorth = false;
+
+  // Keep the display awake whenever the app is visible
+  bool _keepScreenOn = false;
 
   // Current location marker and heading
   CurrentLocationMarkerStyle _currentLocationMarkerStyle =
@@ -484,14 +488,17 @@ class _MapScreenState extends State<MapScreen> {
 
     // Load lock rotation and successful-only filter
     final lockRotation = await _settingsService.getLockRotationNorth();
+    final keepScreenOn = await _settingsService.getKeepScreenOn();
     final currentLocationMarkerStyle = await _settingsService
         .getCurrentLocationMarkerStyle();
     final showSuccessfulOnly = await _settingsService.getShowSuccessfulOnly();
     setState(() {
       _lockRotationNorth = lockRotation;
+      _keepScreenOn = keepScreenOn;
       _currentLocationMarkerStyle = currentLocationMarkerStyle;
       _showSuccessfulOnly = showSuccessfulOnly;
     });
+    await ScreenWakeService.instance.setAlwaysOn(keepScreenOn);
 
     // Load alert toggles
     final deadZoneAlerts = await _settingsService.getDeadZoneAlertsEnabled();
@@ -3802,6 +3809,22 @@ $placemarks  </Document>
                       },
                     ),
                     const Divider(),
+                    SwitchListTile(
+                      title: const Text('Keep Screen On'),
+                      subtitle: const Text(
+                        'Prevent the screen from sleeping while the app is open',
+                      ),
+                      secondary: const Icon(Icons.screen_lock_portrait),
+                      value: _keepScreenOn,
+                      onChanged: (value) async {
+                        setState(() {
+                          _keepScreenOn = value;
+                        });
+                        setModalState(() {});
+                        await _settingsService.setKeepScreenOn(value);
+                        await ScreenWakeService.instance.setAlwaysOn(value);
+                      },
+                    ),
                     SwitchListTile(
                       title: const Text('Lock Map Rotation'),
                       subtitle: const Text('Prevent map rotation'),

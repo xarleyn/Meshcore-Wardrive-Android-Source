@@ -10,9 +10,9 @@ import 'database_service.dart';
 import 'lora_companion_service.dart';
 import 'location_quality_filter.dart';
 import '../utils/geohash_utils.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'persistent_debug_logger.dart';
+import 'screen_wake_service.dart';
 import 'settings_service.dart';
 import 'widget_service.dart';
 import 'ducting_service.dart';
@@ -366,7 +366,7 @@ class LocationService {
       );
 
       // Enable wakelock to prevent screen from sleeping and stopping tracking
-      await WakelockPlus.enable();
+      await ScreenWakeService.instance.setTrackingActive(true);
       await _logger.logPowerEvent('Wakelock enabled');
       print('Wakelock enabled - app will stay active during tracking');
 
@@ -951,10 +951,10 @@ class LocationService {
     await FlutterForegroundTask.stopService();
     await _logger.logServiceEvent('Foreground service stopped');
 
-    // Disable wakelock when tracking stops
-    await WakelockPlus.disable();
-    await _logger.logPowerEvent('Wakelock disabled');
-    print('Wakelock disabled');
+    // Release the tracking reason; Always On may still require the wakelock.
+    await ScreenWakeService.instance.setTrackingActive(false);
+    await _logger.logPowerEvent('Tracking wakelock released');
+    print('Tracking wakelock released');
 
     // Finalize session
     if (_currentSessionId != null && _sessionStartTime != null) {

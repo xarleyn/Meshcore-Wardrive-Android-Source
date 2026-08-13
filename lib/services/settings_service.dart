@@ -39,6 +39,7 @@ class SettingsService {
   static const String _carpeaterIntervalKey = 'carpeater_interval_seconds';
   static const String _deviceNameKey = 'device_name';
   static const String _lockRotationKey = 'lock_rotation_north';
+  static const String _keepScreenOnKey = 'keep_screen_on';
   static const String _currentLocationMarkerStyleKey =
       'current_location_marker_style';
   static const String _showSuccessfulOnlyKey = 'show_successful_only';
@@ -490,6 +491,17 @@ class SettingsService {
     await prefs.setBool(_lockRotationKey, value);
   }
 
+  /// Whether the display should stay awake while the app is open.
+  Future<bool> getKeepScreenOn() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keepScreenOnKey) ?? false;
+  }
+
+  Future<void> setKeepScreenOn(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keepScreenOnKey, value);
+  }
+
   Future<CurrentLocationMarkerStyle> getCurrentLocationMarkerStyle() async {
     final prefs = await SharedPreferences.getInstance();
     final storedValue = prefs.getString(_currentLocationMarkerStyleKey);
@@ -543,6 +555,7 @@ class SettingsService {
     _carpeaterIntervalKey,
     _deviceNameKey,
     _lockRotationKey,
+    _keepScreenOnKey,
     _currentLocationMarkerStyleKey,
     _showSuccessfulOnlyKey,
     // Upload service keys

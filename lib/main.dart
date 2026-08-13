@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/map_screen.dart';
 import 'services/internet_connectivity_service.dart';
+import 'services/screen_wake_service.dart';
+import 'services/settings_service.dart';
 import 'widgets/offline_banner.dart';
 
 void main() {
@@ -37,6 +39,7 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     _connectivityService = InternetConnectivityService()..start();
     _loadThemeMode();
+    _loadKeepScreenOn();
   }
 
   @override
@@ -55,6 +58,11 @@ class _MyAppState extends State<MyApp> {
         orElse: () => ThemeMode.system,
       );
     });
+  }
+
+  Future<void> _loadKeepScreenOn() async {
+    final keepScreenOn = await SettingsService().getKeepScreenOn();
+    await ScreenWakeService.instance.setAlwaysOn(keepScreenOn);
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {

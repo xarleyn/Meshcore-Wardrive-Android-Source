@@ -43,4 +43,22 @@ void main() {
       );
     });
   });
+
+  group('keep screen on setting', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('defaults to disabled', () async {
+      expect(await SettingsService().getKeepScreenOn(), isFalse);
+    });
+
+    test('persists the selected value', () async {
+      final settings = SettingsService();
+
+      await settings.setKeepScreenOn(true);
+
+      expect(await settings.getKeepScreenOn(), isTrue);
+    });
+  });
 }

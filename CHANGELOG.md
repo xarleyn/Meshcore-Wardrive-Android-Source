@@ -3,6 +3,8 @@
 ## Unreleased
 
 ### Added
+- A new Keep Screen On setting prevents the display from sleeping while the
+  app is open, without interfering with the existing tracking wakelock.
 - The current GPS marker can now be switched between the classic blue circle
   and a compass-aware direction arrow in Settings. The arrow falls back to GPS
   course while moving when a compass sensor is unavailable.
