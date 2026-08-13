@@ -1,49 +1,66 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
+# Operating system and editor state
 .DS_Store
+Thumbs.db
+*.swp
+*.tmp
 .atom/
 .build/
 .buildlog/
 .history
 .svn/
 .swiftpm/
-migrate_working_dir/
-
-# IntelliJ related
+.idea/
 *.iml
 *.ipr
 *.iws
-.idea/
+.history/
+migrate_working_dir/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+# Commit the shared VS Code configuration, but keep machine-local overrides out.
+!.vscode/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
+.vscode/settings.local.json
 
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
+# Dart and Flutter
 .dart_tool/
 .flutter-plugins-dependencies
+.packages
 .pub-cache/
 .pub/
+**/doc/api/
+**/ios/Flutter/.last_build_id
 /build/
 /coverage/
 
-# Symbolication related
-app.*.symbols
+# Local SDKs and tool caches
+/.toolchain/
+/flutter/
 
-# Obfuscation related
-app.*.map.json
-
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
-
-# Release APKs
+# Build and diagnostic artifacts
 *.apk
+*.aab
+*.class
+*.log
+app.*.symbols
+app.*.map.json
+/android/app/debug/
+/android/app/profile/
+/android/app/release/
+
+# Local Android configuration and signing credentials
+/android/local.properties
+/android/key.properties
+*.jks
+*.keystore
+
+# Local AI tooling
 .aider*
+
+# Environment files may contain secrets
+.env
+.env.*
+!.env.example
