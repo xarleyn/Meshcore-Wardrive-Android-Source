@@ -38,6 +38,7 @@ dependencies:
   
   # Location tracking
   geolocator: ^13.0.2
+  flutter_compass: ^0.8.1
   permission_handler: ^11.3.1
   wakelock_plus: ^1.2.8
   flutter_foreground_task: ^8.11.0

@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Added
+- The current GPS marker can now be switched between the classic blue circle
+  and a compass-aware direction arrow in Settings. The arrow falls back to GPS
+  course while moving when a compass sensor is unavailable.
 - An app-wide offline banner now detects restricted or unavailable internet
   access with a short periodic connectivity check. GPS tracking, radio
   communication, and local sample storage continue while offline.

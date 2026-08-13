@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
+enum CurrentLocationMarkerStyle { circle, arrow }
+
 class SettingsService {
   static const String _showSamplesKey = 'show_samples';
   static const String _showGpsSamplesKey = 'show_gps_samples';
@@ -37,6 +39,8 @@ class SettingsService {
   static const String _carpeaterIntervalKey = 'carpeater_interval_seconds';
   static const String _deviceNameKey = 'device_name';
   static const String _lockRotationKey = 'lock_rotation_north';
+  static const String _currentLocationMarkerStyleKey =
+      'current_location_marker_style';
   static const String _showSuccessfulOnlyKey = 'show_successful_only';
   static const String _deadZoneAlertsKey = 'dead_zone_alerts_enabled';
   static const String _newRepeaterAlertsKey = 'new_repeater_alerts_enabled';
@@ -486,6 +490,22 @@ class SettingsService {
     await prefs.setBool(_lockRotationKey, value);
   }
 
+  Future<CurrentLocationMarkerStyle> getCurrentLocationMarkerStyle() async {
+    final prefs = await SharedPreferences.getInstance();
+    final storedValue = prefs.getString(_currentLocationMarkerStyleKey);
+    return CurrentLocationMarkerStyle.values.firstWhere(
+      (style) => style.name == storedValue,
+      orElse: () => CurrentLocationMarkerStyle.circle,
+    );
+  }
+
+  Future<void> setCurrentLocationMarkerStyle(
+    CurrentLocationMarkerStyle value,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_currentLocationMarkerStyleKey, value.name);
+  }
+
   /// All preference keys that should be exported/imported
   static const List<String> _exportKeys = [
     _showSamplesKey,
@@ -523,6 +543,7 @@ class SettingsService {
     _carpeaterIntervalKey,
     _deviceNameKey,
     _lockRotationKey,
+    _currentLocationMarkerStyleKey,
     _showSuccessfulOnlyKey,
     // Upload service keys
     'upload_api_url',

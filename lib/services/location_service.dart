@@ -68,6 +68,10 @@ class LocationService {
   final _currentPositionController = StreamController<LatLng>.broadcast();
   Stream<LatLng> get currentPositionStream => _currentPositionController.stream;
 
+  // GPS course is used as a fallback when the device has no compass sensor.
+  final _courseController = StreamController<double>.broadcast();
+  Stream<double> get courseStream => _courseController.stream;
+
   // Stream for broadcasting when samples are saved
   final _sampleSavedController = StreamController<void>.broadcast();
   Stream<void> get sampleSavedStream => _sampleSavedController.stream;
@@ -609,6 +613,11 @@ class LocationService {
     // Update speed (filter out invalid negative values)
     _currentSpeedMps = (position.speed >= 0) ? position.speed : 0.0;
     _speedController.add(_currentSpeedMps);
+    if (_currentSpeedMps >= 0.5 &&
+        position.heading.isFinite &&
+        position.heading >= 0) {
+      _courseController.add(position.heading % 360);
+    }
 
     // Calculate distance traveled
     if (_lastPosition != null) {
@@ -1156,6 +1165,7 @@ class LocationService {
     stopTracking();
     _logger.close();
     _currentPositionController.close();
+    _courseController.close();
     _sampleSavedController.close();
     _pingEventController.close();
     _totalDistanceController.close();

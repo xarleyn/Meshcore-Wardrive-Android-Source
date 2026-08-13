@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:intl/intl.dart';
@@ -14,6 +16,7 @@ import '../services/database_service.dart';
 import '../services/upload_service.dart';
 import '../services/settings_service.dart';
 import '../utils/geohash_utils.dart';
+import '../utils/heading_utils.dart';
 import '../utils/color_blind_palette.dart';
 import '../services/widget_service.dart';
 import 'package:geohash_plus/geohash_plus.dart' as geohash;
@@ -90,6 +93,8 @@ class _MapScreenState extends State<MapScreen> {
   LatLng? _currentPosition;
   Timer? _updateTimer;
   StreamSubscription<LatLng>? _positionSubscription;
+  StreamSubscription<double>? _courseSubscription;
+  StreamSubscription<CompassEvent>? _compassSubscription;
   StreamSubscription<void>? _sampleSavedSubscription;
   StreamSubscription<String>? _pingEventSubscription;
   StreamSubscription<double>? _distanceSubscription;
@@ -134,6 +139,15 @@ class _MapScreenState extends State<MapScreen> {
 
   // Map rotation lock
   bool _lockRotationNorth = false;
+
+  // Current location marker and heading
+  CurrentLocationMarkerStyle _currentLocationMarkerStyle =
+      CurrentLocationMarkerStyle.circle;
+  double _currentHeading = 0;
+  double? _pendingHeading;
+  double _pendingHeadingFactor = 0.3;
+  Timer? _headingUpdateTimer;
+  bool _hasCompassHeading = false;
 
   // Route trail
   bool _showRouteTrail = false;
@@ -282,6 +296,14 @@ class _MapScreenState extends State<MapScreen> {
         }
       }
     });
+
+    _courseSubscription = _locationService.courseStream.listen((heading) {
+      if (!_hasCompassHeading) {
+        _scheduleHeadingUpdate(heading, factor: 1);
+      }
+    });
+
+    _syncCompassSubscription();
 
     // Subscribe to sample saved events - reload map when new samples are saved
     _sampleSavedSubscription = _locationService.sampleSavedStream.listen((_) {
@@ -462,9 +484,12 @@ class _MapScreenState extends State<MapScreen> {
 
     // Load lock rotation and successful-only filter
     final lockRotation = await _settingsService.getLockRotationNorth();
+    final currentLocationMarkerStyle = await _settingsService
+        .getCurrentLocationMarkerStyle();
     final showSuccessfulOnly = await _settingsService.getShowSuccessfulOnly();
     setState(() {
       _lockRotationNorth = lockRotation;
+      _currentLocationMarkerStyle = currentLocationMarkerStyle;
       _showSuccessfulOnly = showSuccessfulOnly;
     });
 
@@ -493,6 +518,58 @@ class _MapScreenState extends State<MapScreen> {
     // Apply to services
     _locationService.setPingInterval(pingInterval);
     _locationService.loraCompanion.setIgnoredRepeaterPrefix(ignoredPrefix);
+  }
+
+  void _syncCompassSubscription() {
+    _compassSubscription?.cancel();
+    _compassSubscription = null;
+    _hasCompassHeading = false;
+
+    if (_currentLocationMarkerStyle != CurrentLocationMarkerStyle.arrow) {
+      return;
+    }
+
+    _compassSubscription = FlutterCompass.events?.listen(
+      (event) {
+        final heading = event.heading;
+        if (heading == null || !heading.isFinite) return;
+        _hasCompassHeading = true;
+        _scheduleHeadingUpdate(heading);
+      },
+      onError: (_) {
+        _hasCompassHeading = false;
+      },
+    );
+  }
+
+  void _scheduleHeadingUpdate(double heading, {double factor = 0.3}) {
+    _pendingHeading = HeadingUtils.normalize(heading);
+    _pendingHeadingFactor = factor;
+    if (_headingUpdateTimer?.isActive ?? false) return;
+
+    _applyPendingHeading();
+    _headingUpdateTimer = Timer(const Duration(milliseconds: 80), () {
+      _headingUpdateTimer = null;
+      _applyPendingHeading();
+    });
+  }
+
+  void _applyPendingHeading() {
+    final heading = _pendingHeading;
+    _pendingHeading = null;
+    if (heading == null || !mounted) return;
+
+    final smoothed = HeadingUtils.interpolate(
+      _currentHeading,
+      heading,
+      factor: _pendingHeadingFactor,
+    );
+    if (HeadingUtils.shortestDelta(_currentHeading, smoothed).abs() < 0.25) {
+      return;
+    }
+    setState(() {
+      _currentHeading = smoothed;
+    });
   }
 
   Future<void> _getCurrentLocation() async {
@@ -1581,6 +1658,9 @@ $placemarks  </Document>
     _updateTimer?.cancel();
     _batterySubscription?.cancel();
     _positionSubscription?.cancel();
+    _courseSubscription?.cancel();
+    _compassSubscription?.cancel();
+    _headingUpdateTimer?.cancel();
     _sampleSavedSubscription?.cancel();
     _pingEventSubscription?.cancel();
     _distanceSubscription?.cancel();
@@ -2450,18 +2530,15 @@ $placemarks  </Document>
 
   Widget _buildCurrentLocationLayer() {
     final markers = [
-      // Main location dot
       Marker(
         point: _currentPosition!,
-        width: 20,
-        height: 20,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.blue,
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 2),
-          ),
-        ),
+        width: _currentLocationMarkerStyle == CurrentLocationMarkerStyle.arrow
+            ? 34
+            : 20,
+        height: _currentLocationMarkerStyle == CurrentLocationMarkerStyle.arrow
+            ? 34
+            : 20,
+        child: _buildCurrentPositionMarker(),
       ),
     ];
 
@@ -2492,6 +2569,35 @@ $placemarks  </Document>
     }
 
     return MarkerLayer(markers: markers);
+  }
+
+  Widget _buildCurrentPositionMarker() {
+    if (_currentLocationMarkerStyle == CurrentLocationMarkerStyle.circle) {
+      return Semantics(
+        label: 'Current location',
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.blue,
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 2),
+          ),
+        ),
+      );
+    }
+
+    return Semantics(
+      label: 'Current location, heading ${_currentHeading.round()} degrees',
+      child: Transform.rotate(
+        angle: _currentHeading * math.pi / 180,
+        child: const Stack(
+          alignment: Alignment.center,
+          children: [
+            Icon(Icons.navigation, size: 34, color: Colors.white),
+            Icon(Icons.navigation, size: 27, color: Colors.blue),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildControlPanel() {
@@ -3707,6 +3813,36 @@ $placemarks  </Document>
                         setModalState(() {});
                         await _settingsService.setLockRotationNorth(value);
                       },
+                    ),
+                    ListTile(
+                      title: const Text('Current Location Marker'),
+                      subtitle: const Text(
+                        'The direction arrow follows the phone compass',
+                      ),
+                      trailing: DropdownButton<CurrentLocationMarkerStyle>(
+                        value: _currentLocationMarkerStyle,
+                        items: const [
+                          DropdownMenuItem(
+                            value: CurrentLocationMarkerStyle.circle,
+                            child: Text('Circle'),
+                          ),
+                          DropdownMenuItem(
+                            value: CurrentLocationMarkerStyle.arrow,
+                            child: Text('Direction arrow'),
+                          ),
+                        ],
+                        onChanged: (value) async {
+                          if (value == null) return;
+                          setState(() {
+                            _currentLocationMarkerStyle = value;
+                          });
+                          setModalState(() {});
+                          _syncCompassSubscription();
+                          await _settingsService.setCurrentLocationMarkerStyle(
+                            value,
+                          );
+                        },
+                      ),
                     ),
                     ListTile(
                       title: const Text('Theme'),
