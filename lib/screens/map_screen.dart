@@ -46,6 +46,7 @@ import 'device_comparison_screen.dart';
 import 'ducting_forecast_screen.dart';
 import 'repeater_health_screen.dart';
 import '../services/achievement_service.dart';
+import '../services/radio_position_estimator.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -95,9 +96,15 @@ class _MapScreenState extends State<MapScreen> {
   StreamSubscription<double>? _speedSubscription;
   StreamSubscription<String>? _newRepeaterSubscription;
   StreamSubscription<String>? _deadZoneSubscription;
+  StreamSubscription<PingResult>? _radioPositionSubscription;
 
   // Ping visual indicator
   bool _showPingPulse = false;
+
+  // Coarse radio-derived position. This is kept visually separate from GPS.
+  PingResult? _latestPingResult;
+  RadioPositionEstimate? _radioPositionEstimate;
+  Timer? _radioPositionExpiryTimer;
 
   // Distance tracking
   double _totalDistance = 0.0;
@@ -227,6 +234,24 @@ class _MapScreenState extends State<MapScreen> {
       setState(() {
         _batteryPercent = percent;
       });
+    });
+
+    _radioPositionSubscription = loraService.pingResults.listen((result) {
+      if (!mounted) return;
+      _radioPositionExpiryTimer?.cancel();
+      setState(() {
+        _latestPingResult = result.status == PingStatus.success ? result : null;
+        _radioPositionEstimate = _calculateRadioPositionEstimate(_repeaters);
+      });
+      if (result.status == PingStatus.success) {
+        _radioPositionExpiryTimer = Timer(const Duration(minutes: 2), () {
+          if (!mounted) return;
+          setState(() {
+            _latestPingResult = null;
+            _radioPositionEstimate = null;
+          });
+        });
+      }
     });
 
     // Subscribe to Carpeater state changes
@@ -545,6 +570,9 @@ class _MapScreenState extends State<MapScreen> {
         _connectionType = connType;
         _autoPingEnabled = _locationService.isAutoPingEnabled;
         _repeaters = repeaterMap.values.toList();
+        _radioPositionEstimate = _calculateRadioPositionEstimate(
+          repeaterMap.values,
+        );
       });
     } else {
       // Just update connection status and auto-ping state if changed
@@ -1559,6 +1587,8 @@ $placemarks  </Document>
     _speedSubscription?.cancel();
     _newRepeaterSubscription?.cancel();
     _deadZoneSubscription?.cancel();
+    _radioPositionSubscription?.cancel();
+    _radioPositionExpiryTimer?.cancel();
     _batterySaverSubscription?.cancel();
     _heatmapRebuildStream.close();
     _locationService.dispose();
@@ -1911,6 +1941,7 @@ $placemarks  </Document>
         if (_showSamples) _buildSampleLayer(),
         if (_showEdges) _buildEdgeLayer(),
         if (_showRepeaters) _buildRepeaterLayer(),
+        ..._buildRadioPositionLayers(),
         _buildPlannedMarkersLayer(),
         if (_currentPosition != null && !_hideUIForScreenshot)
           _buildCurrentLocationLayer(),
@@ -2217,6 +2248,79 @@ $placemarks  </Document>
     }).toList();
 
     return MarkerLayer(markers: markers);
+  }
+
+  RadioPositionEstimate? _calculateRadioPositionEstimate(
+    Iterable<Repeater> repeaters,
+  ) {
+    final result = _latestPingResult;
+    if (result == null ||
+        DateTime.now().difference(result.timestamp) >
+            const Duration(minutes: 2)) {
+      return null;
+    }
+
+    return RadioPositionEstimator.estimate(
+      responses: result.responses,
+      repeaters: repeaters,
+    );
+  }
+
+  List<Widget> _buildRadioPositionLayers() {
+    final estimate = _radioPositionEstimate;
+    if (estimate == null) return const [];
+
+    const color = Colors.grey;
+    final uncertaintyText = estimate.uncertaintyMeters >= 1000
+        ? '${(estimate.uncertaintyMeters / 1000).toStringAsFixed(1)} km'
+        : '${estimate.uncertaintyMeters.round()} m';
+
+    return [
+      PolygonLayer(
+        polygons: [
+          Polygon(
+            points: _circlePoints(
+              estimate.position,
+              estimate.uncertaintyMeters,
+            ),
+            color: color.withValues(alpha: 0.12),
+            borderColor: color.withValues(alpha: 0.7),
+            borderStrokeWidth: 2,
+          ),
+        ],
+      ),
+      MarkerLayer(
+        markers: [
+          Marker(
+            point: estimate.position,
+            width: 28,
+            height: 28,
+            child: Semantics(
+              label: 'Approximate radio position, uncertainty $uncertaintyText',
+              button: true,
+              child: GestureDetector(
+                onTap: () => _showSnackBar(
+                  'Approximate radio position · '
+                  '${estimate.repeaterCount} repeaters · ±$uncertaintyText',
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.85),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  child: const Icon(
+                    Icons.wifi_tethering,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ];
   }
 
   /// Generate polygon points approximating a circle at a given radius

@@ -6,6 +6,9 @@
 - An app-wide offline banner now detects restricted or unavailable internet
   access with a short periodic connectivity check. GPS tracking, radio
   communication, and local sample storage continue while offline.
+- Successful pings heard by at least three positioned repeaters now show a
+  temporary grey radio-position estimate and its uncertainty circle. The
+  estimate is visually distinct from the blue GPS position.
 
 ### Fixed
 - Update checks now time out quickly and show a concise offline error instead

@@ -15,6 +15,20 @@ enum ConnectionType { usb, bluetooth, none }
 
 enum PingStatus { success, failed, timeout, pending }
 
+class PingResponse {
+  final String nodeId;
+  final int rssi;
+  final int snr;
+
+  const PingResponse({
+    required this.nodeId,
+    required this.rssi,
+    required this.snr,
+  });
+
+  Map<String, dynamic> toJson() => {'nodeId': nodeId, 'rssi': rssi, 'snr': snr};
+}
+
 class PingResult {
   final DateTime timestamp;
   final PingStatus status;
@@ -25,6 +39,7 @@ class PingResult {
   final double? longitude;
   final String? error;
   final int? responseTimeMs;
+  final List<PingResponse> responses;
 
   PingResult({
     required this.timestamp,
@@ -36,7 +51,8 @@ class PingResult {
     this.longitude,
     this.error,
     this.responseTimeMs,
-  });
+    List<PingResponse> responses = const [],
+  }) : responses = List.unmodifiable(responses);
 
   Map<String, dynamic> toJson() => {
     'timestamp': timestamp.toIso8601String(),
@@ -48,6 +64,7 @@ class PingResult {
     'longitude': longitude,
     'error': error,
     'responseTimeMs': responseTimeMs,
+    'responses': responses.map((response) => response.toJson()).toList(),
   };
 }
 
@@ -64,7 +81,7 @@ class LoRaCompanionService {
   // State
   final _pingResultController = StreamController<PingResult>.broadcast();
   final _pendingPings = <int, Completer<PingResult>>{}; // tag -> completer
-  final Map<int, List<Map<String, dynamic>>> _pingResponses =
+  final Map<int, List<PingResponse>> _pingResponses =
       {}; // tag -> list of responses
   final _random = Random();
   int? _batteryPercent;
@@ -726,9 +743,7 @@ class LoRaCompanionService {
             _pendingPings.remove(tag);
             _pingResponses.remove(tag);
 
-            responses.sort(
-              (a, b) => (b['snr'] as int).compareTo(a['snr'] as int),
-            );
+            responses.sort((a, b) => b.snr.compareTo(a.snr));
             final best = responses.first;
 
             final elapsed = DateTime.now()
@@ -738,18 +753,19 @@ class LoRaCompanionService {
               '✅ Ping complete (early): ${responses.length} repeater(s) responded in ${elapsed}ms',
             );
             _debugLog.logPing(
-              '✅ Best response: ${best["nodeId"]} (SNR=${best["snr"]}, RSSI=${best["rssi"]}, ${elapsed}ms)',
+              '✅ Best response: ${best.nodeId} (SNR=${best.snr}, RSSI=${best.rssi}, ${elapsed}ms)',
             );
 
             final result = PingResult(
               timestamp: DateTime.now(),
               status: PingStatus.success,
-              rssi: best['rssi'] as int,
-              snr: best['snr'] as int,
-              nodeId: best['nodeId'] as String,
+              rssi: best.rssi,
+              snr: best.snr,
+              nodeId: best.nodeId,
               latitude: latitude,
               longitude: longitude,
               responseTimeMs: elapsed,
+              responses: responses,
             );
             completer.complete(result);
             _pingResultController.add(result);
@@ -781,9 +797,7 @@ class LoRaCompanionService {
             _pingResultController.add(result);
           } else {
             // Got responses after early timer - use the best one (highest SNR)
-            responses.sort(
-              (a, b) => (b['snr'] as int).compareTo(a['snr'] as int),
-            );
+            responses.sort((a, b) => b.snr.compareTo(a.snr));
             final best = responses.first;
 
             final elapsed = DateTime.now()
@@ -793,18 +807,19 @@ class LoRaCompanionService {
               '✅ Ping complete: ${responses.length} repeater(s) responded in ${elapsed}ms',
             );
             _debugLog.logPing(
-              '✅ Best response: ${best["nodeId"]} (SNR=${best["snr"]}, RSSI=${best["rssi"]}, ${elapsed}ms)',
+              '✅ Best response: ${best.nodeId} (SNR=${best.snr}, RSSI=${best.rssi}, ${elapsed}ms)',
             );
 
             final result = PingResult(
               timestamp: DateTime.now(),
               status: PingStatus.success,
-              rssi: best['rssi'] as int,
-              snr: best['snr'] as int,
-              nodeId: best['nodeId'] as String,
+              rssi: best.rssi,
+              snr: best.snr,
+              nodeId: best.nodeId,
               latitude: latitude,
               longitude: longitude,
               responseTimeMs: elapsed,
+              responses: responses,
             );
             completer.complete(result);
             _pingResultController.add(result);
@@ -1071,13 +1086,10 @@ class LoRaCompanionService {
       // Check if this response matches a pending ping
       final completer = _pendingPings[tag];
       if (completer != null && !completer.isCompleted) {
-        // Add this response to the list
-        _pingResponses[tag]?.add({
-          'nodeId': pubkeyShort,
-          'snr': snr,
-          'rssi': rssi,
-          'node_type': nodeType,
-        });
+        _addPingResponse(
+          tag,
+          PingResponse(nodeId: pubkeyShort, snr: snr, rssi: rssi),
+        );
 
         _debugLog.logPing(
           '📡 Repeater $pubkeyShort responded (SNR=$snr, RSSI=$rssi)',
@@ -1226,12 +1238,10 @@ class LoRaCompanionService {
       if (_pendingPings.isNotEmpty) {
         final activePing = _pendingPings.entries.last;
         if (!activePing.value.isCompleted) {
-          _pingResponses[activePing.key]?.add({
-            'nodeId': keyPrefix,
-            'snr': snr,
-            'rssi': rssi,
-            'node_type': ADV_TYPE_REPEATER,
-          });
+          _addPingResponse(
+            activePing.key,
+            PingResponse(nodeId: keyPrefix, snr: snr, rssi: rssi),
+          );
           _debugLog.logPing('📡 Added ACK from $keyPrefix to ping responses');
         }
       }
@@ -1283,6 +1293,25 @@ class LoRaCompanionService {
         );
       }
     } catch (_) {}
+  }
+
+  void _addPingResponse(int tag, PingResponse response) {
+    final responses = _pingResponses[tag];
+    if (responses == null) return;
+
+    final existingIndex = responses.indexWhere(
+      (existing) => existing.nodeId == response.nodeId,
+    );
+    if (existingIndex == -1) {
+      responses.add(response);
+      return;
+    }
+
+    // ACK and discovery frames may report the same repeater. Keep the stronger
+    // observation so it contributes only once to radio positioning.
+    if (response.rssi > responses[existingIndex].rssi) {
+      responses[existingIndex] = response;
+    }
   }
 
   /// Create command frame based on connection type (BLE vs USB)

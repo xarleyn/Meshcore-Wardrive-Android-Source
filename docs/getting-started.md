@@ -47,6 +47,10 @@ that file to your Android device and install it.
 ### Settings Options
 - **Show Samples**: Toggle individual GPS point visibility
 - **Show Edges**: Toggle repeater connection lines
+- **Radio position estimate**: After at least three positioned repeaters answer
+  the same ping, a temporary grey marker and uncertainty circle show the coarse
+  RSSI-weighted estimate. This is not a GPS fix and can be inaccurate because
+  terrain, antennas, and radio propagation strongly affect RSSI.
 - **Color Mode**:
   - Quality: Green (excellent) → Red (poor)
   - Age: Green (fresh) → Red (old)
