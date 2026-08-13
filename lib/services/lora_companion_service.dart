@@ -1138,7 +1138,7 @@ class LoRaCompanionService {
         if (tracker != null && tracker.isAcceptingResponses) {
           _addPingResponse(
             tag,
-            PingResponse(nodeId: pubkeyShort, snr: snr, rssi: rssi),
+            PingResponse(nodeId: pubkey, snr: snr, rssi: rssi),
           );
           _debugLog.logPing(
             '📡 Repeater $pubkeyShort responded (SNR=$snr, RSSI=$rssi)',

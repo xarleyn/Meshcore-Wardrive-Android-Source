@@ -181,6 +181,13 @@ void main() {
       expect(discovery!['node_type'], ADV_TYPE_REPEATER);
       expect(discovery['snr'], -2);
       expect(discovery['tag'], 0x12345678);
+      expect(
+        discovery['pubkey'],
+        publicKey
+            .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
+            .join()
+            .toUpperCase(),
+      );
       expect(discovery['pubkey_bytes'], publicKey);
     });
 

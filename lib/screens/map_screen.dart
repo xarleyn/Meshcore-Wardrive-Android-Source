@@ -2979,7 +2979,9 @@ $placemarks  </Document>
 
     // Show result
     if (pingSuccess) {
-      _showSnackBar('✅ Ping heard by ${result.nodeId}');
+      final nodeId = result.nodeId ?? 'Unknown';
+      final displayNodeId = nodeId.length > 8 ? nodeId.substring(0, 8) : nodeId;
+      _showSnackBar('✅ Ping heard by $displayNodeId');
     } else if (result.status == PingStatus.timeout) {
       _showSnackBar('❌ No response - dead zone');
     } else {
@@ -5275,7 +5277,7 @@ $placemarks  </Document>
     final loraRepeater = _locationService.loraCompanion.getRepeaterLocation(
       fullId,
     );
-    return loraRepeater?.name ?? fullId; // Return full ID if no name
+    return loraRepeater?.name;
   }
 
   void _showSampleInfo(Sample sample) {
