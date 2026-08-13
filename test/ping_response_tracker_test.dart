@@ -23,6 +23,18 @@ void main() {
       expect(result.nodeId, 'AABBCCDD');
       expect(result.responseTimeMs, 125);
       expect(result.responses, hasLength(1));
+      expect(tracker.collectUntilTimeout, isFalse);
+    });
+
+    test('records the thorough collection policy', () {
+      final tracker = PingResponseTracker(
+        sentAt: sentAt,
+        latitude: 55.75,
+        longitude: 37.62,
+        collectUntilTimeout: true,
+      );
+
+      expect(tracker.collectUntilTimeout, isTrue);
     });
 
     test(

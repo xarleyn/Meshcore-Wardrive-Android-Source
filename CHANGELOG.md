@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Added
+- Discovery response collection is now configurable: fast mode finishes three
+  seconds after the first response, while thorough mode keeps listening until
+  the configured discovery timeout.
 - Fresh installs now use the regional `meshcoretel.ru` upload endpoint for
   Russian locales and `meshcoretel.io` elsewhere.
 - A new Keep Screen On setting prevents the display from sleeping while the

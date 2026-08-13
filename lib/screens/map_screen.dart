@@ -123,6 +123,7 @@ class _MapScreenState extends State<MapScreen> {
 
   // Discovery timeout (5-30 seconds)
   int _discoveryTimeoutSeconds = 10;
+  bool _thoroughResponseCollection = false;
 
   // Fuel unit ('imperial' for MPG/gal, 'metric' for L/100km/L)
   String _fuelUnit = 'metric';
@@ -441,6 +442,8 @@ class _MapScreenState extends State<MapScreen> {
     final distanceUnit = await _settingsService.getDistanceUnit();
     final colorBlindMode = await _settingsService.getColorBlindMode();
     final discoveryTimeout = await _settingsService.getDiscoveryTimeout();
+    final thoroughResponseCollection = await _settingsService
+        .getThoroughResponseCollection();
     final fuelUnit = await _settingsService.getFuelUnit();
     final showRouteTrail = await _settingsService.getShowRouteTrail();
     final showHeatmap = await _settingsService.getShowHeatmap();
@@ -463,6 +466,7 @@ class _MapScreenState extends State<MapScreen> {
       _distanceUnit = distanceUnit;
       _colorBlindMode = colorBlindMode;
       _discoveryTimeoutSeconds = discoveryTimeout;
+      _thoroughResponseCollection = thoroughResponseCollection;
       _fuelUnit = fuelUnit;
       _showRouteTrail = showRouteTrail;
       _showHeatmap = showHeatmap;
@@ -2949,6 +2953,7 @@ $placemarks  </Document>
       longitude: _currentPosition!.longitude,
       timeoutSeconds: _discoveryTimeoutSeconds,
       waitForAllResponses: true,
+      collectUntilTimeout: _thoroughResponseCollection,
     );
 
     final responses = result.responses;
@@ -4149,6 +4154,24 @@ $placemarks  </Document>
                           await _settingsService.setDiscoveryTimeout(value!);
                         },
                       ),
+                    ),
+                    SwitchListTile(
+                      title: const Text('Thorough Response Collection'),
+                      subtitle: Text(
+                        _thoroughResponseCollection
+                            ? 'Thorough: collect responses until the discovery timeout'
+                            : 'Fast: finish 3 seconds after the first response',
+                      ),
+                      value: _thoroughResponseCollection,
+                      onChanged: (value) async {
+                        setState(() {
+                          _thoroughResponseCollection = value;
+                        });
+                        setModalState(() {});
+                        await _settingsService.setThoroughResponseCollection(
+                          value,
+                        );
+                      },
                     ),
                     ListTile(
                       title: const Text('Ignore Repeaters'),

@@ -92,8 +92,17 @@ void main() {
       expect(await settings.getDistanceUnit(), 'km');
       expect(await settings.getFuelUnit(), 'metric');
       expect(await settings.getDiscoveryTimeout(), 10);
+      expect(await settings.getThoroughResponseCollection(), isFalse);
       expect(await settings.getPingMode(), 'time');
       expect(await settings.getPingTimeInterval(), 30);
+    });
+
+    test('persists thorough response collection', () async {
+      final settings = SettingsService();
+
+      await settings.setThoroughResponseCollection(true);
+
+      expect(await settings.getThoroughResponseCollection(), isTrue);
     });
   });
 }

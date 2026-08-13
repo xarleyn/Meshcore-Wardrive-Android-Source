@@ -18,6 +18,8 @@ class SettingsService {
   static const String _distanceUnitKey = 'distance_unit';
   static const String _colorBlindModeKey = 'color_blind_mode';
   static const String _discoveryTimeoutKey = 'discovery_timeout_seconds';
+  static const String _thoroughResponseCollectionKey =
+      'thorough_response_collection';
   static const String _totalDistanceDrivenKey = 'total_distance_driven_meters';
   static const String _vehicleMpgKey = 'vehicle_mpg';
   static const String _gasPriceKey = 'gas_price_per_gallon';
@@ -220,6 +222,20 @@ class SettingsService {
   Future<void> setDiscoveryTimeout(int value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_discoveryTimeoutKey, value);
+  }
+
+  /// Whether discovery should keep collecting responses until its timeout.
+  ///
+  /// Disabled by default to preserve the fast mode, which completes the
+  /// collection three seconds after the first response.
+  Future<bool> getThoroughResponseCollection() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_thoroughResponseCollectionKey) ?? false;
+  }
+
+  Future<void> setThoroughResponseCollection(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_thoroughResponseCollectionKey, value);
   }
 
   /// Get total distance driven across all sessions (in meters)

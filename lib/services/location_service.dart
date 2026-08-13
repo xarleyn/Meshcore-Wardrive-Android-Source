@@ -819,6 +819,8 @@ class LocationService {
     try {
       // Get user-configured discovery timeout
       final timeoutSeconds = await _settings.getDiscoveryTimeout();
+      final collectUntilTimeout = await _settings
+          .getThoroughResponseCollection();
       await _logger.logPingEvent(
         'Sending ping to LoRa device (timeout: ${timeoutSeconds}s)...',
       );
@@ -827,6 +829,7 @@ class LocationService {
         longitude: latLng.longitude,
         timeoutSeconds: timeoutSeconds,
         waitForAllResponses: true,
+        collectUntilTimeout: collectUntilTimeout,
       );
 
       final responses = pingResult.responses;

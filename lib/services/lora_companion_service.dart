@@ -89,11 +89,13 @@ class PingResponseTracker {
     required this.sentAt,
     required this.latitude,
     required this.longitude,
+    this.collectUntilTimeout = false,
   });
 
   final DateTime sentAt;
   final double latitude;
   final double longitude;
+  final bool collectUntilTimeout;
   final Completer<PingResult> _completer = Completer<PingResult>();
   final Completer<PingResult> _collectionCompleter = Completer<PingResult>();
   final List<PingResponse> _responses = [];
@@ -809,6 +811,7 @@ class LoRaCompanionService {
     double? longitude,
     int timeoutSeconds = 30,
     bool waitForAllResponses = false,
+    bool collectUntilTimeout = false,
   }) async {
     if (!isDeviceConnected) {
       return PingResult(
@@ -850,6 +853,7 @@ class LoRaCompanionService {
         sentAt: pingSendTime,
         latitude: latitude,
         longitude: longitude,
+        collectUntilTimeout: collectUntilTimeout,
       );
       registeredTag = tag;
       _pendingPings[tag] = tracker;
@@ -1305,13 +1309,17 @@ class LoRaCompanionService {
     if (result == null) return;
 
     if (isFirstResponse) {
-      _pingTimeoutTimers.remove(tag)?.cancel();
-      _pingCollectionTimers[tag] = Timer(
-        _pingResponseCollectionWindow,
-        () => _removePendingPing(tag),
-      );
+      if (!tracker.collectUntilTimeout) {
+        _pingTimeoutTimers.remove(tag)?.cancel();
+        _pingCollectionTimers[tag] = Timer(
+          _pingResponseCollectionWindow,
+          () => _removePendingPing(tag),
+        );
+      }
       _debugLog.logPing(
-        'Ping response received in ${result.responseTimeMs}ms; collecting additional responses',
+        tracker.collectUntilTimeout
+            ? 'Ping response received in ${result.responseTimeMs}ms; collecting until discovery timeout'
+            : 'Ping response received in ${result.responseTimeMs}ms; collecting for 3 more seconds',
       );
     }
 
