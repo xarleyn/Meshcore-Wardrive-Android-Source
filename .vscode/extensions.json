@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "Dart-Code.flutter",
+    "DavidAnson.vscode-markdownlint",
+    "EditorConfig.EditorConfig",
+    "redhat.vscode-yaml"
+  ]
+}

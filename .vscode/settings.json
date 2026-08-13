@@ -1,0 +1,36 @@
+{
+  "dart.lineLength": 100,
+  "dart.runPubGetOnPubspecChanges": "prompt",
+  "editor.rulers": [100],
+  "files.exclude": {
+    "**/.dart_tool": true,
+    "**/.flutter-plugins-dependencies": true,
+    "**/build": true
+  },
+  "files.watcherExclude": {
+    "**/.dart_tool/**": true,
+    "**/.toolchain/**": true,
+    "**/build/**": true,
+    "**/flutter/**": true
+  },
+  "search.exclude": {
+    "**/.dart_tool": true,
+    "**/.toolchain": true,
+    "**/build": true,
+    "**/flutter": true
+  },
+  "[dart]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit"
+    },
+    "editor.defaultFormatter": "Dart-Code.dart-code",
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "editor.rulers": [100],
+    "editor.selectionHighlight": false,
+    "editor.suggest.snippetsPreventQuickSuggestions": false,
+    "editor.tabCompletion": "onlySnippets",
+    "editor.wordBasedSuggestions": "off"
+  }
+}
