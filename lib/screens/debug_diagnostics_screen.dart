@@ -8,10 +8,7 @@ import 'package:path_provider/path_provider.dart';
 class DebugDiagnosticsScreen extends StatefulWidget {
   final LocationService locationService;
 
-  const DebugDiagnosticsScreen({
-    Key? key,
-    required this.locationService,
-  }) : super(key: key);
+  const DebugDiagnosticsScreen({super.key, required this.locationService});
 
   @override
   State<DebugDiagnosticsScreen> createState() => _DebugDiagnosticsScreenState();
@@ -29,18 +26,21 @@ class _DebugDiagnosticsScreenState extends State<DebugDiagnosticsScreen> {
 
   Future<void> _loadLogFiles() async {
     setState(() => _loading = true);
-    
+
     try {
       final directory = await getExternalStorageDirectory();
       if (directory != null) {
-        final files = directory.listSync()
+        final files = directory
+            .listSync()
             .whereType<File>()
             .where((file) => file.path.contains('meshcore_debug_'))
             .toList();
-        
+
         // Sort by date (newest first)
-        files.sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
-        
+        files.sort(
+          (a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()),
+        );
+
         setState(() {
           _logFiles = files;
           _loading = false;
@@ -61,9 +61,9 @@ class _DebugDiagnosticsScreenState extends State<DebugDiagnosticsScreen> {
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error sharing file: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error sharing file: $e')));
       }
     }
   }
@@ -92,15 +92,15 @@ class _DebugDiagnosticsScreenState extends State<DebugDiagnosticsScreen> {
         await file.delete();
         await _loadLogFiles();
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Log file deleted')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Log file deleted')));
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error deleting file: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error deleting file: $e')));
         }
       }
     }
@@ -122,9 +122,9 @@ class _DebugDiagnosticsScreenState extends State<DebugDiagnosticsScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error reading file: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error reading file: $e')));
       }
     }
   }
@@ -137,7 +137,7 @@ class _DebugDiagnosticsScreenState extends State<DebugDiagnosticsScreen> {
 
   String _formatDateTime(DateTime dt) {
     return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')} '
-           '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+        '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -163,10 +163,7 @@ class _DebugDiagnosticsScreenState extends State<DebugDiagnosticsScreen> {
               children: [
                 const Text(
                   'Troubleshooting Samsung Devices',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 const Text(
@@ -177,12 +174,19 @@ class _DebugDiagnosticsScreenState extends State<DebugDiagnosticsScreen> {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(Icons.info_outline, size: 16, color: Colors.blue),
+                    const Icon(
+                      Icons.info_outline,
+                      size: 16,
+                      color: Colors.blue,
+                    ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         'Current session: ${widget.locationService.debugLogPath?.split('/').last ?? 'Not started'}',
-                        style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic,
+                        ),
                       ),
                     ),
                   ],
@@ -194,84 +198,100 @@ class _DebugDiagnosticsScreenState extends State<DebugDiagnosticsScreen> {
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
                 : _logFiles.isEmpty
-                    ? const Center(
-                        child: Text(
-                          'No debug logs found.\nStart tracking to generate logs.',
-                          textAlign: TextAlign.center,
-                        ),
-                      )
-                    : ListView.builder(
-                        itemCount: _logFiles.length,
-                        itemBuilder: (context, index) {
-                          final file = _logFiles[index];
-                          final fileName = file.path.split('/').last;
-                          final fileSize = file.lengthSync();
-                          final modified = file.lastModifiedSync();
+                ? const Center(
+                    child: Text(
+                      'No debug logs found.\nStart tracking to generate logs.',
+                      textAlign: TextAlign.center,
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: _logFiles.length,
+                    itemBuilder: (context, index) {
+                      final file = _logFiles[index];
+                      final fileName = file.path.split('/').last;
+                      final fileSize = file.lengthSync();
+                      final modified = file.lastModifiedSync();
 
-                          return Card(
-                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                            child: ListTile(
-                              leading: const Icon(Icons.description, color: Colors.blue),
-                              title: Text(
-                                fileName,
-                                style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
-                              ),
-                              subtitle: Text(
-                                '${_formatFileSize(fileSize)} • ${_formatDateTime(modified)}',
-                                style: const TextStyle(fontSize: 11),
-                              ),
-                              trailing: PopupMenuButton<String>(
-                                onSelected: (value) {
-                                  switch (value) {
-                                    case 'view':
-                                      _viewLogFile(file);
-                                      break;
-                                    case 'share':
-                                      _shareLogFile(file);
-                                      break;
-                                    case 'delete':
-                                      _deleteLogFile(file);
-                                      break;
-                                  }
-                                },
-                                itemBuilder: (context) => [
-                                  const PopupMenuItem(
-                                    value: 'view',
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.visibility, size: 20),
-                                        SizedBox(width: 8),
-                                        Text('View'),
-                                      ],
-                                    ),
-                                  ),
-                                  const PopupMenuItem(
-                                    value: 'share',
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.share, size: 20),
-                                        SizedBox(width: 8),
-                                        Text('Share'),
-                                      ],
-                                    ),
-                                  ),
-                                  const PopupMenuItem(
-                                    value: 'delete',
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.delete, size: 20, color: Colors.red),
-                                        SizedBox(width: 8),
-                                        Text('Delete', style: TextStyle(color: Colors.red)),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              onTap: () => _viewLogFile(file),
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        child: ListTile(
+                          leading: const Icon(
+                            Icons.description,
+                            color: Colors.blue,
+                          ),
+                          title: Text(
+                            fileName,
+                            style: const TextStyle(
+                              fontFamily: 'monospace',
+                              fontSize: 12,
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                          subtitle: Text(
+                            '${_formatFileSize(fileSize)} • ${_formatDateTime(modified)}',
+                            style: const TextStyle(fontSize: 11),
+                          ),
+                          trailing: PopupMenuButton<String>(
+                            onSelected: (value) {
+                              switch (value) {
+                                case 'view':
+                                  _viewLogFile(file);
+                                  break;
+                                case 'share':
+                                  _shareLogFile(file);
+                                  break;
+                                case 'delete':
+                                  _deleteLogFile(file);
+                                  break;
+                              }
+                            },
+                            itemBuilder: (context) => [
+                              const PopupMenuItem(
+                                value: 'view',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.visibility, size: 20),
+                                    SizedBox(width: 8),
+                                    Text('View'),
+                                  ],
+                                ),
+                              ),
+                              const PopupMenuItem(
+                                value: 'share',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.share, size: 20),
+                                    SizedBox(width: 8),
+                                    Text('Share'),
+                                  ],
+                                ),
+                              ),
+                              const PopupMenuItem(
+                                value: 'delete',
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.delete,
+                                      size: 20,
+                                      color: Colors.red,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Delete',
+                                      style: TextStyle(color: Colors.red),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          onTap: () => _viewLogFile(file),
+                        ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -284,10 +304,7 @@ class _LogViewerScreen extends StatelessWidget {
   final String fileName;
   final String content;
 
-  const _LogViewerScreen({
-    required this.fileName,
-    required this.content,
-  });
+  const _LogViewerScreen({required this.fileName, required this.content});
 
   @override
   Widget build(BuildContext context) {
@@ -310,10 +327,7 @@ class _LogViewerScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: SelectableText(
           content,
-          style: const TextStyle(
-            fontFamily: 'monospace',
-            fontSize: 11,
-          ),
+          style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
         ),
       ),
     );

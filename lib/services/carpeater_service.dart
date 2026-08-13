@@ -6,7 +6,7 @@ import 'settings_service.dart';
 import 'debug_log_service.dart';
 
 /// Carpeater Mode Service
-/// 
+///
 /// Enables "Car Repeater" wardrive mode where instead of using the companion
 /// radio directly for discovery, we log into a target repeater and use IT to
 /// discover neighbors. Useful for leveraging a more powerful antenna or
@@ -27,7 +27,7 @@ class CarpeaterService {
   final SettingsService _settingsService;
   final _debugLog = DebugLogService();
   final _protocol = MeshCoreProtocol();
-  
+
   // State
   CarpeaterState _state = CarpeaterState.disabled;
   String? _targetRepeaterId;
@@ -44,7 +44,8 @@ class CarpeaterService {
   static const int _maxConsecutiveFailures = 3;
 
   // Results
-  final _neighboursController = StreamController<List<Map<String, dynamic>>>.broadcast();
+  final _neighboursController =
+      StreamController<List<Map<String, dynamic>>>.broadcast();
   final _stateController = StreamController<CarpeaterState>.broadcast();
   final _discoveryStartedController = StreamController<void>.broadcast();
   List<Map<String, dynamic>> _lastNeighbours = [];
@@ -54,24 +55,27 @@ class CarpeaterService {
   Completer<Map<String, dynamic>?>? _loginCompleter;
   Completer<bool>? _sentCompleter;
   Completer<Map<String, dynamic>?>? _neighboursCompleter;
-  
+
   CarpeaterService(this._loraService, this._settingsService);
-  
+
   // Public getters
   CarpeaterState get state => _state;
   Stream<CarpeaterState> get stateStream => _stateController.stream;
-  Stream<List<Map<String, dynamic>>> get neighboursStream => _neighboursController.stream;
+  Stream<List<Map<String, dynamic>>> get neighboursStream =>
+      _neighboursController.stream;
   Stream<void> get discoveryStartedStream => _discoveryStartedController.stream;
-  List<Map<String, dynamic>> get lastNeighbours => List.unmodifiable(_lastNeighbours);
+  List<Map<String, dynamic>> get lastNeighbours =>
+      List.unmodifiable(_lastNeighbours);
   DateTime? get lastDiscoveryTime => _lastDiscoveryTime;
   int get cyclesCompleted => _cyclesCompleted;
   int get totalNeighboursFound => _totalNeighboursFound;
-  bool get isLoggedIn => _state == CarpeaterState.loggedIn || 
-                          _state == CarpeaterState.discovering || 
-                          _state == CarpeaterState.fetchingNeighbours;
+  bool get isLoggedIn =>
+      _state == CarpeaterState.loggedIn ||
+      _state == CarpeaterState.discovering ||
+      _state == CarpeaterState.fetchingNeighbours;
   bool get isAdmin => _isAdmin;
   String? get targetRepeaterId => _targetRepeaterId;
-  
+
   /// Initialize Carpeater mode with settings
   Future<void> initialize() async {
     final enabled = await _settingsService.getCarpeaterEnabled();
@@ -79,26 +83,26 @@ class CarpeaterService {
       _setState(CarpeaterState.disabled);
       return;
     }
-    
+
     _targetRepeaterId = await _settingsService.getCarpeaterRepeaterId();
     _targetRepeaterPassword = await _settingsService.getCarpeaterPassword();
     _discoveryIntervalSeconds = await _settingsService.getCarpeaterInterval();
-    
+
     if (_targetRepeaterId == null || _targetRepeaterId!.isEmpty) {
       _debugLog.logError('Carpeater: No target repeater ID configured');
       _setState(CarpeaterState.error);
       return;
     }
-    
+
     if (_targetRepeaterPassword == null || _targetRepeaterPassword!.isEmpty) {
       _debugLog.logError('Carpeater: No password configured');
       _setState(CarpeaterState.error);
       return;
     }
-    
+
     _debugLog.logInfo('Carpeater: Initialized for repeater $_targetRepeaterId');
   }
-  
+
   /// Start Carpeater mode
   Future<bool> start() async {
     if (!_loraService.isDeviceConnected) {
@@ -106,35 +110,35 @@ class CarpeaterService {
       _setState(CarpeaterState.error);
       return false;
     }
-    
+
     await initialize();
-    
+
     if (_state == CarpeaterState.error) {
       return false;
     }
-    
+
     _cyclesCompleted = 0;
     _totalNeighboursFound = 0;
     _consecutiveFailures = 0;
-    
+
     final loggedIn = await _connectAndLogin();
     if (!loggedIn) return false;
-    
+
     _startDiscoveryLoop();
     return true;
   }
-  
+
   /// Connect to repeater and login. Returns true on success.
   Future<bool> _connectAndLogin() async {
     _setState(CarpeaterState.connecting);
-    
+
     final found = await _findTargetRepeater();
     if (!found) {
       _debugLog.logError('Carpeater: Target repeater not found in contacts');
       _setState(CarpeaterState.error);
       return false;
     }
-    
+
     _setState(CarpeaterState.loggingIn);
     final loggedIn = await _loginToRepeater();
     if (!loggedIn) {
@@ -142,12 +146,12 @@ class CarpeaterService {
       _setState(CarpeaterState.error);
       return false;
     }
-    
+
     _setState(CarpeaterState.loggedIn);
     _debugLog.logInfo('Carpeater: Logged in successfully (admin=$_isAdmin)');
     return true;
   }
-  
+
   /// Stop Carpeater mode
   void stop() {
     final signal = _stopSignal;
@@ -165,14 +169,16 @@ class CarpeaterService {
     _setState(CarpeaterState.disabled);
     _debugLog.logInfo('Carpeater: Stopped');
   }
-  
+
   /// Find the target repeater in the contact list
   Future<bool> _findTargetRepeater() async {
     if (_targetRepeaterId == null) return false;
 
     _debugLog.logInfo('Carpeater: Looking for repeater $_targetRepeaterId');
 
-    _targetRepeaterPubKeyBytes = _loraService.getContactPubKey(_targetRepeaterId!);
+    _targetRepeaterPubKeyBytes = _loraService.getContactPubKey(
+      _targetRepeaterId!,
+    );
     if (_targetRepeaterPubKeyBytes != null) {
       _debugLog.logInfo('Carpeater: Found pubkey in contact cache');
       return true;
@@ -181,7 +187,9 @@ class CarpeaterService {
     await _loraService.refreshContactList();
     await Future.delayed(const Duration(seconds: 3));
 
-    _targetRepeaterPubKeyBytes = _loraService.getContactPubKey(_targetRepeaterId!);
+    _targetRepeaterPubKeyBytes = _loraService.getContactPubKey(
+      _targetRepeaterId!,
+    );
     if (_targetRepeaterPubKeyBytes != null) {
       _debugLog.logInfo('Carpeater: Found pubkey after contact refresh');
       return true;
@@ -192,10 +200,12 @@ class CarpeaterService {
     );
     return false;
   }
-  
+
   /// Login to the target repeater (retries up to 3 times)
   Future<bool> _loginToRepeater() async {
-    if (_targetRepeaterId == null || _targetRepeaterPassword == null) return false;
+    if (_targetRepeaterId == null || _targetRepeaterPassword == null) {
+      return false;
+    }
     if (_targetRepeaterPubKeyBytes == null) return false;
 
     const maxAttempts = 3;
@@ -221,8 +231,10 @@ class CarpeaterService {
           continue;
         }
 
-        final response = await _loginCompleter!.future
-            .timeout(const Duration(seconds: 10), onTimeout: () => null);
+        final response = await _loginCompleter!.future.timeout(
+          const Duration(seconds: 10),
+          onTimeout: () => null,
+        );
         _loginCompleter = null;
 
         if (response == null) {
@@ -246,7 +258,7 @@ class CarpeaterService {
     _loraService.setCarpeaterCallback(null);
     return false;
   }
-  
+
   /// Kick off the sequential discovery loop
   void _startDiscoveryLoop() {
     _stopSignal = Completer<void>();
@@ -257,16 +269,18 @@ class CarpeaterService {
   }
 
   bool get _isStopped => _stopSignal == null || _stopSignal!.isCompleted;
-  
+
   Future<void> _runDiscoveryLoop() async {
     while (!_isStopped) {
       await _runDiscoveryCycle();
       if (_isStopped || _state == CarpeaterState.disabled) break;
-      
+
       // Auto-reconnect after consecutive failures
       if (_state == CarpeaterState.error) {
         if (_consecutiveFailures >= _maxConsecutiveFailures) {
-          _debugLog.logInfo('Carpeater: $_consecutiveFailures consecutive failures — attempting re-login...');
+          _debugLog.logInfo(
+            'Carpeater: $_consecutiveFailures consecutive failures — attempting re-login...',
+          );
           _consecutiveFailures = 0;
           final reconnected = await _connectAndLogin();
           if (!reconnected) {
@@ -275,7 +289,7 @@ class CarpeaterService {
           }
         }
       }
-      
+
       if (_isStopped) break;
       _debugLog.logInfo(
         'Carpeater: Cycle $cyclesCompleted complete — waiting ${_discoveryIntervalSeconds}s...',
@@ -289,15 +303,15 @@ class CarpeaterService {
     }
     _debugLog.logInfo('Carpeater: Discovery loop exited');
   }
-  
+
   /// Run a single discovery cycle
-  /// 
+  ///
   /// Optimized for speed: skips clearing neighbours (just overwrites),
   /// uses short 3s discovery wait (v1.14+ zero-hop adverts are fast),
   /// and reduced timeouts on first attempts.
   Future<void> _runDiscoveryCycle() async {
     if (_state == CarpeaterState.disabled) return;
-    
+
     try {
       _setState(CarpeaterState.discovering);
 
@@ -309,7 +323,9 @@ class CarpeaterService {
       // Step 1: Trigger discovery — tell repeater to send zero-hop advert
       final advertOk = await _triggerRepeaterAdvert();
       if (!advertOk) {
-        _debugLog.logError('Carpeater: Could not trigger advert — skipping cycle');
+        _debugLog.logError(
+          'Carpeater: Could not trigger advert — skipping cycle',
+        );
         _consecutiveFailures++;
         _setState(CarpeaterState.loggedIn);
         return;
@@ -317,21 +333,23 @@ class CarpeaterService {
 
       // Notify listeners to snapshot GPS position
       _discoveryStartedController.add(null);
-      
+
       // Step 2: Wait for responses — v1.14+ repeaters respond via zero-hop
       // adverts within 1-2s of LoRa airtime. 3s is plenty.
       const discoveryWaitSeconds = 3;
-      _debugLog.logInfo('Carpeater: Waiting ${discoveryWaitSeconds}s for responses...');
+      _debugLog.logInfo(
+        'Carpeater: Waiting ${discoveryWaitSeconds}s for responses...',
+      );
       await Future.any([
         Future.delayed(const Duration(seconds: discoveryWaitSeconds)),
         if (_stopSignal != null) _stopSignal!.future,
       ]);
       if (_stopSignal == null || _stopSignal!.isCompleted) return;
-      
+
       // Step 3: Fetch neighbours
       _setState(CarpeaterState.fetchingNeighbours);
       final neighbours = await _fetchNeighbours();
-      
+
       if (neighbours != null && neighbours.isNotEmpty) {
         _lastNeighbours = neighbours;
         _lastDiscoveryTime = DateTime.now();
@@ -343,17 +361,16 @@ class CarpeaterService {
         _debugLog.logInfo('Carpeater: No neighbours found this cycle');
         _neighboursController.add([]);
       }
-      
+
       _cyclesCompleted++;
       _setState(CarpeaterState.loggedIn);
-      
     } catch (e) {
       _debugLog.logError('Carpeater: Discovery cycle error: $e');
       _consecutiveFailures++;
       _setState(CarpeaterState.error);
     }
   }
-  
+
   Future<bool> _triggerRepeaterAdvert() async {
     if (_targetRepeaterPubKeyBytes == null) return false;
 
@@ -366,9 +383,14 @@ class CarpeaterService {
           targetPubKey: _targetRepeaterPubKeyBytes!,
           command: 'discover.neighbors',
         );
-        if (!enqueued) { _sentCompleter = null; continue; }
-        final acked = await _sentCompleter!.future
-            .timeout(const Duration(seconds: 5), onTimeout: () => false);
+        if (!enqueued) {
+          _sentCompleter = null;
+          continue;
+        }
+        final acked = await _sentCompleter!.future.timeout(
+          const Duration(seconds: 5),
+          onTimeout: () => false,
+        );
         _sentCompleter = null;
         if (acked) return true;
       } catch (e) {
@@ -377,7 +399,7 @@ class CarpeaterService {
     }
     return false;
   }
-  
+
   Future<List<Map<String, dynamic>>?> _fetchNeighbours() async {
     if (_targetRepeaterPubKeyBytes == null) return null;
 
@@ -389,19 +411,26 @@ class CarpeaterService {
         final sent = await _loraService.sendRepeaterGetNeighbours(
           targetPubKey: _targetRepeaterPubKeyBytes!,
         );
-        if (!sent) { _neighboursCompleter = null; continue; }
-        final response = await _neighboursCompleter!.future
-            .timeout(const Duration(seconds: 8), onTimeout: () => null);
+        if (!sent) {
+          _neighboursCompleter = null;
+          continue;
+        }
+        final response = await _neighboursCompleter!.future.timeout(
+          const Duration(seconds: 8),
+          onTimeout: () => null,
+        );
         _neighboursCompleter = null;
         if (response == null) continue;
-        return (response['neighbours'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+        return (response['neighbours'] as List?)
+                ?.cast<Map<String, dynamic>>() ??
+            [];
       } catch (e) {
         _neighboursCompleter = null;
       }
     }
     return null;
   }
-  
+
   Future<bool> _clearPreviousNeighbours() async {
     if (_targetRepeaterPubKeyBytes == null) return false;
 
@@ -414,9 +443,14 @@ class CarpeaterService {
           targetPubKey: _targetRepeaterPubKeyBytes!,
           command: 'neighbor.remove ',
         );
-        if (!enqueued) { _sentCompleter = null; continue; }
-        final acked = await _sentCompleter!.future
-            .timeout(const Duration(seconds: 10), onTimeout: () => false);
+        if (!enqueued) {
+          _sentCompleter = null;
+          continue;
+        }
+        final acked = await _sentCompleter!.future.timeout(
+          const Duration(seconds: 10),
+          onTimeout: () => false,
+        );
         _sentCompleter = null;
         if (acked) return true;
       } catch (e) {
@@ -444,7 +478,8 @@ class CarpeaterService {
         }
         break;
       case PUSH_CODE_BINARY_RESPONSE:
-        if (_neighboursCompleter != null && !_neighboursCompleter!.isCompleted) {
+        if (_neighboursCompleter != null &&
+            !_neighboursCompleter!.isCompleted) {
           final result = _protocol.parseBinaryResponseNeighbours(data, 8);
           if (result != null) {
             _neighboursCompleter!.complete(result);
@@ -458,14 +493,14 @@ class CarpeaterService {
         );
     }
   }
-  
+
   void _setState(CarpeaterState newState) {
     if (_state != newState) {
       _state = newState;
       _stateController.add(newState);
     }
   }
-  
+
   void dispose() {
     stop();
     _neighboursController.close();

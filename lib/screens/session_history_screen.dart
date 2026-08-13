@@ -7,7 +7,7 @@ import '../services/settings_service.dart';
 class SessionHistoryScreen extends StatefulWidget {
   /// Optional callback when a session is selected (for map filtering)
   final void Function(WSession session)? onSessionSelected;
-  
+
   const SessionHistoryScreen({super.key, this.onSessionSelected});
 
   @override
@@ -64,7 +64,9 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Session?'),
-        content: const Text('This will remove the session record. Sample data is not affected.'),
+        content: const Text(
+          'This will remove the session record. Sample data is not affected.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -77,7 +79,7 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
         ],
       ),
     );
-    
+
     if (confirmed == true && session.id != null) {
       await _dbService.deleteSession(session.id!);
       await _loadSessions();
@@ -110,7 +112,7 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
         ],
       ),
     );
-    
+
     if (result != null) {
       final updated = WSession(
         id: session.id,
@@ -130,27 +132,25 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Session History'),
-      ),
+      appBar: AppBar(title: const Text('Session History')),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _sessions.isEmpty
-              ? const Center(
-                  child: Text(
-                    'No sessions yet.\n\nStart tracking to record your first session!',
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
-                    textAlign: TextAlign.center,
-                  ),
-                )
-              : ListView.builder(
-                  itemCount: _sessions.length,
-                  padding: const EdgeInsets.all(8),
-                  itemBuilder: (context, index) {
-                    final session = _sessions[index];
-                    return _buildSessionCard(session);
-                  },
-                ),
+          ? const Center(
+              child: Text(
+                'No sessions yet.\n\nStart tracking to record your first session!',
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+                textAlign: TextAlign.center,
+              ),
+            )
+          : ListView.builder(
+              itemCount: _sessions.length,
+              padding: const EdgeInsets.all(8),
+              itemBuilder: (context, index) {
+                final session = _sessions[index];
+                return _buildSessionCard(session);
+              },
+            ),
     );
   }
 
@@ -159,14 +159,14 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
     final timeFormat = DateFormat('h:mm a');
     final duration = session.duration;
     final successRate = session.successRate;
-    
+
     // Determine status color based on success rate
     Color statusColor;
     if (session.pingCount == 0) {
       statusColor = Colors.grey;
-    } else if (successRate != null && successRate >= 70) {
+    } else if (successRate >= 70) {
       statusColor = Colors.green;
-    } else if (successRate != null && successRate >= 30) {
+    } else if (successRate >= 30) {
       statusColor = Colors.orange;
     } else {
       statusColor = Colors.red;
@@ -209,7 +209,11 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
                         padding: const EdgeInsets.all(4),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.delete_outline, size: 20, color: Colors.red),
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          size: 20,
+                          color: Colors.red,
+                        ),
                         onPressed: () => _deleteSession(session),
                         tooltip: 'Delete',
                         constraints: const BoxConstraints(),
@@ -219,29 +223,35 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
                   ),
                 ],
               ),
-              
+
               // Time range
               Text(
                 '${timeFormat.format(session.startTime)}'
                 '${session.endTime != null ? ' – ${timeFormat.format(session.endTime!)}' : ' – In progress'}',
                 style: TextStyle(color: Colors.grey[600], fontSize: 13),
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               // Stats row
               Row(
                 children: [
-                  _buildStat(Icons.timer, duration != null ? _formatDuration(duration) : '--'),
+                  _buildStat(
+                    Icons.timer,
+                    duration != null ? _formatDuration(duration) : '--',
+                  ),
                   const SizedBox(width: 16),
-                  _buildStat(Icons.straighten, _formatDistance(session.distanceMeters)),
+                  _buildStat(
+                    Icons.straighten,
+                    _formatDistance(session.distanceMeters),
+                  ),
                   const SizedBox(width: 16),
                   _buildStat(Icons.location_on, '${session.sampleCount} pts'),
                 ],
               ),
-              
+
               const SizedBox(height: 4),
-              
+
               // Ping stats row
               Row(
                 children: [
@@ -256,12 +266,12 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
                   if (session.pingCount > 0)
                     _buildStat(
                       Icons.percent,
-                      '${successRate?.toStringAsFixed(0)}%',
+                      '${successRate.toStringAsFixed(0)}%',
                       color: statusColor,
                     ),
                 ],
               ),
-              
+
               // Notes
               if (session.notes != null && session.notes!.isNotEmpty) ...[
                 const SizedBox(height: 8),
@@ -276,13 +286,16 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
-              
+
               // Tap hint when callback is provided
               if (widget.onSessionSelected != null) ...[
                 const SizedBox(height: 4),
                 Text(
                   'Tap to view on map',
-                  style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 12),
+                  style: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ],

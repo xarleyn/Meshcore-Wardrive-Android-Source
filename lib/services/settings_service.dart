@@ -40,113 +40,113 @@ class SettingsService {
   static const String _showSuccessfulOnlyKey = 'show_successful_only';
   static const String _deadZoneAlertsKey = 'dead_zone_alerts_enabled';
   static const String _newRepeaterAlertsKey = 'new_repeater_alerts_enabled';
-  
+
   // Alert toggles
   Future<bool> getDeadZoneAlertsEnabled() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_deadZoneAlertsKey) ?? true;
   }
-  
+
   Future<void> setDeadZoneAlertsEnabled(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_deadZoneAlertsKey, value);
   }
-  
+
   Future<bool> getNewRepeaterAlertsEnabled() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_newRepeaterAlertsKey) ?? true;
   }
-  
+
   Future<void> setNewRepeaterAlertsEnabled(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_newRepeaterAlertsKey, value);
   }
-  
+
   Future<bool> getShowSamples() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_showSamplesKey) ?? false;
   }
-  
+
   Future<void> setShowSamples(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_showSamplesKey, value);
   }
-  
+
   Future<bool> getShowGpsSamples() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_showGpsSamplesKey) ?? true;
   }
-  
+
   Future<void> setShowGpsSamples(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_showGpsSamplesKey, value);
   }
-  
+
   Future<bool> getShowCoverage() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_showCoverageKey) ?? true;
   }
-  
+
   Future<void> setShowCoverage(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_showCoverageKey, value);
   }
-  
+
   Future<bool> getShowEdges() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_showEdgesKey) ?? true;
   }
-  
+
   Future<void> setShowEdges(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_showEdgesKey, value);
   }
-  
+
   Future<bool> getShowRepeaters() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_showRepeatersKey) ?? true;
   }
-  
+
   Future<void> setShowRepeaters(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_showRepeatersKey, value);
   }
-  
+
   Future<String> getColorMode() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_colorModeKey) ?? 'quality';
   }
-  
+
   Future<void> setColorMode(String value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_colorModeKey, value);
   }
-  
+
   Future<double> getPingInterval() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getDouble(_pingIntervalKey) ?? 805.0; // Default 0.5 miles
   }
-  
+
   Future<void> setPingInterval(double value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_pingIntervalKey, value);
   }
-  
+
   Future<int> getCoveragePrecision() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt(_coveragePrecisionKey) ?? 6; // Default precision 6
   }
-  
+
   Future<void> setCoveragePrecision(int value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_coveragePrecisionKey, value);
   }
-  
+
   Future<String?> getIgnoredRepeaterPrefix() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_ignoredRepeaterPrefixKey);
   }
-  
+
   Future<void> setIgnoredRepeaterPrefix(String? value) async {
     final prefs = await SharedPreferences.getInstance();
     if (value == null || value.isEmpty) {
@@ -155,14 +155,14 @@ class SettingsService {
       await prefs.setString(_ignoredRepeaterPrefixKey, value);
     }
   }
-  
+
   /// Get comma-separated list of repeater prefixes to ONLY hear from (whitelist)
   /// Empty or null = hear from all repeaters
   Future<String?> getIncludeOnlyRepeaters() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_includeOnlyRepeatersKey);
   }
-  
+
   Future<void> setIncludeOnlyRepeaters(String? value) async {
     final prefs = await SharedPreferences.getInstance();
     if (value == null || value.isEmpty) {
@@ -171,76 +171,76 @@ class SettingsService {
       await prefs.setString(_includeOnlyRepeatersKey, value);
     }
   }
-  
+
   /// Whether to filter edges (purple lines) by the Include Only Repeaters whitelist
   Future<bool> getFilterEdgesByWhitelist() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_filterEdgesByWhitelistKey) ?? false;
   }
-  
+
   Future<void> setFilterEdgesByWhitelist(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_filterEdgesByWhitelistKey, value);
   }
-  
+
   /// Get distance unit ('miles' or 'km')
   Future<String> getDistanceUnit() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_distanceUnitKey) ?? 'miles';
   }
-  
+
   Future<void> setDistanceUnit(String value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_distanceUnitKey, value);
   }
-  
+
   /// Get color blind mode ('normal', 'deuteranopia', 'protanopia', 'tritanopia')
   Future<String> getColorBlindMode() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_colorBlindModeKey) ?? 'normal';
   }
-  
+
   Future<void> setColorBlindMode(String value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_colorBlindModeKey, value);
   }
-  
+
   /// Get discovery timeout in seconds (10-30 seconds, default 20)
   Future<int> getDiscoveryTimeout() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt(_discoveryTimeoutKey) ?? 20;
   }
-  
+
   Future<void> setDiscoveryTimeout(int value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_discoveryTimeoutKey, value);
   }
-  
+
   /// Get total distance driven across all sessions (in meters)
   Future<double> getTotalDistanceDriven() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getDouble(_totalDistanceDrivenKey) ?? 0.0;
   }
-  
+
   /// Add distance from a session to the persistent total
   Future<void> addToTotalDistanceDriven(double meters) async {
     final prefs = await SharedPreferences.getInstance();
     final current = prefs.getDouble(_totalDistanceDrivenKey) ?? 0.0;
     await prefs.setDouble(_totalDistanceDrivenKey, current + meters);
   }
-  
+
   /// Reset total distance driven
   Future<void> resetTotalDistanceDriven() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_totalDistanceDrivenKey, 0.0);
   }
-  
+
   /// Get vehicle MPG (miles per gallon), null if not set
   Future<double?> getVehicleMpg() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getDouble(_vehicleMpgKey);
   }
-  
+
   /// Set vehicle MPG
   Future<void> setVehicleMpg(double? value) async {
     final prefs = await SharedPreferences.getInstance();
@@ -250,171 +250,171 @@ class SettingsService {
       await prefs.setDouble(_vehicleMpgKey, value);
     }
   }
-  
+
   /// Get gas price per gallon (default 3.50)
   Future<double> getGasPrice() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getDouble(_gasPriceKey) ?? 3.50;
   }
-  
+
   /// Set gas price per gallon
   Future<void> setGasPrice(double value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_gasPriceKey, value);
   }
-  
+
   /// Get fuel unit ('imperial' or 'metric')
   Future<String> getFuelUnit() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_fuelUnitKey) ?? 'imperial';
   }
-  
+
   /// Set fuel unit ('imperial' or 'metric')
   Future<void> setFuelUnit(String value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_fuelUnitKey, value);
   }
-  
+
   /// Get show route trail setting
   Future<bool> getShowRouteTrail() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_showRouteTrailKey) ?? false;
   }
-  
+
   /// Set show route trail setting
   Future<void> setShowRouteTrail(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_showRouteTrailKey, value);
   }
-  
+
   /// Get show heatmap setting
   Future<bool> getShowHeatmap() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_showHeatmapKey) ?? false;
   }
-  
+
   /// Set show heatmap setting
   Future<void> setShowHeatmap(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_showHeatmapKey, value);
   }
-  
+
   /// Get show prediction rings setting
   Future<bool> getShowPredictionRings() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_showPredictionRingsKey) ?? false;
   }
-  
+
   /// Set show prediction rings setting
   Future<void> setShowPredictionRings(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_showPredictionRingsKey, value);
   }
-  
+
   /// Get show ducting monitor setting
   Future<bool> getShowDucting() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_showDuctingKey) ?? false;
   }
-  
+
   /// Set show ducting monitor setting
   Future<void> setShowDucting(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_showDuctingKey, value);
   }
-  
+
   // Coverage goal settings
-  
+
   Future<double?> getGoalCenterLat() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getDouble(_goalCenterLatKey);
   }
-  
+
   Future<double?> getGoalCenterLon() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getDouble(_goalCenterLonKey);
   }
-  
+
   Future<double> getGoalRadiusMeters() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getDouble(_goalRadiusMetersKey) ?? 8047.0; // Default 5 miles
   }
-  
+
   Future<void> setGoal(double lat, double lon, double radiusMeters) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_goalCenterLatKey, lat);
     await prefs.setDouble(_goalCenterLonKey, lon);
     await prefs.setDouble(_goalRadiusMetersKey, radiusMeters);
   }
-  
+
   Future<void> clearGoal() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_goalCenterLatKey);
     await prefs.remove(_goalCenterLonKey);
     await prefs.remove(_goalRadiusMetersKey);
   }
-  
+
   // Ping mode: 'distance', 'time', or 'both'
-  
+
   Future<String> getPingMode() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_pingModeKey) ?? 'distance';
   }
-  
+
   Future<void> setPingMode(String value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_pingModeKey, value);
   }
-  
+
   Future<int> getPingTimeInterval() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt(_pingTimeIntervalKey) ?? 60;
   }
-  
+
   Future<void> setPingTimeInterval(int value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_pingTimeIntervalKey, value);
   }
-  
+
   // Sound feedback
-  
+
   Future<bool> getSoundEnabled() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_soundEnabledKey) ?? true;
   }
-  
+
   Future<void> setSoundEnabled(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_soundEnabledKey, value);
   }
-  
+
   Future<bool> getVibrationEnabled() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_vibrationEnabledKey) ?? true;
   }
-  
+
   Future<void> setVibrationEnabled(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_vibrationEnabledKey, value);
   }
-  
+
   // Ping mode:
-  
+
   Future<bool> getCarpeaterEnabled() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_carpeaterEnabledKey) ?? false;
   }
-  
+
   Future<void> setCarpeaterEnabled(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_carpeaterEnabledKey, value);
   }
-  
+
   Future<String?> getCarpeaterRepeaterId() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_carpeaterRepeaterIdKey);
   }
-  
+
   Future<void> setCarpeaterRepeaterId(String? value) async {
     final prefs = await SharedPreferences.getInstance();
     if (value == null || value.isEmpty) {
@@ -423,12 +423,12 @@ class SettingsService {
       await prefs.setString(_carpeaterRepeaterIdKey, value);
     }
   }
-  
+
   Future<String?> getCarpeaterPassword() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_carpeaterPasswordKey);
   }
-  
+
   Future<void> setCarpeaterPassword(String? value) async {
     final prefs = await SharedPreferences.getInstance();
     if (value == null || value.isEmpty) {
@@ -437,23 +437,23 @@ class SettingsService {
       await prefs.setString(_carpeaterPasswordKey, value);
     }
   }
-  
+
   Future<int> getCarpeaterInterval() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt(_carpeaterIntervalKey) ?? 30;
   }
-  
+
   Future<void> setCarpeaterInterval(int value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_carpeaterIntervalKey, value);
   }
-  
+
   /// Get device/operator name for multi-device wardrive
   Future<String?> getDeviceName() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_deviceNameKey);
   }
-  
+
   /// Set device/operator name
   Future<void> setDeviceName(String? value) async {
     final prefs = await SharedPreferences.getInstance();
@@ -463,29 +463,29 @@ class SettingsService {
       await prefs.setString(_deviceNameKey, value);
     }
   }
-  
+
   Future<bool> getShowSuccessfulOnly() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_showSuccessfulOnlyKey) ?? false;
   }
-  
+
   Future<void> setShowSuccessfulOnly(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_showSuccessfulOnlyKey, value);
   }
-  
+
   /// Get lock rotation north setting
   Future<bool> getLockRotationNorth() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_lockRotationKey) ?? false;
   }
-  
+
   /// Set lock rotation north setting
   Future<void> setLockRotationNorth(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_lockRotationKey, value);
   }
-  
+
   /// All preference keys that should be exported/imported
   static const List<String> _exportKeys = [
     _showSamplesKey,
@@ -532,7 +532,7 @@ class SettingsService {
     // Theme
     'theme_mode',
   ];
-  
+
   /// Export all settings to a JSON-encodable map
   Future<Map<String, dynamic>> exportSettings() async {
     final prefs = await SharedPreferences.getInstance();
@@ -541,32 +541,32 @@ class SettingsService {
       '_version': 1,
       '_exportedAt': DateTime.now().toIso8601String(),
     };
-    
+
     for (final key in _exportKeys) {
       final value = prefs.get(key);
       if (value != null) {
         data[key] = value;
       }
     }
-    
+
     return data;
   }
-  
+
   /// Import settings from a JSON map. Returns the number of settings applied.
   Future<int> importSettings(Map<String, dynamic> data) async {
     // Validate format
     if (data['_format'] != 'meshcore_wardrive_settings') {
       throw FormatException('Not a valid MeshCore Wardrive settings file');
     }
-    
+
     final prefs = await SharedPreferences.getInstance();
     int applied = 0;
-    
+
     for (final key in _exportKeys) {
       if (!data.containsKey(key)) continue;
       final value = data[key];
       if (value == null) continue;
-      
+
       try {
         if (value is bool) {
           await prefs.setBool(key, value);
@@ -584,16 +584,16 @@ class SettingsService {
         // Skip invalid values
       }
     }
-    
+
     return applied;
   }
-  
+
   /// Export settings as a formatted JSON string
   Future<String> exportSettingsJson() async {
     final data = await exportSettings();
     return const JsonEncoder.withIndent('  ').convert(data);
   }
-  
+
   /// Import settings from a JSON string. Returns the number of settings applied.
   Future<int> importSettingsJson(String jsonString) async {
     final data = jsonDecode(jsonString) as Map<String, dynamic>;

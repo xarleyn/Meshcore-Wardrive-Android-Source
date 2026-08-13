@@ -41,9 +41,34 @@ class _DuctingForecastScreenState extends State<DuctingForecastScreen> {
 
   // 3h intervals for first 36h, then 6h intervals to 138h
   static const List<int> _forecastHours = [
-    6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36,
-    42, 48, 54, 60, 66, 72, 78, 84, 90, 96,
-    102, 108, 114, 120, 126, 132, 138,
+    6,
+    9,
+    12,
+    15,
+    18,
+    21,
+    24,
+    27,
+    30,
+    33,
+    36,
+    42,
+    48,
+    54,
+    60,
+    66,
+    72,
+    78,
+    84,
+    90,
+    96,
+    102,
+    108,
+    114,
+    120,
+    126,
+    132,
+    138,
   ];
 
   String _region = 'wam';
@@ -127,17 +152,27 @@ class _DuctingForecastScreenState extends State<DuctingForecastScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
             child: DropdownButtonFormField<String>(
-              value: _region,
+              initialValue: _region,
               decoration: const InputDecoration(
                 labelText: 'Region',
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
               ),
               isExpanded: true,
-              items: _regions.entries.map((e) => DropdownMenuItem(
-                value: e.key,
-                child: Text(e.value, style: const TextStyle(fontSize: 14)),
-              )).toList(),
+              items: _regions.entries
+                  .map(
+                    (e) => DropdownMenuItem(
+                      value: e.key,
+                      child: Text(
+                        e.value,
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ),
+                  )
+                  .toList(),
               onChanged: (v) => v != null ? _setRegion(v) : null,
             ),
           ),
@@ -155,8 +190,11 @@ class _DuctingForecastScreenState extends State<DuctingForecastScreen> {
                   return const Center(child: CircularProgressIndicator());
                 },
                 errorBuilder: (ctx, error, stack) => const Center(
-                  child: Text('Failed to load forecast image.\nCheck internet connection.',
-                      textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
+                  child: Text(
+                    'Failed to load forecast image.\nCheck internet connection.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey),
+                  ),
                 ),
               ),
             ),
@@ -169,11 +207,18 @@ class _DuctingForecastScreenState extends State<DuctingForecastScreen> {
               children: [
                 Row(
                   children: [
-                    Text(_timeLabel,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text(
+                      _timeLabel,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                     const Spacer(),
-                    Text('${_currentIndex + 1} / ${_forecastHours.length}',
-                        style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                    Text(
+                      '${_currentIndex + 1} / ${_forecastHours.length}',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
                   ],
                 ),
                 Slider(
@@ -192,13 +237,19 @@ class _DuctingForecastScreenState extends State<DuctingForecastScreen> {
                     IconButton(
                       icon: const Icon(Icons.skip_previous),
                       onPressed: _currentIndex > 0
-                          ? () { _stop(); setState(() => _currentIndex = 0); }
+                          ? () {
+                              _stop();
+                              setState(() => _currentIndex = 0);
+                            }
                           : null,
                     ),
                     IconButton(
                       icon: const Icon(Icons.chevron_left),
                       onPressed: _currentIndex > 0
-                          ? () { _stop(); setState(() => _currentIndex--); }
+                          ? () {
+                              _stop();
+                              setState(() => _currentIndex--);
+                            }
                           : null,
                     ),
                     IconButton(
@@ -209,13 +260,21 @@ class _DuctingForecastScreenState extends State<DuctingForecastScreen> {
                     IconButton(
                       icon: const Icon(Icons.chevron_right),
                       onPressed: _currentIndex < _forecastHours.length - 1
-                          ? () { _stop(); setState(() => _currentIndex++); }
+                          ? () {
+                              _stop();
+                              setState(() => _currentIndex++);
+                            }
                           : null,
                     ),
                     IconButton(
                       icon: const Icon(Icons.skip_next),
                       onPressed: _currentIndex < _forecastHours.length - 1
-                          ? () { _stop(); setState(() => _currentIndex = _forecastHours.length - 1); }
+                          ? () {
+                              _stop();
+                              setState(
+                                () => _currentIndex = _forecastHours.length - 1,
+                              );
+                            }
                           : null,
                     ),
                   ],
@@ -242,8 +301,10 @@ class _DuctingForecastScreenState extends State<DuctingForecastScreen> {
           // Attribution
           const Padding(
             padding: EdgeInsets.only(bottom: 8),
-            child: Text('Forecast © William R. Hepburn — dxinfocentre.com',
-                style: TextStyle(fontSize: 10, color: Colors.grey)),
+            child: Text(
+              'Forecast © William R. Hepburn — dxinfocentre.com',
+              style: TextStyle(fontSize: 10, color: Colors.grey),
+            ),
           ),
         ],
       ),
@@ -256,7 +317,11 @@ class _DuctingForecastScreenState extends State<DuctingForecastScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(width: 10, height: 10, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+          Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
           const SizedBox(width: 3),
           Text(label, style: const TextStyle(fontSize: 9)),
         ],

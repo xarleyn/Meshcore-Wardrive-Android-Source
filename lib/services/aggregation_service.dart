@@ -7,10 +7,10 @@ class AggregationService {
   /// Build indexes from samples and repeaters
   /// @param coveragePrecision: Geohash precision for coverage squares (4-8, default 6)
   static AggregationResult buildIndexes(
-    List<Sample> samples, 
-    List<Repeater> repeaters, 
-    {int coveragePrecision = 6}
-  ) {
+    List<Sample> samples,
+    List<Repeater> repeaters, {
+    int coveragePrecision = 6,
+  }) {
     final Map<String, Coverage> hashToCoverage = {};
     final Map<String, Map<String, dynamic>> idToRepeaters = {};
     final List<Edge> edgeList = [];
@@ -35,20 +35,20 @@ class AggregationService {
       coverageToSamples.putIfAbsent(coverageHash, () => []);
       coverageToSamples[coverageHash]!.add(sample);
     }
-    
+
     // Remove cells that have ONLY GPS-only samples (no pings)
-    coverageToSamples.removeWhere((_, samples) =>
-      samples.every((s) => s.pingSuccess == null),
+    coverageToSamples.removeWhere(
+      (_, samples) => samples.every((s) => s.pingSuccess == null),
     );
-    
+
     // Aggregate samples into coverage areas with smart weighting
     for (final entry in coverageToSamples.entries) {
       final coverageHash = entry.key;
       final samplesInArea = entry.value;
-      
+
       // Sort by timestamp (newest first)
       samplesInArea.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-      
+
       // Get or create coverage
       if (!hashToCoverage.containsKey(coverageHash)) {
         final pos = GeohashUtils.posFromHash(coverageHash);
@@ -59,19 +59,19 @@ class AggregationService {
       }
 
       final coverage = hashToCoverage[coverageHash]!;
-      
+
       // Process samples with time-based weighting
       // Newer samples get more weight, contradicting old samples are discounted
       for (int i = 0; i < samplesInArea.length; i++) {
         final sample = samplesInArea[i];
-        
+
         // Skip GPS-only samples (pingSuccess == null)
         if (sample.pingSuccess == null) continue;
-        
+
         // Calculate age-based weight (newer = more weight)
         final ageInDays = GeohashUtils.ageInDays(sample.timestamp);
         double weight = 1.0;
-        
+
         // Reduce weight for older samples
         if (ageInDays > 30) {
           weight = 0.2; // Very old data, minimal weight
@@ -80,19 +80,19 @@ class AggregationService {
         } else if (ageInDays > 1) {
           weight = 0.8; // Day-old data, slight reduction
         }
-        
+
         // Check for contradictions with newer samples (up to 10 most recent)
         bool contradictedByNewer = false;
         final newerSamples = samplesInArea.sublist(0, i > 10 ? 10 : i);
-        
+
         if (newerSamples.isNotEmpty) {
           // Count how many newer samples contradict this one
           int contradictions = 0;
           int agreements = 0;
-          
+
           for (final newer in newerSamples) {
             if (newer.pingSuccess == null) continue;
-            
+
             // Check if newer samples consistently show opposite result
             if (newer.pingSuccess != sample.pingSuccess) {
               contradictions++;
@@ -100,36 +100,37 @@ class AggregationService {
               agreements++;
             }
           }
-          
+
           // If majority of recent samples contradict, heavily discount this sample
           if (contradictions > agreements && contradictions >= 2) {
             weight *= 0.1; // Contradicted data gets 10% weight
             contradictedByNewer = true;
           }
         }
-        
+
         // Apply weighted sample to coverage stats
         if (sample.pingSuccess == true) {
           coverage.received += weight; // Successful ping (observer heard us)
-          
+
           // Track which repeater actually responded (from sample.path = nodeId)
           if (sample.path != null && sample.path!.isNotEmpty) {
             if (!coverage.repeaters.contains(sample.path!)) {
               coverage.repeaters.add(sample.path!);
             }
           }
-          
+
           // Update lastReceived only if not contradicted
-          if (!contradictedByNewer && 
-              (coverage.lastReceived == null || sample.timestamp.isAfter(coverage.lastReceived!))) {
+          if (!contradictedByNewer &&
+              (coverage.lastReceived == null ||
+                  sample.timestamp.isAfter(coverage.lastReceived!))) {
             coverage.lastReceived = sample.timestamp;
           }
         } else if (sample.pingSuccess == false) {
           coverage.lost += weight; // Failed ping (dead zone)
         }
-        
+
         // Update timestamp
-        if (coverage.updated == null || 
+        if (coverage.updated == null ||
             sample.timestamp.isAfter(coverage.updated!)) {
           coverage.updated = sample.timestamp;
         }
@@ -144,13 +145,11 @@ class AggregationService {
         if (repeaterData != null) {
           final repeater = repeaterData['repeater'] as Repeater;
           // Skip repeaters with location set to 0,0 (invalid/unknown location)
-          if (repeater.position.latitude == 0.0 && repeater.position.longitude == 0.0) {
+          if (repeater.position.latitude == 0.0 &&
+              repeater.position.longitude == 0.0) {
             continue;
           }
-          edgeList.add(Edge(
-            coverage: coverage,
-            repeater: repeater,
-          ));
+          edgeList.add(Edge(coverage: coverage, repeater: repeater));
         }
       }
     }
@@ -162,9 +161,8 @@ class AggregationService {
       repeaterConnections[id] = (repeaterConnections[id] ?? 0) + 1;
     }
 
-    final topRepeaters = repeaterConnections.entries
-        .toList()
-        ..sort((a, b) => b.value.compareTo(a.value));
+    final topRepeaters = repeaterConnections.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
 
     return AggregationResult(
       coverages: hashToCoverage.values.toList(),
@@ -175,18 +173,26 @@ class AggregationService {
   }
 
   /// Get coverage color based on received count
-  static int getCoverageColor(Coverage coverage, String colorMode, {String colorBlindMode = 'normal'}) {
+  static int getCoverageColor(
+    Coverage coverage,
+    String colorMode, {
+    String colorBlindMode = 'normal',
+  }) {
     if (colorMode == 'age') {
       if (coverage.lastReceived == null) return 0xFF808080;
-      
+
       final age = GeohashUtils.ageInDays(coverage.lastReceived!);
       final gradientColors = ColorBlindPalette.getAgeGradient(colorBlindMode);
-      
+
       // Interpolate through gradient based on age
       if (age < 1) return gradientColors[0].value; // Recent
-      if (age < 7) return Color.lerp(gradientColors[0], gradientColors[1], 0.5)!.value;
+      if (age < 7) {
+        return Color.lerp(gradientColors[0], gradientColors[1], 0.5)!.value;
+      }
       if (age < 30) return gradientColors[1].value; // Medium
-      if (age < 90) return Color.lerp(gradientColors[1], gradientColors[2], 0.5)!.value;
+      if (age < 90) {
+        return Color.lerp(gradientColors[1], gradientColors[2], 0.5)!.value;
+      }
       return gradientColors[2].value; // Old
     } else if (colorMode == 'redundancy') {
       // Color by number of unique repeaters that cover this cell
@@ -194,27 +200,32 @@ class AggregationService {
       if (count >= 3) return 0xFF4CAF50; // Green  — 3+ repeaters
       if (count == 2) return 0xFFFFEB3B; // Yellow — 2 repeaters
       if (count == 1) return 0xFFFF9800; // Orange — 1 repeater
-      return 0xFF9E9E9E;                // Gray   — 0 repeaters (all failed)
+      return 0xFF9E9E9E; // Gray   — 0 repeaters (all failed)
     } else {
       // Default: coverage based on ping success rate
       final received = coverage.received; // Successful pings
-      final lost = coverage.lost;         // Failed pings
+      final lost = coverage.lost; // Failed pings
       final total = received + lost;
-      
+
       // No pings attempted here (just GPS tracking)
       if (total == 0) {
         return 0xFFCCCCCC; // Gray
       }
-      
+
       // Calculate success rate
       final successRate = received / total;
-      
+
       // Floor: if a cell has ANY confirmed coverage, never show worse than yellow.
       // A cell that has been reached at least once is not a true dead zone.
-      final effectiveRate = (received > 0 && successRate < 0.30) ? 0.30 : successRate;
-      
+      final effectiveRate = (received > 0 && successRate < 0.30)
+          ? 0.30
+          : successRate;
+
       // Use color blind palette for quality-based coloring
-      return ColorBlindPalette.getQualityColor(colorBlindMode, effectiveRate).value;
+      return ColorBlindPalette.getQualityColor(
+        colorBlindMode,
+        effectiveRate,
+      ).value;
     }
   }
 

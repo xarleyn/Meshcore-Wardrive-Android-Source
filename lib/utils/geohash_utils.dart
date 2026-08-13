@@ -39,7 +39,8 @@ class GeohashUtils {
     final double dLat = lat2 - lat1;
     final double dLon = lon2 - lon1;
 
-    final double a1 = sin(dLat / 2) * sin(dLat / 2) +
+    final double a1 =
+        sin(dLat / 2) * sin(dLat / 2) +
         cos(lat1) * cos(lat2) * sin(dLon / 2) * sin(dLon / 2);
 
     final double c = 2 * atan2(sqrt(a1), sqrt(1 - a1));

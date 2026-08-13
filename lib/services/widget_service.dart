@@ -18,20 +18,16 @@ class WidgetService {
     String distance = '--',
   }) async {
     await HomeWidget.saveWidgetData('samples', sampleCount.toString());
-    await HomeWidget.saveWidgetData(
-        'status', isTracking ? 'Tracking' : 'Idle');
+    await HomeWidget.saveWidgetData('status', isTracking ? 'Tracking' : 'Idle');
     await HomeWidget.saveWidgetData('connection', connectionLabel);
     await HomeWidget.saveWidgetData('success_rate', successRate);
     await HomeWidget.saveWidgetData('distance', distance);
-    await HomeWidget.updateWidget(
-      androidName: _androidWidgetName,
-    );
+    await HomeWidget.updateWidget(androidName: _androidWidgetName);
   }
 
   /// Convenience: update only tracking status.
   static Future<void> updateTrackingStatus(bool isTracking) async {
-    await HomeWidget.saveWidgetData(
-        'status', isTracking ? 'Tracking' : 'Idle');
+    await HomeWidget.saveWidgetData('status', isTracking ? 'Tracking' : 'Idle');
     await HomeWidget.updateWidget(androidName: _androidWidgetName);
   }
 

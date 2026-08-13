@@ -18,15 +18,12 @@ class _SignalTrendScreenState extends State<SignalTrendScreen> {
   @override
   Widget build(BuildContext context) {
     // Filter to samples that have signal data, sorted by time
-    final signalSamples = widget.samples
-        .where((s) => s.pingSuccess != null)
-        .toList()
-      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+    final signalSamples =
+        widget.samples.where((s) => s.pingSuccess != null).toList()
+          ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Signal Trends'),
-      ),
+      appBar: AppBar(title: const Text('Signal Trends')),
       body: Column(
         children: [
           // Metric selector
@@ -45,7 +42,12 @@ class _SignalTrendScreenState extends State<SignalTrendScreen> {
           // Chart
           Expanded(
             child: signalSamples.isEmpty
-                ? const Center(child: Text('No signal data yet.\nDo some wardriving with pings enabled.', textAlign: TextAlign.center))
+                ? const Center(
+                    child: Text(
+                      'No signal data yet.\nDo some wardriving with pings enabled.',
+                      textAlign: TextAlign.center,
+                    ),
+                  )
                 : Padding(
                     padding: const EdgeInsets.fromLTRB(8, 8, 24, 16),
                     child: _buildChart(signalSamples),
@@ -79,7 +81,9 @@ class _SignalTrendScreenState extends State<SignalTrendScreen> {
     }
 
     if (spots.isEmpty) {
-      final label = _metric == 'responseTime' ? 'response time' : _metric.toUpperCase();
+      final label = _metric == 'responseTime'
+          ? 'response time'
+          : _metric.toUpperCase();
       return Center(child: Text('No $label data available.'));
     }
 
@@ -108,7 +112,9 @@ class _SignalTrendScreenState extends State<SignalTrendScreen> {
         gridData: FlGridData(
           show: true,
           drawVerticalLine: false,
-          horizontalInterval: range > 0 ? (range / 5).ceilToDouble().clamp(1, double.infinity) : 10,
+          horizontalInterval: range > 0
+              ? (range / 5).ceilToDouble().clamp(1, double.infinity)
+              : 10,
         ),
         titlesData: FlTitlesData(
           leftTitles: AxisTitles(
@@ -128,7 +134,9 @@ class _SignalTrendScreenState extends State<SignalTrendScreen> {
             sideTitles: SideTitles(
               showTitles: true,
               reservedSize: 32,
-              interval: spots.length > 10 ? (spots.length / 5).ceilToDouble() : 1,
+              interval: spots.length > 10
+                  ? (spots.length / 5).ceilToDouble()
+                  : 1,
               getTitlesWidget: (value, meta) {
                 final ts = timestamps[value];
                 if (ts == null) return const SizedBox.shrink();
@@ -142,8 +150,12 @@ class _SignalTrendScreenState extends State<SignalTrendScreen> {
               },
             ),
           ),
-          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          topTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
         ),
         borderData: FlBorderData(show: true),
         lineBarsData: [
@@ -165,7 +177,9 @@ class _SignalTrendScreenState extends State<SignalTrendScreen> {
             getTooltipItems: (touchedSpots) {
               return touchedSpots.map((spot) {
                 final ts = timestamps[spot.x];
-                final timeStr = ts != null ? DateFormat('MMM d HH:mm').format(ts) : '';
+                final timeStr = ts != null
+                    ? DateFormat('MMM d HH:mm').format(ts)
+                    : '';
                 return LineTooltipItem(
                   '${spot.y.toStringAsFixed(_metric == 'responseTime' ? 0 : 1)} $yLabel\n$timeStr',
                   const TextStyle(color: Colors.white, fontSize: 12),
@@ -182,13 +196,22 @@ class _SignalTrendScreenState extends State<SignalTrendScreen> {
     List<double> values;
     String unit;
     if (_metric == 'rssi') {
-      values = samples.where((s) => s.rssi != null).map((s) => s.rssi!.toDouble()).toList();
+      values = samples
+          .where((s) => s.rssi != null)
+          .map((s) => s.rssi!.toDouble())
+          .toList();
       unit = 'dBm';
     } else if (_metric == 'snr') {
-      values = samples.where((s) => s.snr != null).map((s) => s.snr!.toDouble()).toList();
+      values = samples
+          .where((s) => s.snr != null)
+          .map((s) => s.snr!.toDouble())
+          .toList();
       unit = 'dB';
     } else {
-      values = samples.where((s) => s.responseTimeMs != null).map((s) => s.responseTimeMs!.toDouble()).toList();
+      values = samples
+          .where((s) => s.responseTimeMs != null)
+          .map((s) => s.responseTimeMs!.toDouble())
+          .toList();
       unit = 'ms';
     }
 
@@ -215,9 +238,19 @@ class _SignalTrendScreenState extends State<SignalTrendScreen> {
   Widget _statCard(String label, String value, Color color) {
     return Column(
       children: [
-        Text(label, style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.bold)),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: color,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         const SizedBox(height: 2),
-        Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+        ),
       ],
     );
   }

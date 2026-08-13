@@ -11,7 +11,7 @@ class AndroidTones {
 }
 
 /// Sound and vibration feedback service for wardrive events.
-/// 
+///
 /// Uses a native Android platform channel to access ToneGenerator
 /// (for audible tones) and Vibrator (for haptic feedback).
 class SoundService {
@@ -19,7 +19,9 @@ class SoundService {
   factory SoundService() => _instance;
   SoundService._();
 
-  static const _channel = MethodChannel('mintylinux.meshcore.wardrive/feedback');
+  static const _channel = MethodChannel(
+    'mintylinux.meshcore.wardrive/feedback',
+  );
   final SettingsService _settings = SettingsService();
   bool _enabled = true;
   bool _vibrationEnabled = true;

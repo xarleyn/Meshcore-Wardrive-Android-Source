@@ -35,9 +35,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
     final total = _achievements.length;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Achievements'),
-      ),
+      appBar: AppBar(title: const Text('Achievements')),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : Column(
@@ -47,9 +45,13 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     children: [
-                      Text('$unlocked / $total',
-                          style: const TextStyle(
-                              fontSize: 28, fontWeight: FontWeight.bold)),
+                      Text(
+                        '$unlocked / $total',
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       const SizedBox(height: 4),
                       LinearProgressIndicator(
                         value: total > 0 ? unlocked / total : 0,
@@ -61,8 +63,10 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                         unlocked == total
                             ? 'All achievements unlocked!'
                             : '${total - unlocked} remaining',
-                        style:
-                            const TextStyle(fontSize: 12, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
                       ),
                     ],
                   ),
@@ -99,8 +103,10 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                           ),
                         ),
                         trailing: a.unlocked
-                            ? const Icon(Icons.check_circle,
-                                color: Colors.green)
+                            ? const Icon(
+                                Icons.check_circle,
+                                color: Colors.green,
+                              )
                             : null,
                       );
                     },

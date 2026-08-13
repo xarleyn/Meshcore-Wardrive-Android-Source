@@ -7,7 +7,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:crypto/crypto.dart' show md5;
 
 /// Downloads map tiles for offline use within a bounding box and zoom range.
-/// 
+///
 /// Tiles are saved to the same cache directory used by flutter_map_cache
 /// so they're available automatically when offline.
 class TileDownloadService {
@@ -35,7 +35,7 @@ class TileDownloadService {
   }
 
   /// Download tiles for the given bounds and zoom range.
-  /// 
+  ///
   /// [urlTemplate] — tile URL with {z}, {x}, {y} placeholders.
   /// [onProgress] — called with (completed, total) counts.
   /// Returns the number of tiles successfully downloaded.
@@ -73,7 +73,7 @@ class TileDownloadService {
             try {
               final hash = md5.convert(utf8.encode(url)).toString();
               final file = File('$_cacheDir/$hash');
-              
+
               // Skip already-cached tiles
               if (await file.exists()) {
                 succeeded++;
@@ -113,6 +113,7 @@ class TileDownloadService {
   /// Convert latitude to tile Y coordinate at zoom level z
   static int _latToTileY(double lat, int z) {
     final latRad = lat * pi / 180.0;
-    return ((1.0 - log(tan(latRad) + 1.0 / cos(latRad)) / pi) / 2.0 * (1 << z)).floor();
+    return ((1.0 - log(tan(latRad) + 1.0 / cos(latRad)) / pi) / 2.0 * (1 << z))
+        .floor();
   }
 }

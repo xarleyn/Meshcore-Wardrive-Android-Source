@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
 import '../services/debug_log_service.dart';
@@ -22,14 +21,14 @@ class _DebugLogScreenState extends State<DebugLogScreen> {
   @override
   void initState() {
     super.initState();
-    
+
     // Scroll to bottom when screen first opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients && _logService.logs.isNotEmpty) {
         _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
       }
     });
-    
+
     // Listen for new log entries and auto-scroll
     _logSubscription = _logService.logStream.listen((entry) {
       if (_autoScroll && mounted) {
@@ -68,42 +67,42 @@ class _DebugLogScreenState extends State<DebugLogScreen> {
         return Colors.red;
     }
   }
-  
+
   Future<void> _exportLogs() async {
     try {
       final logs = _logService.logs;
       if (logs.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No logs to export')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('No logs to export')));
         return;
       }
-      
+
       // Build log content
       final buffer = StringBuffer();
       for (final log in logs) {
         final category = log.category != null ? '[${log.category}] ' : '';
         buffer.writeln('[${log.formattedTime}] $category${log.message}');
       }
-      
+
       // Generate filename
       final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
       final fileName = 'meshcore_wardrive_log_$timestamp.txt';
-      
+
       // Let user choose directory
       final selectedDirectory = await FilePicker.platform.getDirectoryPath(
         dialogTitle: 'Choose save location',
       );
-      
+
       if (selectedDirectory == null) {
         // User cancelled
         return;
       }
-      
+
       // Save file to chosen directory
       final file = File('$selectedDirectory/$fileName');
       await file.writeAsString(buffer.toString());
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -114,9 +113,9 @@ class _DebugLogScreenState extends State<DebugLogScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export failed: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Export failed: $e')));
       }
     }
   }
@@ -130,7 +129,11 @@ class _DebugLogScreenState extends State<DebugLogScreen> {
         title: const Text('Debug Terminal'),
         actions: [
           IconButton(
-            icon: Icon(_autoScroll ? Icons.arrow_downward : Icons.arrow_downward_outlined),
+            icon: Icon(
+              _autoScroll
+                  ? Icons.arrow_downward
+                  : Icons.arrow_downward_outlined,
+            ),
             onPressed: () {
               setState(() {
                 _autoScroll = !_autoScroll;
@@ -188,7 +191,10 @@ class _DebugLogScreenState extends State<DebugLogScreen> {
                         // Category badge
                         if (log.category != null) ...[
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 1,
+                            ),
                             decoration: BoxDecoration(
                               color: color.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(3),

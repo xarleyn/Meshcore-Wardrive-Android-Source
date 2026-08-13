@@ -8,7 +8,7 @@ class DebugLogService {
 
   final List<LogEntry> _logs = [];
   final _logController = StreamController<LogEntry>.broadcast();
-  
+
   static const int maxLogs = 500; // Keep last 500 log entries
 
   Stream<LogEntry> get logStream => _logController.stream;
@@ -21,16 +21,16 @@ class DebugLogService {
       level: level,
       category: category,
     );
-    
+
     _logs.add(entry);
-    
+
     // Keep only last maxLogs entries
     if (_logs.length > maxLogs) {
       _logs.removeAt(0);
     }
-    
+
     _logController.add(entry);
-    
+
     // Also print to console
     print('${entry.level.prefix}[${entry.category ?? 'LOG'}] $message');
   }

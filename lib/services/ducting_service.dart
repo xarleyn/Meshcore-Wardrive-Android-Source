@@ -5,22 +5,22 @@ import 'database_service.dart';
 
 /// Atmospheric ducting risk levels
 class DuctingRisk {
-  static const String none = 'none';         // Normal atmosphere
+  static const String none = 'none'; // Normal atmosphere
   static const String possible = 'possible'; // Super-refraction
-  static const String likely = 'likely';     // Trapping/ducting
-  static const String unknown = 'unknown';   // No data available
+  static const String likely = 'likely'; // Trapping/ducting
+  static const String unknown = 'unknown'; // No data available
 }
 
 /// Cached ducting data point
 class DuctingDataPoint {
-  final int timestamp;    // Unix ms
+  final int timestamp; // Unix ms
   final double lat;
   final double lon;
   final String risk;
   final double? nSurface;
   final double? n925;
   final double? gradient;
-  final int fetchedAt;    // Unix ms
+  final int fetchedAt; // Unix ms
 
   DuctingDataPoint({
     required this.timestamp,
@@ -73,9 +73,7 @@ class DuctingService {
         '&timeformat=unixtime',
       );
 
-      final response = await http.get(url).timeout(
-        const Duration(seconds: 10),
-      );
+      final response = await http.get(url).timeout(const Duration(seconds: 10));
 
       if (response.statusCode != 200) return false;
 
@@ -118,8 +116,11 @@ class DuctingService {
         final upperTempC = temp925.length > i ? temp925[i] : null;
         final upperRh = rh925.length > i ? rh925[i] : null;
 
-        if (surfTempC == null || surfRh == null || surfP == null ||
-            upperTempC == null || upperRh == null) {
+        if (surfTempC == null ||
+            surfRh == null ||
+            surfP == null ||
+            upperTempC == null ||
+            upperRh == null) {
           continue;
         }
 
@@ -159,13 +160,16 @@ class DuctingService {
       final validAfter = tsMs - _cacheValidity.inMilliseconds;
 
       // Find the closest cached entry within validity window
-      final results = await db.rawQuery('''
+      final results = await db.rawQuery(
+        '''
         SELECT risk, ABS(timestamp - ?) AS diff
         FROM ${DatabaseService.tableDuctingCache}
         WHERE fetched_at > ?
         ORDER BY diff ASC
         LIMIT 1
-      ''', [tsMs, validAfter]);
+      ''',
+        [tsMs, validAfter],
+      );
 
       if (results.isNotEmpty) {
         return results.first['risk'] as String;
@@ -180,8 +184,8 @@ class DuctingService {
   Future<String> getLatestRisk() async {
     try {
       final db = await _dbService.database;
-      final validAfter = DateTime.now().millisecondsSinceEpoch -
-          _cacheValidity.inMilliseconds;
+      final validAfter =
+          DateTime.now().millisecondsSinceEpoch - _cacheValidity.inMilliseconds;
 
       final results = await db.query(
         DatabaseService.tableDuctingCache,
@@ -207,7 +211,10 @@ class DuctingService {
   /// where P = pressure (hPa), T = temperature (K),
   /// e = water vapor pressure (hPa)
   static double _computeRefractivity(
-      double pressureHpa, double tempCelsius, double relativeHumidity) {
+    double pressureHpa,
+    double tempCelsius,
+    double relativeHumidity,
+  ) {
     final tKelvin = tempCelsius + 273.15;
     // Saturation vapor pressure (Magnus formula)
     final es = 6.112 * exp((17.67 * tempCelsius) / (tempCelsius + 243.5));
@@ -219,7 +226,10 @@ class DuctingService {
 
   /// Compute the refractivity gradient dN/dh in N-units per km.
   static double _computeGradient(
-      double nSurface, double nUpper, double heightDiffMeters) {
+    double nSurface,
+    double nUpper,
+    double heightDiffMeters,
+  ) {
     return ((nUpper - nSurface) / heightDiffMeters) * 1000.0;
   }
 
