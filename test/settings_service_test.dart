@@ -79,4 +79,21 @@ void main() {
       expect(await settings.getShowRadioPosition(), isFalse);
     });
   });
+
+  group('wardrive defaults', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('uses metric, time-based defaults from meshcoretel', () async {
+      final settings = SettingsService();
+
+      expect(await settings.getCoveragePrecision(), 7);
+      expect(await settings.getDistanceUnit(), 'km');
+      expect(await settings.getFuelUnit(), 'metric');
+      expect(await settings.getDiscoveryTimeout(), 10);
+      expect(await settings.getPingMode(), 'time');
+      expect(await settings.getPingTimeInterval(), 30);
+    });
+  });
 }

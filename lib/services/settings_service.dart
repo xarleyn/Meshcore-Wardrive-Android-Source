@@ -140,7 +140,7 @@ class SettingsService {
 
   Future<int> getCoveragePrecision() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(_coveragePrecisionKey) ?? 6; // Default precision 6
+    return prefs.getInt(_coveragePrecisionKey) ?? 7; // ~150m coverage cells
   }
 
   Future<void> setCoveragePrecision(int value) async {
@@ -192,7 +192,7 @@ class SettingsService {
   /// Get distance unit ('miles' or 'km')
   Future<String> getDistanceUnit() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_distanceUnitKey) ?? 'miles';
+    return prefs.getString(_distanceUnitKey) ?? 'km';
   }
 
   Future<void> setDistanceUnit(String value) async {
@@ -211,10 +211,10 @@ class SettingsService {
     await prefs.setString(_colorBlindModeKey, value);
   }
 
-  /// Get discovery timeout in seconds (10-30 seconds, default 20)
+  /// Get discovery timeout in seconds (5-30 seconds, default 10)
   Future<int> getDiscoveryTimeout() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(_discoveryTimeoutKey) ?? 20;
+    return prefs.getInt(_discoveryTimeoutKey) ?? 10;
   }
 
   Future<void> setDiscoveryTimeout(int value) async {
@@ -272,7 +272,7 @@ class SettingsService {
   /// Get fuel unit ('imperial' or 'metric')
   Future<String> getFuelUnit() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_fuelUnitKey) ?? 'imperial';
+    return prefs.getString(_fuelUnitKey) ?? 'metric';
   }
 
   /// Set fuel unit ('imperial' or 'metric')
@@ -375,7 +375,7 @@ class SettingsService {
 
   Future<String> getPingMode() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_pingModeKey) ?? 'distance';
+    return prefs.getString(_pingModeKey) ?? 'time';
   }
 
   Future<void> setPingMode(String value) async {
@@ -385,7 +385,7 @@ class SettingsService {
 
   Future<int> getPingTimeInterval() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(_pingTimeIntervalKey) ?? 60;
+    return prefs.getInt(_pingTimeIntervalKey) ?? 30;
   }
 
   Future<void> setPingTimeInterval(int value) async {

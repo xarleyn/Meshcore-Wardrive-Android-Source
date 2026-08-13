@@ -3,6 +3,8 @@
 ## Unreleased
 
 ### Added
+- Fresh installs now use the regional `meshcoretel.ru` upload endpoint for
+  Russian locales and `meshcoretel.io` elsewhere.
 - A new Keep Screen On setting prevents the display from sleeping while the
   app is open, without interfering with the existing tracking wakelock.
 - The current GPS marker can now be switched between the classic blue circle
@@ -19,6 +21,13 @@
   in map settings without disabling its calculation.
 
 ### Fixed
+- Discovery pings now persist one sample for every unique repeater response,
+  including each response's latency, while duplicate responses from the same
+  node remain de-duplicated.
+- Coverage-to-repeater lines now match full and short node IDs without case
+  sensitivity, and coverage details show two-byte repeater prefixes.
+- The connect action is disabled for the full USB/Bluetooth connection attempt
+  so overlapping scans and connection requests cannot be started.
 - Repeater names containing Cyrillic characters or emoji are now decoded and
   displayed correctly.
 - Radio ping results are now shown as soon as the first tagged discovery
@@ -37,6 +46,11 @@
   blocking legitimate drives on high-altitude roads.
 - Tracking startup failures now show a specific permission, settings, or
   service error.
+
+### Changed
+- Fresh installs default to metric units, geohash precision 7, time-based
+  pings every 30 seconds, and a 10-second discovery timeout. Additional
+  20-second, 25-second, and 45-second ping intervals are available.
 
 ## v1.0.42 - 2026-07-12
 

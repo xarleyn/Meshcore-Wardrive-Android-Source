@@ -15,7 +15,8 @@ class UploadService {
       return s;
     }
 
-    return norm(url) == norm(defaultApiUrl);
+    return norm(url) == norm(defaultRuApiUrl) ||
+        norm(url) == norm(defaultGlobalApiUrl);
   }
 
   static const String _apiUrlKey = 'upload_api_url';
@@ -26,9 +27,21 @@ class UploadService {
   static const String _selectedEndpointsKey =
       'selected_endpoints'; // JSON list of selected endpoint names
 
-  // Default URL (user can change this)
-  static const String defaultApiUrl =
-      'https://meshwar-map.pages.dev/api/samples';
+  static const String defaultEndpointName = 'Meshcoretel';
+  static const String defaultRuApiUrl =
+      'https://meshcoretel.ru/wardrive/samples';
+  static const String defaultGlobalApiUrl =
+      'https://meshcoretel.io/wardrive/samples';
+
+  /// Pick the closest public Meshcoretel endpoint for a fresh install.
+  static String defaultApiUrlForLocale(String localeName) {
+    return localeName.toLowerCase().startsWith('ru')
+        ? defaultRuApiUrl
+        : defaultGlobalApiUrl;
+  }
+
+  static String get defaultApiUrl =>
+      defaultApiUrlForLocale(Platform.localeName);
 
   final DatabaseService _db = DatabaseService();
 
@@ -356,7 +369,7 @@ class UploadService {
 
     if (json == null || json.isEmpty) {
       // Return default endpoint
-      return [UploadEndpoint(name: 'Default', url: defaultApiUrl)];
+      return [UploadEndpoint(name: defaultEndpointName, url: defaultApiUrl)];
     }
 
     final List<dynamic> decoded = jsonDecode(json);
@@ -378,11 +391,20 @@ class UploadService {
     final json = prefs.getString(_selectedEndpointsKey);
 
     if (json == null || json.isEmpty) {
-      return ['Default']; // Default to the default endpoint
+      return [defaultEndpointName];
     }
 
     final List<dynamic> decoded = jsonDecode(json);
-    return decoded.cast<String>();
+    final names = decoded.cast<String>();
+
+    // Preserve selection for installs that stored the old implicit name but
+    // never saved a custom endpoint list.
+    if (!prefs.containsKey(_uploadEndpointsKey) && names.contains('Default')) {
+      return names
+          .map((name) => name == 'Default' ? defaultEndpointName : name)
+          .toList();
+    }
+    return names;
   }
 
   /// Set selected endpoint names

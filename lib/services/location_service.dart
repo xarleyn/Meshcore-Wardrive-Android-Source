@@ -46,8 +46,8 @@ class LocationService {
   LatLng? _lastPingPosition;
 
   // Ping mode: 'distance', 'time', or 'both'
-  String _pingMode = 'distance';
-  int _pingTimeIntervalSeconds = 60;
+  String _pingMode = 'time';
+  int _pingTimeIntervalSeconds = 30;
   Timer? _timePingTimer;
   bool _pingInProgress = false; // Guard against overlapping pings
   DateTime? _lastPingTimestamp; // When the last ping was triggered (any source)
@@ -826,9 +826,12 @@ class LocationService {
         latitude: latLng.latitude,
         longitude: latLng.longitude,
         timeoutSeconds: timeoutSeconds,
+        waitForAllResponses: true,
       );
 
-      final pingSuccess = pingResult.status == PingStatus.success;
+      final responses = pingResult.responses;
+      final pingSuccess =
+          pingResult.status == PingStatus.success && responses.isNotEmpty;
       final nodeId = pingResult.nodeId;
 
       await _logger.logPingEvent(
@@ -838,12 +841,18 @@ class LocationService {
         'Ping complete: ${pingResult.status.name}, Node: $nodeId, RSSI: ${pingResult.rssi}, SNR: ${pingResult.snr}',
       );
 
-      // Sound feedback based on result quality
-      _soundService.playForPingResult(
-        success: pingSuccess,
-        snr: pingResult.snr,
-        rssi: pingResult.rssi,
-      );
+      // Sound feedback for every unique response, or once for a dead zone.
+      if (pingSuccess) {
+        for (final response in responses) {
+          await _soundService.playForPingResult(
+            success: true,
+            snr: response.snr,
+            rssi: response.rssi,
+          );
+        }
+      } else {
+        await _soundService.playForPingResult(success: false);
+      }
 
       // Update notification with result
       final shortId = (nodeId != null && nodeId.isNotEmpty)
@@ -876,24 +885,37 @@ class LocationService {
         if (ductingRisk == DuctingRisk.unknown) ductingRisk = null;
       }
 
-      // Create a new sample with ping results
-      final sample = Sample(
-        id: _generateUniqueId(),
-        position: latLng,
-        timestamp: DateTime.now(),
-        path: nodeId,
-        geohash: geohash,
-        rssi: pingResult.rssi,
-        snr: pingResult.snr,
-        pingSuccess: pingSuccess,
-        responseTimeMs: pingResult.responseTimeMs,
-        ductingRisk: ductingRisk,
-        deviceId: _loraCompanion.connectedDeviceId,
-      );
-
-      // Save ping result as new sample
-      await _dbService.insertSample(sample);
-      print('Saved ping result: ${sample.id}');
+      if (pingSuccess) {
+        // Persist every unique repeater response from this discovery cycle.
+        for (final response in responses) {
+          final sample = Sample(
+            id: _generateUniqueId(),
+            position: latLng,
+            timestamp: DateTime.now(),
+            path: response.nodeId,
+            geohash: geohash,
+            rssi: response.rssi,
+            snr: response.snr,
+            pingSuccess: true,
+            responseTimeMs: response.responseTimeMs,
+            ductingRisk: ductingRisk,
+            deviceId: _loraCompanion.connectedDeviceId,
+          );
+          await _dbService.insertSample(sample);
+        }
+      } else {
+        final sample = Sample(
+          id: _generateUniqueId(),
+          position: latLng,
+          timestamp: DateTime.now(),
+          geohash: geohash,
+          pingSuccess: false,
+          responseTimeMs: pingResult.responseTimeMs,
+          ductingRisk: ductingRisk,
+          deviceId: _loraCompanion.connectedDeviceId,
+        );
+        await _dbService.insertSample(sample);
+      }
       // Notify listeners
       _sampleSavedController.add(null);
     } catch (e) {

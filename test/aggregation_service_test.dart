@@ -28,5 +28,24 @@ void main() {
       expect(result.edges, hasLength(1));
       expect(result.edges.single.repeater, same(repeater));
     });
+
+    test('matches repeater IDs without case sensitivity', () {
+      final repeater = Repeater(
+        id: 'aabbccdd',
+        position: const LatLng(55.75, 37.62),
+      );
+      final sample = Sample(
+        id: 'sample-1',
+        position: const LatLng(55.76, 37.63),
+        timestamp: DateTime.now(),
+        path: 'AABBCCDDEEFF0011',
+        geohash: 'ucftpv12',
+        pingSuccess: true,
+      );
+
+      final result = AggregationService.buildIndexes([sample], [repeater]);
+
+      expect(result.edges.single.repeater, same(repeater));
+    });
   });
 }

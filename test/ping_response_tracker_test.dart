@@ -72,6 +72,36 @@ void main() {
       },
     );
 
+    test(
+      'completes collection with every unique response and latency',
+      () async {
+        final tracker = PingResponseTracker(
+          sentAt: sentAt,
+          latitude: 55.75,
+          longitude: 37.62,
+        );
+
+        tracker.addResponse(
+          const PingResponse(nodeId: 'FIRST', rssi: -90, snr: 2),
+          sentAt.add(const Duration(milliseconds: 120)),
+        );
+        tracker.addResponse(
+          const PingResponse(nodeId: 'SECOND', rssi: -75, snr: 8),
+          sentAt.add(const Duration(milliseconds: 640)),
+        );
+        tracker.close(sentAt.add(const Duration(seconds: 3)));
+
+        final result = await tracker.collectedResult;
+        expect(result.responses.map((response) => response.nodeId), [
+          'SECOND',
+          'FIRST',
+        ]);
+        expect(result.responses.first.responseTimeMs, 640);
+        expect(result.responses.last.responseTimeMs, 120);
+        expect(result.responseTimeMs, 120);
+      },
+    );
+
     test('ignores a weaker duplicate from the same repeater', () {
       final tracker = PingResponseTracker(
         sentAt: sentAt,

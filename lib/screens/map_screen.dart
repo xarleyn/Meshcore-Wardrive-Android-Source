@@ -69,6 +69,7 @@ class _MapScreenState extends State<MapScreen> {
   final ScreenshotController _screenshotController = ScreenshotController();
 
   bool _isTracking = false;
+  bool _isConnecting = false;
   int _sampleCount = 0;
   List<Sample> _samples = [];
   AggregationResult? _aggregationResult;
@@ -86,7 +87,7 @@ class _MapScreenState extends State<MapScreen> {
   _includeOnlyRepeaters; // Comma-separated list of repeater prefixes to show
   bool _filterEdgesByWhitelist = false; // Whether to apply whitelist to edges
   double _pingIntervalMeters = 805.0; // Default 0.5 miles
-  int _coveragePrecision = 6; // Default precision 6 (~1.2km squares)
+  int _coveragePrecision = 7; // Default precision 7 (~150m squares)
 
   // Repeaters
   List<Repeater> _repeaters = [];
@@ -115,16 +116,16 @@ class _MapScreenState extends State<MapScreen> {
   // Distance tracking
   double _totalDistance = 0.0;
   double _currentSpeed = 0.0;
-  String _distanceUnit = 'miles';
+  String _distanceUnit = 'km';
 
   // Color blind mode
   String _colorBlindMode = 'normal';
 
-  // Discovery timeout (10-30 seconds)
-  int _discoveryTimeoutSeconds = 20;
+  // Discovery timeout (5-30 seconds)
+  int _discoveryTimeoutSeconds = 10;
 
   // Fuel unit ('imperial' for MPG/gal, 'metric' for L/100km/L)
-  String _fuelUnit = 'imperial';
+  String _fuelUnit = 'metric';
 
   // Screenshot mode - hide UI elements
   bool _hideUIForScreenshot = false;
@@ -192,8 +193,8 @@ class _MapScreenState extends State<MapScreen> {
   bool _vibrationEnabled = false;
 
   // Ping mode
-  String _pingMode = 'distance';
-  int _pingTimeInterval = 60;
+  String _pingMode = 'time';
+  int _pingTimeInterval = 30;
 
   // Planned repeater markers
   List<Map<String, dynamic>> _plannedMarkers = [];
@@ -2873,7 +2874,7 @@ $placemarks  </Document>
               // Connect button or Manual Ping
               if (!_loraConnected)
                 TextButton(
-                  onPressed: _showConnectionDialog,
+                  onPressed: _isConnecting ? null : _showConnectionDialog,
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
@@ -2881,7 +2882,10 @@ $placemarks  </Document>
                     ),
                     minimumSize: Size.zero,
                   ),
-                  child: const Text('Connect', style: TextStyle(fontSize: 12)),
+                  child: Text(
+                    _isConnecting ? 'Connecting...' : 'Connect',
+                    style: const TextStyle(fontSize: 12),
+                  ),
                 ),
               if (_loraConnected) ...[
                 IconButton(
@@ -2943,15 +2947,25 @@ $placemarks  </Document>
     final result = await _locationService.loraCompanion.ping(
       latitude: _currentPosition!.latitude,
       longitude: _currentPosition!.longitude,
+      timeoutSeconds: _discoveryTimeoutSeconds,
+      waitForAllResponses: true,
     );
 
-    // Sound/vibration feedback based on result
-    final pingSuccess = result.status == PingStatus.success;
-    SoundService().playForPingResult(
-      success: pingSuccess,
-      snr: result.snr,
-      rssi: result.rssi,
-    );
+    final responses = result.responses;
+    final pingSuccess =
+        result.status == PingStatus.success && responses.isNotEmpty;
+
+    if (pingSuccess) {
+      for (final response in responses) {
+        await SoundService().playForPingResult(
+          success: true,
+          snr: response.snr,
+          rssi: response.rssi,
+        );
+      }
+    } else {
+      await SoundService().playForPingResult(success: false);
+    }
 
     // Create and save sample
     final geohash = GeohashUtils.sampleKey(
@@ -2959,34 +2973,54 @@ $placemarks  </Document>
       _currentPosition!.longitude,
     );
 
-    final sample = Sample(
-      id: '${DateTime.now().millisecondsSinceEpoch}_$geohash',
-      position: _currentPosition!,
-      timestamp: DateTime.now(),
-      path: result.nodeId, // Save repeater/node ID
-      geohash: geohash,
-      rssi: result.rssi,
-      snr: result.snr,
-      pingSuccess: pingSuccess,
-      responseTimeMs: result.responseTimeMs,
-      deviceId: _locationService.loraCompanion.connectedDeviceId,
-    );
-
-    await DatabaseService().insertSample(sample);
+    if (pingSuccess) {
+      for (var index = 0; index < responses.length; index++) {
+        final response = responses[index];
+        final sample = Sample(
+          id: '${DateTime.now().microsecondsSinceEpoch}_${index}_$geohash',
+          position: _currentPosition!,
+          timestamp: DateTime.now(),
+          path: response.nodeId,
+          geohash: geohash,
+          rssi: response.rssi,
+          snr: response.snr,
+          pingSuccess: true,
+          responseTimeMs: response.responseTimeMs,
+          deviceId: _locationService.loraCompanion.connectedDeviceId,
+        );
+        await DatabaseService().insertSample(sample);
+      }
+    } else {
+      final sample = Sample(
+        id: '${DateTime.now().microsecondsSinceEpoch}_$geohash',
+        position: _currentPosition!,
+        timestamp: DateTime.now(),
+        geohash: geohash,
+        pingSuccess: false,
+        responseTimeMs: result.responseTimeMs,
+        deviceId: _locationService.loraCompanion.connectedDeviceId,
+      );
+      await DatabaseService().insertSample(sample);
+    }
 
     // Reload samples to update map
     await _loadSamples();
 
     // Show result
     if (pingSuccess) {
-      final nodeId = result.nodeId ?? 'Unknown';
-      final displayNodeId = nodeId.length > 8 ? nodeId.substring(0, 8) : nodeId;
-      _showSnackBar('✅ Ping heard by $displayNodeId');
+      final summary = responses.length == 1
+          ? '✅ Ping heard by ${_shortNodeId(responses.single.nodeId)}'
+          : '✅ Discovery complete: found ${responses.length} repeaters';
+      _showSnackBar(summary);
     } else if (result.status == PingStatus.timeout) {
       _showSnackBar('❌ No response - dead zone');
     } else {
       _showSnackBar('❌ Ping failed: ${result.error}');
     }
+  }
+
+  String _shortNodeId(String nodeId) {
+    return (nodeId.length > 8 ? nodeId.substring(0, 8) : nodeId).toUpperCase();
   }
 
   void _showConnectionDialog() {
@@ -3039,6 +3073,8 @@ $placemarks  </Document>
   }
 
   Future<void> _connectUsb() async {
+    if (_isConnecting) return;
+    setState(() => _isConnecting = true);
     try {
       final devices = await _locationService.loraCompanion.scanUsbDevices();
 
@@ -3079,10 +3115,14 @@ $placemarks  </Document>
       }
     } catch (e) {
       _showSnackBar('USB error: $e');
+    } finally {
+      if (mounted) setState(() => _isConnecting = false);
     }
   }
 
   Future<void> _connectBluetooth() async {
+    if (_isConnecting) return;
+    setState(() => _isConnecting = true);
     try {
       _showSnackBar('Scanning for Bluetooth devices...');
       final devices = await _locationService.loraCompanion
@@ -3127,6 +3167,8 @@ $placemarks  </Document>
       }
     } catch (e) {
       _showSnackBar('Bluetooth error: $e');
+    } finally {
+      if (mounted) setState(() => _isConnecting = false);
     }
   }
 
@@ -4191,7 +4233,10 @@ $placemarks  </Document>
                             DropdownMenuItem(value: 5, child: Text('5s')),
                             DropdownMenuItem(value: 10, child: Text('10s')),
                             DropdownMenuItem(value: 15, child: Text('15s')),
+                            DropdownMenuItem(value: 20, child: Text('20s')),
+                            DropdownMenuItem(value: 25, child: Text('25s')),
                             DropdownMenuItem(value: 30, child: Text('30s')),
+                            DropdownMenuItem(value: 45, child: Text('45s')),
                             DropdownMenuItem(value: 60, child: Text('60s')),
                             DropdownMenuItem(value: 120, child: Text('2m')),
                             DropdownMenuItem(value: 300, child: Text('5m')),
@@ -5487,10 +5532,10 @@ $placemarks  </Document>
     final lostDisplay = coverage.lost.toStringAsFixed(1);
     final totalDisplay = total.toStringAsFixed(1);
 
-    // Get unique repeater prefixes (first 2 chars)
+    // Show two-byte repeater prefixes so IDs stay compact but distinguishable.
     final uniquePrefixes =
         coverage.repeaters
-            .map((id) => id.substring(0, id.length >= 2 ? 2 : id.length))
+            .map((id) => id.substring(0, id.length >= 4 ? 4 : id.length))
             .toSet()
             .toList()
           ..sort();

@@ -23,14 +23,21 @@ class PingResponse {
   final String nodeId;
   final int rssi;
   final int snr;
+  final int? responseTimeMs;
 
   const PingResponse({
     required this.nodeId,
     required this.rssi,
     required this.snr,
+    this.responseTimeMs,
   });
 
-  Map<String, dynamic> toJson() => {'nodeId': nodeId, 'rssi': rssi, 'snr': snr};
+  Map<String, dynamic> toJson() => {
+    'nodeId': nodeId,
+    'rssi': rssi,
+    'snr': snr,
+    'responseTimeMs': responseTimeMs,
+  };
 }
 
 class PingResult {
@@ -88,12 +95,14 @@ class PingResponseTracker {
   final double latitude;
   final double longitude;
   final Completer<PingResult> _completer = Completer<PingResult>();
+  final Completer<PingResult> _collectionCompleter = Completer<PingResult>();
   final List<PingResponse> _responses = [];
 
   bool _acceptingResponses = true;
   int? _firstResponseTimeMs;
 
   Future<PingResult> get result => _completer.future;
+  Future<PingResult> get collectedResult => _collectionCompleter.future;
   bool get isAcceptingResponses => _acceptingResponses;
   bool get hasResponse => _firstResponseTimeMs != null;
   List<PingResponse> get responses => List.unmodifiable(_responses);
@@ -103,21 +112,26 @@ class PingResponseTracker {
   PingResult? addResponse(PingResponse response, DateTime receivedAt) {
     if (!_acceptingResponses) return null;
 
+    final responseTimeMs = max(0, receivedAt.difference(sentAt).inMilliseconds);
+    final timedResponse = PingResponse(
+      nodeId: response.nodeId,
+      rssi: response.rssi,
+      snr: response.snr,
+      responseTimeMs: response.responseTimeMs ?? responseTimeMs,
+    );
+
     final existingIndex = _responses.indexWhere(
-      (existing) => existing.nodeId == response.nodeId,
+      (existing) => existing.nodeId == timedResponse.nodeId,
     );
     if (existingIndex == -1) {
-      _responses.add(response);
-    } else if (response.rssi > _responses[existingIndex].rssi) {
-      _responses[existingIndex] = response;
+      _responses.add(timedResponse);
+    } else if (timedResponse.rssi > _responses[existingIndex].rssi) {
+      _responses[existingIndex] = timedResponse;
     } else {
       return null;
     }
 
-    _firstResponseTimeMs ??= max(
-      0,
-      receivedAt.difference(sentAt).inMilliseconds,
-    );
+    _firstResponseTimeMs ??= responseTimeMs;
     final pingResult = _successResult(receivedAt);
     if (!_completer.isCompleted) {
       _completer.complete(pingResult);
@@ -137,12 +151,13 @@ class PingResponseTracker {
       responseTimeMs: max(0, timedOutAt.difference(sentAt).inMilliseconds),
     );
     _completer.complete(pingResult);
+    _collectionCompleter.complete(pingResult);
     return pingResult;
   }
 
   PingResult? fail(DateTime failedAt, String error) {
     if (_completer.isCompleted) {
-      _acceptingResponses = false;
+      close(failedAt);
       return null;
     }
     _acceptingResponses = false;
@@ -154,11 +169,23 @@ class PingResponseTracker {
       error: error,
     );
     _completer.complete(pingResult);
+    _collectionCompleter.complete(pingResult);
     return pingResult;
   }
 
-  void close() {
+  PingResult? close(DateTime closedAt) {
+    if (!_acceptingResponses) return null;
     _acceptingResponses = false;
+    if (_responses.isEmpty) return null;
+
+    final pingResult = _successResult(closedAt);
+    if (!_completer.isCompleted) {
+      _completer.complete(pingResult);
+    }
+    if (!_collectionCompleter.isCompleted) {
+      _collectionCompleter.complete(pingResult);
+    }
+    return pingResult;
   }
 
   PingResult _successResult(DateTime receivedAt) {
@@ -781,6 +808,7 @@ class LoRaCompanionService {
     double? latitude,
     double? longitude,
     int timeoutSeconds = 30,
+    bool waitForAllResponses = false,
   }) async {
     if (!isDeviceConnected) {
       return PingResult(
@@ -882,7 +910,9 @@ class LoRaCompanionService {
         '📍 Discovery ping sent, tag=0x${tag.toRadixString(16)}, waiting for responses...',
       );
 
-      return await tracker.result;
+      return await (waitForAllResponses
+          ? tracker.collectedResult
+          : tracker.result);
     } catch (e) {
       final failedAt = DateTime.now();
       final tracker = registeredTag == null
@@ -890,7 +920,9 @@ class LoRaCompanionService {
           : _pendingPings[registeredTag];
       if (tracker?.hasResponse == true) {
         _removePendingPing(registeredTag!);
-        return await tracker!.result;
+        return await (waitForAllResponses
+            ? tracker!.collectedResult
+            : tracker!.result);
       }
       final result =
           tracker?.fail(failedAt, e.toString()) ??
@@ -1291,7 +1323,7 @@ class LoRaCompanionService {
   void _removePendingPing(int tag) {
     _pingTimeoutTimers.remove(tag)?.cancel();
     _pingCollectionTimers.remove(tag)?.cancel();
-    _pendingPings.remove(tag)?.close();
+    _pendingPings.remove(tag)?.close(DateTime.now());
   }
 
   void _failPendingPings(String error) {

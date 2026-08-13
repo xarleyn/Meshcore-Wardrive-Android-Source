@@ -19,7 +19,7 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
   final SettingsService _settings = SettingsService();
   List<WSession> _sessions = [];
   bool _loading = true;
-  String _distanceUnit = 'miles';
+  String _distanceUnit = 'km';
 
   @override
   void initState() {

@@ -17,11 +17,16 @@ class AggregationService {
 
     // Build repeaters map
     for (final repeater in repeaters) {
-      idToRepeaters[repeater.id] = {
+      final repeaterData = <String, dynamic>{
         'pos': repeater.position,
         'elevation': repeater.elevation,
         'repeater': repeater,
       };
+      final normalizedId = repeater.id.toUpperCase();
+      idToRepeaters[normalizedId] = repeaterData;
+      if (normalizedId.length >= 8) {
+        idToRepeaters[normalizedId.substring(0, 8)] = repeaterData;
+      }
     }
 
     // Group samples by coverage area — only include cells with at least one ping
@@ -141,10 +146,12 @@ class AggregationService {
     for (final coverage in hashToCoverage.values) {
       // Only create edges for repeaters that actually responded in this coverage area
       for (final repeaterId in coverage.repeaters) {
-        final shortRepeaterId = repeaterId.length >= 8
-            ? repeaterId.substring(0, 8)
-            : repeaterId;
-        final repeaterData = idToRepeaters[shortRepeaterId];
+        final normalizedId = repeaterId.toUpperCase();
+        final repeaterData =
+            idToRepeaters[normalizedId] ??
+            idToRepeaters[normalizedId.length >= 8
+                ? normalizedId.substring(0, 8)
+                : normalizedId];
         if (repeaterData != null) {
           final repeater = repeaterData['repeater'] as Repeater;
           // Skip repeaters with location set to 0,0 (invalid/unknown location)
