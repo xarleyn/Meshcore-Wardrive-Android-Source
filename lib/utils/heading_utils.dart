@@ -13,4 +13,8 @@ class HeadingUtils {
     assert(factor >= 0 && factor <= 1);
     return normalize(from + shortestDelta(from, to) * factor);
   }
+
+  static double mapRotationForHeading(double heading) {
+    return normalize(-heading);
+  }
 }

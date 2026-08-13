@@ -7,7 +7,9 @@
   app is open, without interfering with the existing tracking wakelock.
 - The current GPS marker can now be switched between the classic blue circle
   and a compass-aware direction arrow in Settings. The arrow falls back to GPS
-  course while moving when a compass sensor is unavailable.
+  course while moving when a compass sensor is unavailable. In arrow mode, the
+  compass button toggles heading-up rotation; rotating the map manually stops
+  heading-up tracking.
 - An app-wide offline banner now detects restricted or unavailable internet
   access with a short periodic connectivity check. GPS tracking, radio
   communication, and local sample storage continue while offline.

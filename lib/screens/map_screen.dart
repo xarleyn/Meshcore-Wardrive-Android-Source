@@ -152,6 +152,7 @@ class _MapScreenState extends State<MapScreen> {
   double _pendingHeadingFactor = 0.3;
   Timer? _headingUpdateTimer;
   bool _hasCompassHeading = false;
+  bool _followHeading = false;
 
   // Route trail
   bool _showRouteTrail = false;
@@ -580,6 +581,9 @@ class _MapScreenState extends State<MapScreen> {
     setState(() {
       _currentHeading = smoothed;
     });
+    if (_followHeading) {
+      _rotateMapToHeading();
+    }
   }
 
   Future<void> _getCurrentLocation() async {
@@ -1579,9 +1583,35 @@ $placemarks  </Document>
     }
   }
 
-  void _resetMapRotation() {
-    _mapController.rotate(0); // 0 degrees = north up
-    _showSnackBar('Map reset to north');
+  void _handleCompassButton() {
+    final canFollowHeading =
+        _currentLocationMarkerStyle == CurrentLocationMarkerStyle.arrow &&
+        !_lockRotationNorth;
+
+    if (!canFollowHeading) {
+      setState(() {
+        _followHeading = false;
+      });
+      _mapController.rotate(0);
+      _showSnackBar('Map reset to north');
+      return;
+    }
+
+    setState(() {
+      _followHeading = !_followHeading;
+    });
+
+    if (_followHeading) {
+      _rotateMapToHeading();
+      _showSnackBar('Heading-up enabled');
+    } else {
+      _mapController.rotate(0);
+      _showSnackBar('Heading-up disabled — map reset to north');
+    }
+  }
+
+  void _rotateMapToHeading() {
+    _mapController.rotate(HeadingUtils.mapRotationForHeading(_currentHeading));
   }
 
   Future<void> _captureScreenshot() async {
@@ -1947,8 +1977,16 @@ $placemarks  </Document>
                 FloatingActionButton(
                   heroTag: 'compass',
                   mini: true,
-                  onPressed: _resetMapRotation,
-                  tooltip: 'Reset to North',
+                  onPressed: _handleCompassButton,
+                  tooltip:
+                      _currentLocationMarkerStyle ==
+                              CurrentLocationMarkerStyle.arrow &&
+                          !_lockRotationNorth
+                      ? _followHeading
+                            ? 'Stop heading-up and reset north'
+                            : 'Rotate map with heading'
+                      : 'Reset to North',
+                  backgroundColor: _followHeading ? Colors.blue : null,
                   child: const Icon(Icons.navigation),
                 ),
                 const SizedBox(height: 8),
@@ -1997,6 +2035,14 @@ $placemarks  </Document>
         onTap: (tapPosition, point) => _handleMapTap(point),
         onLongPress: (tapPosition, point) => _handleMapLongPress(point),
         onMapEvent: (event) {
+          if (event is MapEventRotate &&
+              event.source != MapEventSource.mapController &&
+              _followHeading) {
+            setState(() {
+              _followHeading = false;
+            });
+          }
+
           // Disable follow mode if user manually pans/drags the map
           if (event is MapEventMoveStart &&
               event.source == MapEventSource.mapController) {
@@ -3849,7 +3895,13 @@ $placemarks  </Document>
                       onChanged: (value) async {
                         setState(() {
                           _lockRotationNorth = value;
+                          if (value) {
+                            _followHeading = false;
+                          }
                         });
+                        if (value) {
+                          _mapController.rotate(0);
+                        }
                         setModalState(() {});
                         await _settingsService.setLockRotationNorth(value);
                       },
@@ -3875,7 +3927,13 @@ $placemarks  </Document>
                           if (value == null) return;
                           setState(() {
                             _currentLocationMarkerStyle = value;
+                            if (value == CurrentLocationMarkerStyle.circle) {
+                              _followHeading = false;
+                            }
                           });
+                          if (value == CurrentLocationMarkerStyle.circle) {
+                            _mapController.rotate(0);
+                          }
                           setModalState(() {});
                           _syncCompassSubscription();
                           await _settingsService.setCurrentLocationMarkerStyle(

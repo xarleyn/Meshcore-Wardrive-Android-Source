@@ -17,5 +17,11 @@ void main() {
       expect(HeadingUtils.interpolate(350, 10, factor: 0.5), 0);
       expect(HeadingUtils.interpolate(10, 350, factor: 0.5), 0);
     });
+
+    test('rotates the map opposite to the current heading', () {
+      expect(HeadingUtils.mapRotationForHeading(0), 0);
+      expect(HeadingUtils.mapRotationForHeading(90), 270);
+      expect(HeadingUtils.mapRotationForHeading(350), 10);
+    });
   });
 }
