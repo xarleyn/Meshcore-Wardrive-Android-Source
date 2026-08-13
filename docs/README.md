@@ -14,6 +14,7 @@
 ## Development
 
 - [Debugging ping responses](development/debugging-pings.md)
+- [Android release builds, versioning, and signing](development/releasing.md)
 - [Version history](../CHANGELOG.md)
 
 Screenshot source files are stored in `assets/screenshots/`.

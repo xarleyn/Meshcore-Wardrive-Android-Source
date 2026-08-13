@@ -67,11 +67,17 @@ flutter run
 
 ### Building Release APK
 
-```bash
-flutter build apk --release
+Configure the stable signing key once, then use the release script. It
+increments Android's build number and keeps the displayed version synchronized:
+
+```powershell
+.\tool\build_release.ps1
 ```
 
 The APK will be located at: `build/app/outputs/flutter-apk/app-release.apk`
+
+See [Android release builds](docs/development/releasing.md) for initial signing
+setup, public version changes, and per-architecture builds.
 
 ## 📁 Project Structure
 
@@ -117,10 +123,10 @@ flutter test
 flutter run
 ```
 
-Build a release APK with:
+Build a signed release APK with automatic build-number incrementing:
 
-```sh
-flutter build apk --release
+```powershell
+.\tool\build_release.ps1
 ```
 
 The generated APK is written below `build/app/outputs/flutter-apk/`. Publish

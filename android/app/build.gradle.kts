@@ -14,6 +14,39 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+val releaseTaskRequested = gradle.startParameter.taskNames.any {
+    it.contains("release", ignoreCase = true)
+}
+if (releaseTaskRequested) {
+    if (!keystorePropertiesFile.exists()) {
+        throw GradleException(
+            "Release signing is not configured. Create android/key.properties " +
+                "as described in docs/development/releasing.md."
+        )
+    }
+
+    val requiredSigningProperties = listOf(
+        "keyAlias",
+        "keyPassword",
+        "storeFile",
+        "storePassword",
+    )
+    val missingSigningProperties = requiredSigningProperties.filter {
+        keystoreProperties.getProperty(it).isNullOrBlank()
+    }
+    if (missingSigningProperties.isNotEmpty()) {
+        throw GradleException(
+            "Missing release signing properties in android/key.properties: " +
+                missingSigningProperties.joinToString(", ")
+        )
+    }
+
+    val releaseKeystore = file(keystoreProperties.getProperty("storeFile"))
+    if (!releaseKeystore.isFile) {
+        throw GradleException("Release keystore not found: $releaseKeystore")
+    }
+}
+
 android {
     namespace = "mintylinux.meshcore.wardrive"
     compileSdk = flutter.compileSdkVersion
@@ -47,11 +80,7 @@ android {
 
     buildTypes {
         release {
-            signingConfig = if (keystorePropertiesFile.exists()) {
-                signingConfigs.getByName("release")
-            } else {
-                signingConfigs.getByName("debug")
-            }
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 

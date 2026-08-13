@@ -58,7 +58,8 @@ On first launch, grant these permissions:
 
 ### "Failed to install" error
 - Make sure you have enough storage space (need ~100MB free)
-- Uninstall any previous version first
+- For an update, make sure the APK has the same application ID and signing
+  certificate as the installed app, and a higher build number
 - Restart your device and try again
 
 ### Permissions denied
@@ -75,7 +76,11 @@ On first launch, grant these permissions:
 To update to a new version:
 1. Download the new APK
 2. Install over the existing app (data will be preserved)
-3. Or uninstall old version first for a clean install
+
+Do not uninstall first unless you intentionally want a clean installation.
+Uninstalling deletes the app's settings and collected wardrive data. If Android
+rejects the update because its signing certificate differs, export or back up
+important data before uninstalling the old app.
 
 ## Uninstalling
 
