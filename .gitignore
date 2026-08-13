@@ -28,6 +28,7 @@ migrate_working_dir/
 # Dart and Flutter
 .dart_tool/
 .flutter-plugins-dependencies
+devtools_options.yaml
 .packages
 .pub-cache/
 .pub/
@@ -35,6 +36,13 @@ migrate_working_dir/
 **/ios/Flutter/.last_build_id
 /build/
 /coverage/
+
+# This project maintains only the Android Flutter host.
+/ios/
+/linux/
+/macos/
+/web/
+/windows/
 
 # Local SDKs and tool caches
 /.toolchain/
