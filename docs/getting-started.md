@@ -61,7 +61,8 @@ that file to your Android device and install it.
 ## Tips for Wardriving
 
 1. **Battery Optimization**: Disable battery optimization for this app in Android settings
-2. **Keep GPS Clear**: Ensure device has clear view of sky for best accuracy
+2. **Location Sources**: Android combines GPS, cellular, and nearby Wi-Fi. A
+   clear view of the sky still gives the best outdoor accuracy.
 3. **Regular Exports**: Export data periodically to avoid data loss
 4. **Background Tracking**: The app can track in the background on Android 10+
 
@@ -99,7 +100,9 @@ Exported JSON contains an array of samples:
 ## Technical Details
 
 - **Sample Rate**: Every 5 meters of movement
-- **Location Accuracy**: High (GPS)
+- **Location Accuracy**: High (Android fused GPS/network/Wi-Fi location)
+- **Quality Filtering**: Fixes worse than 250m and probable aircraft movement
+  are excluded; high-altitude roads are still supported
 - **Coverage Precision**: ~0.61km × 1.22km grid
 - **Sample Precision**: ~19m × 19m grid
 - **Center Point**: 47.7776, -122.4247 (Puget Sound area)

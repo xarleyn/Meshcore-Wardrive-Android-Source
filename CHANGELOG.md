@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- Android location fixes now use the fused provider so GPS, cellular, and
+  nearby Wi-Fi positioning can work together.
+- Very inaccurate fixes and probable in-flight samples are ignored without
+  blocking legitimate drives on high-altitude roads.
+- Tracking startup failures now show a specific permission, settings, or
+  service error.
+
 ## v1.0.42 - 2026-07-12
 
 ### Added
