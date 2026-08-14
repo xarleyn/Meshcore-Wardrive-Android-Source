@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:meshcore_wardrive/models/location_quality_settings.dart';
 import 'package:meshcore_wardrive/services/location_quality_filter.dart';
 
 void main() {
@@ -61,6 +62,36 @@ void main() {
       );
 
       expect(reason, contains('probable flight'));
+    });
+
+    test('uses configured location quality thresholds', () {
+      final filter = LocationQualityFilter(
+        settings: const LocationQualitySettings(
+          maxHorizontalAccuracyMeters: 20,
+          airborneAltitudeMeters: 1000,
+          airborneSpeedMetersPerSecond: 70,
+          maxWardriveSpeedMetersPerSecond: 100,
+        ),
+      );
+
+      expect(
+        filter.rejectionReason(_position(accuracy: 21, speed: 10)),
+        contains('horizontal accuracy'),
+      );
+      expect(
+        filter.rejectionReason(
+          _position(accuracy: 10, altitude: 800, speed: 60),
+        ),
+        isNull,
+      );
+
+      filter.updateSettings(const LocationQualitySettings());
+      expect(
+        filter.rejectionReason(
+          _position(accuracy: 10, altitude: 800, speed: 60),
+        ),
+        contains('probable flight'),
+      );
     });
   });
 }

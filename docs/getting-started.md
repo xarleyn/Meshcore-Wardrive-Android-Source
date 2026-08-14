@@ -60,6 +60,10 @@ that file to your Android device and install it.
   priority over Android fused/GPS positioning and uses a cyan current-location
   marker. The app returns to fused positioning when no fresh Wi-Fi estimate is
   available. Internet access and at least two mapped access points are required.
+- **Location Quality Filters**: An expandable group for tuning the maximum
+  horizontal error, airborne altitude and speed, and maximum wardrive speed.
+  Speeds are entered in km/h. The defaults preserve the built-in filters used
+  by earlier versions, and **Restore Defaults** resets the whole group.
 - **Color Mode**:
   - Quality: Green (excellent) → Red (poor)
   - Age: Green (fresh) → Red (old)
@@ -102,9 +106,10 @@ Exported JSON contains an array of samples:
 - Grant "Allow all the time" permission
 - Leave the map open; the app retries a stalled location stream automatically
 - Be aware that Android's fused result can still be wrong during real GNSS
-  spoofing. Fixes marked as mock locations, worse than 250m accuracy, or moving
-  implausibly fast are ignored, but software cannot prove every plausible fix
-  is genuine without an independent positioning source.
+  spoofing. Fixes marked as mock locations, worse than the configured accuracy
+  threshold (250m by default), or moving implausibly fast are ignored, but
+  software cannot prove every plausible fix is genuine without an independent
+  positioning source.
 
 ### Map Not Loading
 - Check internet connection (needed for map tiles)

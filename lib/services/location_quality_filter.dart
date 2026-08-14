@@ -2,17 +2,24 @@ import 'dart:math' as math;
 
 import 'package:geolocator/geolocator.dart';
 
+import '../models/location_quality_settings.dart';
+
 /// Rejects location fixes that would create misleading wardrive samples.
 ///
 /// The altitude check is deliberately combined with speed. A blanket altitude
 /// limit would discard legitimate drives on mountain roads.
 class LocationQualityFilter {
-  static const double maxHorizontalAccuracyMeters = 250;
-  static const double airborneAltitudeMeters = 500;
-  static const double airborneSpeedMetersPerSecond = 45;
-  static const double maxWardriveSpeedMetersPerSecond = 83.33;
+  LocationQualityFilter({
+    LocationQualitySettings settings = const LocationQualitySettings(),
+  }) : _settings = settings;
 
+  LocationQualitySettings _settings;
   Position? _lastAcceptedPosition;
+
+  void updateSettings(LocationQualitySettings settings) {
+    _settings = settings;
+    reset();
+  }
 
   /// Returns `null` for an acceptable fix, otherwise a diagnostic reason.
   String? rejectionReason(Position position) {
@@ -30,9 +37,10 @@ class LocationQualityFilter {
     }
 
     if (position.accuracy.isFinite &&
-        position.accuracy > maxHorizontalAccuracyMeters) {
+        position.accuracy > _settings.maxHorizontalAccuracyMeters) {
       return 'horizontal accuracy ${position.accuracy.toStringAsFixed(1)}m '
-          'is worse than ${maxHorizontalAccuracyMeters.toStringAsFixed(0)}m';
+          'is worse than '
+          '${_settings.maxHorizontalAccuracyMeters.toStringAsFixed(0)}m';
     }
 
     final reportedSpeed = position.speed.isFinite && position.speed > 0
@@ -42,14 +50,14 @@ class LocationQualityFilter {
     final effectiveSpeed = math.max(reportedSpeed, derivedSpeed);
 
     if (position.altitude.isFinite &&
-        position.altitude >= airborneAltitudeMeters &&
-        effectiveSpeed >= airborneSpeedMetersPerSecond) {
+        position.altitude >= _settings.airborneAltitudeMeters &&
+        effectiveSpeed >= _settings.airborneSpeedMetersPerSecond) {
       return 'probable flight: altitude '
           '${position.altitude.toStringAsFixed(0)}m, speed '
           '${(effectiveSpeed * 3.6).toStringAsFixed(0)}km/h';
     }
 
-    if (effectiveSpeed >= maxWardriveSpeedMetersPerSecond) {
+    if (effectiveSpeed >= _settings.maxWardriveSpeedMetersPerSecond) {
       return 'speed ${(effectiveSpeed * 3.6).toStringAsFixed(0)}km/h '
           'is too high for wardriving';
     }

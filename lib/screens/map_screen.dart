@@ -9,6 +9,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/models.dart';
+import '../models/location_quality_settings.dart';
 import '../services/location_service.dart';
 import '../services/aggregation_service.dart';
 import '../services/lora_companion_service.dart';
@@ -191,6 +192,8 @@ class _MapScreenState extends State<MapScreen> {
   bool _showPredictionRings = false;
   bool _showRadioPosition = true;
   bool _beaconDbWifiPositioning = false;
+  LocationQualitySettings _locationQualitySettings =
+      const LocationQualitySettings();
   LocationPositionSource _positionSource = LocationPositionSource.fused;
 
   // Atmospheric ducting
@@ -476,6 +479,8 @@ class _MapScreenState extends State<MapScreen> {
     final showRadioPosition = await _settingsService.getShowRadioPosition();
     final beaconDbWifiPositioning = await _settingsService
         .getBeaconDbWifiPositioning();
+    final locationQualitySettings = await _settingsService
+        .getLocationQualitySettings();
     final showDucting = await _settingsService.getShowDucting();
 
     setState(() {
@@ -500,6 +505,7 @@ class _MapScreenState extends State<MapScreen> {
       _showPredictionRings = showPredictionRings;
       _showRadioPosition = showRadioPosition;
       _beaconDbWifiPositioning = beaconDbWifiPositioning;
+      _locationQualitySettings = locationQualitySettings;
       _showDucting = showDucting;
     });
 
@@ -562,6 +568,7 @@ class _MapScreenState extends State<MapScreen> {
     // Apply to services
     _locationService.setPingInterval(pingInterval);
     _locationService.setWifiPositioningEnabled(beaconDbWifiPositioning);
+    _locationService.setLocationQualitySettings(locationQualitySettings);
     _locationService.loraCompanion.setIgnoredRepeaterPrefix(ignoredPrefix);
   }
 
@@ -3576,6 +3583,95 @@ $placemarks  </Document>
     }
   }
 
+  String _formatLocationQualityValue(double value) {
+    return value == value.roundToDouble()
+        ? value.toStringAsFixed(0)
+        : value.toStringAsFixed(1);
+  }
+
+  Future<void> _editLocationQualityValue({
+    required String title,
+    required String description,
+    required String unit,
+    required double displayedValue,
+    required LocationQualitySettings Function(double value) update,
+    required StateSetter setModalState,
+  }) async {
+    final controller = TextEditingController(
+      text: _formatLocationQualityValue(displayedValue),
+    );
+    final formKey = GlobalKey<FormState>();
+    final value = await showDialog<double>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(title),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(description),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: controller,
+                autofocus: true,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: InputDecoration(suffixText: unit),
+                validator: (text) {
+                  final parsed = double.tryParse(
+                    (text ?? '').trim().replaceAll(',', '.'),
+                  );
+                  if (parsed == null || !parsed.isFinite || parsed <= 0) {
+                    return 'Enter a number greater than zero';
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              if (!(formKey.currentState?.validate() ?? false)) return;
+              Navigator.pop(
+                dialogContext,
+                double.parse(controller.text.trim().replaceAll(',', '.')),
+              );
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (value == null || !mounted) return;
+
+    final settings = update(value);
+    await _settingsService.setLocationQualitySettings(settings);
+    if (!mounted) return;
+    setState(() => _locationQualitySettings = settings);
+    _locationService.setLocationQualitySettings(settings);
+    setModalState(() {});
+  }
+
+  Future<void> _resetLocationQualitySettings(StateSetter setModalState) async {
+    const settings = LocationQualitySettings();
+    await _settingsService.setLocationQualitySettings(settings);
+    if (!mounted) return;
+    setState(() => _locationQualitySettings = settings);
+    _locationService.setLocationQualitySettings(settings);
+    setModalState(() {});
+    _showSnackBar('Location quality filters reset');
+  }
+
   void _showSettings() {
     showModalBottomSheet(
       context: context,
@@ -3787,6 +3883,123 @@ $placemarks  </Document>
                           await _requestWifiScanThrottlingDisabled();
                         }
                       },
+                    ),
+                    ExpansionTile(
+                      leading: const Icon(Icons.gps_fixed),
+                      title: const Text('Location Quality Filters'),
+                      subtitle: const Text(
+                        'Accuracy and implausible-movement thresholds',
+                      ),
+                      children: [
+                        ListTile(
+                          title: const Text('Maximum Horizontal Error'),
+                          subtitle: const Text(
+                            'Reject positions with worse reported accuracy',
+                          ),
+                          trailing: Text(
+                            '${_formatLocationQualityValue(_locationQualitySettings.maxHorizontalAccuracyMeters)} m',
+                          ),
+                          onTap: () => _editLocationQualityValue(
+                            title: 'Maximum Horizontal Error',
+                            description:
+                                'Positions whose reported horizontal error is '
+                                'larger than this value are ignored.',
+                            unit: 'm',
+                            displayedValue: _locationQualitySettings
+                                .maxHorizontalAccuracyMeters,
+                            update: (value) => _locationQualitySettings
+                                .copyWith(maxHorizontalAccuracyMeters: value),
+                            setModalState: setModalState,
+                          ),
+                        ),
+                        ListTile(
+                          title: const Text('Airborne Altitude'),
+                          subtitle: const Text(
+                            'Altitude used together with airborne speed',
+                          ),
+                          trailing: Text(
+                            '${_formatLocationQualityValue(_locationQualitySettings.airborneAltitudeMeters)} m',
+                          ),
+                          onTap: () => _editLocationQualityValue(
+                            title: 'Airborne Altitude',
+                            description:
+                                'At or above this altitude, a position is '
+                                'ignored only when it also exceeds the '
+                                'airborne speed.',
+                            unit: 'm',
+                            displayedValue:
+                                _locationQualitySettings.airborneAltitudeMeters,
+                            update: (value) => _locationQualitySettings
+                                .copyWith(airborneAltitudeMeters: value),
+                            setModalState: setModalState,
+                          ),
+                        ),
+                        ListTile(
+                          title: const Text('Airborne Speed'),
+                          subtitle: const Text(
+                            'Speed used together with airborne altitude',
+                          ),
+                          trailing: Text(
+                            '${_formatLocationQualityValue(_locationQualitySettings.airborneSpeedMetersPerSecond * 3.6)} km/h',
+                          ),
+                          onTap: () => _editLocationQualityValue(
+                            title: 'Airborne Speed',
+                            description:
+                                'At or above this speed, a high-altitude '
+                                'position is treated as a probable flight.',
+                            unit: 'km/h',
+                            displayedValue:
+                                _locationQualitySettings
+                                    .airborneSpeedMetersPerSecond *
+                                3.6,
+                            update: (value) =>
+                                _locationQualitySettings.copyWith(
+                                  airborneSpeedMetersPerSecond: value / 3.6,
+                                ),
+                            setModalState: setModalState,
+                          ),
+                        ),
+                        ListTile(
+                          title: const Text('Maximum Wardrive Speed'),
+                          subtitle: const Text(
+                            'Reject positions moving faster than this',
+                          ),
+                          trailing: Text(
+                            '${_formatLocationQualityValue(_locationQualitySettings.maxWardriveSpeedMetersPerSecond * 3.6)} km/h',
+                          ),
+                          onTap: () => _editLocationQualityValue(
+                            title: 'Maximum Wardrive Speed',
+                            description:
+                                'Positions moving at or above this speed are '
+                                'ignored as implausible wardrive data.',
+                            unit: 'km/h',
+                            displayedValue:
+                                _locationQualitySettings
+                                    .maxWardriveSpeedMetersPerSecond *
+                                3.6,
+                            update: (value) =>
+                                _locationQualitySettings.copyWith(
+                                  maxWardriveSpeedMetersPerSecond: value / 3.6,
+                                ),
+                            setModalState: setModalState,
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              right: 16,
+                              bottom: 8,
+                            ),
+                            child: TextButton.icon(
+                              onPressed: () =>
+                                  _resetLocationQualitySettings(setModalState),
+                              icon: const Icon(Icons.restore),
+                              label: const Text('Restore Defaults'),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     SwitchListTile(
                       title: const Text('Show Approximate Position'),

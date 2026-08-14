@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/location_quality_settings.dart';
+
 enum CurrentLocationMarkerStyle { circle, arrow }
 
 class SettingsService {
@@ -29,6 +31,14 @@ class SettingsService {
   static const String _showPredictionRingsKey = 'show_prediction_rings';
   static const String _showRadioPositionKey = 'show_radio_position';
   static const String _beaconDbWifiPositioningKey = 'beacondb_wifi_positioning';
+  static const String _maxHorizontalAccuracyMetersKey =
+      'location_max_horizontal_accuracy_meters';
+  static const String _airborneAltitudeMetersKey =
+      'location_airborne_altitude_meters';
+  static const String _airborneSpeedMetersPerSecondKey =
+      'location_airborne_speed_meters_per_second';
+  static const String _maxWardriveSpeedMetersPerSecondKey =
+      'location_max_wardrive_speed_meters_per_second';
   static const String _showDuctingKey = 'show_ducting';
   static const String _goalCenterLatKey = 'goal_center_lat';
   static const String _goalCenterLonKey = 'goal_center_lon';
@@ -358,6 +368,69 @@ class SettingsService {
     await prefs.setBool(_beaconDbWifiPositioningKey, value);
   }
 
+  Future<LocationQualitySettings> getLocationQualitySettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    return LocationQualitySettings(
+      maxHorizontalAccuracyMeters: _positiveOrDefault(
+        prefs.getDouble(_maxHorizontalAccuracyMetersKey),
+        LocationQualitySettings.defaultMaxHorizontalAccuracyMeters,
+      ),
+      airborneAltitudeMeters: _positiveOrDefault(
+        prefs.getDouble(_airborneAltitudeMetersKey),
+        LocationQualitySettings.defaultAirborneAltitudeMeters,
+      ),
+      airborneSpeedMetersPerSecond: _positiveOrDefault(
+        prefs.getDouble(_airborneSpeedMetersPerSecondKey),
+        LocationQualitySettings.defaultAirborneSpeedMetersPerSecond,
+      ),
+      maxWardriveSpeedMetersPerSecond: _positiveOrDefault(
+        prefs.getDouble(_maxWardriveSpeedMetersPerSecondKey),
+        LocationQualitySettings.defaultMaxWardriveSpeedMetersPerSecond,
+      ),
+    );
+  }
+
+  Future<void> setLocationQualitySettings(
+    LocationQualitySettings settings,
+  ) async {
+    final values = [
+      settings.maxHorizontalAccuracyMeters,
+      settings.airborneAltitudeMeters,
+      settings.airborneSpeedMetersPerSecond,
+      settings.maxWardriveSpeedMetersPerSecond,
+    ];
+    if (values.any((value) => !value.isFinite || value <= 0)) {
+      throw ArgumentError.value(
+        settings,
+        'settings',
+        'values must be positive',
+      );
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(
+      _maxHorizontalAccuracyMetersKey,
+      settings.maxHorizontalAccuracyMeters,
+    );
+    await prefs.setDouble(
+      _airborneAltitudeMetersKey,
+      settings.airborneAltitudeMeters,
+    );
+    await prefs.setDouble(
+      _airborneSpeedMetersPerSecondKey,
+      settings.airborneSpeedMetersPerSecond,
+    );
+    await prefs.setDouble(
+      _maxWardriveSpeedMetersPerSecondKey,
+      settings.maxWardriveSpeedMetersPerSecond,
+    );
+  }
+
+  double _positiveOrDefault(double? value, double defaultValue) {
+    if (value == null || !value.isFinite || value <= 0) return defaultValue;
+    return value;
+  }
+
   /// Get show ducting monitor setting
   Future<bool> getShowDucting() async {
     final prefs = await SharedPreferences.getInstance();
@@ -585,6 +658,10 @@ class SettingsService {
     _showPredictionRingsKey,
     _showRadioPositionKey,
     _beaconDbWifiPositioningKey,
+    _maxHorizontalAccuracyMetersKey,
+    _airborneAltitudeMetersKey,
+    _airborneSpeedMetersPerSecondKey,
+    _maxWardriveSpeedMetersPerSecondKey,
     _showDuctingKey,
     _goalCenterLatKey,
     _goalCenterLonKey,

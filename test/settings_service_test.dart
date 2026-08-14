@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meshcore_wardrive/models/location_quality_settings.dart';
 import 'package:meshcore_wardrive/services/settings_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -122,5 +123,78 @@ void main() {
 
       expect(await settings.getThoroughResponseCollection(), isTrue);
     });
+  });
+
+  group('location quality settings', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('uses the existing filter defaults', () async {
+      final settings = await SettingsService().getLocationQualitySettings();
+
+      expect(settings.maxHorizontalAccuracyMeters, 250);
+      expect(settings.airborneAltitudeMeters, 500);
+      expect(settings.airborneSpeedMetersPerSecond, 45);
+      expect(settings.maxWardriveSpeedMetersPerSecond, 83.33);
+    });
+
+    test('persists all thresholds together', () async {
+      final service = SettingsService();
+      const expected = LocationQualitySettings(
+        maxHorizontalAccuracyMeters: 80,
+        airborneAltitudeMeters: 1200,
+        airborneSpeedMetersPerSecond: 55,
+        maxWardriveSpeedMetersPerSecond: 90,
+      );
+
+      await service.setLocationQualitySettings(expected);
+      final actual = await service.getLocationQualitySettings();
+
+      expect(actual.maxHorizontalAccuracyMeters, 80);
+      expect(actual.airborneAltitudeMeters, 1200);
+      expect(actual.airborneSpeedMetersPerSecond, 55);
+      expect(actual.maxWardriveSpeedMetersPerSecond, 90);
+    });
+
+    test('replaces invalid stored values with defaults', () async {
+      SharedPreferences.setMockInitialValues({
+        'location_max_horizontal_accuracy_meters': -1.0,
+        'location_airborne_altitude_meters': double.infinity,
+      });
+
+      final settings = await SettingsService().getLocationQualitySettings();
+
+      expect(settings.maxHorizontalAccuracyMeters, 250);
+      expect(settings.airborneAltitudeMeters, 500);
+    });
+
+    test(
+      'includes all thresholds in settings backup import and export',
+      () async {
+        final service = SettingsService();
+        const expected = LocationQualitySettings(
+          maxHorizontalAccuracyMeters: 75,
+          airborneAltitudeMeters: 900,
+          airborneSpeedMetersPerSecond: 50,
+          maxWardriveSpeedMetersPerSecond: 95,
+        );
+        await service.setLocationQualitySettings(expected);
+
+        final exported = await service.exportSettings();
+        expect(exported['location_max_horizontal_accuracy_meters'], 75);
+        expect(exported['location_airborne_altitude_meters'], 900);
+        expect(exported['location_airborne_speed_meters_per_second'], 50);
+        expect(exported['location_max_wardrive_speed_meters_per_second'], 95);
+
+        SharedPreferences.setMockInitialValues({});
+        expect(await service.importSettings(exported), greaterThanOrEqualTo(4));
+        final imported = await service.getLocationQualitySettings();
+        expect(imported.maxHorizontalAccuracyMeters, 75);
+        expect(imported.airborneAltitudeMeters, 900);
+        expect(imported.airborneSpeedMetersPerSecond, 50);
+        expect(imported.maxWardriveSpeedMetersPerSecond, 95);
+      },
+    );
   });
 }

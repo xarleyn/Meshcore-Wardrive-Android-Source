@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:permission_handler/permission_handler.dart' hide ServiceStatus;
 import '../models/models.dart';
+import '../models/location_quality_settings.dart';
 import 'database_service.dart';
 import 'lora_companion_service.dart';
 import 'location_quality_filter.dart';
@@ -214,6 +215,12 @@ class LocationService {
     if (fusedPosition != null) {
       _handleNewPosition(fusedPosition, source: LocationPositionSource.fused);
     }
+  }
+
+  /// Applies the same rejection thresholds to fused and Wi-Fi positions.
+  void setLocationQualitySettings(LocationQualitySettings settings) {
+    _qualityFilter.updateSettings(settings);
+    _wifiQualityFilter.updateSettings(settings);
   }
 
   void _startWifiLocationUpdates() {

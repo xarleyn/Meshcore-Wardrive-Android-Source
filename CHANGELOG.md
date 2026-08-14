@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Added
+- Location rejection thresholds are now configurable in a dedicated expandable
+  Settings group, with user-friendly km/h speed inputs and one-tap restoration
+  of the previous built-in defaults.
 - Starting a recording now requests precise and always-on location access plus
   an exemption from Android battery optimization. When beaconDB Wi-Fi
   positioning is enabled, the app also links to Developer options to disable
