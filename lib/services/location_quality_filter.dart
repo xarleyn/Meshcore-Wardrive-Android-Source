@@ -16,6 +16,10 @@ class LocationQualityFilter {
 
   /// Returns `null` for an acceptable fix, otherwise a diagnostic reason.
   String? rejectionReason(Position position) {
+    if (position.isMocked) {
+      return 'Android marked the location as mocked';
+    }
+
     if (!position.latitude.isFinite ||
         !position.longitude.isFinite ||
         position.latitude < -90 ||

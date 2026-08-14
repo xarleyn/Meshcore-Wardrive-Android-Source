@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:permission_handler/permission_handler.dart' hide ServiceStatus;
 import '../models/models.dart';
 import 'database_service.dart';
 import 'lora_companion_service.dart';
@@ -40,6 +40,13 @@ class LocationService {
     });
   }
   StreamSubscription<Position>? _positionStreamSubscription;
+  StreamSubscription<ServiceStatus>? _locationServiceStatusSubscription;
+  Timer? _positionWatchdogTimer;
+  Timer? _positionRestartTimer;
+  DateTime? _lastPositionEventAt;
+  bool _positionSearchRequested = false;
+  bool _positionStreamRestarting = false;
+  int _positionStreamGeneration = 0;
   bool _isTracking = false;
   bool _autoPingEnabled = false;
   double _pingIntervalMeters = 805.0; // Default 0.5 miles
@@ -53,8 +60,11 @@ class LocationService {
   DateTime? _lastPingTimestamp; // When the last ping was triggered (any source)
 
   // Distance tracking
+  static const double _minimumRecordedMovementMeters = 5;
   double _totalDistanceMeters = 0.0;
   LatLng? _lastPosition;
+  LatLng? _lastDistancePosition;
+  LatLng? _lastRecordedPosition;
 
   // Session ping stats for live notification
   int _sessionPingCount = 0;
@@ -226,6 +236,135 @@ class LocationService {
     return await Geolocator.isLocationServiceEnabled();
   }
 
+  /// Keep looking for a position while the map is open, even outside a
+  /// recording session. Android's fused provider can use GNSS, Wi-Fi, and
+  /// cellular signals; samples are persisted only while [_isTracking] is true.
+  Future<bool> startPositionSearch() async {
+    await _logger.init();
+    _positionSearchRequested = true;
+
+    final hasPermission = await checkPermissions();
+    if (!hasPermission) return false;
+
+    _monitorLocationServiceStatus();
+    _startPositionWatchdog();
+
+    if (!await isLocationServiceEnabled()) {
+      await _logger.logLocationEvent(
+        'Position search is waiting for Android location services',
+      );
+      return false;
+    }
+
+    return _restartPositionStream(reason: 'position search started');
+  }
+
+  void _monitorLocationServiceStatus() {
+    _locationServiceStatusSubscription ??= Geolocator.getServiceStatusStream()
+        .listen((status) {
+          if (!_positionSearchRequested) return;
+          if (status == ServiceStatus.enabled) {
+            _schedulePositionStreamRestart('location services enabled');
+          } else {
+            _lastPositionEventAt = null;
+            _logger.logLocationEvent(
+              'Position search paused: Android location services disabled',
+            );
+          }
+        });
+  }
+
+  void _startPositionWatchdog() {
+    _positionWatchdogTimer ??= Timer.periodic(const Duration(seconds: 15), (_) {
+      if (!_positionSearchRequested || _positionStreamRestarting) return;
+      final lastEvent = _lastPositionEventAt;
+      final streamStalled =
+          lastEvent != null &&
+          DateTime.now().difference(lastEvent) > const Duration(seconds: 45);
+      if (_positionStreamSubscription == null || streamStalled) {
+        _schedulePositionStreamRestart(
+          streamStalled ? 'no location updates for 45 seconds' : 'no stream',
+        );
+      }
+    });
+  }
+
+  void _schedulePositionStreamRestart(String reason) {
+    if (!_positionSearchRequested ||
+        (_positionRestartTimer?.isActive ?? false)) {
+      return;
+    }
+    _positionRestartTimer = Timer(const Duration(seconds: 2), () {
+      _positionRestartTimer = null;
+      _restartPositionStream(reason: reason);
+    });
+  }
+
+  Future<bool> _restartPositionStream({required String reason}) async {
+    if (!_positionSearchRequested || _positionStreamRestarting) return false;
+    _positionStreamRestarting = true;
+    final generation = ++_positionStreamGeneration;
+
+    try {
+      await _positionStreamSubscription?.cancel();
+      _positionStreamSubscription = null;
+
+      final permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        await _logger.logLocationEvent(
+          'Position search paused: location permission unavailable',
+        );
+        return false;
+      }
+      if (!await isLocationServiceEnabled()) return false;
+
+      final locationSettings = Platform.isAndroid
+          ? AndroidSettings(
+              accuracy: LocationAccuracy.high,
+              distanceFilter: 0,
+              intervalDuration: const Duration(seconds: 5),
+              forceLocationManager: false,
+            )
+          : const LocationSettings(
+              accuracy: LocationAccuracy.high,
+              distanceFilter: 0,
+            );
+
+      _lastPositionEventAt = DateTime.now();
+      _positionStreamSubscription =
+          Geolocator.getPositionStream(
+            locationSettings: locationSettings,
+          ).listen(
+            (position) {
+              if (generation != _positionStreamGeneration) return;
+              _lastPositionEventAt = DateTime.now();
+              _handleNewPosition(position);
+            },
+            onError: (Object error) {
+              if (generation != _positionStreamGeneration) return;
+              _logger.logError('Location Stream', error.toString());
+              _schedulePositionStreamRestart('stream error: $error');
+            },
+            onDone: () {
+              if (generation != _positionStreamGeneration) return;
+              _positionStreamSubscription = null;
+              _schedulePositionStreamRestart('stream closed');
+            },
+          );
+      await _logger.logLocationEvent(
+        'Position stream started ($reason; fused provider, 0m filter)',
+      );
+      return true;
+    } catch (e) {
+      await _logger.logError('Position Stream Restart', e.toString());
+      _schedulePositionStreamRestart('restart failed');
+      return false;
+    } finally {
+      _positionStreamRestarting = false;
+    }
+  }
+
   /// Get current position once
   Future<LatLng?> getCurrentPosition() async {
     try {
@@ -335,45 +474,33 @@ class LocationService {
       await _logger.logServiceEvent('Foreground service started successfully');
       print('Foreground service started');
 
-      final locationSettings = Platform.isAndroid
-          ? AndroidSettings(
-              accuracy: LocationAccuracy.high,
-              distanceFilter: 5, // Update every 5 meters
-              intervalDuration: const Duration(seconds: 5),
-              forceLocationManager: false,
-            )
-          : const LocationSettings(
-              accuracy: LocationAccuracy.high,
-              distanceFilter: 5,
-            );
-
       _qualityFilter.reset();
-      _positionStreamSubscription =
-          Geolocator.getPositionStream(
-            locationSettings: locationSettings,
-          ).listen(
-            (Position position) {
-              _handleNewPosition(position);
-            },
-            onError: (error) {
-              _logger.logError('Location Stream', error.toString());
-              print('Location stream error: $error');
-            },
-          );
-
-      await _logger.logLocationEvent(
-        'Position stream started with 5m distance filter',
-      );
+      _positionSearchRequested = true;
+      _monitorLocationServiceStatus();
+      _startPositionWatchdog();
+      if (_positionStreamSubscription == null &&
+          !await _restartPositionStream(reason: 'tracking started')) {
+        throw StateError('Could not start the Android position stream.');
+      }
 
       // Enable wakelock to prevent screen from sleeping and stopping tracking
       await ScreenWakeService.instance.setTrackingActive(true);
       await _logger.logPowerEvent('Wakelock enabled');
       print('Wakelock enabled - app will stay active during tracking');
 
-      _isTracking = true;
+      // Reset the recording state before allowing stream events to be saved.
+      _totalDistanceMeters = 0.0;
+      _lastPosition = null;
+      _lastDistancePosition = null;
+      _lastRecordedPosition = null;
+      _lastPingPosition = null;
+      _lastPingTimestamp = null;
+      _totalDistanceController.add(_totalDistanceMeters);
+      _sessionStartTime = DateTime.now();
       _sessionPingCount = 0;
       _sessionSuccessCount = 0;
       _deadZoneAlertedCells.clear();
+      _isTracking = true;
       WidgetService.updateTrackingStatus(true);
 
       // Start monitoring device battery for battery saver mode
@@ -396,11 +523,6 @@ class LocationService {
       } catch (e) {
         await _logger.logError('Device Tracking', e.toString());
       }
-
-      // Reset distance tracking for new session
-      _totalDistanceMeters = 0.0;
-      _lastPosition = null;
-      _totalDistanceController.add(_totalDistanceMeters);
 
       // Start ducting monitoring if enabled (non-blocking)
       _ductingEnabled = await _settings.getShowDucting();
@@ -429,7 +551,6 @@ class LocationService {
       }
 
       // Create a new session record
-      _sessionStartTime = DateTime.now();
       try {
         final session = WSession(startTime: _sessionStartTime!);
         _currentSessionId = await _dbService.createSession(session);
@@ -443,11 +564,13 @@ class LocationService {
       await _logger.logServiceEvent('Tracking started successfully');
       return true;
     } catch (e) {
+      _isTracking = false;
       await _logger.logError('Start Tracking', e.toString());
       _lastStartError = 'Could not start Android location tracking: $e';
       print('Error starting location tracking: $e');
-      await _positionStreamSubscription?.cancel();
-      _positionStreamSubscription = null;
+      await FlutterForegroundTask.stopService();
+      await ScreenWakeService.instance.setTrackingActive(false);
+      _schedulePositionStreamRestart('tracking start failed');
       return false;
     }
   }
@@ -562,6 +685,7 @@ class LocationService {
 
     _pingInProgress = true;
     _lastPingPosition = position;
+    _lastRecordedPosition = position;
     _lastPingTimestamp = DateTime.now();
 
     final geohash = GeohashUtils.sampleKey(
@@ -619,30 +743,32 @@ class LocationService {
       _courseController.add(position.heading % 360);
     }
 
-    // Calculate distance traveled
-    if (_lastPosition != null) {
+    // Calculate distance at the same five-metre granularity previously
+    // provided by Android's distance filter. The zero-metre provider filter is
+    // now reserved for keeping the map marker and watchdog fresh.
+    if (_isTracking && _lastDistancePosition != null) {
       final distanceMeters = Geolocator.distanceBetween(
-        _lastPosition!.latitude,
-        _lastPosition!.longitude,
+        _lastDistancePosition!.latitude,
+        _lastDistancePosition!.longitude,
         latLng.latitude,
         latLng.longitude,
       );
-      _totalDistanceMeters += distanceMeters;
-      _totalDistanceController.add(_totalDistanceMeters);
+      if (distanceMeters >= _minimumRecordedMovementMeters) {
+        _totalDistanceMeters += distanceMeters;
+        _lastDistancePosition = latLng;
+        _totalDistanceController.add(_totalDistanceMeters);
+      }
+    } else if (_isTracking) {
+      _lastDistancePosition = latLng;
     }
     _lastPosition = latLng;
 
     // Broadcast current position to listeners
     _currentPositionController.add(latLng);
 
-    // Dead zone alert: check if current coverage cell is a known dead zone
-    _checkDeadZone(latLng);
-
-    // Create sample
-    final geohash = GeohashUtils.sampleKey(
-      position.latitude,
-      position.longitude,
-    );
+    // Outside an active wardrive session we still keep the current-position
+    // marker fresh, but do not calculate trip distance or persist samples.
+    if (!_isTracking) return;
 
     // Check if we should trigger a ping (but don't wait for it)
     final isConnected = _loraCompanion.isDeviceConnected;
@@ -687,6 +813,7 @@ class LocationService {
         // Keep a single radio ping active so its response window has one owner.
         _pingInProgress = true;
         _lastPingPosition = latLng;
+        _lastRecordedPosition = latLng;
         _lastPingTimestamp = DateTime.now();
         await _logger.logPingEvent(
           'Distance-based ping triggered at ${latLng.latitude}, ${latLng.longitude}',
@@ -706,10 +833,36 @@ class LocationService {
         print(
           'Triggering auto-ping via LoRa at ${latLng.latitude}, ${latLng.longitude}',
         );
+        final geohash = GeohashUtils.sampleKey(
+          position.latitude,
+          position.longitude,
+        );
         _performPingInBackground(latLng, geohash);
         return; // Don't save GPS sample when auto-pinging - wait for ping result
       }
     }
+
+    final lastRecordedPosition = _lastRecordedPosition;
+    if (lastRecordedPosition != null &&
+        Geolocator.distanceBetween(
+              lastRecordedPosition.latitude,
+              lastRecordedPosition.longitude,
+              latLng.latitude,
+              latLng.longitude,
+            ) <
+            _minimumRecordedMovementMeters) {
+      return;
+    }
+    _lastRecordedPosition = latLng;
+
+    // Dead zone alert: check if current coverage cell is a known dead zone
+    _checkDeadZone(latLng);
+
+    // Create sample
+    final geohash = GeohashUtils.sampleKey(
+      position.latitude,
+      position.longitude,
+    );
 
     // Only save GPS sample if auto-ping is disabled or no ping triggered
     // Tag with ducting risk if monitoring is enabled
@@ -946,11 +1099,8 @@ class LocationService {
 
   /// Stop tracking location
   Future<void> stopTracking() async {
+    _isTracking = false;
     await _logger.logServiceEvent('stopTracking() called');
-
-    await _positionStreamSubscription?.cancel();
-    _positionStreamSubscription = null;
-    _qualityFilter.reset();
 
     // Stop ducting monitoring
     _ductingFetchTimer?.cancel();
@@ -1009,7 +1159,6 @@ class LocationService {
       _sessionStartTime = null;
     }
 
-    _isTracking = false;
     WidgetService.updateTrackingStatus(false);
     await _logger.logServiceEvent('Tracking stopped successfully');
   }
@@ -1187,6 +1336,13 @@ class LocationService {
 
   /// Dispose resources
   void dispose() {
+    _positionSearchRequested = false;
+    _positionWatchdogTimer?.cancel();
+    _positionRestartTimer?.cancel();
+    _locationServiceStatusSubscription?.cancel();
+    _positionStreamGeneration++;
+    _positionStreamSubscription?.cancel();
+    _positionStreamSubscription = null;
     stopTracking();
     _logger.close();
     _currentPositionController.close();

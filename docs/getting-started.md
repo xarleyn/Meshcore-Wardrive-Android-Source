@@ -30,7 +30,8 @@ that file to your Android device and install it.
 
 2. **Start Tracking**: Tap the green play button (bottom right)
    - The button will turn red when tracking is active
-   - Your position will update automatically every 5 meters
+   - The map searches for and updates your position before tracking starts
+   - Recorded samples are added after about 5 meters of movement
 
 3. **View Your Coverage**: As you move:
    - GPS samples are collected automatically
@@ -92,7 +93,11 @@ Exported JSON contains an array of samples:
 ### Location Not Updating
 - Check Location Services are enabled
 - Grant "Allow all the time" permission
-- Restart the app
+- Leave the map open; the app retries a stalled location stream automatically
+- Be aware that Android's fused result can still be wrong during real GNSS
+  spoofing. Fixes marked as mock locations, worse than 250m accuracy, or moving
+  implausibly fast are ignored, but software cannot prove every plausible fix
+  is genuine without an independent positioning source.
 
 ### Map Not Loading
 - Check internet connection (needed for map tiles)
@@ -106,8 +111,9 @@ Exported JSON contains an array of samples:
 
 - **Sample Rate**: Every 5 meters of movement
 - **Location Accuracy**: High (Android fused GPS/network/Wi-Fi location)
-- **Quality Filtering**: Fixes worse than 250m and probable aircraft movement
-  are excluded; high-altitude roads are still supported
+- **Quality Filtering**: Android-reported mock fixes, fixes worse than 250m,
+  and probable aircraft movement are excluded; high-altitude roads are still
+  supported
 - **Coverage Precision**: ~0.61km × 1.22km grid
 - **Sample Precision**: ~19m × 19m grid
 - **Center Point**: 47.7776, -122.4247 (Puget Sound area)

@@ -291,9 +291,16 @@ class _MapScreenState extends State<MapScreen> {
       position,
     ) {
       if (!mounted) return;
+      final shouldCenterMap = _currentPosition == null;
       setState(() {
         _currentPosition = position;
       });
+
+      if (shouldCenterMap) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _mapController.move(position, 13.0);
+        });
+      }
 
       // Auto-follow if enabled (throttled to reduce map redraws)
       if (_followLocation) {
@@ -411,7 +418,7 @@ class _MapScreenState extends State<MapScreen> {
     });
 
     await _loadSamples();
-    await _getCurrentLocation();
+    await _locationService.startPositionSearch();
 
     // Load cached community coverage for offline viewing
     final cached = await _uploadService.loadCachedCoverage();
@@ -588,17 +595,6 @@ class _MapScreenState extends State<MapScreen> {
     });
     if (_followHeading) {
       _rotateMapToHeading();
-    }
-  }
-
-  Future<void> _getCurrentLocation() async {
-    final pos = await _locationService.getCurrentPosition();
-    if (pos != null) {
-      setState(() {
-        _currentPosition = pos;
-      });
-      // Move map to user's current location on startup
-      _mapController.move(pos, 13.0);
     }
   }
 

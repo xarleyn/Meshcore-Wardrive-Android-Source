@@ -24,6 +24,15 @@ void main() {
       );
     });
 
+    test('rejects a fix Android reports as mocked', () {
+      final filter = LocationQualityFilter();
+
+      expect(
+        filter.rejectionReason(_position(isMocked: true)),
+        contains('mocked'),
+      );
+    });
+
     test('rejects a probable flight without banning mountain roads', () {
       final filter = LocationQualityFilter();
 
@@ -63,6 +72,7 @@ Position _position({
   double accuracy = 10,
   double altitude = 100,
   double speed = 10,
+  bool isMocked = false,
 }) {
   return Position(
     latitude: latitude,
@@ -75,5 +85,6 @@ Position _position({
     headingAccuracy: 0,
     speed: speed,
     speedAccuracy: 1,
+    isMocked: isMocked,
   );
 }

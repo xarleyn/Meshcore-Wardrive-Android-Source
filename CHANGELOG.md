@@ -24,6 +24,12 @@
   in map settings without disabling its calculation.
 
 ### Fixed
+- The map now keeps searching for a fused Android position whenever it is open,
+  even before recording starts. A watchdog restarts stalled or closed location
+  streams and resumes automatically after Location Services are re-enabled.
+- Android-reported mock locations are excluded from the map and recorded
+  wardrive data. GPS samples and trip distance retain their five-metre movement
+  threshold even though the live position stream updates more frequently.
 - Discovery pings now persist one sample for every unique repeater response,
   including each response's latency, while duplicate responses from the same
   node remain de-duplicated.
