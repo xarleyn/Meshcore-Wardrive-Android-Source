@@ -95,6 +95,7 @@ class _MapScreenState extends State<MapScreen> {
   LatLng? _currentPosition;
   Timer? _updateTimer;
   StreamSubscription<LatLng>? _positionSubscription;
+  StreamSubscription<LocationPositionSource>? _positionSourceSubscription;
   StreamSubscription<double>? _courseSubscription;
   StreamSubscription<CompassEvent>? _compassSubscription;
   StreamSubscription<void>? _sampleSavedSubscription;
@@ -184,6 +185,8 @@ class _MapScreenState extends State<MapScreen> {
   // Coverage prediction rings
   bool _showPredictionRings = false;
   bool _showRadioPosition = true;
+  bool _beaconDbWifiPositioning = false;
+  LocationPositionSource _positionSource = LocationPositionSource.fused;
 
   // Atmospheric ducting
   bool _showDucting = false;
@@ -309,6 +312,16 @@ class _MapScreenState extends State<MapScreen> {
           _lastAutoFollowMove = now;
           _mapController.move(position, _mapController.camera.zoom);
         }
+      }
+    });
+
+    _positionSourceSubscription = _locationService.positionSourceStream.listen((
+      source,
+    ) {
+      if (mounted) {
+        setState(() {
+          _positionSource = source;
+        });
       }
     });
 
@@ -456,6 +469,8 @@ class _MapScreenState extends State<MapScreen> {
     final showHeatmap = await _settingsService.getShowHeatmap();
     final showPredictionRings = await _settingsService.getShowPredictionRings();
     final showRadioPosition = await _settingsService.getShowRadioPosition();
+    final beaconDbWifiPositioning = await _settingsService
+        .getBeaconDbWifiPositioning();
     final showDucting = await _settingsService.getShowDucting();
 
     setState(() {
@@ -479,6 +494,7 @@ class _MapScreenState extends State<MapScreen> {
       _showHeatmap = showHeatmap;
       _showPredictionRings = showPredictionRings;
       _showRadioPosition = showRadioPosition;
+      _beaconDbWifiPositioning = beaconDbWifiPositioning;
       _showDucting = showDucting;
     });
 
@@ -540,6 +556,7 @@ class _MapScreenState extends State<MapScreen> {
 
     // Apply to services
     _locationService.setPingInterval(pingInterval);
+    _locationService.setWifiPositioningEnabled(beaconDbWifiPositioning);
     _locationService.loraCompanion.setIgnoredRepeaterPrefix(ignoredPrefix);
   }
 
@@ -1699,6 +1716,7 @@ $placemarks  </Document>
     _updateTimer?.cancel();
     _batterySubscription?.cancel();
     _positionSubscription?.cancel();
+    _positionSourceSubscription?.cancel();
     _courseSubscription?.cancel();
     _compassSubscription?.cancel();
     _headingUpdateTimer?.cancel();
@@ -2629,12 +2647,18 @@ $placemarks  </Document>
   }
 
   Widget _buildCurrentPositionMarker() {
+    final positionColor = _positionSource == LocationPositionSource.wifi
+        ? Colors.cyan
+        : Colors.blue;
+    final positionLabel = _positionSource == LocationPositionSource.wifi
+        ? 'Current Wi-Fi location from beaconDB'
+        : 'Current fused Android location';
     if (_currentLocationMarkerStyle == CurrentLocationMarkerStyle.circle) {
       return Semantics(
-        label: 'Current location',
+        label: positionLabel,
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.blue,
+            color: positionColor,
             shape: BoxShape.circle,
             border: Border.all(color: Colors.white, width: 2),
           ),
@@ -2643,14 +2667,14 @@ $placemarks  </Document>
     }
 
     return Semantics(
-      label: 'Current location, heading ${_currentHeading.round()} degrees',
+      label: '$positionLabel, heading ${_currentHeading.round()} degrees',
       child: Transform.rotate(
         angle: _currentHeading * math.pi / 180,
-        child: const Stack(
+        child: Stack(
           alignment: Alignment.center,
           children: [
-            Icon(Icons.navigation, size: 34, color: Colors.white),
-            Icon(Icons.navigation, size: 27, color: Colors.blue),
+            const Icon(Icons.navigation, size: 34, color: Colors.white),
+            Icon(Icons.navigation, size: 27, color: positionColor),
           ],
         ),
       ),
@@ -3596,6 +3620,29 @@ $placemarks  </Document>
                         });
                         setModalState(() {});
                         await _settingsService.setShowPredictionRings(value);
+                      },
+                    ),
+                    SwitchListTile(
+                      title: const Text('beaconDB Wi-Fi Positioning'),
+                      subtitle: const Text(
+                        'Prefer Wi-Fi location; sends nearby BSSIDs and signal '
+                        'levels to beaconDB. Cyan marker means Wi-Fi is active.',
+                      ),
+                      value: _beaconDbWifiPositioning,
+                      onChanged: (value) async {
+                        setState(() {
+                          _beaconDbWifiPositioning = value;
+                        });
+                        setModalState(() {});
+                        await _settingsService.setBeaconDbWifiPositioning(
+                          value,
+                        );
+                        _locationService.setWifiPositioningEnabled(value);
+                        if (value) {
+                          _showSnackBar(
+                            'beaconDB enabled: nearby BSSIDs will be shared',
+                          );
+                        }
                       },
                     ),
                     SwitchListTile(

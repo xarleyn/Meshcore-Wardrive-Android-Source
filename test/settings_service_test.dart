@@ -80,6 +80,24 @@ void main() {
     });
   });
 
+  group('beaconDB Wi-Fi positioning setting', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('defaults to disabled', () async {
+      expect(await SettingsService().getBeaconDbWifiPositioning(), isFalse);
+    });
+
+    test('persists the selected value', () async {
+      final settings = SettingsService();
+
+      await settings.setBeaconDbWifiPositioning(true);
+
+      expect(await settings.getBeaconDbWifiPositioning(), isTrue);
+    });
+  });
+
   group('wardrive defaults', () {
     setUp(() {
       SharedPreferences.setMockInitialValues({});

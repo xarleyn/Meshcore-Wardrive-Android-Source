@@ -1,15 +1,21 @@
 package mintylinux.meshcore.wardrive
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.ToneGenerator
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemClock
 import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import android.util.Log
+import android.net.wifi.WifiManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -17,6 +23,7 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterActivity() {
     private val TAG = "MeshcoreFeedback"
     private val CHANNEL = "mintylinux.meshcore.wardrive/feedback"
+    private val WIFI_CHANNEL = "mintylinux.meshcore.wardrive/wifi_location"
     private var toneGenerator: ToneGenerator? = null
 
     private fun getVibrator(): Vibrator {
@@ -75,6 +82,59 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, WIFI_CHANNEL)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "getWifiScanResults" -> getWifiScanResults(result)
+                    else -> result.notImplemented()
+                }
+            }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun getWifiScanResults(result: MethodChannel.Result) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+            checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED
+        ) {
+            result.error("LOCATION_PERMISSION", "Fine location permission is required", null)
+            return
+        }
+
+        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        val scanStarted = try {
+            wifiManager.startScan()
+        } catch (e: SecurityException) {
+            result.error("WIFI_PERMISSION", e.message, null)
+            return
+        } catch (e: Exception) {
+            Log.w(TAG, "Wi-Fi scan could not be started", e)
+            false
+        }
+
+        // Android may throttle startScan(). Cached/passively refreshed results
+        // are still useful, and each result carries its age for Dart to check.
+        val delayMs = if (scanStarted) 1_500L else 0L
+        Handler(Looper.getMainLooper()).postDelayed({
+            try {
+                val nowMicros = SystemClock.elapsedRealtimeNanos() / 1_000L
+                val scans = wifiManager.scanResults.map { scan ->
+                    mapOf(
+                        "bssid" to scan.BSSID,
+                        "ssid" to scan.SSID,
+                        "signalStrength" to scan.level,
+                        "frequency" to scan.frequency,
+                        "ageMillis" to ((nowMicros - scan.timestamp).coerceAtLeast(0L) / 1_000L),
+                    )
+                }
+                result.success(scans)
+            } catch (e: SecurityException) {
+                result.error("WIFI_PERMISSION", e.message, null)
+            } catch (e: Exception) {
+                result.error("WIFI_SCAN", e.message, null)
+            }
+        }, delayMs)
     }
 
     override fun onDestroy() {

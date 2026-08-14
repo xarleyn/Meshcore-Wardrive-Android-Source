@@ -15,9 +15,12 @@ import 'persistent_debug_logger.dart';
 import 'screen_wake_service.dart';
 import 'settings_service.dart';
 import 'widget_service.dart';
+import 'wifi_location_service.dart';
 import 'ducting_service.dart';
 import 'carpeater_service.dart';
 import 'sound_service.dart';
+
+enum LocationPositionSource { fused, wifi }
 
 class LocationService {
   final DatabaseService _dbService = DatabaseService();
@@ -27,6 +30,8 @@ class LocationService {
   final DuctingService _ductingService = DuctingService();
   final SoundService _soundService = SoundService();
   final LocationQualityFilter _qualityFilter = LocationQualityFilter();
+  final LocationQualityFilter _wifiQualityFilter = LocationQualityFilter();
+  final WifiLocationService _wifiLocationService = WifiLocationService();
   String? _lastStartError;
 
   LocationService() {
@@ -47,6 +52,12 @@ class LocationService {
   bool _positionSearchRequested = false;
   bool _positionStreamRestarting = false;
   int _positionStreamGeneration = 0;
+  Timer? _wifiLocationTimer;
+  bool _wifiPositioningEnabled = false;
+  bool _wifiLookupInProgress = false;
+  DateTime? _lastAcceptedWifiPositionAt;
+  Position? _lastFusedPosition;
+  LocationPositionSource _activePositionSource = LocationPositionSource.fused;
   bool _isTracking = false;
   bool _autoPingEnabled = false;
   double _pingIntervalMeters = 805.0; // Default 0.5 miles
@@ -77,6 +88,12 @@ class LocationService {
   // Stream for broadcasting current position
   final _currentPositionController = StreamController<LatLng>.broadcast();
   Stream<LatLng> get currentPositionStream => _currentPositionController.stream;
+
+  final _positionSourceController =
+      StreamController<LocationPositionSource>.broadcast();
+  Stream<LocationPositionSource> get positionSourceStream =>
+      _positionSourceController.stream;
+  LocationPositionSource get activePositionSource => _activePositionSource;
 
   // GPS course is used as a fallback when the device has no compass sensor.
   final _courseController = StreamController<double>.broadcast();
@@ -178,6 +195,79 @@ class LocationService {
     }
   }
 
+  /// Enable the opt-in beaconDB Wi-Fi location source. A recent, valid Wi-Fi
+  /// fix takes priority over Android's fused provider.
+  void setWifiPositioningEnabled(bool enabled) {
+    if (_wifiPositioningEnabled == enabled) return;
+    _wifiPositioningEnabled = enabled;
+    _wifiLocationTimer?.cancel();
+    _wifiLocationTimer = null;
+
+    if (enabled) {
+      _startWifiLocationUpdates();
+      return;
+    }
+
+    _lastAcceptedWifiPositionAt = null;
+    _wifiQualityFilter.reset();
+    final fusedPosition = _lastFusedPosition;
+    if (fusedPosition != null) {
+      _handleNewPosition(fusedPosition, source: LocationPositionSource.fused);
+    }
+  }
+
+  void _startWifiLocationUpdates() {
+    if (!_wifiPositioningEnabled || !_positionSearchRequested) return;
+    _wifiLocationTimer?.cancel();
+    _lookupWifiPosition();
+    _wifiLocationTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      _lookupWifiPosition();
+    });
+  }
+
+  Future<void> _lookupWifiPosition() async {
+    if (!_wifiPositioningEnabled ||
+        !_positionSearchRequested ||
+        _wifiLookupInProgress) {
+      return;
+    }
+    _wifiLookupInProgress = true;
+    try {
+      final estimate = await _wifiLocationService.locate();
+      if (!_wifiPositioningEnabled ||
+          !_positionSearchRequested ||
+          estimate == null) {
+        return;
+      }
+
+      await _logger.logLocationEvent(
+        'beaconDB Wi-Fi estimate: ${estimate.position.latitude}, '
+        '${estimate.position.longitude}, accuracy '
+        '${estimate.accuracyMeters.toStringAsFixed(1)}m from '
+        '${estimate.accessPointCount} access points',
+      );
+      _handleNewPosition(
+        Position(
+          latitude: estimate.position.latitude,
+          longitude: estimate.position.longitude,
+          timestamp: DateTime.now(),
+          accuracy: estimate.accuracyMeters,
+          altitude: 0,
+          altitudeAccuracy: -1,
+          heading: 0,
+          headingAccuracy: -1,
+          speed: 0,
+          speedAccuracy: -1,
+        ),
+        source: LocationPositionSource.wifi,
+      );
+    } catch (e) {
+      await _logger.logError('beaconDB Wi-Fi Location', e.toString());
+    } finally {
+      _wifiLookupInProgress = false;
+    }
+  }
+
   /// Enable or disable Carpeater mode at runtime
   void setCarpeaterMode(bool enabled) {
     final wasEnabled = _carpeaterModeEnabled;
@@ -248,6 +338,7 @@ class LocationService {
 
     _monitorLocationServiceStatus();
     _startPositionWatchdog();
+    _startWifiLocationUpdates();
 
     if (!await isLocationServiceEnabled()) {
       await _logger.logLocationEvent(
@@ -339,7 +430,10 @@ class LocationService {
             (position) {
               if (generation != _positionStreamGeneration) return;
               _lastPositionEventAt = DateTime.now();
-              _handleNewPosition(position);
+              _handleNewPosition(
+                position,
+                source: LocationPositionSource.fused,
+              );
             },
             onError: (Object error) {
               if (generation != _positionStreamGeneration) return;
@@ -475,6 +569,7 @@ class LocationService {
       print('Foreground service started');
 
       _qualityFilter.reset();
+      _wifiQualityFilter.reset();
       _positionSearchRequested = true;
       _monitorLocationServiceStatus();
       _startPositionWatchdog();
@@ -717,22 +812,40 @@ class LocationService {
   double get totalDistanceKm => _totalDistanceMeters / 1000.0;
 
   /// Handle new position from location stream
-  void _handleNewPosition(Position position) async {
+  void _handleNewPosition(
+    Position position, {
+    required LocationPositionSource source,
+  }) async {
     final latLng = LatLng(position.latitude, position.longitude);
     await _logger.logLocationEvent(
-      'Location update: ${latLng.latitude}, ${latLng.longitude}, '
+      '${source.name} location update: ${latLng.latitude}, '
+      '${latLng.longitude}, '
       'accuracy: ${position.accuracy}m, altitude: ${position.altitude}m, '
       'speed: ${(position.speed * 3.6).toStringAsFixed(1)}km/h',
     );
 
-    final rejectionReason = _qualityFilter.rejectionReason(position);
+    final qualityFilter = source == LocationPositionSource.wifi
+        ? _wifiQualityFilter
+        : _qualityFilter;
+    final rejectionReason = qualityFilter.rejectionReason(position);
     if (rejectionReason != null || !GeohashUtils.isValidLocation(latLng)) {
       final reason = rejectionReason ?? 'coordinates outside valid range';
-      await _logger.logLocationEvent('Location ignored: $reason');
+      await _logger.logLocationEvent(
+        '${source.name} location ignored: $reason',
+      );
       print('Location ignored: $reason');
       return;
     }
-    _qualityFilter.accept(position);
+    qualityFilter.accept(position);
+
+    if (source == LocationPositionSource.fused) {
+      _lastFusedPosition = position;
+      if (_hasFreshWifiPosition) return;
+    } else {
+      _lastAcceptedWifiPositionAt = DateTime.now();
+    }
+
+    _activatePositionSource(source);
 
     // Update speed (filter out invalid negative values)
     _currentSpeedMps = (position.speed >= 0) ? position.speed : 0.0;
@@ -895,6 +1008,24 @@ class LocationService {
     } catch (e) {
       print('Error saving sample: $e');
     }
+  }
+
+  bool get _hasFreshWifiPosition {
+    final receivedAt = _lastAcceptedWifiPositionAt;
+    return _wifiPositioningEnabled &&
+        receivedAt != null &&
+        DateTime.now().difference(receivedAt) < const Duration(seconds: 45);
+  }
+
+  void _activatePositionSource(LocationPositionSource source) {
+    if (_activePositionSource == source) return;
+    _activePositionSource = source;
+    _lastPosition = null;
+    _lastDistancePosition = null;
+    _lastRecordedPosition = null;
+    _lastPingPosition = null;
+    _positionSourceController.add(source);
+    _logger.logLocationEvent('Active position source: ${source.name}');
   }
 
   /// Start monitoring device battery level for battery saver mode
@@ -1337,8 +1468,10 @@ class LocationService {
   /// Dispose resources
   void dispose() {
     _positionSearchRequested = false;
+    _wifiPositioningEnabled = false;
     _positionWatchdogTimer?.cancel();
     _positionRestartTimer?.cancel();
+    _wifiLocationTimer?.cancel();
     _locationServiceStatusSubscription?.cancel();
     _positionStreamGeneration++;
     _positionStreamSubscription?.cancel();
@@ -1346,6 +1479,7 @@ class LocationService {
     stopTracking();
     _logger.close();
     _currentPositionController.close();
+    _positionSourceController.close();
     _courseController.close();
     _sampleSavedController.close();
     _pingEventController.close();
@@ -1358,5 +1492,6 @@ class LocationService {
     _carpeaterDiscoveryStartedSubscription?.cancel();
     _carpeaterService.dispose();
     _loraCompanion.dispose();
+    _wifiLocationService.dispose();
   }
 }

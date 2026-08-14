@@ -3,6 +3,11 @@
 ## Unreleased
 
 ### Added
+- Optional beaconDB Wi-Fi positioning can now be enabled in Settings. It scans
+  nearby access points every 30 seconds and gives a valid Wi-Fi-only estimate
+  priority over Android fused/GPS positions. IP and cell fallbacks are disabled,
+  `_nomap`, hidden, randomized, and stale networks are excluded, and the active
+  Wi-Fi position is shown with a cyan marker.
 - Discovery response collection is now configurable: fast mode finishes three
   seconds after the first response, while thorough mode keeps listening until
   the configured discovery timeout.

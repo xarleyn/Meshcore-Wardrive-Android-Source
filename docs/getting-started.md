@@ -53,6 +53,13 @@ that file to your Android device and install it.
   RSSI-weighted estimate. This is not a GPS fix and can be inaccurate because
   terrain, antennas, and radio propagation strongly affect RSSI. Disable
   **Show Approximate Position** to hide it without stopping the calculation.
+- **beaconDB Wi-Fi Positioning**: Disabled by default. When enabled, the app
+  sends nearby access-point BSSIDs, signal levels, frequencies, and observation
+  ages to beaconDB every 30 seconds. SSIDs are used only on the phone to exclude
+  hidden and `_nomap` networks and are not sent. A valid Wi-Fi estimate takes
+  priority over Android fused/GPS positioning and uses a cyan current-location
+  marker. The app returns to fused positioning when no fresh Wi-Fi estimate is
+  available. Internet access and at least two mapped access points are required.
 - **Color Mode**:
   - Quality: Green (excellent) → Red (poor)
   - Age: Green (fresh) → Red (old)
@@ -111,6 +118,8 @@ Exported JSON contains an array of samples:
 
 - **Sample Rate**: Every 5 meters of movement
 - **Location Accuracy**: High (Android fused GPS/network/Wi-Fi location)
+- **Optional Wi-Fi Source**: beaconDB Wi-Fi-only lookup, 30-second interval,
+  no IP or cell-position fallback, disabled by default
 - **Quality Filtering**: Android-reported mock fixes, fixes worse than 250m,
   and probable aircraft movement are excluded; high-altitude roads are still
   supported

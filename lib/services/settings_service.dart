@@ -28,6 +28,7 @@ class SettingsService {
   static const String _showHeatmapKey = 'show_heatmap';
   static const String _showPredictionRingsKey = 'show_prediction_rings';
   static const String _showRadioPositionKey = 'show_radio_position';
+  static const String _beaconDbWifiPositioningKey = 'beacondb_wifi_positioning';
   static const String _showDuctingKey = 'show_ducting';
   static const String _goalCenterLatKey = 'goal_center_lat';
   static const String _goalCenterLonKey = 'goal_center_lon';
@@ -344,6 +345,19 @@ class SettingsService {
     await prefs.setBool(_showRadioPositionKey, value);
   }
 
+  /// Whether nearby Wi-Fi BSSIDs may be sent to beaconDB for positioning.
+  /// Disabled by default because this sends radio observations to a third
+  /// party and requires network access.
+  Future<bool> getBeaconDbWifiPositioning() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_beaconDbWifiPositioningKey) ?? false;
+  }
+
+  Future<void> setBeaconDbWifiPositioning(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_beaconDbWifiPositioningKey, value);
+  }
+
   /// Get show ducting monitor setting
   Future<bool> getShowDucting() async {
     final prefs = await SharedPreferences.getInstance();
@@ -570,6 +584,7 @@ class SettingsService {
     _showHeatmapKey,
     _showPredictionRingsKey,
     _showRadioPositionKey,
+    _beaconDbWifiPositioningKey,
     _showDuctingKey,
     _goalCenterLatKey,
     _goalCenterLonKey,
