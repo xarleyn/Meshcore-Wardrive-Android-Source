@@ -511,7 +511,7 @@ class LocationService {
         autoRunOnBoot: false,
         autoRunOnMyPackageReplaced: false,
         allowWakeLock: true,
-        allowWifiLock: false,
+        allowWifiLock: true,
       ),
     );
   }

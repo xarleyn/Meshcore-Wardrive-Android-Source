@@ -3,6 +3,10 @@
 ## Unreleased
 
 ### Added
+- Starting a recording now requests precise and always-on location access plus
+  an exemption from Android battery optimization. When beaconDB Wi-Fi
+  positioning is enabled, the app also links to Developer options to disable
+  Wi-Fi scan throttling and holds a Wi-Fi lock during foreground tracking.
 - Optional beaconDB Wi-Fi positioning can now be enabled in Settings. It scans
   nearby access points every 30 seconds and gives a valid Wi-Fi-only estimate
   priority over Android fused/GPS positions. IP and cell fallbacks are disabled,

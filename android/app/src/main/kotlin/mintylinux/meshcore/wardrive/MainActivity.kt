@@ -2,6 +2,7 @@ package mintylinux.meshcore.wardrive
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.AudioAttributes
 import android.media.AudioManager
@@ -14,6 +15,7 @@ import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.provider.Settings
 import android.util.Log
 import android.net.wifi.WifiManager
 import io.flutter.embedding.android.FlutterActivity
@@ -24,6 +26,8 @@ class MainActivity : FlutterActivity() {
     private val TAG = "MeshcoreFeedback"
     private val CHANNEL = "mintylinux.meshcore.wardrive/feedback"
     private val WIFI_CHANNEL = "mintylinux.meshcore.wardrive/wifi_location"
+    private val TRACKING_SETTINGS_CHANNEL =
+        "mintylinux.meshcore.wardrive/tracking_settings"
     private var toneGenerator: ToneGenerator? = null
 
     private fun getVibrator(): Vibrator {
@@ -90,6 +94,53 @@ class MainActivity : FlutterActivity() {
                     else -> result.notImplemented()
                 }
             }
+
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            TRACKING_SETTINGS_CHANNEL,
+        ).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "isWifiScanThrottlingEnabled" -> {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+                        result.success(false)
+                    } else {
+                        try {
+                            result.success(
+                                Settings.Global.getInt(
+                                    contentResolver,
+                                    "wifi_scan_throttle_enabled",
+                                    1,
+                                ) != 0,
+                            )
+                        } catch (e: SecurityException) {
+                            Log.w(TAG, "Could not read Wi-Fi scan throttling setting", e)
+                            result.success(null)
+                        }
+                    }
+                }
+                "openWifiScanThrottlingSettings" -> {
+                    result.success(openWifiScanThrottlingSettings())
+                }
+                else -> result.notImplemented()
+            }
+        }
+    }
+
+    private fun openWifiScanThrottlingSettings(): Boolean {
+        val developerSettings = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
+        val intent = if (developerSettings.resolveActivity(packageManager) != null) {
+            developerSettings
+        } else {
+            Intent(Settings.ACTION_SETTINGS)
+        }
+
+        return try {
+            startActivity(intent)
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "Could not open Wi-Fi scan throttling settings", e)
+            false
+        }
     }
 
     @Suppress("DEPRECATION")

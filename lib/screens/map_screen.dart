@@ -32,6 +32,8 @@ import 'package:flutter_map_cache/flutter_map_cache.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:dio_cache_interceptor_file_store/dio_cache_interceptor_file_store.dart';
 import 'package:flutter_map_heatmap/flutter_map_heatmap.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'dart:typed_data';
 import 'debug_log_screen.dart';
 import 'debug_diagnostics_screen.dart';
@@ -51,6 +53,7 @@ import 'repeater_health_screen.dart';
 import '../services/achievement_service.dart';
 import '../services/radio_position_estimator.dart';
 import '../services/screen_wake_service.dart';
+import '../services/android_tracking_settings_service.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -67,6 +70,8 @@ class _MapScreenState extends State<MapScreen> {
   final UploadService _uploadService = UploadService();
   final SettingsService _settingsService = SettingsService();
   final ScreenshotController _screenshotController = ScreenshotController();
+  final AndroidTrackingSettingsService _androidTrackingSettings =
+      AndroidTrackingSettingsService();
 
   bool _isTracking = false;
   bool _isConnecting = false;
@@ -747,6 +752,8 @@ class _MapScreenState extends State<MapScreen> {
       // Check for newly unlocked achievements
       AchievementService().checkAndUnlock();
     } else {
+      if (!await _prepareAndroidTracking()) return;
+
       // Start tracking
       final started = await _locationService.startTracking();
       if (started) {
@@ -783,6 +790,141 @@ class _MapScreenState extends State<MapScreen> {
         );
       }
     }
+  }
+
+  Future<bool> _prepareAndroidTracking() async {
+    if (!Platform.isAndroid) return true;
+
+    final foregroundStatus = await Permission.locationWhenInUse.request();
+    if (!foregroundStatus.isGranted) return true;
+
+    final accuracy = await Geolocator.getLocationAccuracy();
+    if (accuracy != LocationAccuracyStatus.precise) {
+      await _showSettingsDialog(
+        title: 'Precise location required',
+        message:
+            'Wardriving needs precise location. In Android app permissions, '
+            'enable “Use precise location”, then tap Start again.',
+        actionLabel: 'Open app settings',
+        onOpen: openAppSettings,
+      );
+      return false;
+    }
+
+    var backgroundStatus = await Permission.locationAlways.status;
+    if (!backgroundStatus.isGranted) {
+      final shouldRequest = await _showRequestDialog(
+        title: 'Allow location all the time',
+        message:
+            'MeshCore Wardrive records while the screen is off or another app '
+            'is open. Android needs location access set to “Allow all the time”.',
+      );
+      if (!shouldRequest) return false;
+
+      backgroundStatus = await Permission.locationAlways.request();
+      if (!backgroundStatus.isGranted) {
+        await _showSettingsDialog(
+          title: 'Background location required',
+          message:
+              'Select Permissions → Location → Allow all the time, then return '
+              'and tap Start again.',
+          actionLabel: 'Open app settings',
+          onOpen: openAppSettings,
+        );
+        return false;
+      }
+    }
+
+    final batteryStatus = await Permission.ignoreBatteryOptimizations.status;
+    if (!batteryStatus.isGranted) {
+      final shouldRequest = await _showRequestDialog(
+        title: 'Unrestricted battery use',
+        message:
+            'Allow MeshCore Wardrive to ignore battery optimizations so Android '
+            'does not pause GPS, radio communication, or Wi-Fi scans during a drive.',
+      );
+      if (shouldRequest) {
+        await Permission.ignoreBatteryOptimizations.request();
+      }
+    }
+
+    if (_beaconDbWifiPositioning) {
+      if (!await _requestWifiScanThrottlingDisabled()) return false;
+    }
+
+    return true;
+  }
+
+  Future<bool> _requestWifiScanThrottlingDisabled() async {
+    if (!Platform.isAndroid) return true;
+
+    final throttlingEnabled = await _androidTrackingSettings
+        .isWifiScanThrottlingEnabled();
+    if (throttlingEnabled == false || !mounted) return true;
+
+    final openedSettings = await _showSettingsDialog(
+      title: 'Disable Wi-Fi scan throttling',
+      message:
+          'Android does not let apps change this setting automatically. In '
+          'Developer options, turn off “Wi-Fi scan throttling” for timely '
+          'beaconDB position updates.',
+      actionLabel: 'Developer options',
+      onOpen: _androidTrackingSettings.openWifiScanThrottlingSettings,
+    );
+    return !openedSettings;
+  }
+
+  Future<bool> _showRequestDialog({
+    required String title,
+    required String message,
+  }) async {
+    if (!mounted) return false;
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(title),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Not now'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Continue'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
+  Future<bool> _showSettingsDialog({
+    required String title,
+    required String message,
+    required String actionLabel,
+    required Future<bool> Function() onOpen,
+  }) async {
+    if (!mounted) return false;
+    final shouldOpen = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Not now'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(actionLabel),
+          ),
+        ],
+      ),
+    );
+    if (shouldOpen != true) return false;
+    return onOpen();
   }
 
   Future<void> _clearData() async {
@@ -3642,6 +3784,7 @@ $placemarks  </Document>
                           _showSnackBar(
                             'beaconDB enabled: nearby BSSIDs will be shared',
                           );
+                          await _requestWifiScanThrottlingDisabled();
                         }
                       },
                     ),
