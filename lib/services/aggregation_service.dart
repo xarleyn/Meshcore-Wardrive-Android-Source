@@ -4,6 +4,14 @@ import '../utils/geohash_utils.dart';
 import '../utils/color_blind_palette.dart';
 
 class AggregationService {
+  /// Normalizes full public keys and their displayed prefixes to the same key.
+  static String repeaterLookupKey(String nodeId) {
+    final normalizedId = nodeId.toUpperCase();
+    return normalizedId.length >= 8
+        ? normalizedId.substring(0, 8)
+        : normalizedId;
+  }
+
   /// Build indexes from samples and repeaters
   /// @param coveragePrecision: Geohash precision for coverage squares (4-8, default 6)
   static AggregationResult buildIndexes(
@@ -22,11 +30,7 @@ class AggregationService {
         'elevation': repeater.elevation,
         'repeater': repeater,
       };
-      final normalizedId = repeater.id.toUpperCase();
-      idToRepeaters[normalizedId] = repeaterData;
-      if (normalizedId.length >= 8) {
-        idToRepeaters[normalizedId.substring(0, 8)] = repeaterData;
-      }
+      idToRepeaters[repeaterLookupKey(repeater.id)] = repeaterData;
     }
 
     // Group samples by coverage area — only include cells with at least one ping
@@ -146,12 +150,7 @@ class AggregationService {
     for (final coverage in hashToCoverage.values) {
       // Only create edges for repeaters that actually responded in this coverage area
       for (final repeaterId in coverage.repeaters) {
-        final normalizedId = repeaterId.toUpperCase();
-        final repeaterData =
-            idToRepeaters[normalizedId] ??
-            idToRepeaters[normalizedId.length >= 8
-                ? normalizedId.substring(0, 8)
-                : normalizedId];
+        final repeaterData = idToRepeaters[repeaterLookupKey(repeaterId)];
         if (repeaterData != null) {
           final repeater = repeaterData['repeater'] as Repeater;
           // Skip repeaters with location set to 0,0 (invalid/unknown location)

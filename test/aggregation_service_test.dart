@@ -5,6 +5,17 @@ import 'package:meshcore_wardrive/services/aggregation_service.dart';
 
 void main() {
   group('AggregationService', () {
+    test('uses the same lookup key for full and short repeater IDs', () {
+      const shortNodeId = 'aabbccdd';
+      const fullNodeId =
+          'AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899';
+
+      expect(
+        AggregationService.repeaterLookupKey(fullNodeId),
+        AggregationService.repeaterLookupKey(shortNodeId),
+      );
+    });
+
     test('links a full sample node ID to its short repeater ID', () {
       const shortNodeId = 'AABBCCDD';
       const fullNodeId =

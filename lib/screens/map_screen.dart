@@ -2668,7 +2668,8 @@ $placemarks  </Document>
         );
         if (!matches) continue;
       }
-      repeaterById[repeater.id] = repeater;
+      repeaterById[AggregationService.repeaterLookupKey(repeater.id)] =
+          repeater;
     }
 
     // Match samples to repeaters by path (nodeId)
@@ -2678,7 +2679,8 @@ $placemarks  </Document>
           sample.path!.isEmpty) {
         continue;
       }
-      final repeater = repeaterById[sample.path!];
+      final repeater =
+          repeaterById[AggregationService.repeaterLookupKey(sample.path!)];
       if (repeater == null) continue;
 
       final dist = distance.as(
