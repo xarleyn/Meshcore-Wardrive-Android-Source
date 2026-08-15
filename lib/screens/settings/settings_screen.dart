@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 export 'widgets/settings_section_header.dart';
+export 'widgets/settings_text_input_dialog.dart';
 
 typedef SettingsContentBuilder =
     Widget Function(

@@ -98,53 +98,29 @@ extension _StatisticsSettingsSection on _MapScreenState {
                 final displayValue = vehicleMpg != null && isMetric
                     ? (235.215 / vehicleMpg).toStringAsFixed(1)
                     : vehicleMpg?.toStringAsFixed(1) ?? '';
-                final controller = TextEditingController(text: displayValue);
-                final confirmed = await showDialog<bool>(
+                final input = await showSettingsTextInputDialog(
                   context: context,
-                  builder: (ctx) => AlertDialog(
-                    title: const Text('Vehicle Fuel Economy'),
-                    content: TextField(
-                      controller: controller,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: isMetric
-                            ? 'Litres per 100km (L/100km)'
-                            : 'Miles Per Gallon (MPG)',
-                        hintText: isMetric ? 'e.g., 9.4' : 'e.g., 25.0',
-                      ),
-                      autofocus: true,
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(ctx, false),
-                        child: const Text('Cancel'),
-                      ),
-                      if (vehicleMpg != null)
-                        TextButton(
-                          onPressed: () async {
-                            await _settingsService.setVehicleMpg(null);
-                            Navigator.pop(ctx, true);
-                          },
-                          child: const Text('Clear'),
-                        ),
-                      TextButton(
-                        onPressed: () => Navigator.pop(ctx, true),
-                        child: const Text('Save'),
-                      ),
-                    ],
+                  title: 'Vehicle Fuel Economy',
+                  initialValue: displayValue,
+                  labelText: isMetric
+                      ? 'Litres per 100km (L/100km)'
+                      : 'Miles Per Gallon (MPG)',
+                  hintText: isMetric ? 'e.g., 9.4' : 'e.g., 25.0',
+                  allowClear: vehicleMpg != null,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
                   ),
+                  validator: _validatePositiveNumber,
                 );
-                if (confirmed == true && controller.text.isNotEmpty) {
-                  final inputValue = double.tryParse(controller.text);
-                  if (inputValue != null && inputValue > 0) {
-                    // Convert L/100km to MPG for internal storage
-                    final mpgToStore = isMetric
-                        ? 235.215 / inputValue
-                        : inputValue;
-                    await _settingsService.setVehicleMpg(mpgToStore);
-                  }
+                if (input == null) return;
+                if (input.isEmpty) {
+                  await _settingsService.setVehicleMpg(null);
+                } else {
+                  final inputValue = _parseNumber(input);
+                  final mpgToStore = isMetric
+                      ? 235.215 / inputValue
+                      : inputValue;
+                  await _settingsService.setVehicleMpg(mpgToStore);
                 }
                 setModalState(() {});
               },
@@ -163,47 +139,24 @@ extension _StatisticsSettingsSection on _MapScreenState {
                 final displayPrice = isMetric
                     ? (gasPrice / 3.78541).toStringAsFixed(2)
                     : gasPrice.toStringAsFixed(2);
-                final controller = TextEditingController(text: displayPrice);
-                final confirmed = await showDialog<bool>(
+                final input = await showSettingsTextInputDialog(
                   context: context,
-                  builder: (ctx) => AlertDialog(
-                    title: Text(isMetric ? 'Fuel Price' : 'Gas Price'),
-                    content: TextField(
-                      controller: controller,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: isMetric
-                            ? 'Price per Litre'
-                            : 'Price per Gallon',
-                        hintText: isMetric ? 'e.g., 1.85' : 'e.g., 3.50',
-                        prefixText: '\$ ',
-                      ),
-                      autofocus: true,
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(ctx, false),
-                        child: const Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () => Navigator.pop(ctx, true),
-                        child: const Text('Save'),
-                      ),
-                    ],
+                  title: isMetric ? 'Fuel Price' : 'Gas Price',
+                  initialValue: displayPrice,
+                  labelText: isMetric ? 'Price per Litre' : 'Price per Gallon',
+                  hintText: isMetric ? 'e.g., 1.85' : 'e.g., 3.50',
+                  prefixText: '\$ ',
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
                   ),
+                  validator: _validatePositiveNumber,
                 );
-                if (confirmed == true && controller.text.isNotEmpty) {
-                  final inputPrice = double.tryParse(controller.text);
-                  if (inputPrice != null && inputPrice > 0) {
-                    // Convert $/L to $/gal for internal storage
-                    final priceToStore = isMetric
-                        ? inputPrice * 3.78541
-                        : inputPrice;
-                    await _settingsService.setGasPrice(priceToStore);
-                  }
-                }
+                if (input == null) return;
+                final inputPrice = _parseNumber(input);
+                final priceToStore = isMetric
+                    ? inputPrice * 3.78541
+                    : inputPrice;
+                await _settingsService.setGasPrice(priceToStore);
                 setModalState(() {});
               },
             ),
@@ -212,4 +165,16 @@ extension _StatisticsSettingsSection on _MapScreenState {
       },
     ),
   ];
+
+  String? _validatePositiveNumber(String? text) {
+    final value = double.tryParse((text ?? '').trim().replaceAll(',', '.'));
+    if (value == null || !value.isFinite || value <= 0) {
+      return 'Enter a number greater than zero';
+    }
+    return null;
+  }
+
+  double _parseNumber(String text) {
+    return double.parse(text.trim().replaceAll(',', '.'));
+  }
 }

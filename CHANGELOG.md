@@ -36,6 +36,11 @@
   in map settings without disabling its calculation.
 
 ### Fixed
+- Settings text fields now keep their controllers alive until dialog dismissal
+  finishes, preventing crashes and cascading layout errors after saving location
+  quality thresholds and other editable preferences.
+- Location quality controls no longer rely on Flutter's `ExpansionTile`
+  announcement event, which Android API 36 reports as deprecated.
 - The map now keeps searching for a fused Android position whenever it is open,
   even before recording starts. A watchdog restarts stalled or closed location
   streams and resumes automatically after Location Services are re-enabled.

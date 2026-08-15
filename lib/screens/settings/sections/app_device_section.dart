@@ -17,29 +17,13 @@ extension _AppDeviceSettingsSection on _MapScreenState {
       trailing: const Icon(Icons.edit, size: 20),
       onTap: () async {
         final current = await _settingsService.getDeviceName();
-        final controller = TextEditingController(text: current ?? '');
-        final result = await showDialog<String>(
+        if (!context.mounted) return;
+        final result = await showSettingsTextInputDialog(
           context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text('Device Name'),
-            content: TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'Name',
-                hintText: 'e.g., Chuck-Pixel',
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, controller.text),
-                child: const Text('Save'),
-              ),
-            ],
-          ),
+          title: 'Device Name',
+          initialValue: current ?? '',
+          labelText: 'Name',
+          hintText: 'e.g., Chuck-Pixel',
         );
         if (result != null) {
           await _settingsService.setDeviceName(result.isEmpty ? null : result);

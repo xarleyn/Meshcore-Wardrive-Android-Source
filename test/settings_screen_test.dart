@@ -31,4 +31,41 @@ void main() {
     expect(find.text('Map display'), findsOneWidget);
     expect(find.text('Show Coverage Boxes'), findsOneWidget);
   });
+
+  testWidgets('keeps text controller alive through dialog dismissal', (
+    tester,
+  ) async {
+    String? result;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => FilledButton(
+              onPressed: () async {
+                result = await showSettingsTextInputDialog(
+                  context: context,
+                  title: 'Maximum Horizontal Error',
+                  initialValue: '250',
+                  labelText: 'Maximum Horizontal Error',
+                  suffixText: 'm',
+                );
+              },
+              child: const Text('Edit'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Edit'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), '300');
+    await tester.tap(find.text('Save'));
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+    await tester.pumpAndSettle();
+    expect(result, '300');
+  });
 }

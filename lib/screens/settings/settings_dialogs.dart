@@ -132,50 +132,21 @@ extension _SettingsDialogs on _MapScreenState {
   }
 
   Future<void> _setIgnoredRepeater() async {
-    final controller = TextEditingController(
-      text: _ignoredRepeaterPrefix ?? '',
-    );
-
-    final confirmed = await showDialog<bool>(
+    final input = await showSettingsTextInputDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Ignore Repeaters'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Filter out responses from your mobile repeater(s) to avoid false coverage.\n\n'
-              'Enter repeater prefixes separated by commas:',
-              style: TextStyle(fontSize: 13),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'Repeater Prefixes',
-                hintText: 'e.g., 7E, A4F, BAD5',
-                isDense: true,
-              ),
-              textCapitalization: TextCapitalization.characters,
-              maxLines: 2,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Save'),
-          ),
-        ],
-      ),
+      title: 'Ignore Repeaters',
+      initialValue: _ignoredRepeaterPrefix ?? '',
+      labelText: 'Repeater Prefixes',
+      hintText: 'e.g., 7E, A4F, BAD5',
+      description:
+          'Filter out responses from your mobile repeater(s) to avoid false '
+          'coverage. Enter repeater prefixes separated by commas:',
+      textCapitalization: TextCapitalization.characters,
+      maxLines: 2,
     );
 
-    if (confirmed == true) {
-      final prefix = controller.text.isEmpty ? null : controller.text;
+    if (input != null) {
+      final prefix = input.trim().isEmpty ? null : input.trim();
       _updateMapState(() {
         _ignoredRepeaterPrefix = prefix;
       });
@@ -188,48 +159,21 @@ extension _SettingsDialogs on _MapScreenState {
   }
 
   Future<void> _setIncludeOnlyRepeaters() async {
-    final controller = TextEditingController(text: _includeOnlyRepeaters ?? '');
-
-    final confirmed = await showDialog<bool>(
+    final input = await showSettingsTextInputDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Include Only Repeaters'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Show ONLY samples from specific repeaters (whitelist). Useful for testing your own infrastructure.\n\n'
-              'Enter repeater prefixes separated by commas:',
-              style: TextStyle(fontSize: 13),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'Repeater Prefixes',
-                hintText: 'e.g., 7E3A, A4F2, 8B',
-                isDense: true,
-              ),
-              textCapitalization: TextCapitalization.characters,
-              maxLines: 2,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Save'),
-          ),
-        ],
-      ),
+      title: 'Include Only Repeaters',
+      initialValue: _includeOnlyRepeaters ?? '',
+      labelText: 'Repeater Prefixes',
+      hintText: 'e.g., 7E3A, A4F2, 8B',
+      description:
+          'Show only samples from specific repeaters (whitelist). Enter '
+          'repeater prefixes separated by commas:',
+      textCapitalization: TextCapitalization.characters,
+      maxLines: 2,
     );
 
-    if (confirmed == true) {
-      final prefixes = controller.text.isEmpty ? null : controller.text;
+    if (input != null) {
+      final prefixes = input.trim().isEmpty ? null : input.trim();
       _updateMapState(() {
         _includeOnlyRepeaters = prefixes;
       });
@@ -252,63 +196,27 @@ extension _SettingsDialogs on _MapScreenState {
     required LocationQualitySettings Function(double value) update,
     required StateSetter setModalState,
   }) async {
-    final controller = TextEditingController(
-      text: _formatLocationQualityValue(displayedValue),
-    );
-    final formKey = GlobalKey<FormState>();
-    final value = await showDialog<double>(
+    final input = await showSettingsTextInputDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(title),
-        content: Form(
-          key: formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(description),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: controller,
-                autofocus: true,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                decoration: InputDecoration(suffixText: unit),
-                validator: (text) {
-                  final parsed = double.tryParse(
-                    (text ?? '').trim().replaceAll(',', '.'),
-                  );
-                  if (parsed == null || !parsed.isFinite || parsed <= 0) {
-                    return 'Enter a number greater than zero';
-                  }
-                  return null;
-                },
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              if (!(formKey.currentState?.validate() ?? false)) return;
-              Navigator.pop(
-                dialogContext,
-                double.parse(controller.text.trim().replaceAll(',', '.')),
-              );
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      ),
+      title: title,
+      initialValue: _formatLocationQualityValue(displayedValue),
+      labelText: title,
+      description: description,
+      suffixText: unit,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      validator: (text) {
+        final parsed = double.tryParse(
+          (text ?? '').trim().replaceAll(',', '.'),
+        );
+        if (parsed == null || !parsed.isFinite || parsed <= 0) {
+          return 'Enter a number greater than zero';
+        }
+        return null;
+      },
     );
-    controller.dispose();
-    if (value == null || !mounted) return;
+    if (input == null || !mounted) return;
 
+    final value = double.parse(input.trim().replaceAll(',', '.'));
     final settings = update(value);
     await _settingsService.setLocationQualitySettings(settings);
     if (!mounted) return;

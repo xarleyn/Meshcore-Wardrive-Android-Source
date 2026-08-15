@@ -37,32 +37,13 @@ extension _CarpeaterSettingsSection on _MapScreenState {
         leading: const Icon(Icons.cell_tower),
         trailing: const Icon(Icons.edit, size: 20),
         onTap: () async {
-          final controller = TextEditingController(
-            text: _carpeaterRepeaterId ?? '',
-          );
-          final result = await showDialog<String>(
+          final result = await showSettingsTextInputDialog(
             context: context,
-            builder: (ctx) => AlertDialog(
-              title: const Text('Target Repeater'),
-              content: TextField(
-                controller: controller,
-                decoration: const InputDecoration(
-                  labelText: 'Repeater ID Prefix',
-                  hintText: 'e.g., BAD5DC49',
-                ),
-                textCapitalization: TextCapitalization.characters,
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx, controller.text),
-                  child: const Text('Save'),
-                ),
-              ],
-            ),
+            title: 'Target Repeater',
+            initialValue: _carpeaterRepeaterId ?? '',
+            labelText: 'Repeater ID Prefix',
+            hintText: 'e.g., BAD5DC49',
+            textCapitalization: TextCapitalization.characters,
           );
           if (result != null) {
             _updateMapState(() {
@@ -85,32 +66,13 @@ extension _CarpeaterSettingsSection on _MapScreenState {
         leading: const Icon(Icons.lock),
         trailing: const Icon(Icons.edit, size: 20),
         onTap: () async {
-          final controller = TextEditingController(
-            text: _carpeaterPassword ?? '',
-          );
-          final result = await showDialog<String>(
+          final result = await showSettingsTextInputDialog(
             context: context,
-            builder: (ctx) => AlertDialog(
-              title: const Text('Admin Password'),
-              content: TextField(
-                controller: controller,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Password',
-                  hintText: 'Repeater admin password',
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx, controller.text),
-                  child: const Text('Save'),
-                ),
-              ],
-            ),
+            title: 'Admin Password',
+            initialValue: _carpeaterPassword ?? '',
+            labelText: 'Password',
+            hintText: 'Repeater admin password',
+            obscureText: true,
           );
           if (result != null) {
             _updateMapState(() {
