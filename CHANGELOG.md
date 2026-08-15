@@ -69,6 +69,10 @@
   service error.
 
 ### Changed
+- Settings now open as a dedicated full-screen page and are grouped into
+  Android-style categories for map display, positioning, alerts, Carpeater,
+  app/device preferences, discovery, statistics, data, diagnostics, and online
+  services.
 - Fresh installs default to metric units, geohash precision 7, time-based
   pings every 30 seconds, and a 10-second discovery timeout. Additional
   20-second, 25-second, and 45-second ping intervals are available.
