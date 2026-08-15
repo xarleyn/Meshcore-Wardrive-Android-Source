@@ -14,10 +14,18 @@ class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
     required this.version,
     required this.contentBuilder,
+    this.title = 'Settings',
     super.key,
   });
 
-  final String version;
+  const SettingsScreen.category({
+    required this.title,
+    required this.contentBuilder,
+    super.key,
+  }) : version = null;
+
+  final String title;
+  final String? version;
   final SettingsContentBuilder contentBuilder;
 
   @override
@@ -37,19 +45,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(widget.title),
         actions: [
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 20),
-              child: Text(
-                'v${widget.version}',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+          if (widget.version case final version?)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(right: 20),
+                child: Text(
+                  'v$version',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
             ),
-          ),
         ],
       ),
       body: StatefulBuilder(

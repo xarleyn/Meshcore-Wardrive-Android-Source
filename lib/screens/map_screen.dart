@@ -68,6 +68,7 @@ part 'settings/sections/diagnostics_section.dart';
 part 'settings/sections/discovery_section.dart';
 part 'settings/sections/feedback_section.dart';
 part 'settings/sections/location_section.dart';
+part 'settings/sections/location_quality_section.dart';
 part 'settings/sections/map_display_section.dart';
 part 'settings/sections/online_map_section.dart';
 part 'settings/sections/statistics_section.dart';

@@ -68,4 +68,22 @@ void main() {
     await tester.pumpAndSettle();
     expect(result, '300');
   });
+
+  testWidgets('renders a dedicated settings category page', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SettingsScreen.category(
+          title: 'Location Quality Filters',
+          contentBuilder: (context, setPageState, scrollController) => ListView(
+            controller: scrollController,
+            children: const [ListTile(title: Text('Maximum Horizontal Error'))],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Location Quality Filters'), findsOneWidget);
+    expect(find.text('Maximum Horizontal Error'), findsOneWidget);
+    expect(find.textContaining(RegExp(r'^v\d')), findsNothing);
+  });
 }
