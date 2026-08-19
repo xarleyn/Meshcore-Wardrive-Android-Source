@@ -3,6 +3,10 @@
 ## Unreleased
 
 ### Added
+- Interface and map themes can now be selected independently. Existing installs
+  keep their previous map appearance when the new setting is initialized.
+- Added a map-provider investigation covering Yandex Tiles API, Yandex MapKit,
+  hosted alternatives, offline support, migration effort, and licensing risks.
 - Location rejection thresholds are now configurable in a dedicated expandable
   Settings group, with user-friendly km/h speed inputs and one-tap restoration
   of the previous built-in defaults.

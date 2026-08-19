@@ -31,7 +31,7 @@ companion radio over USB or Bluetooth, and displays coverage on a Flutter map.
 - Repeater response time tracking
 - Color blind accessibility modes
 - Debug terminal with logging
-- Light/Dark theme support
+- Independent light/dark/system themes for the interface and map
 
 ## 🛠️ Development Setup
 

@@ -189,6 +189,9 @@ class _MapScreenState extends State<MapScreen> {
   // Offline tile cache
   CacheStore? _tileCacheStore;
 
+  // Map theme is independent from the Material interface theme.
+  MapThemeMode _mapThemeMode = MapThemeMode.system;
+
   // Heatmap
   bool _showHeatmap = false;
   final StreamController<void> _heatmapRebuildStream =
@@ -499,6 +502,7 @@ class _MapScreenState extends State<MapScreen> {
     final locationQualitySettings = await _settingsService
         .getLocationQualitySettings();
     final showDucting = await _settingsService.getShowDucting();
+    final mapThemeMode = await _settingsService.getMapThemeMode();
 
     setState(() {
       _showSamples = showSamples;
@@ -524,6 +528,7 @@ class _MapScreenState extends State<MapScreen> {
       _beaconDbWifiPositioning = beaconDbWifiPositioning;
       _locationQualitySettings = locationQualitySettings;
       _showDucting = showDucting;
+      _mapThemeMode = mapThemeMode;
     });
 
     // Load ping mode settings
@@ -2206,7 +2211,7 @@ $placemarks  </Document>
   }
 
   Widget _buildMap() {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final isDarkMode = _usesDarkMapTiles(context);
 
     return FlutterMap(
       mapController: _mapController,
@@ -3520,7 +3525,7 @@ $placemarks  </Document>
     );
   }
 
-  String _getThemeModeText() {
+  String _getInterfaceThemeModeText() {
     final appState = MyApp.of(context);
     if (appState == null) return 'System Default';
 
@@ -3534,14 +3539,14 @@ $placemarks  </Document>
     }
   }
 
-  Future<void> _showThemeSelector() async {
+  Future<void> _showInterfaceThemeSelector() async {
     final appState = MyApp.of(context);
     if (appState == null) return;
 
     final selected = await showDialog<ThemeMode>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Choose Theme'),
+        title: const Text('Choose Interface Theme'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -3567,7 +3572,64 @@ $placemarks  </Document>
 
     if (selected != null) {
       await appState.setThemeMode(selected);
-      setState(() {}); // Refresh to update map tiles
+    }
+  }
+
+  String _getMapThemeModeText() {
+    switch (_mapThemeMode) {
+      case MapThemeMode.light:
+        return 'Light';
+      case MapThemeMode.dark:
+        return 'Dark';
+      case MapThemeMode.system:
+        return 'System Default';
+    }
+  }
+
+  bool _usesDarkMapTiles(BuildContext context) {
+    switch (_mapThemeMode) {
+      case MapThemeMode.light:
+        return false;
+      case MapThemeMode.dark:
+        return true;
+      case MapThemeMode.system:
+        return MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+    }
+  }
+
+  Future<void> _showMapThemeSelector() async {
+    final selected = await showDialog<MapThemeMode>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Choose Map Theme'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: const Text('Light'),
+              leading: const Icon(Icons.light_mode),
+              onTap: () => Navigator.pop(context, MapThemeMode.light),
+            ),
+            ListTile(
+              title: const Text('Dark'),
+              leading: const Icon(Icons.dark_mode),
+              onTap: () => Navigator.pop(context, MapThemeMode.dark),
+            ),
+            ListTile(
+              title: const Text('System Default'),
+              leading: const Icon(Icons.brightness_auto),
+              onTap: () => Navigator.pop(context, MapThemeMode.system),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (selected != null) {
+      setState(() {
+        _mapThemeMode = selected;
+      });
+      await _settingsService.setMapThemeMode(selected);
     }
   }
 
@@ -4337,7 +4399,7 @@ $placemarks  </Document>
 
     final bounds = _mapController.camera.visibleBounds;
     final currentZoom = _mapController.camera.zoom.floor();
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final isDarkMode = _usesDarkMapTiles(context);
 
     int minZoom = currentZoom;
     int maxZoom = (currentZoom + 3).clamp(0, 18);

@@ -14,6 +14,7 @@
 ## Development
 
 - [Debugging ping responses](development/debugging-pings.md)
+- [Map provider investigation](development/map-providers.md)
 - [Android release builds, versioning, and signing](development/releasing.md)
 - [Version history](../CHANGELOG.md)
 

@@ -3,6 +3,17 @@ part of '../../map_screen.dart';
 extension _MapDisplaySettingsSection on _MapScreenState {
   List<Widget> _buildMapDisplaySettings(StateSetter setModalState) => [
     const SettingsSectionHeader(title: 'Map display', icon: Icons.map_outlined),
+    ListTile(
+      title: const Text('Map Theme'),
+      subtitle: Text(_getMapThemeModeText()),
+      leading: const Icon(Icons.map_outlined),
+      trailing: const Icon(Icons.brightness_6),
+      onTap: () {
+        Navigator.pop(context);
+        _showMapThemeSelector();
+      },
+    ),
+    const Divider(),
     SwitchListTile(
       title: const Text('Show Coverage Boxes'),
       value: _showCoverage,

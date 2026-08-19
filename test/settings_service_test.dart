@@ -63,6 +63,52 @@ void main() {
     });
   });
 
+  group('map theme setting', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('defaults to the system theme', () async {
+      expect(await SettingsService().getMapThemeMode(), MapThemeMode.system);
+    });
+
+    test('persists the selected map theme independently', () async {
+      final settings = SettingsService();
+
+      await settings.setMapThemeMode(MapThemeMode.dark);
+
+      expect(await settings.getMapThemeMode(), MapThemeMode.dark);
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('theme_mode'), isNull);
+    });
+
+    test('inherits and stores the legacy interface theme once', () async {
+      SharedPreferences.setMockInitialValues({'theme_mode': 'dark'});
+      final settings = SettingsService();
+
+      expect(await settings.getMapThemeMode(), MapThemeMode.dark);
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('theme_mode', 'light');
+      expect(await settings.getMapThemeMode(), MapThemeMode.dark);
+    });
+
+    test('falls back to system for an unknown stored value', () async {
+      SharedPreferences.setMockInitialValues({'map_theme_mode': 'sepia'});
+
+      expect(await SettingsService().getMapThemeMode(), MapThemeMode.system);
+    });
+
+    test('includes the map theme in settings backup', () async {
+      final settings = SettingsService();
+      await settings.setMapThemeMode(MapThemeMode.light);
+
+      final exported = await settings.exportSettings();
+
+      expect(exported['map_theme_mode'], 'light');
+    });
+  });
+
   group('radio position visibility setting', () {
     setUp(() {
       SharedPreferences.setMockInitialValues({});

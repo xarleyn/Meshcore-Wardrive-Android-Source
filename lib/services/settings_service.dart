@@ -5,6 +5,8 @@ import '../models/location_quality_settings.dart';
 
 enum CurrentLocationMarkerStyle { circle, arrow }
 
+enum MapThemeMode { system, light, dark }
+
 class SettingsService {
   static const String _showSamplesKey = 'show_samples';
   static const String _showGpsSamplesKey = 'show_gps_samples';
@@ -59,6 +61,7 @@ class SettingsService {
   static const String _showSuccessfulOnlyKey = 'show_successful_only';
   static const String _deadZoneAlertsKey = 'dead_zone_alerts_enabled';
   static const String _newRepeaterAlertsKey = 'new_repeater_alerts_enabled';
+  static const String _mapThemeModeKey = 'map_theme_mode';
 
   // Alert toggles
   Future<bool> getDeadZoneAlertsEnabled() async {
@@ -633,6 +636,31 @@ class SettingsService {
     await prefs.setString(_currentLocationMarkerStyleKey, value.name);
   }
 
+  /// Returns the independently selected map theme.
+  ///
+  /// Existing installations inherit their previous app-wide theme once. This
+  /// keeps the map appearance stable while decoupling future interface changes.
+  Future<MapThemeMode> getMapThemeMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    final storedValue = prefs.getString(_mapThemeModeKey);
+    final legacyThemeValue = prefs.getString('theme_mode');
+    final value = storedValue ?? legacyThemeValue ?? MapThemeMode.system.name;
+    final mode = MapThemeMode.values.firstWhere(
+      (candidate) => candidate.name == value,
+      orElse: () => MapThemeMode.system,
+    );
+
+    if (storedValue == null) {
+      await prefs.setString(_mapThemeModeKey, mode.name);
+    }
+    return mode;
+  }
+
+  Future<void> setMapThemeMode(MapThemeMode value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_mapThemeModeKey, value.name);
+  }
+
   /// All preference keys that should be exported/imported
   static const List<String> _exportKeys = [
     _showSamplesKey,
@@ -686,6 +714,7 @@ class SettingsService {
     'selected_endpoints',
     // Theme
     'theme_mode',
+    _mapThemeModeKey,
   ];
 
   /// Export all settings to a JSON-encodable map

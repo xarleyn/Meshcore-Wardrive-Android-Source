@@ -99,12 +99,12 @@ extension _AppDeviceSettingsSection on _MapScreenState {
       ),
     ),
     ListTile(
-      title: const Text('Theme'),
-      subtitle: Text(_getThemeModeText()),
+      title: const Text('Interface Theme'),
+      subtitle: Text(_getInterfaceThemeModeText()),
       trailing: const Icon(Icons.brightness_6),
       onTap: () {
         Navigator.pop(context);
-        _showThemeSelector();
+        _showInterfaceThemeSelector();
       },
     ),
     if (_loraConnected)
