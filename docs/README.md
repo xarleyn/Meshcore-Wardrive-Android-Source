@@ -13,6 +13,8 @@
 
 ## Development
 
+- [In-app localization (en / ru)](superpowers/specs/2026-08-20-localization-design.md)
+- [Localization implementation plan](superpowers/plans/2026-08-20-localization.md)
 - [Fresh session map view](superpowers/specs/2026-08-19-fresh-session-map-design.md)
 - [Debugging ping responses](development/debugging-pings.md)
 - [Map provider investigation](development/map-providers.md)
