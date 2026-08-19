@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meshcore_wardrive/l10n/generated/app_localizations.dart';
 import 'package:meshcore_wardrive/screens/settings/settings_screen.dart';
 import 'package:meshcore_wardrive/services/upload_service.dart';
+
+import 'helpers/l10n_harness.dart';
 
 void main() {
   const firstEndpoint = UploadEndpoint(
@@ -13,40 +16,40 @@ void main() {
     url: 'https://second.example/upload',
   );
 
-  Future<void> showSelectionDialog(
+  Future<AppLocalizations> showSelectionDialog(
     WidgetTester tester,
     ValueNotifier<List<String>?> result,
   ) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Builder(
-            builder: (context) => FilledButton(
-              onPressed: () async {
-                result.value = await showDialog<List<String>>(
-                  context: context,
-                  builder: (context) => const UploadEndpointSelectionDialog(
-                    endpoints: [firstEndpoint, secondEndpoint],
-                    initiallySelectedNames: ['First site'],
-                  ),
-                );
-              },
-              child: const Text('Open'),
-            ),
+    final l10n = await pumpWithL10n(
+      tester,
+      Scaffold(
+        body: Builder(
+          builder: (context) => FilledButton(
+            onPressed: () async {
+              result.value = await showDialog<List<String>>(
+                context: context,
+                builder: (context) => const UploadEndpointSelectionDialog(
+                  endpoints: [firstEndpoint, secondEndpoint],
+                  initiallySelectedNames: ['First site'],
+                ),
+              );
+            },
+            child: const Text('Open'),
           ),
         ),
       ),
     );
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
+    return l10n;
   }
 
   testWidgets('returns all sites selected for upload', (tester) async {
     final result = ValueNotifier<List<String>?>(null);
-    await showSelectionDialog(tester, result);
+    final l10n = await showSelectionDialog(tester, result);
 
-    expect(find.text('Upload Data'), findsOneWidget);
-    expect(find.text('Select sites to upload to:'), findsOneWidget);
+    expect(find.text(l10n.settingsUploadData), findsOneWidget);
+    expect(find.text(l10n.settingsUploadSelectSites), findsOneWidget);
     expect(
       tester
           .widget<CheckboxListTile>(
@@ -58,7 +61,7 @@ void main() {
 
     await tester.tap(find.text('Second site'));
     await tester.pump();
-    await tester.tap(find.widgetWithText(FilledButton, 'Upload'));
+    await tester.tap(find.widgetWithText(FilledButton, l10n.settingsUpload));
     await tester.pumpAndSettle();
 
     expect(result.value, ['First site', 'Second site']);
@@ -66,12 +69,12 @@ void main() {
 
   testWidgets('cancel closes the dialog without submitting', (tester) async {
     final result = ValueNotifier<List<String>?>(null);
-    await showSelectionDialog(tester, result);
+    final l10n = await showSelectionDialog(tester, result);
 
-    await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
+    await tester.tap(find.widgetWithText(TextButton, l10n.settingsCancel));
     await tester.pumpAndSettle();
 
-    expect(find.text('Upload Data'), findsNothing);
+    expect(find.text(l10n.settingsUploadData), findsNothing);
     expect(result.value, isNull);
   });
 

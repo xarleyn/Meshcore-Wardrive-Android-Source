@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/generated/app_localizations.dart';
+
 export 'widgets/settings_section_header.dart';
 export 'widgets/settings_text_input_dialog.dart';
 export 'widgets/upload_endpoint_selection_dialog.dart';
@@ -15,17 +17,17 @@ class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
     required this.version,
     required this.contentBuilder,
-    this.title = 'Settings',
+    this.title,
     super.key,
   });
 
   const SettingsScreen.category({
-    required this.title,
+    required String this.title,
     required this.contentBuilder,
     super.key,
   }) : version = null;
 
-  final String title;
+  final String? title;
   final String? version;
   final SettingsContentBuilder contentBuilder;
 
@@ -66,18 +68,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(widget.title ?? l10n.settingsTitle),
         actions: [
           IconButton(
             onPressed: _scrollToTop,
-            tooltip: 'Scroll to top',
+            tooltip: l10n.settingsScrollToTop,
             icon: const Icon(Icons.vertical_align_top),
           ),
           IconButton(
             onPressed: _scrollToBottom,
-            tooltip: 'Scroll to bottom',
+            tooltip: l10n.settingsScrollToBottom,
             icon: const Icon(Icons.vertical_align_bottom),
           ),
           if (widget.version case final version?)

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../services/upload_service.dart';
 
 class UploadEndpointSelectionDialog extends StatefulWidget {
@@ -32,18 +33,20 @@ class _UploadEndpointSelectionDialogState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return AlertDialog(
-      title: const Text('Upload Data'),
+      title: Text(l10n.settingsUploadData),
       content: SizedBox(
         width: double.maxFinite,
         child: widget.endpoints.isEmpty
-            ? const Text('No upload sites configured')
+            ? Text(l10n.settingsUploadNoSites)
             : ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 400),
                 child: ListView(
                   shrinkWrap: true,
                   children: [
-                    const Text('Select sites to upload to:'),
+                    Text(l10n.settingsUploadSelectSites),
                     const SizedBox(height: 8),
                     ...widget.endpoints.map((endpoint) {
                       return CheckboxListTile(
@@ -75,7 +78,7 @@ class _UploadEndpointSelectionDialogState
         TextButton(
           key: const ValueKey('upload-endpoint-cancel'),
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l10n.settingsCancel),
         ),
         FilledButton(
           key: const ValueKey('upload-endpoint-submit'),
@@ -90,7 +93,7 @@ class _UploadEndpointSelectionDialogState
                       .toList();
                   Navigator.pop(context, selectedNames);
                 },
-          child: const Text('Upload'),
+          child: Text(l10n.settingsUpload),
         ),
       ],
     );

@@ -19,5 +19,1288 @@
   "languagePickerTitle": "Choose language",
   "@languagePickerTitle": {
     "description": "Dialog title for the language picker"
+  },
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "Settings screen AppBar title"
+  },
+  "settingsScrollToTop": "Scroll to top",
+  "@settingsScrollToTop": {
+    "description": "Tooltip for scrolling settings to the top"
+  },
+  "settingsScrollToBottom": "Scroll to bottom",
+  "@settingsScrollToBottom": {
+    "description": "Tooltip for scrolling settings to the bottom"
+  },
+  "settingsCancel": "Cancel",
+  "@settingsCancel": {
+    "description": "Cancel button on settings dialogs"
+  },
+  "settingsSave": "Save",
+  "@settingsSave": {
+    "description": "Save button on settings dialogs"
+  },
+  "settingsClear": "Clear",
+  "@settingsClear": {
+    "description": "Clear button that empties a value"
+  },
+  "settingsUpload": "Upload",
+  "@settingsUpload": {
+    "description": "Confirm upload in endpoint selection dialog"
+  },
+  "settingsReset": "Reset",
+  "@settingsReset": {
+    "description": "Confirm reset action"
+  },
+  "settingsNotSet": "Not set",
+  "@settingsNotSet": {
+    "description": "Placeholder when an optional setting has no value"
+  },
+  "settingsNone": "None",
+  "@settingsNone": {
+    "description": "Dropdown option meaning no interval"
+  },
+  "settingsUnknown": "Unknown",
+  "@settingsUnknown": {
+    "description": "Fallback when a coverage precision is unrecognized"
+  },
+  "settingsEnterNumberGreaterThanZero": "Enter a number greater than zero",
+  "@settingsEnterNumberGreaterThanZero": {
+    "description": "Validation error for positive numeric settings"
+  },
+  "settingsSectionMapDisplay": "Map display",
+  "@settingsSectionMapDisplay": {
+    "description": "Settings section header"
+  },
+  "settingsSectionLocation": "Location & positioning",
+  "@settingsSectionLocation": {
+    "description": "Settings section header"
+  },
+  "settingsSectionFeedback": "Feedback & alerts",
+  "@settingsSectionFeedback": {
+    "description": "Settings section header"
+  },
+  "settingsSectionCarpeater": "Carpeater mode (Beta)",
+  "@settingsSectionCarpeater": {
+    "description": "Settings section header for Carpeater beta mode"
+  },
+  "settingsSectionAppDevice": "App & device",
+  "@settingsSectionAppDevice": {
+    "description": "Settings section header"
+  },
+  "settingsSectionDiscovery": "Discovery & sampling",
+  "@settingsSectionDiscovery": {
+    "description": "Settings section header"
+  },
+  "settingsSectionStatistics": "Statistics",
+  "@settingsSectionStatistics": {
+    "description": "Settings section header"
+  },
+  "settingsSectionDataManagement": "Data management",
+  "@settingsSectionDataManagement": {
+    "description": "Settings section header"
+  },
+  "settingsSectionBackup": "Settings backup",
+  "@settingsSectionBackup": {
+    "description": "Settings section header"
+  },
+  "settingsSectionDiagnostics": "Diagnostics",
+  "@settingsSectionDiagnostics": {
+    "description": "Settings section header"
+  },
+  "settingsSectionOnlineMap": "Online map",
+  "@settingsSectionOnlineMap": {
+    "description": "Settings section header"
+  },
+  "settingsSectionAbout": "About",
+  "@settingsSectionAbout": {
+    "description": "Settings section header"
+  },
+  "settingsSectionThresholds": "Thresholds",
+  "@settingsSectionThresholds": {
+    "description": "Location quality subsection header"
+  },
+  "settingsSectionImpossibleZones": "Impossible Zones",
+  "@settingsSectionImpossibleZones": {
+    "description": "Location quality subsection header"
+  },
+  "settingsShowCoverageBoxes": "Show Coverage Boxes",
+  "@settingsShowCoverageBoxes": {
+    "description": "Toggle to show coverage squares on the map"
+  },
+  "settingsSimplifyMapAtLowZoom": "Simplify map at low zoom",
+  "@settingsSimplifyMapAtLowZoom": {
+    "description": "Toggle title for map level-of-detail simplification"
+  },
+  "settingsSimplifyMapAtLowZoomSubtitle": "Group coverage and samples by geohash while zoomed out",
+  "@settingsSimplifyMapAtLowZoomSubtitle": {
+    "description": "Subtitle for map simplification toggle"
+  },
+  "settingsShowSamples": "Show Samples",
+  "@settingsShowSamples": {
+    "description": "Toggle to show sample markers"
+  },
+  "settingsShowEdges": "Show Edges",
+  "@settingsShowEdges": {
+    "description": "Toggle to show coverage edges"
+  },
+  "settingsShowRepeaters": "Show Repeaters",
+  "@settingsShowRepeaters": {
+    "description": "Toggle to show repeater markers"
+  },
+  "settingsShowGpsSamples": "Show GPS Samples",
+  "@settingsShowGpsSamples": {
+    "description": "Toggle to show GPS-only sample markers"
+  },
+  "settingsShowGpsSamplesSubtitle": "Show blue GPS-only markers",
+  "@settingsShowGpsSamplesSubtitle": {
+    "description": "Subtitle for GPS sample toggle"
+  },
+  "settingsShowSuccessfulPingsOnly": "Show Successful Pings Only",
+  "@settingsShowSuccessfulPingsOnly": {
+    "description": "Toggle to hide failed pings"
+  },
+  "settingsShowSuccessfulPingsOnlySubtitle": "Hide failed pings and GPS-only samples",
+  "@settingsShowSuccessfulPingsOnlySubtitle": {
+    "description": "Subtitle for successful-pings-only toggle"
+  },
+  "settingsShowRouteTrail": "Show Route Trail",
+  "@settingsShowRouteTrail": {
+    "description": "Toggle to draw the driven path"
+  },
+  "settingsShowRouteTrailSubtitle": "Draw driven path on map",
+  "@settingsShowRouteTrailSubtitle": {
+    "description": "Subtitle for route trail toggle"
+  },
+  "settingsCommunityCoverage": "Community Coverage",
+  "@settingsCommunityCoverage": {
+    "description": "Toggle for downloaded community coverage overlay"
+  },
+  "settingsCommunityCoverageDownloaded": "Show downloaded coverage from web map",
+  "@settingsCommunityCoverageDownloaded": {
+    "description": "Subtitle when community coverage is cached"
+  },
+  "settingsCommunityCoverageNeedDownload": "Download first from Data Management",
+  "@settingsCommunityCoverageNeedDownload": {
+    "description": "Subtitle when community coverage has not been downloaded"
+  },
+  "settingsClearDownloadedCoverageTooltip": "Clear downloaded coverage",
+  "@settingsClearDownloadedCoverageTooltip": {
+    "description": "Tooltip to delete cached community coverage"
+  },
+  "settingsCommunityCoverageCleared": "Community coverage cleared",
+  "@settingsCommunityCoverageCleared": {
+    "description": "Snackbar after clearing community coverage"
+  },
+  "settingsShowHeatmap": "Show Heatmap",
+  "@settingsShowHeatmap": {
+    "description": "Toggle for ping heatmap overlay"
+  },
+  "settingsShowHeatmapSubtitle": "Heat gradient overlay of ping activity",
+  "@settingsShowHeatmapSubtitle": {
+    "description": "Subtitle for heatmap toggle"
+  },
+  "settingsShowPredictionRings": "Show Prediction Rings",
+  "@settingsShowPredictionRings": {
+    "description": "Toggle for estimated repeater coverage rings"
+  },
+  "settingsShowPredictionRingsSubtitle": "Estimated repeater coverage radius",
+  "@settingsShowPredictionRingsSubtitle": {
+    "description": "Subtitle for prediction rings toggle"
+  },
+  "settingsBeaconDbWifi": "beaconDB Wi-Fi Positioning",
+  "@settingsBeaconDbWifi": {
+    "description": "Toggle title for beaconDB Wi-Fi positioning"
+  },
+  "settingsBeaconDbWifiSubtitle": "Prefer Wi-Fi location; sends nearby BSSIDs and signal levels to beaconDB. Cyan marker means Wi-Fi is active.",
+  "@settingsBeaconDbWifiSubtitle": {
+    "description": "Subtitle explaining beaconDB Wi-Fi positioning"
+  },
+  "settingsBeaconDbEnabledSnack": "beaconDB enabled: nearby BSSIDs will be shared",
+  "@settingsBeaconDbEnabledSnack": {
+    "description": "Snackbar when beaconDB Wi-Fi positioning is turned on"
+  },
+  "settingsLocationQualityFilters": "Location Quality Filters",
+  "@settingsLocationQualityFilters": {
+    "description": "Tile and category page title for location quality filters"
+  },
+  "settingsLocationQualityFiltersSubtitle": "Accuracy, implausible movement, and impossible locations",
+  "@settingsLocationQualityFiltersSubtitle": {
+    "description": "Subtitle for location quality filters tile"
+  },
+  "settingsShowApproximatePosition": "Show Approximate Position",
+  "@settingsShowApproximatePosition": {
+    "description": "Toggle for radio-estimated position marker"
+  },
+  "settingsShowApproximatePositionSubtitle": "Display the grey radio-position estimate",
+  "@settingsShowApproximatePositionSubtitle": {
+    "description": "Subtitle for approximate position toggle"
+  },
+  "settingsDuctingForecast": "Ducting Forecast",
+  "@settingsDuctingForecast": {
+    "description": "Tile title for tropospheric ducting forecast"
+  },
+  "settingsDuctingForecastSubtitle": "6-day tropospheric ducting maps",
+  "@settingsDuctingForecastSubtitle": {
+    "description": "Subtitle for ducting forecast tile"
+  },
+  "settingsAtmosphericDucting": "Atmospheric Ducting",
+  "@settingsAtmosphericDucting": {
+    "description": "Toggle for atmospheric ducting monitoring"
+  },
+  "settingsAtmosphericDuctingSubtitle": "Monitor ducting conditions (needs internet)",
+  "@settingsAtmosphericDuctingSubtitle": {
+    "description": "Subtitle for atmospheric ducting toggle"
+  },
+  "settingsSoundFeedback": "Sound Feedback",
+  "@settingsSoundFeedback": {
+    "description": "Toggle for ping sound feedback"
+  },
+  "settingsSoundFeedbackSubtitle": "Play tones on ping results",
+  "@settingsSoundFeedbackSubtitle": {
+    "description": "Subtitle for sound feedback toggle"
+  },
+  "settingsVibrationFeedback": "Vibration Feedback",
+  "@settingsVibrationFeedback": {
+    "description": "Toggle for haptic ping feedback"
+  },
+  "settingsVibrationFeedbackSubtitle": "Haptic feedback on ping results",
+  "@settingsVibrationFeedbackSubtitle": {
+    "description": "Subtitle for vibration feedback toggle"
+  },
+  "settingsDeadZoneAlerts": "Dead Zone Alerts",
+  "@settingsDeadZoneAlerts": {
+    "description": "Toggle for dead zone notifications"
+  },
+  "settingsDeadZoneAlertsSubtitle": "Notify when entering a known dead zone",
+  "@settingsDeadZoneAlertsSubtitle": {
+    "description": "Subtitle for dead zone alerts"
+  },
+  "settingsNewRepeaterAlerts": "New Repeater Alerts",
+  "@settingsNewRepeaterAlerts": {
+    "description": "Toggle for new repeater discovery alerts"
+  },
+  "settingsNewRepeaterAlertsSubtitle": "Notify when a never-before-seen repeater is discovered",
+  "@settingsNewRepeaterAlertsSubtitle": {
+    "description": "Subtitle for new repeater alerts"
+  },
+  "settingsEnableCarpeaterMode": "Enable Carpeater Mode",
+  "@settingsEnableCarpeaterMode": {
+    "description": "Toggle to enable Carpeater discovery mode"
+  },
+  "settingsCarpeaterEnabledSubtitle": "Using repeater for discovery",
+  "@settingsCarpeaterEnabledSubtitle": {
+    "description": "Subtitle when Carpeater mode is on"
+  },
+  "settingsCarpeaterDisabledSubtitle": "Use a repeater to discover neighbors\nRequires v1.14+ firmware on all repeaters",
+  "@settingsCarpeaterDisabledSubtitle": {
+    "description": "Subtitle when Carpeater mode is off"
+  },
+  "settingsTargetRepeater": "Target Repeater",
+  "@settingsTargetRepeater": {
+    "description": "Carpeater target repeater tile and dialog title"
+  },
+  "settingsRepeaterIdPrefix": "Repeater ID Prefix",
+  "@settingsRepeaterIdPrefix": {
+    "description": "Label for Carpeater repeater ID field"
+  },
+  "settingsRepeaterIdHint": "e.g., BAD5DC49",
+  "@settingsRepeaterIdHint": {
+    "description": "Hint for repeater ID prefix field"
+  },
+  "settingsAdminPassword": "Admin Password",
+  "@settingsAdminPassword": {
+    "description": "Carpeater admin password tile and dialog title"
+  },
+  "settingsPassword": "Password",
+  "@settingsPassword": {
+    "description": "Password field label"
+  },
+  "settingsRepeaterAdminPasswordHint": "Repeater admin password",
+  "@settingsRepeaterAdminPasswordHint": {
+    "description": "Hint for repeater admin password field"
+  },
+  "settingsCycleInterval": "Cycle Interval",
+  "@settingsCycleInterval": {
+    "description": "Carpeater discovery cycle interval"
+  },
+  "settingsCycleIntervalSubtitle": "Time between discovery cycles",
+  "@settingsCycleIntervalSubtitle": {
+    "description": "Subtitle for cycle interval"
+  },
+  "settingsDeviceName": "Device Name",
+  "@settingsDeviceName": {
+    "description": "Device name tile and dialog title"
+  },
+  "settingsDeviceNameNotSet": "Not set — used for multi-device wardrive",
+  "@settingsDeviceNameNotSet": {
+    "description": "Subtitle when no device name is configured"
+  },
+  "settingsDeviceNameLabel": "Name",
+  "@settingsDeviceNameLabel": {
+    "description": "Label for device name text field"
+  },
+  "settingsDeviceNameHint": "e.g., Chuck-Pixel",
+  "@settingsDeviceNameHint": {
+    "description": "Hint for device name field"
+  },
+  "settingsKeepScreenOn": "Keep Screen On",
+  "@settingsKeepScreenOn": {
+    "description": "Settings toggle title; keeps the display awake"
+  },
+  "settingsKeepScreenOnSubtitle": "Prevent the screen from sleeping while the app is open",
+  "@settingsKeepScreenOnSubtitle": {
+    "description": "Settings toggle subtitle for keep-screen-on"
+  },
+  "settingsBatterySaver": "Battery Saver",
+  "@settingsBatterySaver": {
+    "description": "Battery saver toggle title"
+  },
+  "settingsBatterySaverSubtitle": "Auto-double ping interval when battery ≤20%",
+  "@settingsBatterySaverSubtitle": {
+    "description": "Battery saver toggle subtitle"
+  },
+  "settingsLockMapRotation": "Lock Map Rotation",
+  "@settingsLockMapRotation": {
+    "description": "Toggle to lock map rotation to north"
+  },
+  "settingsLockMapRotationSubtitle": "Prevent map rotation",
+  "@settingsLockMapRotationSubtitle": {
+    "description": "Subtitle for lock rotation toggle"
+  },
+  "settingsCurrentLocationMarker": "Current Location Marker",
+  "@settingsCurrentLocationMarker": {
+    "description": "Title for current location marker style"
+  },
+  "settingsCurrentLocationMarkerSubtitle": "The direction arrow follows the phone compass",
+  "@settingsCurrentLocationMarkerSubtitle": {
+    "description": "Subtitle for current location marker style"
+  },
+  "settingsMarkerCircle": "Circle",
+  "@settingsMarkerCircle": {
+    "description": "Circle location marker style"
+  },
+  "settingsMarkerDirectionArrow": "Direction arrow",
+  "@settingsMarkerDirectionArrow": {
+    "description": "Compass arrow location marker style"
+  },
+  "settingsCalibrateCompass": "Calibrate Compass",
+  "@settingsCalibrateCompass": {
+    "description": "Tile to open compass calibration"
+  },
+  "settingsCalibrateCompassSubtitle": "Draw a figure-8 in the air if the heading looks wrong",
+  "@settingsCalibrateCompassSubtitle": {
+    "description": "Subtitle for compass calibration"
+  },
+  "settingsInterfaceTheme": "Interface Theme",
+  "@settingsInterfaceTheme": {
+    "description": "Tile to choose app interface theme"
+  },
+  "settingsMapTheme": "Map Theme",
+  "@settingsMapTheme": {
+    "description": "Tile to choose map theme"
+  },
+  "settingsScanForRepeaters": "Scan for Repeaters",
+  "@settingsScanForRepeaters": {
+    "description": "Tile to scan for nearby LoRa repeaters"
+  },
+  "settingsScanFindNearby": "Find nearby LoRa nodes",
+  "@settingsScanFindNearby": {
+    "description": "Subtitle when no repeaters have been found yet"
+  },
+  "settingsRepeatersFound": "{count, plural, one{{count} repeater found} other{{count} repeaters found}}",
+  "@settingsRepeatersFound": {
+    "description": "Subtitle showing how many repeaters were found",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "settingsRefreshContactList": "Refresh Contact List",
+  "@settingsRefreshContactList": {
+    "description": "Tile to refresh repeater names from the device"
+  },
+  "settingsRefreshContactListSubtitle": "Update repeater names from device",
+  "@settingsRefreshContactListSubtitle": {
+    "description": "Subtitle for refresh contact list"
+  },
+  "settingsColorMode": "Color Mode",
+  "@settingsColorMode": {
+    "description": "Coverage color mode setting"
+  },
+  "settingsColorModeQuality": "Quality",
+  "@settingsColorModeQuality": {
+    "description": "Color coverage by signal quality"
+  },
+  "settingsColorModeAge": "Age",
+  "@settingsColorModeAge": {
+    "description": "Color coverage by sample age"
+  },
+  "settingsColorModeRedundancy": "Redundancy",
+  "@settingsColorModeRedundancy": {
+    "description": "Color coverage by sample redundancy"
+  },
+  "settingsDistanceUnit": "Distance Unit",
+  "@settingsDistanceUnit": {
+    "description": "Distance unit preference"
+  },
+  "settingsMiles": "Miles",
+  "@settingsMiles": {
+    "description": "Miles distance unit option"
+  },
+  "settingsKilometers": "Kilometers",
+  "@settingsKilometers": {
+    "description": "Kilometers distance unit option"
+  },
+  "settingsFuelUnit": "Fuel Unit",
+  "@settingsFuelUnit": {
+    "description": "Fuel unit preference"
+  },
+  "settingsFuelUnitImperial": "MPG / Gallons",
+  "@settingsFuelUnitImperial": {
+    "description": "Imperial fuel unit option"
+  },
+  "settingsFuelUnitMetric": "L/100km / Litres",
+  "@settingsFuelUnitMetric": {
+    "description": "Metric fuel unit option"
+  },
+  "settingsColorBlindMode": "Color Blind Mode",
+  "@settingsColorBlindMode": {
+    "description": "Color vision accessibility mode"
+  },
+  "settingsColorBlindNormal": "Normal",
+  "@settingsColorBlindNormal": {
+    "description": "Default color vision option"
+  },
+  "settingsColorBlindDeuteranopia": "Deuteranopia",
+  "@settingsColorBlindDeuteranopia": {
+    "description": "Deuteranopia color-blind mode; keep medical term"
+  },
+  "settingsColorBlindProtanopia": "Protanopia",
+  "@settingsColorBlindProtanopia": {
+    "description": "Protanopia color-blind mode; keep medical term"
+  },
+  "settingsColorBlindTritanopia": "Tritanopia",
+  "@settingsColorBlindTritanopia": {
+    "description": "Tritanopia color-blind mode; keep medical term"
+  },
+  "settingsDiscoveryTimeout": "Discovery Timeout",
+  "@settingsDiscoveryTimeout": {
+    "description": "How long to wait for repeater responses"
+  },
+  "settingsDiscoveryTimeoutSubtitle": "How long to wait for repeater responses",
+  "@settingsDiscoveryTimeoutSubtitle": {
+    "description": "Subtitle for discovery timeout"
+  },
+  "settingsThoroughResponseCollection": "Thorough Response Collection",
+  "@settingsThoroughResponseCollection": {
+    "description": "Toggle for waiting until discovery timeout"
+  },
+  "settingsThoroughOn": "Thorough: collect responses until the discovery timeout",
+  "@settingsThoroughOn": {
+    "description": "Subtitle when thorough collection is enabled"
+  },
+  "settingsThoroughOff": "Fast: finish 3 seconds after the first response",
+  "@settingsThoroughOff": {
+    "description": "Subtitle when thorough collection is disabled"
+  },
+  "settingsIgnoreRepeaters": "Ignore Repeaters",
+  "@settingsIgnoreRepeaters": {
+    "description": "Tile and dialog to ignore repeater prefixes"
+  },
+  "settingsIgnoringPrefix": "Ignoring: {prefix}",
+  "@settingsIgnoringPrefix": {
+    "description": "Subtitle listing ignored repeater prefixes",
+    "placeholders": {
+      "prefix": {"type": "String"}
+    }
+  },
+  "settingsNotFiltering": "Not filtering",
+  "@settingsNotFiltering": {
+    "description": "Subtitle when no ignore filter is set"
+  },
+  "settingsIncludeOnlyRepeaters": "Include Only Repeaters",
+  "@settingsIncludeOnlyRepeaters": {
+    "description": "Tile and dialog for repeater whitelist"
+  },
+  "settingsWhitelistPrefix": "Whitelist: {prefixes}",
+  "@settingsWhitelistPrefix": {
+    "description": "Subtitle listing whitelisted repeater prefixes",
+    "placeholders": {
+      "prefixes": {"type": "String"}
+    }
+  },
+  "settingsShowAllRepeaters": "Show all repeaters",
+  "@settingsShowAllRepeaters": {
+    "description": "Subtitle when no repeater whitelist is set"
+  },
+  "settingsApplyWhitelistToEdges": "Apply Whitelist to Edges",
+  "@settingsApplyWhitelistToEdges": {
+    "description": "Toggle to filter map edges by whitelist"
+  },
+  "settingsApplyWhitelistToEdgesSubtitle": "Only show edges for whitelisted repeaters",
+  "@settingsApplyWhitelistToEdgesSubtitle": {
+    "description": "Subtitle for whitelist-on-edges toggle"
+  },
+  "settingsPingMode": "Ping Mode",
+  "@settingsPingMode": {
+    "description": "How automatic pings are triggered"
+  },
+  "settingsPingModeDistance": "Distance",
+  "@settingsPingModeDistance": {
+    "description": "Ping when distance threshold is reached"
+  },
+  "settingsPingModeTime": "Time",
+  "@settingsPingModeTime": {
+    "description": "Ping on a time interval"
+  },
+  "settingsPingModeBoth": "Both",
+  "@settingsPingModeBoth": {
+    "description": "Ping on both distance and time"
+  },
+  "settingsPingDistance": "Ping Distance",
+  "@settingsPingDistance": {
+    "description": "Tile for ping distance interval"
+  },
+  "settingsPingTimeInterval": "Ping Time Interval",
+  "@settingsPingTimeInterval": {
+    "description": "Tile for ping time interval"
+  },
+  "settingsCoverageResolution": "Coverage Resolution",
+  "@settingsCoverageResolution": {
+    "description": "Coverage square size setting and dialog title"
+  },
+  "settingsPingInterval": "Ping Interval",
+  "@settingsPingInterval": {
+    "description": "Dialog title for choosing ping distance"
+  },
+  "settingsPingIntervalPrompt": "How often should pings be sent?",
+  "@settingsPingIntervalPrompt": {
+    "description": "Prompt in ping interval dialog"
+  },
+  "settingsPingFrequent": "Frequent",
+  "@settingsPingFrequent": {
+    "description": "Frequent ping interval option"
+  },
+  "settingsPingFrequentSubtitle": "Every 50 meters",
+  "@settingsPingFrequentSubtitle": {
+    "description": "Frequent ping interval description"
+  },
+  "settingsPingNormal": "Normal",
+  "@settingsPingNormal": {
+    "description": "Normal ping interval option"
+  },
+  "settingsPingNormalSubtitle": "Every 200 meters (~0.12 miles)",
+  "@settingsPingNormalSubtitle": {
+    "description": "Normal ping interval description"
+  },
+  "settingsPingSparse": "Sparse",
+  "@settingsPingSparse": {
+    "description": "Sparse ping interval option"
+  },
+  "settingsPingSparseSubtitle": "Every 0.5 miles (805 meters)",
+  "@settingsPingSparseSubtitle": {
+    "description": "Sparse ping interval description"
+  },
+  "settingsPingVerySparse": "Very Sparse",
+  "@settingsPingVerySparse": {
+    "description": "Very sparse ping interval option"
+  },
+  "settingsPingVerySparseSubtitle": "Every 1 mile (1609 meters)",
+  "@settingsPingVerySparseSubtitle": {
+    "description": "Very sparse ping interval description"
+  },
+  "settingsPingIntervalSet": "Ping interval: {description}",
+  "@settingsPingIntervalSet": {
+    "description": "Snackbar after changing ping interval",
+    "placeholders": {
+      "description": {"type": "String"}
+    }
+  },
+  "settingsPingIntervalMetersFrequent": "{meters} meters (frequent)",
+  "@settingsPingIntervalMetersFrequent": {
+    "description": "Ping interval description under 100 meters",
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "settingsPingIntervalMeters": "{meters} meters",
+  "@settingsPingIntervalMeters": {
+    "description": "Ping interval description in meters",
+    "placeholders": {
+      "meters": {"type": "int"}
+    }
+  },
+  "settingsPingIntervalMiles": "{miles} miles ({meters}m)",
+  "@settingsPingIntervalMiles": {
+    "description": "Ping interval description in miles with meters",
+    "placeholders": {
+      "miles": {"type": "String"},
+      "meters": {"type": "int"}
+    }
+  },
+  "settingsCoverageResolutionPrompt": "Choose the size of coverage squares:",
+  "@settingsCoverageResolutionPrompt": {
+    "description": "Prompt in coverage resolution dialog"
+  },
+  "settingsCoverageRegional": "Regional",
+  "@settingsCoverageRegional": {
+    "description": "Regional coverage resolution option"
+  },
+  "settingsCoverageRegionalSubtitle": "~20km squares (precision 4)",
+  "@settingsCoverageRegionalSubtitle": {
+    "description": "Regional coverage option subtitle"
+  },
+  "settingsCoverageCity": "City-level",
+  "@settingsCoverageCity": {
+    "description": "City-level coverage resolution option"
+  },
+  "settingsCoverageCitySubtitle": "~5km squares (precision 5)",
+  "@settingsCoverageCitySubtitle": {
+    "description": "City-level coverage option subtitle"
+  },
+  "settingsCoverageNeighborhood": "Neighborhood",
+  "@settingsCoverageNeighborhood": {
+    "description": "Neighborhood coverage resolution option"
+  },
+  "settingsCoverageNeighborhoodSubtitle": "~1.2km squares (precision 6, default)",
+  "@settingsCoverageNeighborhoodSubtitle": {
+    "description": "Neighborhood coverage option subtitle"
+  },
+  "settingsCoverageStreet": "Street-level",
+  "@settingsCoverageStreet": {
+    "description": "Street-level coverage resolution option"
+  },
+  "settingsCoverageStreetSubtitle": "~153m squares (precision 7)",
+  "@settingsCoverageStreetSubtitle": {
+    "description": "Street-level coverage option subtitle"
+  },
+  "settingsCoverageBuilding": "Building-level",
+  "@settingsCoverageBuilding": {
+    "description": "Building-level coverage resolution option"
+  },
+  "settingsCoverageBuildingSubtitle": "~38m squares (precision 8, detailed)",
+  "@settingsCoverageBuildingSubtitle": {
+    "description": "Building-level coverage option subtitle"
+  },
+  "settingsCoverageRegionalDesc": "Regional (~20km squares)",
+  "@settingsCoverageRegionalDesc": {
+    "description": "Regional coverage summary for tile and snackbar"
+  },
+  "settingsCoverageCityDesc": "City-level (~5km squares)",
+  "@settingsCoverageCityDesc": {
+    "description": "City-level coverage summary"
+  },
+  "settingsCoverageNeighborhoodDesc": "Neighborhood (~1.2km squares)",
+  "@settingsCoverageNeighborhoodDesc": {
+    "description": "Neighborhood coverage summary"
+  },
+  "settingsCoverageStreetDesc": "Street-level (~153m squares)",
+  "@settingsCoverageStreetDesc": {
+    "description": "Street-level coverage summary"
+  },
+  "settingsCoverageBuildingDesc": "Building-level (~38m squares)",
+  "@settingsCoverageBuildingDesc": {
+    "description": "Building-level coverage summary"
+  },
+  "settingsCoverageResolutionSet": "Coverage resolution: {description}",
+  "@settingsCoverageResolutionSet": {
+    "description": "Snackbar after changing coverage resolution",
+    "placeholders": {
+      "description": {"type": "String"}
+    }
+  },
+  "settingsRepeaterPrefixes": "Repeater Prefixes",
+  "@settingsRepeaterPrefixes": {
+    "description": "Label for comma-separated repeater prefixes"
+  },
+  "settingsIgnoreRepeaterHint": "e.g., 7E, A4F, BAD5",
+  "@settingsIgnoreRepeaterHint": {
+    "description": "Hint for ignore-repeaters field"
+  },
+  "settingsIgnoreRepeaterDescription": "Filter out responses from your mobile repeater(s) to avoid false coverage. Enter repeater prefixes separated by commas:",
+  "@settingsIgnoreRepeaterDescription": {
+    "description": "Description in ignore-repeaters dialog"
+  },
+  "settingsRepeaterPrefixUpdated": "Repeater prefix updated",
+  "@settingsRepeaterPrefixUpdated": {
+    "description": "Snackbar after saving ignored prefixes"
+  },
+  "settingsIncludeOnlyHint": "e.g., 7E3A, A4F2, 8B",
+  "@settingsIncludeOnlyHint": {
+    "description": "Hint for include-only repeaters field"
+  },
+  "settingsIncludeOnlyDescription": "Show only samples from specific repeaters (whitelist). Enter repeater prefixes separated by commas:",
+  "@settingsIncludeOnlyDescription": {
+    "description": "Description in include-only repeaters dialog"
+  },
+  "settingsRepeaterWhitelistUpdated": "Repeater whitelist updated",
+  "@settingsRepeaterWhitelistUpdated": {
+    "description": "Snackbar after saving repeater whitelist"
+  },
+  "settingsLocationQualityResetSnack": "Location quality filters reset",
+  "@settingsLocationQualityResetSnack": {
+    "description": "Snackbar after restoring location quality defaults"
+  },
+  "settingsMaxHorizontalError": "Maximum Horizontal Error",
+  "@settingsMaxHorizontalError": {
+    "description": "Location quality threshold title"
+  },
+  "settingsMaxHorizontalErrorSubtitle": "Reject positions with worse reported accuracy",
+  "@settingsMaxHorizontalErrorSubtitle": {
+    "description": "Subtitle for maximum horizontal error"
+  },
+  "settingsMaxHorizontalErrorDescription": "Positions whose reported horizontal error is larger than this value are ignored.",
+  "@settingsMaxHorizontalErrorDescription": {
+    "description": "Dialog description for maximum horizontal error"
+  },
+  "settingsAirborneAltitude": "Airborne Altitude",
+  "@settingsAirborneAltitude": {
+    "description": "Airborne altitude threshold title"
+  },
+  "settingsAirborneAltitudeSubtitle": "Altitude used together with airborne speed",
+  "@settingsAirborneAltitudeSubtitle": {
+    "description": "Subtitle for airborne altitude"
+  },
+  "settingsAirborneAltitudeDescription": "At or above this altitude, a position is ignored only when it also exceeds the airborne speed.",
+  "@settingsAirborneAltitudeDescription": {
+    "description": "Dialog description for airborne altitude"
+  },
+  "settingsAirborneSpeed": "Airborne Speed",
+  "@settingsAirborneSpeed": {
+    "description": "Airborne speed threshold title"
+  },
+  "settingsAirborneSpeedSubtitle": "Speed used together with airborne altitude",
+  "@settingsAirborneSpeedSubtitle": {
+    "description": "Subtitle for airborne speed"
+  },
+  "settingsAirborneSpeedDescription": "At or above this speed, a high-altitude position is treated as a probable flight.",
+  "@settingsAirborneSpeedDescription": {
+    "description": "Dialog description for airborne speed"
+  },
+  "settingsMaxWardriveSpeed": "Maximum Wardrive Speed",
+  "@settingsMaxWardriveSpeed": {
+    "description": "Maximum plausible wardrive speed title"
+  },
+  "settingsMaxWardriveSpeedSubtitle": "Reject positions moving faster than this",
+  "@settingsMaxWardriveSpeedSubtitle": {
+    "description": "Subtitle for maximum wardrive speed"
+  },
+  "settingsMaxWardriveSpeedDescription": "Positions moving at or above this speed are ignored as implausible wardrive data.",
+  "@settingsMaxWardriveSpeedDescription": {
+    "description": "Dialog description for maximum wardrive speed"
+  },
+  "settingsRestoreDefaults": "Restore Defaults",
+  "@settingsRestoreDefaults": {
+    "description": "Button to restore location quality defaults"
+  },
+  "settingsImpossibleZonesBlurb": "Places you cannot physically be. GPS inside a zone is discarded and the last valid position is kept. Zones are not shown on the map.",
+  "@settingsImpossibleZonesBlurb": {
+    "description": "Explanation of impossible zones"
+  },
+  "settingsAddImpossibleZone": "Add Impossible Zone",
+  "@settingsAddImpossibleZone": {
+    "description": "Tile and dialog title to add an impossible zone"
+  },
+  "settingsImpossibleZoneEmptySubtitle": "Uses current position or map center",
+  "@settingsImpossibleZoneEmptySubtitle": {
+    "description": "Subtitle when no impossible zones exist"
+  },
+  "settingsImpossibleZoneCount": "{count, plural, one{{count} zone} other{{count} zones}}",
+  "@settingsImpossibleZoneCount": {
+    "description": "Count of configured impossible zones",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "settingsUnnamedZone": "Unnamed zone",
+  "@settingsUnnamedZone": {
+    "description": "Fallback label for a zone without a name"
+  },
+  "settingsDeleteZoneTooltip": "Delete zone",
+  "@settingsDeleteZoneTooltip": {
+    "description": "Tooltip to delete one impossible zone"
+  },
+  "settingsClearImpossibleZones": "Clear Impossible Zones",
+  "@settingsClearImpossibleZones": {
+    "description": "Tile and dialog title to remove all impossible zones"
+  },
+  "settingsRemoveAllZones": "{count, plural, one{Remove all {count} zone} other{Remove all {count} zones}}",
+  "@settingsRemoveAllZones": {
+    "description": "Subtitle to remove every configured zone",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "settingsClearImpossibleZonesConfirm": "Remove all impossible zones? GPS inside those areas will no longer be discarded.",
+  "@settingsClearImpossibleZonesConfirm": {
+    "description": "Confirmation body for clearing impossible zones"
+  },
+  "settingsAddImpossibleZoneCenter": "Center: {lat}, {lon}",
+  "@settingsAddImpossibleZoneCenter": {
+    "description": "Shows the chosen zone center coordinates",
+    "placeholders": {
+      "lat": {"type": "String"},
+      "lon": {"type": "String"}
+    }
+  },
+  "settingsAddImpossibleZoneBlurb": "GPS inside this area is treated as invalid and discarded.",
+  "@settingsAddImpossibleZoneBlurb": {
+    "description": "Explanation in add-impossible-zone dialog"
+  },
+  "settingsLabelOptional": "Label (optional)",
+  "@settingsLabelOptional": {
+    "description": "Optional zone label field"
+  },
+  "settingsLabelHintAirport": "e.g., Airport",
+  "@settingsLabelHintAirport": {
+    "description": "Hint for optional zone label"
+  },
+  "settingsRadius": "Radius:",
+  "@settingsRadius": {
+    "description": "Radius picker label"
+  },
+  "settingsRadius500m": "500m (~0.3 mi)",
+  "@settingsRadius500m": {
+    "description": "500 meter zone radius option"
+  },
+  "settingsRadius1km": "1 km (~0.6 mi)",
+  "@settingsRadius1km": {
+    "description": "1 kilometer zone radius option"
+  },
+  "settingsRadius2km": "2 km (~1.2 mi)",
+  "@settingsRadius2km": {
+    "description": "2 kilometer zone radius option"
+  },
+  "settingsRadius5km": "5 km (~3 mi)",
+  "@settingsRadius5km": {
+    "description": "5 kilometer zone radius option"
+  },
+  "settingsAddZone": "Add Zone",
+  "@settingsAddZone": {
+    "description": "Confirm adding an impossible zone"
+  },
+  "settingsImpossibleZoneAdded": "Impossible zone added",
+  "@settingsImpossibleZoneAdded": {
+    "description": "Snackbar after adding an impossible zone"
+  },
+  "settingsTotalDistanceDriven": "Total Distance Driven",
+  "@settingsTotalDistanceDriven": {
+    "description": "Lifetime distance statistic"
+  },
+  "settingsResetTooltip": "Reset",
+  "@settingsResetTooltip": {
+    "description": "Tooltip to reset total distance"
+  },
+  "settingsResetDistance": "Reset Distance",
+  "@settingsResetDistance": {
+    "description": "Dialog title to reset driven distance"
+  },
+  "settingsResetDistanceConfirm": "Reset total distance driven to zero?",
+  "@settingsResetDistanceConfirm": {
+    "description": "Confirmation body for resetting distance"
+  },
+  "settingsEstimatedFuelUsed": "Estimated Fuel Used",
+  "@settingsEstimatedFuelUsed": {
+    "description": "Estimated fuel usage statistic"
+  },
+  "settingsVehicleFuelEconomy": "Vehicle Fuel Economy",
+  "@settingsVehicleFuelEconomy": {
+    "description": "Vehicle fuel economy setting"
+  },
+  "settingsLitresPer100km": "Litres per 100km (L/100km)",
+  "@settingsLitresPer100km": {
+    "description": "Metric fuel economy field label"
+  },
+  "settingsMilesPerGallon": "Miles Per Gallon (MPG)",
+  "@settingsMilesPerGallon": {
+    "description": "Imperial fuel economy field label"
+  },
+  "settingsHintMetricEconomy": "e.g., 9.4",
+  "@settingsHintMetricEconomy": {
+    "description": "Hint for metric fuel economy"
+  },
+  "settingsHintImperialEconomy": "e.g., 25.0",
+  "@settingsHintImperialEconomy": {
+    "description": "Hint for imperial fuel economy"
+  },
+  "settingsFuelEconomyMetric": "{value} L/100km",
+  "@settingsFuelEconomyMetric": {
+    "description": "Displayed metric fuel economy",
+    "placeholders": {
+      "value": {"type": "String"}
+    }
+  },
+  "settingsFuelEconomyImperial": "{value} MPG",
+  "@settingsFuelEconomyImperial": {
+    "description": "Displayed imperial fuel economy",
+    "placeholders": {
+      "value": {"type": "String"}
+    }
+  },
+  "settingsFuelUsedLitres": "{amount} L (~${cost} @ ${price}/L)",
+  "@settingsFuelUsedLitres": {
+    "description": "Estimated litres used with cost",
+    "placeholders": {
+      "amount": {"type": "String"},
+      "cost": {"type": "String"},
+      "price": {"type": "String"}
+    }
+  },
+  "settingsFuelUsedGallons": "{amount} gal (~${cost} @ ${price}/gal)",
+  "@settingsFuelUsedGallons": {
+    "description": "Estimated gallons used with cost",
+    "placeholders": {
+      "amount": {"type": "String"},
+      "cost": {"type": "String"},
+      "price": {"type": "String"}
+    }
+  },
+  "settingsFuelPrice": "Fuel Price",
+  "@settingsFuelPrice": {
+    "description": "Metric fuel price setting"
+  },
+  "settingsGasPrice": "Gas Price",
+  "@settingsGasPrice": {
+    "description": "Imperial gas price setting"
+  },
+  "settingsPricePerLitre": "Price per Litre",
+  "@settingsPricePerLitre": {
+    "description": "Metric fuel price field label"
+  },
+  "settingsPricePerGallon": "Price per Gallon",
+  "@settingsPricePerGallon": {
+    "description": "Imperial gas price field label"
+  },
+  "settingsHintFuelPrice": "e.g., 1.85",
+  "@settingsHintFuelPrice": {
+    "description": "Hint for metric fuel price"
+  },
+  "settingsHintGasPrice": "e.g., 3.50",
+  "@settingsHintGasPrice": {
+    "description": "Hint for imperial gas price"
+  },
+  "settingsFuelPriceDisplay": "${price}/L",
+  "@settingsFuelPriceDisplay": {
+    "description": "Displayed metric fuel price",
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "settingsGasPriceDisplay": "${price}/gal",
+  "@settingsGasPriceDisplay": {
+    "description": "Displayed imperial gas price",
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "settingsAnalytics": "Analytics",
+  "@settingsAnalytics": {
+    "description": "Tile to open analytics"
+  },
+  "settingsAnalyticsSubtitle": "Time, goals, comparison & repeater stats",
+  "@settingsAnalyticsSubtitle": {
+    "description": "Subtitle for analytics tile"
+  },
+  "settingsAchievements": "Achievements",
+  "@settingsAchievements": {
+    "description": "Tile to open achievements"
+  },
+  "settingsAchievementsSubtitle": "Wardrive milestone badges",
+  "@settingsAchievementsSubtitle": {
+    "description": "Subtitle for achievements tile"
+  },
+  "settingsDeviceComparison": "Device Comparison",
+  "@settingsDeviceComparison": {
+    "description": "Tile to compare companion devices"
+  },
+  "settingsDeviceComparisonSubtitle": "Compare LoRa companion performance",
+  "@settingsDeviceComparisonSubtitle": {
+    "description": "Subtitle for device comparison"
+  },
+  "settingsDownloadCommunityCoverage": "Download Community Coverage",
+  "@settingsDownloadCommunityCoverage": {
+    "description": "Tile to download community coverage"
+  },
+  "settingsCommunityCoverageCached": "Cached — toggle in map layers",
+  "@settingsCommunityCoverageCached": {
+    "description": "Subtitle when community coverage is cached"
+  },
+  "settingsPullCoverageFromWeb": "Pull coverage data from web map",
+  "@settingsPullCoverageFromWeb": {
+    "description": "Subtitle when community coverage is not cached"
+  },
+  "settingsSessionHistory": "Session History",
+  "@settingsSessionHistory": {
+    "description": "Tile to open session history"
+  },
+  "settingsFilteringBySession": "Filtering by session",
+  "@settingsFilteringBySession": {
+    "description": "Subtitle when a session filter is active"
+  },
+  "settingsViewPastSessions": "View past wardrive sessions",
+  "@settingsViewPastSessions": {
+    "description": "Subtitle when no session filter is active"
+  },
+  "settingsClearFilterTooltip": "Clear filter",
+  "@settingsClearFilterTooltip": {
+    "description": "Tooltip to clear session filter"
+  },
+  "settingsSessionFilterCleared": "Session filter cleared",
+  "@settingsSessionFilterCleared": {
+    "description": "Snackbar after clearing session filter"
+  },
+  "settingsExportData": "Export Data",
+  "@settingsExportData": {
+    "description": "Tile to export samples"
+  },
+  "settingsExportDataSubtitle": "JSON, CSV, GPX, or KML",
+  "@settingsExportDataSubtitle": {
+    "description": "Subtitle listing export formats"
+  },
+  "settingsImportData": "Import Data",
+  "@settingsImportData": {
+    "description": "Tile to import samples"
+  },
+  "settingsImportDataSubtitle": "Load samples from file",
+  "@settingsImportDataSubtitle": {
+    "description": "Subtitle for import data"
+  },
+  "settingsShareCoverageMap": "Share Coverage Map",
+  "@settingsShareCoverageMap": {
+    "description": "Tile to screenshot and share the map"
+  },
+  "settingsShareCoverageMapSubtitle": "Screenshot + share in one tap",
+  "@settingsShareCoverageMapSubtitle": {
+    "description": "Subtitle for share coverage map"
+  },
+  "settingsFilterByRepeater": "Filter by Repeater",
+  "@settingsFilterByRepeater": {
+    "description": "Tile to filter coverage by repeater"
+  },
+  "settingsFilteringRepeater": "Filtering: {prefixes}",
+  "@settingsFilteringRepeater": {
+    "description": "Subtitle when a repeater filter is active",
+    "placeholders": {
+      "prefixes": {"type": "String"}
+    }
+  },
+  "settingsShowCoverageFromRepeater": "Show coverage from a specific repeater",
+  "@settingsShowCoverageFromRepeater": {
+    "description": "Subtitle when no repeater filter is active"
+  },
+  "settingsRepeaterFilterCleared": "Repeater filter cleared",
+  "@settingsRepeaterFilterCleared": {
+    "description": "Snackbar after clearing repeater filter"
+  },
+  "settingsFilterBySource": "Filter by Source",
+  "@settingsFilterBySource": {
+    "description": "Tile and dialog to filter by device/operator"
+  },
+  "settingsShowingSource": "Showing: {source}",
+  "@settingsShowingSource": {
+    "description": "Subtitle when a source filter is active",
+    "placeholders": {
+      "source": {"type": "String"}
+    }
+  },
+  "settingsFilterByDeviceOperator": "Filter by device/operator",
+  "@settingsFilterByDeviceOperator": {
+    "description": "Subtitle when no source filter is active"
+  },
+  "settingsSourceFilterCleared": "Source filter cleared",
+  "@settingsSourceFilterCleared": {
+    "description": "Snackbar after clearing source filter"
+  },
+  "settingsNoSourceTaggedData": "No source-tagged data yet",
+  "@settingsNoSourceTaggedData": {
+    "description": "Snackbar when no sources exist to filter"
+  },
+  "settingsShowAll": "Show All",
+  "@settingsShowAll": {
+    "description": "Dialog option to clear source filter"
+  },
+  "settingsShowingDataFrom": "Showing data from: {source}",
+  "@settingsShowingDataFrom": {
+    "description": "Snackbar after choosing a source filter",
+    "placeholders": {
+      "source": {"type": "String"}
+    }
+  },
+  "settingsFindCoverageGaps": "Find Coverage Gaps",
+  "@settingsFindCoverageGaps": {
+    "description": "Tile to find poor-signal areas"
+  },
+  "settingsFindCoverageGapsSubtitle": "Locate areas with poor signal",
+  "@settingsFindCoverageGapsSubtitle": {
+    "description": "Subtitle for find coverage gaps"
+  },
+  "settingsDeleteMode": "Delete Mode",
+  "@settingsDeleteMode": {
+    "description": "Tile to enable sample/cell delete mode"
+  },
+  "settingsDeleteModeSubtitle": "Tap to delete individual samples or cells",
+  "@settingsDeleteModeSubtitle": {
+    "description": "Subtitle for delete mode"
+  },
+  "settingsDeleteModeOn": "Delete mode ON — tap a coverage square or sample to delete",
+  "@settingsDeleteModeOn": {
+    "description": "Snackbar after enabling delete mode"
+  },
+  "settingsPlannedRepeaters": "Planned Repeaters",
+  "@settingsPlannedRepeaters": {
+    "description": "Tile for planned repeater markers"
+  },
+  "settingsPlannedMarkersSubtitle": "{count, plural, one{{count} marker — long-press map to add} other{{count} markers — long-press map to add}}",
+  "@settingsPlannedMarkersSubtitle": {
+    "description": "Count of planned repeater markers",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "settingsClearAllMarkers": "Clear All Markers",
+  "@settingsClearAllMarkers": {
+    "description": "Dialog title to remove planned markers"
+  },
+  "settingsClearAllMarkersConfirm": "Remove all planned repeater markers?",
+  "@settingsClearAllMarkersConfirm": {
+    "description": "Confirmation body for clearing planned markers"
+  },
+  "settingsAllMarkersCleared": "All markers cleared",
+  "@settingsAllMarkersCleared": {
+    "description": "Snackbar after clearing planned markers"
+  },
+  "settingsPrivacyZones": "Privacy Zones",
+  "@settingsPrivacyZones": {
+    "description": "Tile for privacy zones"
+  },
+  "settingsPrivacyZonesSubtitle": "{count, plural, one{{count} zone — excludes data from uploads} other{{count} zones — excludes data from uploads}}",
+  "@settingsPrivacyZonesSubtitle": {
+    "description": "Count of privacy zones",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "settingsClearPrivacyZones": "Clear Privacy Zones",
+  "@settingsClearPrivacyZones": {
+    "description": "Tile and dialog title to remove privacy zones"
+  },
+  "settingsClearPrivacyZonesConfirm": "Remove all privacy zones? Data will no longer be filtered from uploads.",
+  "@settingsClearPrivacyZonesConfirm": {
+    "description": "Confirmation body for clearing privacy zones"
+  },
+  "settingsPrivacyZonesCleared": "Privacy zones cleared",
+  "@settingsPrivacyZonesCleared": {
+    "description": "Snackbar after clearing privacy zones"
+  },
+  "settingsClearMap": "Clear Map",
+  "@settingsClearMap": {
+    "description": "Tile to delete all samples and coverage"
+  },
+  "settingsClearMapSubtitle": "Delete all samples and coverage",
+  "@settingsClearMapSubtitle": {
+    "description": "Subtitle for clear map"
+  },
+  "settingsDownloadOfflineTiles": "Download Offline Tiles",
+  "@settingsDownloadOfflineTiles": {
+    "description": "Tile to cache map tiles"
+  },
+  "settingsDownloadOfflineTilesSubtitle": "Cache map tiles for current view",
+  "@settingsDownloadOfflineTilesSubtitle": {
+    "description": "Subtitle for offline tile download"
+  },
+  "settingsClearTileCache": "Clear Tile Cache",
+  "@settingsClearTileCache": {
+    "description": "Tile to remove cached map tiles"
+  },
+  "settingsClearTileCacheSubtitle": "Remove cached offline map tiles",
+  "@settingsClearTileCacheSubtitle": {
+    "description": "Subtitle for clear tile cache"
+  },
+  "settingsTileCacheCleared": "Tile cache cleared",
+  "@settingsTileCacheCleared": {
+    "description": "Snackbar after clearing tile cache"
+  },
+  "settingsExportSettings": "Export Settings",
+  "@settingsExportSettings": {
+    "description": "Tile to export app settings"
+  },
+  "settingsExportSettingsSubtitle": "Save all app settings to file",
+  "@settingsExportSettingsSubtitle": {
+    "description": "Subtitle for export settings"
+  },
+  "settingsImportSettings": "Import Settings",
+  "@settingsImportSettings": {
+    "description": "Tile to import app settings"
+  },
+  "settingsImportSettingsSubtitle": "Load settings from file",
+  "@settingsImportSettingsSubtitle": {
+    "description": "Subtitle for import settings"
+  },
+  "settingsRepeaterHealth": "Repeater Health",
+  "@settingsRepeaterHealth": {
+    "description": "Tile to open repeater health"
+  },
+  "settingsRepeaterHealthSubtitle": "Per-repeater stats, trends & alerts",
+  "@settingsRepeaterHealthSubtitle": {
+    "description": "Subtitle for repeater health"
+  },
+  "settingsSignalTrends": "Signal Trends",
+  "@settingsSignalTrends": {
+    "description": "Tile to open signal trend charts"
+  },
+  "settingsSignalTrendsSubtitle": "RSSI, SNR & response time charts",
+  "@settingsSignalTrendsSubtitle": {
+    "description": "Subtitle for signal trends"
+  },
+  "settingsDebugDiagnostics": "Debug Diagnostics",
+  "@settingsDebugDiagnostics": {
+    "description": "Tile to open debug logs"
+  },
+  "settingsDebugDiagnosticsSubtitle": "View debug logs for troubleshooting",
+  "@settingsDebugDiagnosticsSubtitle": {
+    "description": "Subtitle for debug diagnostics"
+  },
+  "settingsUploadData": "Upload Data",
+  "@settingsUploadData": {
+    "description": "Upload samples tile and dialog title"
+  },
+  "settingsUploadDataSubtitle": "Upload samples to web map",
+  "@settingsUploadDataSubtitle": {
+    "description": "Subtitle for upload data"
+  },
+  "settingsManageUploadSites": "Manage Upload Sites",
+  "@settingsManageUploadSites": {
+    "description": "Tile to edit upload endpoints"
+  },
+  "settingsManageUploadSitesSubtitle": "Add/edit upload endpoints",
+  "@settingsManageUploadSitesSubtitle": {
+    "description": "Subtitle for manage upload sites"
+  },
+  "settingsUploadNoSites": "No upload sites configured",
+  "@settingsUploadNoSites": {
+    "description": "Empty state in upload site picker"
+  },
+  "settingsUploadSelectSites": "Select sites to upload to:",
+  "@settingsUploadSelectSites": {
+    "description": "Prompt in upload site picker"
+  },
+  "settingsCheckForUpdates": "Check for Updates",
+  "@settingsCheckForUpdates": {
+    "description": "Tile to check for app updates"
+  },
+  "settingsAboutCurrentVersion": "Current version: v{version}",
+  "@settingsAboutCurrentVersion": {
+    "description": "Shows the installed app version",
+    "placeholders": {
+      "version": {"type": "String"}
+    }
+  },
+  "settingsViewOnGitHub": "View on GitHub",
+  "@settingsViewOnGitHub": {
+    "description": "Tile to open the GitHub repository"
+  },
+  "settingsViewOnGitHubSubtitle": "Source code and releases",
+  "@settingsViewOnGitHubSubtitle": {
+    "description": "Subtitle for GitHub tile"
   }
 }

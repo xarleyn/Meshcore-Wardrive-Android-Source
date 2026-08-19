@@ -4,251 +4,282 @@ extension _AppDeviceSettingsSection on _MapScreenState {
   List<Widget> _buildAppDeviceSettings(
     BuildContext context,
     StateSetter setModalState,
-  ) => [
-    const SettingsSectionHeader(title: 'App & device', icon: Icons.tune),
-    ListTile(
-      title: const Text('Device Name'),
-      subtitle: FutureBuilder<String?>(
-        future: _settingsService.getDeviceName(),
-        builder: (context, snap) =>
-            Text(snap.data ?? 'Not set — used for multi-device wardrive'),
+  ) {
+    final l10n = AppLocalizations.of(context);
+    return [
+      SettingsSectionHeader(
+        title: l10n.settingsSectionAppDevice,
+        icon: Icons.tune,
       ),
-      leading: const Icon(Icons.badge),
-      trailing: const Icon(Icons.edit, size: 20),
-      onTap: () async {
-        final current = await _settingsService.getDeviceName();
-        if (!context.mounted) return;
-        final result = await showSettingsTextInputDialog(
-          context: context,
-          title: 'Device Name',
-          initialValue: current ?? '',
-          labelText: 'Name',
-          hintText: 'e.g., Chuck-Pixel',
-        );
-        if (result != null) {
-          await _settingsService.setDeviceName(result.isEmpty ? null : result);
-          setModalState(() {});
-        }
-      },
-    ),
-    const Divider(),
-    SwitchListTile(
-      title: const Text('Keep Screen On'),
-      subtitle: const Text(
-        'Prevent the screen from sleeping while the app is open',
-      ),
-      secondary: const Icon(Icons.screen_lock_portrait),
-      value: _keepScreenOn,
-      onChanged: (value) async {
-        _updateMapState(() {
-          _keepScreenOn = value;
-        });
-        setModalState(() {});
-        await _settingsService.setKeepScreenOn(value);
-        await ScreenWakeService.instance.setAlwaysOn(value);
-      },
-    ),
-    SwitchListTile(
-      title: const Text('Battery Saver'),
-      subtitle: const Text('Auto-double ping interval when battery ≤20%'),
-      secondary: const Icon(Icons.battery_saver),
-      value: _batterySaverEnabled,
-      onChanged: (value) async {
-        _updateMapState(() {
-          _batterySaverEnabled = value;
-        });
-        setModalState(() {});
-        await _settingsService.setBatterySaverEnabled(value);
-        _locationService.setBatterySaverEnabled(value);
-      },
-    ),
-    SwitchListTile(
-      title: const Text('Lock Map Rotation'),
-      subtitle: const Text('Prevent map rotation'),
-      value: _lockRotationNorth,
-      onChanged: (value) async {
-        _updateMapState(() {
-          _lockRotationNorth = value;
-          if (value) {
-            _followHeading = false;
+      ListTile(
+        title: Text(l10n.settingsDeviceName),
+        subtitle: FutureBuilder<String?>(
+          future: _settingsService.getDeviceName(),
+          builder: (context, snap) =>
+              Text(snap.data ?? l10n.settingsDeviceNameNotSet),
+        ),
+        leading: const Icon(Icons.badge),
+        trailing: const Icon(Icons.edit, size: 20),
+        onTap: () async {
+          final current = await _settingsService.getDeviceName();
+          if (!context.mounted) return;
+          final result = await showSettingsTextInputDialog(
+            context: context,
+            title: l10n.settingsDeviceName,
+            initialValue: current ?? '',
+            labelText: l10n.settingsDeviceNameLabel,
+            hintText: l10n.settingsDeviceNameHint,
+          );
+          if (result != null) {
+            await _settingsService.setDeviceName(
+              result.isEmpty ? null : result,
+            );
+            setModalState(() {});
           }
-        });
-        if (value) {
-          _mapController.rotate(0);
-        }
-        setModalState(() {});
-        await _settingsService.setLockRotationNorth(value);
-      },
-    ),
-    ListTile(
-      title: const Text('Current Location Marker'),
-      subtitle: const Text('The direction arrow follows the phone compass'),
-      trailing: DropdownButton<CurrentLocationMarkerStyle>(
-        value: _currentLocationMarkerStyle,
-        items: const [
-          DropdownMenuItem(
-            value: CurrentLocationMarkerStyle.circle,
-            child: Text('Circle'),
-          ),
-          DropdownMenuItem(
-            value: CurrentLocationMarkerStyle.arrow,
-            child: Text('Direction arrow'),
-          ),
-        ],
+        },
+      ),
+      const Divider(),
+      SwitchListTile(
+        title: Text(l10n.settingsKeepScreenOn),
+        subtitle: Text(l10n.settingsKeepScreenOnSubtitle),
+        secondary: const Icon(Icons.screen_lock_portrait),
+        value: _keepScreenOn,
         onChanged: (value) async {
-          if (value == null) return;
           _updateMapState(() {
-            _currentLocationMarkerStyle = value;
-            if (value == CurrentLocationMarkerStyle.circle) {
+            _keepScreenOn = value;
+          });
+          setModalState(() {});
+          await _settingsService.setKeepScreenOn(value);
+          await ScreenWakeService.instance.setAlwaysOn(value);
+        },
+      ),
+      SwitchListTile(
+        title: Text(l10n.settingsBatterySaver),
+        subtitle: Text(l10n.settingsBatterySaverSubtitle),
+        secondary: const Icon(Icons.battery_saver),
+        value: _batterySaverEnabled,
+        onChanged: (value) async {
+          _updateMapState(() {
+            _batterySaverEnabled = value;
+          });
+          setModalState(() {});
+          await _settingsService.setBatterySaverEnabled(value);
+          _locationService.setBatterySaverEnabled(value);
+        },
+      ),
+      SwitchListTile(
+        title: Text(l10n.settingsLockMapRotation),
+        subtitle: Text(l10n.settingsLockMapRotationSubtitle),
+        value: _lockRotationNorth,
+        onChanged: (value) async {
+          _updateMapState(() {
+            _lockRotationNorth = value;
+            if (value) {
               _followHeading = false;
             }
           });
-          if (value == CurrentLocationMarkerStyle.circle) {
+          if (value) {
             _mapController.rotate(0);
           }
           setModalState(() {});
-          _syncCompassSubscription();
-          await _settingsService.setCurrentLocationMarkerStyle(value);
+          await _settingsService.setLockRotationNorth(value);
         },
       ),
-    ),
-    ListTile(
-      title: const Text('Calibrate Compass'),
-      subtitle: const Text(
-        'Draw a figure-8 in the air if the heading looks wrong',
-      ),
-      leading: const Icon(Icons.explore),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: () {
-        Navigator.pop(context);
-        _openCompassCalibration(snoozeOnDismiss: false);
-      },
-    ),
-    ListTile(
-      title: const Text('Interface Theme'),
-      subtitle: Text(_getInterfaceThemeModeText()),
-      trailing: const Icon(Icons.brightness_6),
-      onTap: () {
-        Navigator.pop(context);
-        _showInterfaceThemeSelector();
-      },
-    ),
-    ListTile(
-      title: const Text('Map Theme'),
-      subtitle: Text(_getMapThemeModeText()),
-      trailing: const Icon(Icons.map_outlined),
-      onTap: () {
-        Navigator.pop(context);
-        _showMapThemeSelector();
-      },
-    ),
-    ListTile(
-      title: Text(AppLocalizations.of(context).language),
-      subtitle: Text(_getAppLocalePreferenceText()),
-      trailing: const Icon(Icons.language),
-      onTap: () {
-        Navigator.pop(context);
-        _showLanguageSelector();
-      },
-    ),
-    if (_loraConnected)
       ListTile(
-        title: const Text('Scan for Repeaters'),
-        subtitle: Text(
-          _repeaters.isEmpty
-              ? 'Find nearby LoRa nodes'
-              : '${_repeaters.length} repeater(s) found',
+        title: Text(l10n.settingsCurrentLocationMarker),
+        subtitle: Text(l10n.settingsCurrentLocationMarkerSubtitle),
+        trailing: DropdownButton<CurrentLocationMarkerStyle>(
+          value: _currentLocationMarkerStyle,
+          items: [
+            DropdownMenuItem(
+              value: CurrentLocationMarkerStyle.circle,
+              child: Text(l10n.settingsMarkerCircle),
+            ),
+            DropdownMenuItem(
+              value: CurrentLocationMarkerStyle.arrow,
+              child: Text(l10n.settingsMarkerDirectionArrow),
+            ),
+          ],
+          onChanged: (value) async {
+            if (value == null) return;
+            _updateMapState(() {
+              _currentLocationMarkerStyle = value;
+              if (value == CurrentLocationMarkerStyle.circle) {
+                _followHeading = false;
+              }
+            });
+            if (value == CurrentLocationMarkerStyle.circle) {
+              _mapController.rotate(0);
+            }
+            setModalState(() {});
+            _syncCompassSubscription();
+            await _settingsService.setCurrentLocationMarkerStyle(value);
+          },
         ),
-        leading: const Icon(Icons.cell_tower),
-        trailing: const Icon(Icons.search),
-        onTap: () {
-          Navigator.pop(context);
-          _scanForRepeaters();
-        },
       ),
-    if (_loraConnected)
       ListTile(
-        title: const Text('Refresh Contact List'),
-        subtitle: const Text('Update repeater names from device'),
-        leading: const Icon(Icons.refresh),
+        title: Text(l10n.settingsCalibrateCompass),
+        subtitle: Text(l10n.settingsCalibrateCompassSubtitle),
+        leading: const Icon(Icons.explore),
+        trailing: const Icon(Icons.chevron_right),
         onTap: () {
           Navigator.pop(context);
-          _refreshContacts();
+          _openCompassCalibration(snoozeOnDismiss: false);
         },
       ),
-    ListTile(
-      title: const Text('Color Mode'),
-      trailing: DropdownButton<String>(
-        value: _colorMode,
-        items: const [
-          DropdownMenuItem(value: 'quality', child: Text('Quality')),
-          DropdownMenuItem(value: 'age', child: Text('Age')),
-          DropdownMenuItem(value: 'redundancy', child: Text('Redundancy')),
-        ],
-        onChanged: (value) async {
-          _updateMapState(() {
-            _colorMode = value!;
-          });
-          await _settingsService.setColorMode(value!);
+      ListTile(
+        title: Text(l10n.settingsInterfaceTheme),
+        subtitle: Text(_getInterfaceThemeModeText()),
+        trailing: const Icon(Icons.brightness_6),
+        onTap: () {
+          Navigator.pop(context);
+          _showInterfaceThemeSelector();
         },
       ),
-    ),
-    ListTile(
-      title: const Text('Distance Unit'),
-      trailing: DropdownButton<String>(
-        value: _distanceUnit,
-        items: const [
-          DropdownMenuItem(value: 'miles', child: Text('Miles')),
-          DropdownMenuItem(value: 'km', child: Text('Kilometers')),
-        ],
-        onChanged: (value) async {
-          _updateMapState(() {
-            _distanceUnit = value!;
-            // Update displayed distance immediately
-            _totalDistance = value == 'miles'
-                ? _locationService.totalDistanceMiles
-                : _locationService.totalDistanceKm;
-          });
-          setModalState(() {});
-          await _settingsService.setDistanceUnit(value!);
+      ListTile(
+        title: Text(l10n.settingsMapTheme),
+        subtitle: Text(_getMapThemeModeText()),
+        trailing: const Icon(Icons.map_outlined),
+        onTap: () {
+          Navigator.pop(context);
+          _showMapThemeSelector();
         },
       ),
-    ),
-    ListTile(
-      title: const Text('Fuel Unit'),
-      trailing: DropdownButton<String>(
-        value: _fuelUnit,
-        items: const [
-          DropdownMenuItem(value: 'imperial', child: Text('MPG / Gallons')),
-          DropdownMenuItem(value: 'metric', child: Text('L/100km / Litres')),
-        ],
-        onChanged: (value) async {
-          _updateMapState(() {
-            _fuelUnit = value!;
-          });
-          setModalState(() {});
-          await _settingsService.setFuelUnit(value!);
+      ListTile(
+        title: Text(l10n.language),
+        subtitle: Text(_getAppLocalePreferenceText()),
+        trailing: const Icon(Icons.language),
+        onTap: () {
+          Navigator.pop(context);
+          _showLanguageSelector();
         },
       ),
-    ),
-    ListTile(
-      title: const Text('Color Blind Mode'),
-      trailing: DropdownButton<String>(
-        value: _colorBlindMode,
-        items: const [
-          DropdownMenuItem(value: 'normal', child: Text('Normal')),
-          DropdownMenuItem(value: 'deuteranopia', child: Text('Deuteranopia')),
-          DropdownMenuItem(value: 'protanopia', child: Text('Protanopia')),
-          DropdownMenuItem(value: 'tritanopia', child: Text('Tritanopia')),
-        ],
-        onChanged: (value) async {
-          _updateMapState(() {
-            _colorBlindMode = value!;
-          });
-          setModalState(() {});
-          await _settingsService.setColorBlindMode(value!);
-        },
+      if (_loraConnected)
+        ListTile(
+          title: Text(l10n.settingsScanForRepeaters),
+          subtitle: Text(
+            _repeaters.isEmpty
+                ? l10n.settingsScanFindNearby
+                : l10n.settingsRepeatersFound(_repeaters.length),
+          ),
+          leading: const Icon(Icons.cell_tower),
+          trailing: const Icon(Icons.search),
+          onTap: () {
+            Navigator.pop(context);
+            _scanForRepeaters();
+          },
+        ),
+      if (_loraConnected)
+        ListTile(
+          title: Text(l10n.settingsRefreshContactList),
+          subtitle: Text(l10n.settingsRefreshContactListSubtitle),
+          leading: const Icon(Icons.refresh),
+          onTap: () {
+            Navigator.pop(context);
+            _refreshContacts();
+          },
+        ),
+      ListTile(
+        title: Text(l10n.settingsColorMode),
+        trailing: DropdownButton<String>(
+          value: _colorMode,
+          items: [
+            DropdownMenuItem(
+              value: 'quality',
+              child: Text(l10n.settingsColorModeQuality),
+            ),
+            DropdownMenuItem(
+              value: 'age',
+              child: Text(l10n.settingsColorModeAge),
+            ),
+            DropdownMenuItem(
+              value: 'redundancy',
+              child: Text(l10n.settingsColorModeRedundancy),
+            ),
+          ],
+          onChanged: (value) async {
+            _updateMapState(() {
+              _colorMode = value!;
+            });
+            await _settingsService.setColorMode(value!);
+          },
+        ),
       ),
-    ),
-  ];
+      ListTile(
+        title: Text(l10n.settingsDistanceUnit),
+        trailing: DropdownButton<String>(
+          value: _distanceUnit,
+          items: [
+            DropdownMenuItem(value: 'miles', child: Text(l10n.settingsMiles)),
+            DropdownMenuItem(value: 'km', child: Text(l10n.settingsKilometers)),
+          ],
+          onChanged: (value) async {
+            _updateMapState(() {
+              _distanceUnit = value!;
+              // Update displayed distance immediately
+              _totalDistance = value == 'miles'
+                  ? _locationService.totalDistanceMiles
+                  : _locationService.totalDistanceKm;
+            });
+            setModalState(() {});
+            await _settingsService.setDistanceUnit(value!);
+          },
+        ),
+      ),
+      ListTile(
+        title: Text(l10n.settingsFuelUnit),
+        trailing: DropdownButton<String>(
+          value: _fuelUnit,
+          items: [
+            DropdownMenuItem(
+              value: 'imperial',
+              child: Text(l10n.settingsFuelUnitImperial),
+            ),
+            DropdownMenuItem(
+              value: 'metric',
+              child: Text(l10n.settingsFuelUnitMetric),
+            ),
+          ],
+          onChanged: (value) async {
+            _updateMapState(() {
+              _fuelUnit = value!;
+            });
+            setModalState(() {});
+            await _settingsService.setFuelUnit(value!);
+          },
+        ),
+      ),
+      ListTile(
+        title: Text(l10n.settingsColorBlindMode),
+        trailing: DropdownButton<String>(
+          value: _colorBlindMode,
+          items: [
+            DropdownMenuItem(
+              value: 'normal',
+              child: Text(l10n.settingsColorBlindNormal),
+            ),
+            DropdownMenuItem(
+              value: 'deuteranopia',
+              child: Text(l10n.settingsColorBlindDeuteranopia),
+            ),
+            DropdownMenuItem(
+              value: 'protanopia',
+              child: Text(l10n.settingsColorBlindProtanopia),
+            ),
+            DropdownMenuItem(
+              value: 'tritanopia',
+              child: Text(l10n.settingsColorBlindTritanopia),
+            ),
+          ],
+          onChanged: (value) async {
+            _updateMapState(() {
+              _colorBlindMode = value!;
+            });
+            setModalState(() {});
+            await _settingsService.setColorBlindMode(value!);
+          },
+        ),
+      ),
+    ];
+  }
 }
