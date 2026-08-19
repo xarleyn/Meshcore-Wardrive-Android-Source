@@ -5,6 +5,9 @@
 ### Added
 - Interface and map themes can now be selected independently. Existing installs
   keep their previous map appearance when the new setting is initialized.
+- Map LOD (geohash grouping of coverage, edges, and samples at low zoom) can now
+  be turned off in Map display. It stays on by default. With it off, the map
+  shows native coverage cells and individual GPS sample points.
 - Added a map-provider investigation covering Yandex Tiles API, Yandex MapKit,
   hosted alternatives, offline support, migration effort, and licensing risks.
 - Location rejection thresholds are now configurable in a dedicated expandable

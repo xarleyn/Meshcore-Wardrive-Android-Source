@@ -62,6 +62,7 @@ class SettingsService {
   static const String _deadZoneAlertsKey = 'dead_zone_alerts_enabled';
   static const String _newRepeaterAlertsKey = 'new_repeater_alerts_enabled';
   static const String _mapThemeModeKey = 'map_theme_mode';
+  static const String _mapLodEnabledKey = 'map_lod_enabled';
 
   // Alert toggles
   Future<bool> getDeadZoneAlertsEnabled() async {
@@ -597,6 +598,16 @@ class SettingsService {
     await prefs.setBool(_showSuccessfulOnlyKey, value);
   }
 
+  Future<bool> getMapLodEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_mapLodEnabledKey) ?? true;
+  }
+
+  Future<void> setMapLodEnabled(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_mapLodEnabledKey, value);
+  }
+
   /// Get lock rotation north setting
   Future<bool> getLockRotationNorth() async {
     final prefs = await SharedPreferences.getInstance();
@@ -707,6 +718,7 @@ class SettingsService {
     _keepScreenOnKey,
     _currentLocationMarkerStyleKey,
     _showSuccessfulOnlyKey,
+    _mapLodEnabledKey,
     // Upload service keys
     'upload_api_url',
     'auto_upload_enabled',

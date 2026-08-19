@@ -109,6 +109,33 @@ void main() {
     });
   });
 
+  group('map LOD setting', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('defaults to enabled', () async {
+      expect(await SettingsService().getMapLodEnabled(), isTrue);
+    });
+
+    test('persists the selected value', () async {
+      final settings = SettingsService();
+
+      await settings.setMapLodEnabled(false);
+
+      expect(await settings.getMapLodEnabled(), isFalse);
+    });
+
+    test('includes map LOD in settings backup', () async {
+      final settings = SettingsService();
+      await settings.setMapLodEnabled(false);
+
+      final exported = await settings.exportSettings();
+
+      expect(exported['map_lod_enabled'], isFalse);
+    });
+  });
+
   group('radio position visibility setting', () {
     setUp(() {
       SharedPreferences.setMockInitialValues({});

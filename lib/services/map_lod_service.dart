@@ -117,6 +117,27 @@ class MapLodService {
         .toList(growable: false);
   }
 
+  /// One marker per sample at its recorded GPS position, oldest first.
+  static List<SampleCluster> individualSamples(Iterable<Sample> samples) {
+    final clusters = samples
+        .map(
+          (sample) => SampleCluster(
+            id: sample.id,
+            position: sample.position,
+            sampleCount: 1,
+            successfulCount: sample.pingSuccess == true ? 1 : 0,
+            failedCount: sample.pingSuccess == false ? 1 : 0,
+            gpsOnlyCount: sample.pingSuccess == null ? 1 : 0,
+            newestSample: sample,
+          ),
+        )
+        .toList();
+    clusters.sort(
+      (a, b) => a.newestSample.timestamp.compareTo(b.newestSample.timestamp),
+    );
+    return clusters;
+  }
+
   static String _keyAtPrecision(
     String existingHash,
     double latitude,

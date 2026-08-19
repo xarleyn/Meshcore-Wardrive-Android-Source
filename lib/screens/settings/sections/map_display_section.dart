@@ -15,6 +15,20 @@ extension _MapDisplaySettingsSection on _MapScreenState {
       },
     ),
     SwitchListTile(
+      title: const Text('Simplify map at low zoom'),
+      subtitle: const Text(
+        'Group coverage and samples by geohash while zoomed out',
+      ),
+      value: _mapLodEnabled,
+      onChanged: (value) async {
+        _updateMapState(() {
+          _mapLodEnabled = value;
+        });
+        setModalState(() {});
+        await _settingsService.setMapLodEnabled(value);
+      },
+    ),
+    SwitchListTile(
       title: const Text('Show Samples'),
       value: _showSamples,
       onChanged: (value) async {

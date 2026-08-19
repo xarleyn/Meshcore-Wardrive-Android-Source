@@ -114,5 +114,33 @@ void main() {
       expect(result.single.gpsOnlyCount, 1);
       expect(result.single.newestSample, same(newer));
     });
+
+    test('keeps each sample at its GPS position when LOD is off', () {
+      final first = Sample(
+        id: 'a',
+        position: const LatLng(55.75, 37.61),
+        timestamp: DateTime.utc(2026, 1, 1),
+        geohash: 'ucftpv11',
+        pingSuccess: true,
+      );
+      final second = Sample(
+        id: 'b',
+        position: const LatLng(55.76, 37.62),
+        timestamp: DateTime.utc(2026, 2, 1),
+        geohash: 'ucftpv11',
+        pingSuccess: false,
+      );
+
+      final result = MapLodService.individualSamples([second, first]);
+
+      expect(result, hasLength(2));
+      expect(result.first.newestSample, same(first));
+      expect(result.first.position, first.position);
+      expect(result.first.sampleCount, 1);
+      expect(result.first.successfulCount, 1);
+      expect(result.last.newestSample, same(second));
+      expect(result.last.position, second.position);
+      expect(result.last.failedCount, 1);
+    });
   });
 }

@@ -104,6 +104,7 @@ class _MapScreenState extends State<MapScreen> {
   );
   AggregationResult? _cachedLodAggregation;
   int? _cachedCoverageLodPrecision;
+  bool? _cachedCoverageLodEnabled;
   List<Coverage> _cachedLodCoverages = const [];
   List<Edge> _cachedLodEdges = const [];
   List<Sample>? _cachedSampleLodSource;
@@ -116,6 +117,7 @@ class _MapScreenState extends State<MapScreen> {
   bool _showGpsSamples = true; // Show GPS-only samples (null pingSuccess)
   bool _showSuccessfulOnly = false; // Show only samples with successful pings
   bool _showCoverage = true; // Show coverage boxes
+  bool _mapLodEnabled = true; // Coarsen coverage/samples at low zoom
   bool _showEdges = true;
   bool _showRepeaters = true;
   bool _autoPingEnabled = false;
@@ -493,6 +495,7 @@ class _MapScreenState extends State<MapScreen> {
     final showSamples = await _settingsService.getShowSamples();
     final showGpsSamples = await _settingsService.getShowGpsSamples();
     final showCoverage = await _settingsService.getShowCoverage();
+    final mapLodEnabled = await _settingsService.getMapLodEnabled();
     final showEdges = await _settingsService.getShowEdges();
     final showRepeaters = await _settingsService.getShowRepeaters();
     final colorMode = await _settingsService.getColorMode();
@@ -522,6 +525,7 @@ class _MapScreenState extends State<MapScreen> {
       _showSamples = showSamples;
       _showGpsSamples = showGpsSamples;
       _showCoverage = showCoverage;
+      _mapLodEnabled = mapLodEnabled;
       _showEdges = showEdges;
       _showRepeaters = showRepeaters;
       _colorMode = colorMode;
@@ -1707,15 +1711,25 @@ $placemarks  </Document>
     setState(callback);
   }
 
-  int get _coverageLodPrecision => MapLodService.precisionForZoom(
-    _mapLodZoom,
-    maxPrecision: _coveragePrecision,
-  );
+  int get _coverageLodPrecision {
+    if (!_mapLodEnabled) return _coveragePrecision;
+    return MapLodService.precisionForZoom(
+      _mapLodZoom,
+      maxPrecision: _coveragePrecision,
+    );
+  }
 
-  int get _sampleLodPrecision =>
-      MapLodService.precisionForZoom(_mapLodZoom, maxPrecision: 8);
+  int get _sampleLodPrecision {
+    if (!_mapLodEnabled) return 8;
+    return MapLodService.precisionForZoom(_mapLodZoom, maxPrecision: 8);
+  }
 
   void _updateMapLodZoom(double zoom) {
+    if (!_mapLodEnabled) {
+      _mapLodZoom = zoom;
+      return;
+    }
+
     final oldCoveragePrecision = _coverageLodPrecision;
     final oldSamplePrecision = _sampleLodPrecision;
     final newCoveragePrecision = MapLodService.precisionForZoom(
@@ -1729,6 +1743,7 @@ $placemarks  </Document>
 
     if (oldCoveragePrecision == newCoveragePrecision &&
         oldSamplePrecision == newSamplePrecision) {
+      _mapLodZoom = zoom;
       return;
     }
 
@@ -1744,25 +1759,33 @@ $placemarks  </Document>
       _cachedLodAggregation = null;
       _cachedLodCoverages = const [];
       _cachedLodEdges = const [];
+      _cachedCoverageLodPrecision = null;
+      _cachedCoverageLodEnabled = null;
       return;
     }
     if (identical(_cachedLodAggregation, aggregation) &&
-        _cachedCoverageLodPrecision == precision) {
+        _cachedCoverageLodPrecision == precision &&
+        _cachedCoverageLodEnabled == _mapLodEnabled) {
       return;
     }
 
-    final coverages = MapLodService.aggregateCoverages(
-      aggregation.coverages,
-      precision: precision,
-    );
+    final coverages = _mapLodEnabled
+        ? MapLodService.aggregateCoverages(
+            aggregation.coverages,
+            precision: precision,
+          )
+        : aggregation.coverages;
     _cachedLodAggregation = aggregation;
     _cachedCoverageLodPrecision = precision;
+    _cachedCoverageLodEnabled = _mapLodEnabled;
     _cachedLodCoverages = coverages;
-    _cachedLodEdges = MapLodService.aggregateEdges(
-      aggregation.edges,
-      coverages,
-      precision: precision,
-    );
+    _cachedLodEdges = _mapLodEnabled
+        ? MapLodService.aggregateEdges(
+            aggregation.edges,
+            coverages,
+            precision: precision,
+          )
+        : aggregation.edges;
   }
 
   List<SampleCluster> _sampleClustersForCurrentLod() {
@@ -1770,6 +1793,7 @@ $placemarks  </Document>
       _showGpsSamples,
       _showSuccessfulOnly,
       _includeOnlyRepeaters ?? '',
+      _mapLodEnabled,
     ].join('|');
     final precision = _sampleLodPrecision;
     if (identical(_cachedSampleLodSource, _samples) &&
@@ -1796,10 +1820,9 @@ $placemarks  </Document>
     _cachedSampleLodSource = _samples;
     _cachedSampleLodPrecision = precision;
     _cachedSampleLodFilter = filterKey;
-    _cachedSampleClusters = MapLodService.aggregateSamples(
-      filteredSamples,
-      precision: precision,
-    );
+    _cachedSampleClusters = _mapLodEnabled
+        ? MapLodService.aggregateSamples(filteredSamples, precision: precision)
+        : MapLodService.individualSamples(filteredSamples);
     return _cachedSampleClusters;
   }
 
