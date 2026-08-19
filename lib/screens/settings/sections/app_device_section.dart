@@ -107,6 +107,15 @@ extension _AppDeviceSettingsSection on _MapScreenState {
         _showInterfaceThemeSelector();
       },
     ),
+    ListTile(
+      title: const Text('Map Theme'),
+      subtitle: Text(_getMapThemeModeText()),
+      trailing: const Icon(Icons.map_outlined),
+      onTap: () {
+        Navigator.pop(context);
+        _showMapThemeSelector();
+      },
+    ),
     if (_loraConnected)
       ListTile(
         title: const Text('Scan for Repeaters'),
