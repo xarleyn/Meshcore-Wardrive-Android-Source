@@ -29,6 +29,42 @@ void main() {
     expect(later, 1);
   });
 
+  testWidgets('sits above the system navigation inset like the map FABs', (
+    tester,
+  ) async {
+    const viewSize = Size(400, 800);
+    const navBarHeight = 48.0;
+    tester.view.physicalSize = viewSize;
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(
+            size: viewSize,
+            viewPadding: EdgeInsets.only(bottom: navBarHeight),
+            padding: EdgeInsets.only(bottom: navBarHeight),
+          ),
+          child: Scaffold(
+            body: Stack(
+              children: [
+                CompassCalibrationMapBanner(onCalibrate: () {}, onLater: () {}),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final banner = tester.getRect(find.byType(CompassCalibrationBanner));
+    expect(
+      banner.bottom,
+      viewSize.height - navBarHeight - kFloatingActionButtonMargin,
+    );
+  });
+
   testWidgets('completes the sheet after enough heading motion', (
     tester,
   ) async {

@@ -64,6 +64,37 @@ class CompassCalibrationBanner extends StatelessWidget {
   }
 }
 
+/// Positions the calibration prompt using the same bottom inset as Scaffold
+/// FABs so it stays above a transparent Android navigation bar.
+class CompassCalibrationMapBanner extends StatelessWidget {
+  const CompassCalibrationMapBanner({
+    super.key,
+    required this.onCalibrate,
+    required this.onLater,
+  });
+
+  final VoidCallback onCalibrate;
+  final VoidCallback onLater;
+
+  /// Regular FAB width plus the 16px margins on both sides of the column.
+  static const double _fabColumnClearance =
+      kFloatingActionButtonMargin * 2 + 56;
+
+  @override
+  Widget build(BuildContext context) {
+    final viewPadding = MediaQuery.viewPaddingOf(context);
+    return Positioned(
+      left: kFloatingActionButtonMargin,
+      right: _fabColumnClearance + viewPadding.right,
+      bottom: kFloatingActionButtonMargin + viewPadding.bottom,
+      child: CompassCalibrationBanner(
+        onCalibrate: onCalibrate,
+        onLater: onLater,
+      ),
+    );
+  }
+}
+
 Future<bool?> showCompassCalibrationSheet(
   BuildContext context, {
   Stream<CompassEvent>? events,

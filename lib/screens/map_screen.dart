@@ -2345,16 +2345,11 @@ $placemarks  </Document>
                 ),
               ),
             if (_showCompassCalibrationBanner && !_hideUIForScreenshot)
-              Positioned(
-                left: 16,
-                right: 88,
-                bottom: 16,
-                child: CompassCalibrationBanner(
-                  onCalibrate: () =>
-                      _openCompassCalibration(snoozeOnDismiss: true),
-                  onLater: () => _quietCompassCalibration(
-                    CompassCalibrationPolicy.snoozeDuration,
-                  ),
+              CompassCalibrationMapBanner(
+                onCalibrate: () =>
+                    _openCompassCalibration(snoozeOnDismiss: true),
+                onLater: () => _quietCompassCalibration(
+                  CompassCalibrationPolicy.snoozeDuration,
                 ),
               ),
             if (_deleteMode)
