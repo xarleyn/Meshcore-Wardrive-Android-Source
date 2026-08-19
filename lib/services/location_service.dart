@@ -152,6 +152,8 @@ class LocationService {
   /// Get session ping stats
   int get sessionPingCount => _sessionPingCount;
   int get sessionSuccessCount => _sessionSuccessCount;
+  int? get currentSessionId => _currentSessionId;
+  DateTime? get sessionStartTime => _sessionStartTime;
 
   /// Update foreground notification with live wardrive stats
   void _updateLiveNotification() {

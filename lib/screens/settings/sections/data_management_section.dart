@@ -73,17 +73,17 @@ extension _DataManagementSettingsSection on _MapScreenState {
     ListTile(
       title: const Text('Session History'),
       subtitle: Text(
-        _activeSessionFilter != null
+        _sessionMapView.isFiltered
             ? 'Filtering by session'
             : 'View past wardrive sessions',
       ),
       leading: const Icon(Icons.history),
-      trailing: _activeSessionFilter != null
+      trailing: _sessionMapView.isFiltered
           ? IconButton(
               icon: const Icon(Icons.clear, color: Colors.red),
               onPressed: () {
                 _updateMapState(() {
-                  _activeSessionFilter = null;
+                  _sessionMapView = const SessionMapView.all();
                 });
                 setModalState(() {});
                 _lastAggregatedSampleCount = -1; // Force reaggregation

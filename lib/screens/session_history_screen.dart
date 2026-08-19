@@ -8,7 +8,15 @@ class SessionHistoryScreen extends StatefulWidget {
   /// Optional callback when a session is selected (for map filtering)
   final void Function(WSession session)? onSessionSelected;
 
-  const SessionHistoryScreen({super.key, this.onSessionSelected});
+  /// Called after a session row is deleted, with remaining sessions newest first.
+  final void Function(int deletedId, List<WSession> remaining)?
+  onSessionDeleted;
+
+  const SessionHistoryScreen({
+    super.key,
+    this.onSessionSelected,
+    this.onSessionDeleted,
+  });
 
   @override
   State<SessionHistoryScreen> createState() => _SessionHistoryScreenState();
@@ -83,6 +91,7 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
     if (confirmed == true && session.id != null) {
       await _dbService.deleteSession(session.id!);
       await _loadSessions();
+      widget.onSessionDeleted?.call(session.id!, _sessions);
     }
   }
 

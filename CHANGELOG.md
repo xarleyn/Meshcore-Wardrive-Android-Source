@@ -3,6 +3,10 @@
 ## Unreleased
 
 ### Added
+- Long-press the map Play button to start a new recording on a blank map
+  without deleting stored samples. Short press still shows all coverage. An
+  empty session (no GPS points) asks whether to keep it; discarding or deleting
+  the session on the map falls back to the latest saved session.
 - Direction-arrow mode now offers a figure-8 compass calibration when Android
   reports the magnetometer as unreliable. A compact map banner appears after a
   short delay, Later snoozes it for a day, and Calibrate Compass remains in
@@ -52,6 +56,9 @@
   in map settings without disabling its calculation.
 
 ### Fixed
+- Quick Settings no longer crashes when Discovery Timeout is 5s or 25s, or when
+  ping distance is Frequent (50 m) or another value missing from the compact
+  menus. Those lists now match Settings and still accept unknown saved values.
 - Settings text fields now keep their controllers alive until dialog dismissal
   finishes, preventing crashes and cascading layout errors after saving location
   quality thresholds and other editable preferences.

@@ -32,6 +32,8 @@ that file to your Android device and install it.
    - The button will turn red when tracking is active
    - The map searches for and updates your position before tracking starts
    - Recorded samples are added after about 5 meters of movement
+   - A short press keeps showing all stored coverage. Long-press the play
+     button to start a new session on a blank map without deleting old samples.
 
 3. **View Your Coverage**: As you move:
    - GPS samples are collected automatically
@@ -42,7 +44,11 @@ that file to your Android device and install it.
 
 ### Map Controls
 - **My Location Button** (small blue button): Centers map on your current position
-- **Start/Stop Button** (large green/red): Toggles location tracking
+- **Start/Stop Button** (large green/red): Toggles location tracking. Long-press
+  while stopped starts a fresh session that only shows this trip. After you
+  stop, the map stays on that session until you short-press Play (show all) or
+  pick another session in Settings → Session History. Stopping with no GPS
+  points asks whether to save the empty session.
 - **Settings Icon** (top right): Access display options
 
 ### Settings Options

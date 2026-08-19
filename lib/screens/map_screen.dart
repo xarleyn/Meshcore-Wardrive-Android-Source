@@ -20,6 +20,9 @@ import '../services/settings_service.dart';
 import '../utils/geohash_utils.dart';
 import '../utils/compass_calibration.dart';
 import '../utils/heading_utils.dart';
+import '../utils/discovery_timeout_options.dart';
+import '../utils/ping_distance_options.dart';
+import '../utils/session_map_view.dart';
 import '../utils/color_blind_palette.dart';
 import '../utils/bluetooth_scan.dart';
 import '../widgets/compass_calibration.dart';
@@ -208,7 +211,7 @@ class _MapScreenState extends State<MapScreen> {
   bool _showRouteTrail = false;
 
   // Session filter
-  WSession? _activeSessionFilter;
+  SessionMapView _sessionMapView = const SessionMapView.all();
 
   // Offline tile cache
   CacheStore? _tileCacheStore;
@@ -746,22 +749,9 @@ class _MapScreenState extends State<MapScreen> {
         discoveredRepeaters.length != _lastAggregatedRepeaterCount;
 
     if (needsReaggregation) {
-      var samples = await _locationService.getAllSamples();
-
-      // Apply session time filter if active
-      if (_activeSessionFilter != null) {
-        final start = _activeSessionFilter!.startTime;
-        final end = _activeSessionFilter!.endTime ?? DateTime.now();
-        samples = samples
-            .where(
-              (s) =>
-                  s.timestamp.isAfter(
-                    start.subtract(const Duration(seconds: 1)),
-                  ) &&
-                  s.timestamp.isBefore(end.add(const Duration(seconds: 1))),
-            )
-            .toList();
-      }
+      var samples = _sessionMapView.visibleSamples(
+        await _locationService.getAllSamples(),
+      );
 
       // Apply source filter if active
       if (_activeSourceFilter != null) {
@@ -848,13 +838,85 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  Future<void> _toggleTracking() async {
+  void _applySessionMapView(SessionMapView view) {
+    _sessionMapView = view;
+    _lastAggregatedSampleCount = -1;
+    _loadSamples();
+  }
+
+  Future<bool?> _confirmSaveEmptySession() {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Session is empty'),
+        content: const Text(
+          'No GPS points were recorded. Save this session anyway?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Don't save"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleStoppedSession(int? sessionId) async {
+    if (sessionId == null || !mounted) return;
+
+    final db = DatabaseService();
+    final sessions = await db.getAllSessions();
+    if (!mounted) return;
+    WSession? finalized;
+    for (final session in sessions) {
+      if (session.id == sessionId) {
+        finalized = session;
+        break;
+      }
+    }
+    if (finalized == null) return;
+
+    if (!SessionMapView.isEmptySession(finalized.sampleCount)) {
+      _applySessionMapView(_sessionMapView.afterStopWithSamples(finalized));
+      return;
+    }
+
+    final save = await _confirmSaveEmptySession();
+    if (!mounted) return;
+    if (save != false) {
+      if (_sessionMapView.scope == SessionMapScope.session) {
+        _applySessionMapView(SessionMapView.session(finalized));
+      }
+      return;
+    }
+
+    await db.deleteSession(sessionId);
+    final remaining = await db.getAllSessions();
+    if (!mounted) return;
+    if (_sessionMapView.scope != SessionMapScope.session) return;
+
+    _applySessionMapView(_sessionMapView.afterDiscardingEmpty(remaining));
+    if (remaining.isEmpty) {
+      _showSnackBar('Session discarded');
+    } else {
+      _showSnackBar('Session discarded — showing last saved session');
+    }
+  }
+
+  Future<void> _toggleTracking({bool freshSession = false}) async {
     if (_isTracking) {
       // Persist session distance before stopping
       final sessionMeters = _locationService.totalDistanceMeters;
       if (sessionMeters > 0) {
         await _settingsService.addToTotalDistanceDriven(sessionMeters);
       }
+      final sessionId = _locationService.currentSessionId;
       // Stop tracking and auto-ping
       await _locationService.stopTracking();
       _locationService.disableAutoPing();
@@ -862,6 +924,7 @@ class _MapScreenState extends State<MapScreen> {
         _isTracking = false;
         _autoPingEnabled = false;
       });
+      await _handleStoppedSession(sessionId);
       // Check for newly unlocked achievements
       AchievementService().checkAndUnlock();
     } else {
@@ -870,6 +933,7 @@ class _MapScreenState extends State<MapScreen> {
       // Start tracking
       final started = await _locationService.startTracking();
       if (started) {
+        String startMessage = 'Location tracking started';
         // Auto-enable ping or Carpeater if LoRa is connected
         if (_loraConnected && _carpeaterEnabled) {
           _locationService.setCarpeaterMode(true);
@@ -878,24 +942,25 @@ class _MapScreenState extends State<MapScreen> {
             _isTracking = true;
             _autoPingEnabled = false;
           });
-          _showSnackBar(
-            carpeaterStarted
-                ? 'Carpeater mode started'
-                : 'Carpeater failed — check settings',
-          );
+          startMessage = carpeaterStarted
+              ? 'Carpeater mode started'
+              : 'Carpeater failed — check settings';
         } else if (_loraConnected) {
           _locationService.enableAutoPing();
           setState(() {
             _isTracking = true;
             _autoPingEnabled = true;
           });
-          _showSnackBar('Location tracking and auto-ping started');
+          startMessage = 'Location tracking and auto-ping started';
         } else {
           setState(() {
             _isTracking = true;
           });
-          _showSnackBar('Location tracking started');
         }
+        _onTrackingStarted(
+          freshSession: freshSession,
+          startMessage: startMessage,
+        );
       } else {
         _showSnackBar(
           _locationService.lastStartError ??
@@ -903,6 +968,27 @@ class _MapScreenState extends State<MapScreen> {
         );
       }
     }
+  }
+
+  void _onTrackingStarted({
+    required bool freshSession,
+    required String startMessage,
+  }) {
+    if (freshSession) {
+      final sessionId = _locationService.currentSessionId;
+      final startTime = _locationService.sessionStartTime;
+      if (sessionId != null && startTime != null) {
+        _applySessionMapView(
+          _sessionMapView.afterFreshStart(
+            WSession(id: sessionId, startTime: startTime),
+          ),
+        );
+        _showSnackBar('New session — showing this trip only');
+        return;
+      }
+    }
+    _applySessionMapView(_sessionMapView.afterShortPressStart());
+    _showSnackBar(startMessage);
   }
 
   Future<bool> _prepareAndroidTracking() async {
@@ -2147,7 +2233,7 @@ $placemarks  </Document>
             if (_showQuickSettings)
               Positioned(
                 bottom: 80,
-                right: 16,
+                right: 88,
                 child: Card(
                   elevation: 8,
                   child: Padding(
@@ -2186,42 +2272,11 @@ $placemarks  </Document>
                               'Ping Dist: ',
                               style: TextStyle(fontSize: 12),
                             ),
-                            DropdownButton<double>(
+                            PingDistanceDropdown(
                               value: _pingIntervalMeters,
-                              isDense: true,
-                              items: const [
-                                DropdownMenuItem(
-                                  value: 200.0,
-                                  child: Text(
-                                    '200m',
-                                    style: TextStyle(fontSize: 12),
-                                  ),
-                                ),
-                                DropdownMenuItem(
-                                  value: 400.0,
-                                  child: Text(
-                                    '400m',
-                                    style: TextStyle(fontSize: 12),
-                                  ),
-                                ),
-                                DropdownMenuItem(
-                                  value: 805.0,
-                                  child: Text(
-                                    '0.5mi',
-                                    style: TextStyle(fontSize: 12),
-                                  ),
-                                ),
-                                DropdownMenuItem(
-                                  value: 1609.0,
-                                  child: Text(
-                                    '1mi',
-                                    style: TextStyle(fontSize: 12),
-                                  ),
-                                ),
-                              ],
                               onChanged: (v) async {
-                                setState(() => _pingIntervalMeters = v!);
-                                _locationService.setPingInterval(v!);
+                                setState(() => _pingIntervalMeters = v);
+                                _locationService.setPingInterval(v);
                                 await _settingsService.setPingInterval(v);
                               },
                             ),
@@ -2234,42 +2289,11 @@ $placemarks  </Document>
                               'Timeout: ',
                               style: TextStyle(fontSize: 12),
                             ),
-                            DropdownButton<int>(
+                            DiscoveryTimeoutDropdown(
                               value: _discoveryTimeoutSeconds,
-                              isDense: true,
-                              items: const [
-                                DropdownMenuItem(
-                                  value: 10,
-                                  child: Text(
-                                    '10s',
-                                    style: TextStyle(fontSize: 12),
-                                  ),
-                                ),
-                                DropdownMenuItem(
-                                  value: 15,
-                                  child: Text(
-                                    '15s',
-                                    style: TextStyle(fontSize: 12),
-                                  ),
-                                ),
-                                DropdownMenuItem(
-                                  value: 20,
-                                  child: Text(
-                                    '20s',
-                                    style: TextStyle(fontSize: 12),
-                                  ),
-                                ),
-                                DropdownMenuItem(
-                                  value: 30,
-                                  child: Text(
-                                    '30s',
-                                    style: TextStyle(fontSize: 12),
-                                  ),
-                                ),
-                              ],
                               onChanged: (v) async {
-                                setState(() => _discoveryTimeoutSeconds = v!);
-                                await _settingsService.setDiscoveryTimeout(v!);
+                                setState(() => _discoveryTimeoutSeconds = v);
+                                await _settingsService.setDiscoveryTimeout(v);
                               },
                             ),
                           ],
@@ -2430,9 +2454,15 @@ $placemarks  </Document>
                 GestureDetector(
                   onDoubleTap: () =>
                       setState(() => _showQuickSettings = !_showQuickSettings),
+                  onLongPress: _isTracking
+                      ? null
+                      : () => _toggleTracking(freshSession: true),
                   child: FloatingActionButton(
                     heroTag: 'tracking',
                     onPressed: _toggleTracking,
+                    tooltip: _isTracking
+                        ? 'Stop tracking'
+                        : 'Start tracking. Long-press for a blank-map session.',
                     backgroundColor: _isTracking ? Colors.red : Colors.green,
                     child: Icon(_isTracking ? Icons.stop : Icons.play_arrow),
                   ),
@@ -3721,13 +3751,17 @@ $placemarks  </Document>
       MaterialPageRoute(
         builder: (context) => SessionHistoryScreen(
           onSessionSelected: (session) {
-            setState(() {
-              _activeSessionFilter = session;
-            });
-            _lastAggregatedSampleCount = -1; // Force reaggregation with filter
-            _loadSamples();
+            _applySessionMapView(SessionMapView.session(session));
             _showSnackBar(
               'Showing session from ${DateFormat('MMM d, h:mm a').format(session.startTime)}',
+            );
+          },
+          onSessionDeleted: (deletedId, remaining) {
+            _applySessionMapView(
+              _sessionMapView.afterDeletingSession(
+                deletedId: deletedId,
+                remainingNewestFirst: remaining,
+              ),
             );
           },
         ),

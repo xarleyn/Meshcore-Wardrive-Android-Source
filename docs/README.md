@@ -13,6 +13,7 @@
 
 ## Development
 
+- [Fresh session map view](superpowers/specs/2026-08-19-fresh-session-map-design.md)
 - [Debugging ping responses](development/debugging-pings.md)
 - [Map provider investigation](development/map-providers.md)
 - [Android release builds, versioning, signing, and GitHub Actions](development/releasing.md)

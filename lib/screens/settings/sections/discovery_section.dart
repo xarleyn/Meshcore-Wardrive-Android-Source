@@ -12,22 +12,16 @@ extension _DiscoverySettingsSection on _MapScreenState {
     ListTile(
       title: const Text('Discovery Timeout'),
       subtitle: const Text('How long to wait for repeater responses'),
-      trailing: DropdownButton<int>(
+      trailing: DiscoveryTimeoutDropdown(
         value: _discoveryTimeoutSeconds,
-        items: const [
-          DropdownMenuItem(value: 5, child: Text('5s')),
-          DropdownMenuItem(value: 10, child: Text('10s')),
-          DropdownMenuItem(value: 15, child: Text('15s')),
-          DropdownMenuItem(value: 20, child: Text('20s')),
-          DropdownMenuItem(value: 25, child: Text('25s')),
-          DropdownMenuItem(value: 30, child: Text('30s')),
-        ],
+        isDense: false,
+        itemStyle: null,
         onChanged: (value) async {
           _updateMapState(() {
-            _discoveryTimeoutSeconds = value!;
+            _discoveryTimeoutSeconds = value;
           });
           setModalState(() {});
-          await _settingsService.setDiscoveryTimeout(value!);
+          await _settingsService.setDiscoveryTimeout(value);
         },
       ),
     ),
