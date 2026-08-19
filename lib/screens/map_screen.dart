@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/models.dart';
 import '../models/location_quality_settings.dart';
+import '../models/impossible_zone.dart';
 import '../services/location_service.dart';
 import '../services/aggregation_service.dart';
 import '../services/map_lod_service.dart';
@@ -268,6 +269,7 @@ class _MapScreenState extends State<MapScreen> {
 
   // Privacy zones
   List<Map<String, dynamic>> _privacyZones = [];
+  List<ImpossibleZone> _impossibleZones = [];
 
   // Battery saver mode
   bool _batterySaverActive = false;
@@ -313,6 +315,7 @@ class _MapScreenState extends State<MapScreen> {
     // Load planned markers and privacy zones
     await _loadMarkers();
     await _loadPrivacyZones();
+    await _loadImpossibleZones();
 
     // Subscribe to battery updates
     final loraService = _locationService.loraCompanion;
@@ -1702,6 +1705,14 @@ $placemarks  </Document>
     final zones = await DatabaseService().getAllPrivacyZones();
     setState(() {
       _privacyZones = zones;
+    });
+  }
+
+  Future<void> _loadImpossibleZones() async {
+    final zones = await DatabaseService().getAllImpossibleZones();
+    if (!mounted) return;
+    setState(() {
+      _impossibleZones = zones;
     });
   }
 

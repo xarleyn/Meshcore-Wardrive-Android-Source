@@ -861,6 +861,27 @@ class LocationService {
       print('Location ignored: $reason');
       return;
     }
+
+    try {
+      final impossible = await _dbService.findImpossibleZoneAt(
+        latLng.latitude,
+        latLng.longitude,
+      );
+      if (impossible != null) {
+        await _logger.logLocationEvent(
+          '${source.name} location ignored: ${impossible.rejectionReason}',
+        );
+        print('Location ignored: ${impossible.rejectionReason}');
+        return;
+      }
+    } catch (e) {
+      await _logger.logLocationEvent(
+        '${source.name} location ignored: impossible zone check failed: $e',
+      );
+      print('Location ignored: impossible zone check failed: $e');
+      return;
+    }
+
     qualityFilter.accept(position);
 
     if (source == LocationPositionSource.fused) {

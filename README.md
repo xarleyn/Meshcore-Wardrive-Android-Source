@@ -32,6 +32,7 @@ companion radio over USB or Bluetooth, and displays coverage on a Flutter map.
 - Color blind accessibility modes
 - Debug terminal with logging
 - Independent light/dark/system themes for the interface and map
+- Impossible Zones: discard GPS jumps into places you cannot physically be
 
 ## 🛠️ Development Setup
 

@@ -32,7 +32,9 @@ extension _LocationSettingsSection on _MapScreenState {
     ListTile(
       leading: const Icon(Icons.gps_fixed),
       title: const Text('Location Quality Filters'),
-      subtitle: const Text('Accuracy and implausible-movement thresholds'),
+      subtitle: const Text(
+        'Accuracy, implausible movement, and impossible locations',
+      ),
       trailing: const Icon(Icons.arrow_forward),
       onTap: () => _openLocationQualitySettings(context),
     ),

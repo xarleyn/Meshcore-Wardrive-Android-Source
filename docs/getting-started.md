@@ -66,10 +66,13 @@ that file to your Android device and install it.
   priority over Android fused/GPS positioning and uses a cyan current-location
   marker. The app returns to fused positioning when no fresh Wi-Fi estimate is
   available. Internet access and at least two mapped access points are required.
-- **Location Quality Filters**: An expandable group for tuning the maximum
-  horizontal error, airborne altitude and speed, and maximum wardrive speed.
-  Speeds are entered in km/h. The defaults preserve the built-in filters used
-  by earlier versions, and **Restore Defaults** resets the whole group.
+- **Location Quality Filters**: Thresholds for maximum horizontal error,
+  airborne altitude and speed, and maximum wardrive speed, plus **Impossible
+  Zones** — circular areas you cannot physically occupy (for example an
+  airport). GPS inside a zone is discarded and the last valid position is
+  kept. Zones are managed only in this settings page and are not drawn on
+  the map. Speeds are entered in km/h. **Restore Defaults** resets the
+  thresholds, not the zones.
 - **Color Mode**:
   - Quality: Green (excellent) → Red (poor)
   - Age: Green (fresh) → Red (old)
@@ -122,7 +125,8 @@ Exported JSON contains an array of samples:
   spoofing. Fixes marked as mock locations, worse than the configured accuracy
   threshold (250m by default), or moving implausibly fast are ignored, but
   software cannot prove every plausible fix is genuine without an independent
-  positioning source.
+  positioning source. If GPS still jumps somewhere you cannot be, add an
+  **Impossible Zone** in Location Quality Filters.
 
 ### Map Not Loading
 - Check internet connection (needed for map tiles)
@@ -140,7 +144,9 @@ Exported JSON contains an array of samples:
   no IP or cell-position fallback, disabled by default
 - **Quality Filtering**: Android-reported mock fixes, fixes worse than 250m,
   and probable aircraft movement are excluded; high-altitude roads are still
-  supported
+  supported. Optional Impossible Zones discard fixes inside user-defined
+  circles (airports and other unreachable areas) and keep the last valid
+  position.
 - **Coverage Precision**: ~0.61km × 1.22km grid
 - **Sample Precision**: ~19m × 19m grid
 - **Initial Map View**: Centroid of stored samples at city-scale zoom; if there

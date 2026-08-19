@@ -2,13 +2,14 @@ import 'dart:math';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import '../models/impossible_zone.dart';
 import '../models/models.dart';
 import 'dart:io';
 
 class DatabaseService {
   static Database? _database;
   static const String _databaseName = 'meshcore_wardrive.db';
-  static const int _databaseVersion = 12;
+  static const int _databaseVersion = 13;
   static const String tableDuctingCache = 'ducting_cache';
 
   static const String tableSamples = 'samples';
@@ -16,6 +17,7 @@ class DatabaseService {
   static const String tableSessions = 'sessions';
   static const String tableMarkers = 'planned_markers';
   static const String tablePrivacyZones = 'privacy_zones';
+  static const String tableImpossibleZones = 'impossible_zones';
   static const String tableDevices = 'devices';
 
   Future<Database> get database async {
@@ -140,6 +142,16 @@ class DatabaseService {
     // Create privacy zones table
     await db.execute('''
       CREATE TABLE $tablePrivacyZones (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        lat REAL NOT NULL,
+        lon REAL NOT NULL,
+        radius_meters REAL NOT NULL,
+        label TEXT
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE $tableImpossibleZones (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         lat REAL NOT NULL,
         lon REAL NOT NULL,
@@ -273,6 +285,17 @@ class DatabaseService {
           connection_type TEXT,
           first_used INTEGER NOT NULL,
           last_used INTEGER NOT NULL
+        )
+      ''');
+    }
+    if (oldVersion < 13) {
+      await db.execute('''
+        CREATE TABLE $tableImpossibleZones (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          lat REAL NOT NULL,
+          lon REAL NOT NULL,
+          radius_meters REAL NOT NULL,
+          label TEXT
         )
       ''');
     }
@@ -891,6 +914,43 @@ class DatabaseService {
       }
       return true;
     }).toList();
+  }
+
+  // ============================================================================
+  // IMPOSSIBLE ZONES
+  // ============================================================================
+
+  /// Add a circular area the user cannot physically occupy.
+  Future<int> addImpossibleZone(
+    double lat,
+    double lon,
+    double radiusMeters,
+    String? label,
+  ) async {
+    final db = await database;
+    return await db.insert(tableImpossibleZones, {
+      'lat': lat,
+      'lon': lon,
+      'radius_meters': radiusMeters,
+      'label': label,
+    });
+  }
+
+  Future<List<ImpossibleZone>> getAllImpossibleZones() async {
+    final db = await database;
+    final rows = await db.query(tableImpossibleZones);
+    return rows.map(ImpossibleZone.fromMap).toList();
+  }
+
+  Future<void> deleteImpossibleZone(int id) async {
+    final db = await database;
+    await db.delete(tableImpossibleZones, where: 'id = ?', whereArgs: [id]);
+  }
+
+  /// Returns the first impossible zone containing this point, if any.
+  Future<ImpossibleZone?> findImpossibleZoneAt(double lat, double lon) async {
+    final zones = await getAllImpossibleZones();
+    return ImpossibleZone.containing(zones, lat, lon);
   }
 
   /// Close the database
