@@ -86,4 +86,38 @@ void main() {
     expect(find.text('Maximum Horizontal Error'), findsOneWidget);
     expect(find.textContaining(RegExp(r'^v\d')), findsNothing);
   });
+
+  testWidgets('scrolls settings to the bottom and back to the top', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SettingsScreen.category(
+          title: 'Long settings',
+          contentBuilder: (context, setPageState, scrollController) => ListView(
+            controller: scrollController,
+            children: List.generate(
+              30,
+              (index) => ListTile(title: Text('Setting $index')),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Setting 0'), findsOneWidget);
+    expect(find.text('Setting 29'), findsNothing);
+
+    await tester.tap(find.byTooltip('Scroll to bottom'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Setting 0'), findsNothing);
+    expect(find.text('Setting 29'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Scroll to top'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Setting 0'), findsOneWidget);
+    expect(find.text('Setting 29'), findsNothing);
+  });
 }

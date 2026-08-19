@@ -36,6 +36,28 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   final ScrollController _scrollController = ScrollController();
 
+  Future<void> _scrollTo(double offset) async {
+    if (!_scrollController.hasClients) {
+      return;
+    }
+
+    await _scrollController.animateTo(
+      offset,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+  }
+
+  Future<void> _scrollToTop() => _scrollTo(0);
+
+  Future<void> _scrollToBottom() async {
+    if (!_scrollController.hasClients) {
+      return;
+    }
+
+    await _scrollTo(_scrollController.position.maxScrollExtent);
+  }
+
   @override
   void dispose() {
     _scrollController.dispose();
@@ -48,6 +70,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
       appBar: AppBar(
         title: Text(widget.title),
         actions: [
+          IconButton(
+            onPressed: _scrollToTop,
+            tooltip: 'Scroll to top',
+            icon: const Icon(Icons.vertical_align_top),
+          ),
+          IconButton(
+            onPressed: _scrollToBottom,
+            tooltip: 'Scroll to bottom',
+            icon: const Icon(Icons.vertical_align_bottom),
+          ),
           if (widget.version case final version?)
             Center(
               child: Padding(
