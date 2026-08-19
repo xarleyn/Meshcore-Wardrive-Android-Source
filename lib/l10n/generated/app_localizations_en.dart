@@ -1136,4 +1136,1018 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bluetoothNoDevices => 'No LoRa devices found via Bluetooth';
+
+  @override
+  String get settingsThemeLight => 'Light';
+
+  @override
+  String get settingsThemeDark => 'Dark';
+
+  @override
+  String get settingsThemeSystemDefault => 'System Default';
+
+  @override
+  String get settingsChooseInterfaceTheme => 'Choose Interface Theme';
+
+  @override
+  String get settingsChooseMapTheme => 'Choose Map Theme';
+
+  @override
+  String get mapClose => 'Close';
+
+  @override
+  String get mapDelete => 'Delete';
+
+  @override
+  String get mapOk => 'OK';
+
+  @override
+  String get mapNotNow => 'Not now';
+
+  @override
+  String get mapContinue => 'Continue';
+
+  @override
+  String get mapShare => 'Share';
+
+  @override
+  String get mapImport => 'Import';
+
+  @override
+  String get mapAdd => 'Add';
+
+  @override
+  String get mapDownload => 'Download';
+
+  @override
+  String get mapYes => 'Yes';
+
+  @override
+  String get mapNo => 'No';
+
+  @override
+  String get mapExit => 'EXIT';
+
+  @override
+  String get mapConnect => 'Connect';
+
+  @override
+  String get mapConnecting => 'Connecting...';
+
+  @override
+  String get mapDontSave => 'Don\'t save';
+
+  @override
+  String mapNewRepeaterDiscovered(String repeaterId) {
+    return '🆕 New repeater discovered: $repeaterId';
+  }
+
+  @override
+  String mapEnteringDeadZone(String cellHash) {
+    return '⚠️ Entering known dead zone ($cellHash)';
+  }
+
+  @override
+  String get mapBatterySaverOn => '🔋 Battery saver ON — ping interval doubled';
+
+  @override
+  String get mapBatterySaverOff =>
+      '🔋 Battery saver OFF — normal ping interval restored';
+
+  @override
+  String get mapCompassCalibrated => 'Compass calibrated';
+
+  @override
+  String get mapSessionEmptyTitle => 'Session is empty';
+
+  @override
+  String get mapSessionEmptyBody =>
+      'No GPS points were recorded. Save this session anyway?';
+
+  @override
+  String get mapSessionDiscarded => 'Session discarded';
+
+  @override
+  String get mapSessionDiscardedShowingLast =>
+      'Session discarded — showing last saved session';
+
+  @override
+  String get mapLocationTrackingStarted => 'Location tracking started';
+
+  @override
+  String get mapCarpeaterModeStarted => 'Carpeater mode started';
+
+  @override
+  String get mapCarpeaterFailedCheckSettings =>
+      'Carpeater failed — check settings';
+
+  @override
+  String get mapLocationTrackingAndAutoPingStarted =>
+      'Location tracking and auto-ping started';
+
+  @override
+  String get mapFailedToStartTracking =>
+      'Failed to start location tracking. Check Android settings.';
+
+  @override
+  String get mapNewSessionShowingTrip => 'New session — showing this trip only';
+
+  @override
+  String mapShowingSessionFrom(String timestamp) {
+    return 'Showing session from $timestamp';
+  }
+
+  @override
+  String get mapPreciseLocationRequiredTitle => 'Precise location required';
+
+  @override
+  String get mapPreciseLocationRequiredBody =>
+      'Wardriving needs precise location. In Android app permissions, enable “Use precise location”, then tap Start again.';
+
+  @override
+  String get mapOpenAppSettings => 'Open app settings';
+
+  @override
+  String get mapAllowLocationAllTheTimeTitle => 'Allow location all the time';
+
+  @override
+  String get mapAllowLocationAllTheTimeBody =>
+      'MeshCore Wardrive records while the screen is off or another app is open. Android needs location access set to “Allow all the time”.';
+
+  @override
+  String get mapBackgroundLocationRequiredTitle =>
+      'Background location required';
+
+  @override
+  String get mapBackgroundLocationRequiredBody =>
+      'Select Permissions → Location → Allow all the time, then return and tap Start again.';
+
+  @override
+  String get mapUnrestrictedBatteryTitle => 'Unrestricted battery use';
+
+  @override
+  String get mapUnrestrictedBatteryBody =>
+      'Allow MeshCore Wardrive to ignore battery optimizations so Android does not pause GPS, radio communication, or Wi-Fi scans during a drive.';
+
+  @override
+  String get mapDisableWifiThrottlingTitle => 'Disable Wi-Fi scan throttling';
+
+  @override
+  String get mapDisableWifiThrottlingBody =>
+      'Android does not let apps change this setting automatically. In Developer options, turn off “Wi-Fi scan throttling” for timely beaconDB position updates.';
+
+  @override
+  String get mapDeveloperOptions => 'Developer options';
+
+  @override
+  String get mapClearMapHistoryTitle => 'Clear Map History?';
+
+  @override
+  String mapClearMapHistoryBody(int count) {
+    return 'This will permanently delete all $count samples and coverage data from the map.\n\nThis action cannot be undone.';
+  }
+
+  @override
+  String get mapDeleteAll => 'Delete All';
+
+  @override
+  String mapDeletedSamples(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Deleted $count samples',
+      one: 'Deleted $count sample',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mapExportFormat => 'Export Format';
+
+  @override
+  String get mapExportJsonSubtitle => 'Full data with all fields';
+
+  @override
+  String get mapExportCsvSubtitle => 'Spreadsheet-compatible';
+
+  @override
+  String get mapExportGpxSubtitle => 'GPS track for mapping apps';
+
+  @override
+  String get mapExportKmlSubtitle => 'Google Earth format';
+
+  @override
+  String mapExportAs(String format) {
+    return 'Export as $format';
+  }
+
+  @override
+  String get mapSaveToFolder => 'Save to Folder';
+
+  @override
+  String get mapSaveExport => 'Save Export';
+
+  @override
+  String mapExportedSamples(int count, String format) {
+    return 'Exported $count samples as $format';
+  }
+
+  @override
+  String get mapExportShareSubject => 'MeshCore Wardrive Export';
+
+  @override
+  String mapExportShareText(int count) {
+    return 'Exported $count samples from MeshCore Wardrive';
+  }
+
+  @override
+  String get mapExportShared => 'Export shared';
+
+  @override
+  String mapExportFailed(String error) {
+    return 'Export failed: $error';
+  }
+
+  @override
+  String mapImportedSamples(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Imported $count samples',
+      one: 'Imported $count sample',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String mapImportedSessionsSuffix(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: ', $count sessions',
+      one: ', $count session',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String mapImportedFromSources(String sources) {
+    return ' from $sources';
+  }
+
+  @override
+  String mapImportFailed(String error) {
+    return 'Import failed: $error';
+  }
+
+  @override
+  String get mapSaveSettings => 'Save Settings';
+
+  @override
+  String get mapSettingsExported => 'Settings exported';
+
+  @override
+  String get mapSettingsShareText => 'MeshCore Wardrive Settings';
+
+  @override
+  String get mapImportSettingsConfirm =>
+      'This will overwrite your current app settings (display options, ping settings, upload servers, carpeater config, etc).\n\nYour wardrive data will NOT be affected.\n\nContinue?';
+
+  @override
+  String mapImportedSettingsCount(int count) {
+    return 'Imported $count settings';
+  }
+
+  @override
+  String mapInvalidSettingsFile(String error) {
+    return 'Invalid settings file: $error';
+  }
+
+  @override
+  String get mapAddPlannedRepeater => 'Add Planned Repeater';
+
+  @override
+  String get mapPlannedRepeaterHint => 'e.g., Hilltop near Tracyton';
+
+  @override
+  String get mapAddMarker => 'Add Marker';
+
+  @override
+  String get mapPlannedRepeaterMarkerAdded => 'Planned repeater marker added';
+
+  @override
+  String get mapPlannedRepeater => 'Planned Repeater';
+
+  @override
+  String mapLat(String value) {
+    return 'Lat: $value';
+  }
+
+  @override
+  String mapLon(String value) {
+    return 'Lon: $value';
+  }
+
+  @override
+  String mapAddedOn(String date) {
+    return 'Added: $date';
+  }
+
+  @override
+  String get mapMarkerDeleted => 'Marker deleted';
+
+  @override
+  String get mapAddPrivacyZone => 'Add Privacy Zone';
+
+  @override
+  String get mapPrivacyZoneBlurb =>
+      'Data inside this zone will be excluded from uploads and exports.';
+
+  @override
+  String get mapPrivacyZoneHint => 'e.g., Home';
+
+  @override
+  String get mapPrivacyZoneAdded => 'Privacy zone added';
+
+  @override
+  String get mapDeleteSample => 'Delete Sample';
+
+  @override
+  String mapDeleteSampleConfirm(String kind, String timestamp) {
+    String _temp0 = intl.Intl.selectLogic(kind, {
+      'success': 'Delete this successful sample from $timestamp?',
+      'fail': 'Delete this failed sample from $timestamp?',
+      'other': 'Delete this GPS-only sample from $timestamp?',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get mapSampleDeleted => 'Sample deleted';
+
+  @override
+  String get mapDeleteCoverageCell => 'Delete Coverage Cell';
+
+  @override
+  String mapDeleteCoverageCellBody(int count, String cellId) {
+    return 'Delete all $count samples in this coverage area?\n\nCell: $cellId\nThis cannot be undone.';
+  }
+
+  @override
+  String mapDeletedSamplesFromCell(int count) {
+    return 'Deleted $count samples from cell';
+  }
+
+  @override
+  String get mapZoomToDeleteCell =>
+      'Zoom in to delete an individual coverage cell';
+
+  @override
+  String get mapZoomedPointsGrouped =>
+      'Zoomed points are grouped; delete from coverage view';
+
+  @override
+  String get mapDeleteModeBanner =>
+      'DELETE MODE: Tap a coverage square or sample to delete';
+
+  @override
+  String get mapUpdateAvailable => 'Update Available';
+
+  @override
+  String mapUpdateAvailableBody(String latestVersion, String currentVersion) {
+    return 'New version $latestVersion is available!\n\nCurrent version: $currentVersion\n\nWould you like to download it?';
+  }
+
+  @override
+  String get mapOnLatestVersion => 'You\'re on the latest version!';
+
+  @override
+  String get mapCouldNotCheckUpdates => 'Could not check for updates';
+
+  @override
+  String get mapNoInternetTryAgain =>
+      'No internet connection. Try again when you are online.';
+
+  @override
+  String get mapUpdateCheckTimedOut =>
+      'Update check timed out. Try again later.';
+
+  @override
+  String get mapCouldNotOpenGitHub => 'Could not open GitHub';
+
+  @override
+  String get mapAutoFollowEnabled => 'Auto-follow enabled';
+
+  @override
+  String get mapAutoFollowDisabled => 'Auto-follow disabled';
+
+  @override
+  String get mapMapResetToNorth => 'Map reset to north';
+
+  @override
+  String get mapHeadingUpEnabled => 'Heading-up enabled';
+
+  @override
+  String get mapHeadingUpDisabled => 'Heading-up disabled — map reset to north';
+
+  @override
+  String get mapFailedToCaptureScreenshot => 'Failed to capture screenshot';
+
+  @override
+  String get mapScreenshotSavedToGallery => 'Screenshot saved to gallery!';
+
+  @override
+  String get mapScreenshotSavedTitle => 'Screenshot Saved';
+
+  @override
+  String get mapShareScreenshotPrompt =>
+      'Would you like to share the screenshot?';
+
+  @override
+  String get mapScreenshotShareText => 'MeshCore Wardrive Coverage Map';
+
+  @override
+  String get mapFailedToSaveScreenshot => 'Failed to save screenshot';
+
+  @override
+  String mapErrorCapturingScreenshot(String error) {
+    return 'Error capturing screenshot: $error';
+  }
+
+  @override
+  String get mapDebugTerminal => 'Debug Terminal';
+
+  @override
+  String get mapScreenshotTooltip => 'Screenshot';
+
+  @override
+  String get mapQuickSettings => 'Quick Settings';
+
+  @override
+  String get mapPingDist => 'Ping Dist: ';
+
+  @override
+  String get mapTimeout => 'Timeout: ';
+
+  @override
+  String get mapMode => 'Mode: ';
+
+  @override
+  String get mapStopHeadingUp => 'Stop heading-up and reset north';
+
+  @override
+  String get mapRotateMapWithHeading =>
+      'Rotate map with heading. Long-press to calibrate.';
+
+  @override
+  String get mapResetToNorth => 'Reset to North';
+
+  @override
+  String get mapStopTracking => 'Stop tracking';
+
+  @override
+  String get mapStartTracking =>
+      'Start tracking. Long-press for a blank-map session.';
+
+  @override
+  String get mapNoLora => 'No LoRa';
+
+  @override
+  String mapSamplesCount(String count) {
+    return 'Samples: $count';
+  }
+
+  @override
+  String get mapRetryingCarpeater => 'Retrying Carpeater...';
+
+  @override
+  String get mapCarpeaterReconnected => 'Carpeater reconnected';
+
+  @override
+  String get mapCarpeaterRetryFailed => 'Carpeater retry failed';
+
+  @override
+  String mapCarpeaterStatus(String state) {
+    return 'CP: $state';
+  }
+
+  @override
+  String get mapCarpeaterOff => 'Off';
+
+  @override
+  String get mapCarpeaterConnecting => 'Connecting';
+
+  @override
+  String get mapCarpeaterLogin => 'Login...';
+
+  @override
+  String get mapCarpeaterReady => 'Ready';
+
+  @override
+  String get mapCarpeaterScanning => 'Scanning';
+
+  @override
+  String get mapCarpeaterFetching => 'Fetching';
+
+  @override
+  String get mapCarpeaterError => 'Error';
+
+  @override
+  String mapDuctingStatus(String risk) {
+    return 'Ducting: $risk';
+  }
+
+  @override
+  String get mapDuctingPossible => 'Possible';
+
+  @override
+  String get mapDuctingLikely => 'Likely';
+
+  @override
+  String get mapBatterySaverBadge => '🔋 Saver';
+
+  @override
+  String get mapDisconnect => 'Disconnect';
+
+  @override
+  String get mapManualPing => 'Manual Ping';
+
+  @override
+  String get mapConnectLoraFirst => 'Connect LoRa device first';
+
+  @override
+  String get mapWaitingForGps => 'Waiting for GPS location...';
+
+  @override
+  String get mapPingAlreadyInProgress => 'A ping is already in progress';
+
+  @override
+  String get mapSendingPing => 'Sending ping...';
+
+  @override
+  String mapPingHeardBy(String nodeId) {
+    return '✅ Ping heard by $nodeId';
+  }
+
+  @override
+  String mapDiscoveryComplete(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '✅ Discovery complete: found $count repeaters',
+      one: '✅ Discovery complete: found $count repeater',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mapNoResponseDeadZone => '❌ No response - dead zone';
+
+  @override
+  String mapPingFailed(String error) {
+    return '❌ Ping failed: $error';
+  }
+
+  @override
+  String get mapConnectLoraDevice => 'Connect LoRa Device';
+
+  @override
+  String get mapChooseConnectionMethod => 'Choose connection method:';
+
+  @override
+  String get mapScanUsbDevices => 'Scan USB Devices';
+
+  @override
+  String get mapScanBluetooth => 'Scan Bluetooth';
+
+  @override
+  String get mapNoUsbDevices => 'No USB devices found';
+
+  @override
+  String get mapSelectUsbDevice => 'Select USB Device';
+
+  @override
+  String get mapUsbDeviceFallback => 'USB Device';
+
+  @override
+  String mapVidPid(String vid, String pid) {
+    return 'VID: $vid, PID: $pid';
+  }
+
+  @override
+  String get mapConnectedViaUsb => 'Connected via USB';
+
+  @override
+  String get mapFailedConnectUsb => 'Failed to connect USB device';
+
+  @override
+  String mapUsbError(String error) {
+    return 'USB error: $error';
+  }
+
+  @override
+  String mapConnectingTo(String name) {
+    return 'Connecting to $name...';
+  }
+
+  @override
+  String get mapConnectedViaBluetooth => 'Connected via Bluetooth!';
+
+  @override
+  String get mapFailedConnectBluetooth => 'Failed to connect Bluetooth device';
+
+  @override
+  String get mapDisconnectLoraDevice => 'Disconnect LoRa Device';
+
+  @override
+  String get mapDisconnectConfirm =>
+      'Disconnect from your LoRa companion device?';
+
+  @override
+  String get mapLoraDisconnected => 'LoRa device disconnected';
+
+  @override
+  String get mapRefreshingContactList => 'Refreshing contact list...';
+
+  @override
+  String get mapContactListUpdated => 'Contact list updated';
+
+  @override
+  String get mapScanningForRepeaters => 'Scanning for repeaters...';
+
+  @override
+  String get mapNoRepeatersFound => 'No repeaters found';
+
+  @override
+  String mapRepeatersFound(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Found $count repeaters',
+      one: 'Found $count repeater',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mapSampleInfo => 'Sample Info';
+
+  @override
+  String get mapStatusLabel => 'Status: ';
+
+  @override
+  String get mapStatusSuccess => '✅ Success';
+
+  @override
+  String get mapStatusFailed => '❌ Failed';
+
+  @override
+  String get mapStatusGpsOnly => '📍 GPS Only';
+
+  @override
+  String mapTimeLabel(String timestamp) {
+    return 'Time: $timestamp';
+  }
+
+  @override
+  String get mapRepeaterLabel => 'Repeater: ';
+
+  @override
+  String get mapRssiLabel => 'RSSI: ';
+
+  @override
+  String get mapSnrLabel => 'SNR: ';
+
+  @override
+  String get mapResponseLabel => 'Response: ';
+
+  @override
+  String get mapDuctingLabel => 'Ducting: ';
+
+  @override
+  String mapRssiValue(String value) {
+    return 'RSSI: $value dBm';
+  }
+
+  @override
+  String mapSnrValue(String value) {
+    return 'SNR: $value dB';
+  }
+
+  @override
+  String mapGroupedSamples(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count grouped samples',
+      one: '$count grouped sample',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String mapSuccessfulCount(int count) {
+    return 'Successful: $count';
+  }
+
+  @override
+  String mapFailedCount(int count) {
+    return 'Failed: $count';
+  }
+
+  @override
+  String mapGpsOnlyCount(int count) {
+    return 'GPS only: $count';
+  }
+
+  @override
+  String mapNewest(String timestamp) {
+    return 'Newest: $timestamp';
+  }
+
+  @override
+  String get mapZoomForBreakdown => 'Zoom in for a more detailed breakdown.';
+
+  @override
+  String mapRepeaterFallback(String id) {
+    return 'Repeater $id';
+  }
+
+  @override
+  String mapIdLabel(String id) {
+    return 'ID: $id';
+  }
+
+  @override
+  String mapFilteringBy(String id) {
+    return 'Filtering by $id';
+  }
+
+  @override
+  String get mapFilterByThis => 'Filter by This';
+
+  @override
+  String get mapShowOnMap => 'Show on Map';
+
+  @override
+  String get mapCoverageSquareInfo => 'Coverage Square Info';
+
+  @override
+  String get mapSamplesLabel => 'Samples: ';
+
+  @override
+  String get mapSuccessRateLabel => 'Success Rate: ';
+
+  @override
+  String get mapReceivedLabel => 'Received: ';
+
+  @override
+  String get mapLostLabel => 'Lost: ';
+
+  @override
+  String get mapRepeatersHeard => 'Repeaters Heard: ';
+
+  @override
+  String get mapRepeaterIds => 'Repeater IDs: ';
+
+  @override
+  String get mapNoPingData => 'No ping data';
+
+  @override
+  String get mapNotAvailable => 'N/A';
+
+  @override
+  String mapNearbyRepeaters(int count) {
+    return 'Nearby Repeaters ($count)';
+  }
+
+  @override
+  String mapUploadingTo(String site) {
+    return 'Uploading to $site...';
+  }
+
+  @override
+  String get mapUploadingSamples => 'Uploading samples...';
+
+  @override
+  String mapUploadBatch(int current, int total) {
+    return 'Batch $current of $total';
+  }
+
+  @override
+  String get mapUploadComplete => 'Upload Complete';
+
+  @override
+  String get mapUploadResults => 'Upload Results';
+
+  @override
+  String mapUploadedToSites(int successCount, int total) {
+    return 'Uploaded to $successCount of $total sites';
+  }
+
+  @override
+  String get mapUploadFallbackName => 'Upload';
+
+  @override
+  String mapUploadError(String error) {
+    return 'Upload error: $error';
+  }
+
+  @override
+  String get mapSelectWhichSitesToUpload => 'Select which sites to upload to:';
+
+  @override
+  String get mapDeleteSite => 'Delete Site';
+
+  @override
+  String mapDeleteSiteConfirm(String name) {
+    return 'Delete \"$name\"?';
+  }
+
+  @override
+  String get mapAddSite => 'Add Site';
+
+  @override
+  String get mapUploadSitesUpdated => 'Upload sites updated';
+
+  @override
+  String get mapEditUploadSite => 'Edit Upload Site';
+
+  @override
+  String get mapSiteName => 'Site Name';
+
+  @override
+  String get mapApiUrl => 'API URL';
+
+  @override
+  String get mapAddUploadSite => 'Add Upload Site';
+
+  @override
+  String get mapSiteNameHint => 'e.g., My Personal Map';
+
+  @override
+  String get mapTileCacheNotInitialized => 'Tile cache not initialized';
+
+  @override
+  String get mapDownloadTilesBlurb =>
+      'Download map tiles for the current view area.';
+
+  @override
+  String mapMinZoom(String zoom) {
+    return 'Min Zoom: $zoom';
+  }
+
+  @override
+  String mapMaxZoom(String zoom) {
+    return 'Max Zoom: $zoom';
+  }
+
+  @override
+  String mapTilesEstimate(int count, String megabytes) {
+    return '$count tiles (~$megabytes MB)';
+  }
+
+  @override
+  String get mapLargeDownloadWarning =>
+      'Large download — consider a smaller area or zoom range';
+
+  @override
+  String get mapDownloadingTiles => 'Downloading Tiles';
+
+  @override
+  String mapTilesProgress(int completed, int total) {
+    return '$completed / $total tiles';
+  }
+
+  @override
+  String mapDownloadedTiles(int succeeded, int total) {
+    return 'Downloaded $succeeded/$total tiles';
+  }
+
+  @override
+  String mapDownloadCancelled(int count) {
+    return 'Download cancelled ($count tiles cached)';
+  }
+
+  @override
+  String mapShareFailed(String error) {
+    return 'Share failed: $error';
+  }
+
+  @override
+  String get mapCoverageShareSubject => 'MeshCore Wardrive Coverage';
+
+  @override
+  String mapCoverageShareText(
+    String sampleCount,
+    String coverageCount,
+    String successCount,
+    String failCount,
+    String successRate,
+    String repeaterCount,
+  ) {
+    return 'MeshCore Wardrive Coverage Map\n📍 $sampleCount samples • $coverageCount coverage areas\n✅ $successCount success • ❌ $failCount failed • $successRate% rate\n🔁 $repeaterCount repeaters discovered';
+  }
+
+  @override
+  String get mapNoRepeatersYet =>
+      'No repeaters found yet - do some wardriving first!';
+
+  @override
+  String get mapFilterByRepeater => 'Filter by Repeater';
+
+  @override
+  String mapShowingCoverageFrom(String id) {
+    return 'Showing coverage from $id';
+  }
+
+  @override
+  String get mapRepeaterFilterCleared => 'Repeater filter cleared';
+
+  @override
+  String get mapClearFilter => 'Clear Filter';
+
+  @override
+  String get mapNoCoverageYet =>
+      'No coverage data yet - do some wardriving first!';
+
+  @override
+  String get mapNoCoverageGaps =>
+      'No coverage gaps found! All areas have >30% success rate.';
+
+  @override
+  String mapCoverageGaps(int count) {
+    return 'Coverage Gaps ($count)';
+  }
+
+  @override
+  String mapGapSuccessRate(String rate) {
+    return '$rate% success rate';
+  }
+
+  @override
+  String mapGapSubtitle(String coords, String received, String lost) {
+    return '$coords\n$received received / $lost lost';
+  }
+
+  @override
+  String get mapDownloadFrom => 'Download from';
+
+  @override
+  String get mapDownloadingCoverage => 'Downloading coverage data...';
+
+  @override
+  String mapDownloadedCoverageCells(int count) {
+    return 'Downloaded $count coverage cells';
+  }
+
+  @override
+  String get mapLoadedCachedCoverage => 'Loaded cached coverage (offline)';
+
+  @override
+  String mapDownloadFailed(String error) {
+    return 'Download failed: $error';
+  }
+
+  @override
+  String get mapUnknownError => 'unknown error';
+
+  @override
+  String mapCommunitySuccessRate(String rate) {
+    return 'Success Rate: $rate%';
+  }
+
+  @override
+  String get mapRepeatersHeader => 'Repeaters:';
+
+  @override
+  String mapLastUpdate(String timestamp) {
+    return 'Last Update: $timestamp';
+  }
+
+  @override
+  String mapAppVersionLabel(String version) {
+    return 'App Version: $version';
+  }
+
+  @override
+  String mapApproxRadioPositionUncertainty(String uncertainty) {
+    return 'Approximate radio position, uncertainty $uncertainty';
+  }
+
+  @override
+  String mapApproxRadioPositionSnack(int count, String uncertainty) {
+    return 'Approximate radio position · $count repeaters · ±$uncertainty';
+  }
+
+  @override
+  String get mapCurrentWifiLocation => 'Current Wi-Fi location from beaconDB';
+
+  @override
+  String get mapCurrentFusedLocation => 'Current fused Android location';
+
+  @override
+  String mapPositionHeadingSemantics(String positionLabel, String degrees) {
+    return '$positionLabel, heading $degrees degrees';
+  }
 }

@@ -1154,4 +1154,1037 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get bluetoothNoDevices => 'Устройства LoRa по Bluetooth не найдены';
+
+  @override
+  String get settingsThemeLight => 'Светлая';
+
+  @override
+  String get settingsThemeDark => 'Тёмная';
+
+  @override
+  String get settingsThemeSystemDefault => 'Системная';
+
+  @override
+  String get settingsChooseInterfaceTheme => 'Тема интерфейса';
+
+  @override
+  String get settingsChooseMapTheme => 'Тема карты';
+
+  @override
+  String get mapClose => 'Закрыть';
+
+  @override
+  String get mapDelete => 'Удалить';
+
+  @override
+  String get mapOk => 'OK';
+
+  @override
+  String get mapNotNow => 'Не сейчас';
+
+  @override
+  String get mapContinue => 'Продолжить';
+
+  @override
+  String get mapShare => 'Поделиться';
+
+  @override
+  String get mapImport => 'Импорт';
+
+  @override
+  String get mapAdd => 'Добавить';
+
+  @override
+  String get mapDownload => 'Скачать';
+
+  @override
+  String get mapYes => 'Да';
+
+  @override
+  String get mapNo => 'Нет';
+
+  @override
+  String get mapExit => 'ВЫЙТИ';
+
+  @override
+  String get mapConnect => 'Подключить';
+
+  @override
+  String get mapConnecting => 'Подключение...';
+
+  @override
+  String get mapDontSave => 'Не сохранять';
+
+  @override
+  String mapNewRepeaterDiscovered(String repeaterId) {
+    return '🆕 Обнаружен новый репитер: $repeaterId';
+  }
+
+  @override
+  String mapEnteringDeadZone(String cellHash) {
+    return '⚠️ Вход в известную мёртвую зону ($cellHash)';
+  }
+
+  @override
+  String get mapBatterySaverOn =>
+      '🔋 Энергосбережение ВКЛ — интервал пинга удвоен';
+
+  @override
+  String get mapBatterySaverOff =>
+      '🔋 Энергосбережение ВЫКЛ — обычный интервал пинга восстановлен';
+
+  @override
+  String get mapCompassCalibrated => 'Компас откалиброван';
+
+  @override
+  String get mapSessionEmptyTitle => 'Сессия пуста';
+
+  @override
+  String get mapSessionEmptyBody =>
+      'Точки GPS не записаны. Всё равно сохранить эту сессию?';
+
+  @override
+  String get mapSessionDiscarded => 'Сессия отменена';
+
+  @override
+  String get mapSessionDiscardedShowingLast =>
+      'Сессия отменена — показана последняя сохранённая сессия';
+
+  @override
+  String get mapLocationTrackingStarted => 'Отслеживание геолокации запущено';
+
+  @override
+  String get mapCarpeaterModeStarted => 'Режим Carpeater запущен';
+
+  @override
+  String get mapCarpeaterFailedCheckSettings =>
+      'Carpeater не запустился — проверьте настройки';
+
+  @override
+  String get mapLocationTrackingAndAutoPingStarted =>
+      'Отслеживание геолокации и автопинг запущены';
+
+  @override
+  String get mapFailedToStartTracking =>
+      'Не удалось запустить отслеживание геолокации. Проверьте настройки Android.';
+
+  @override
+  String get mapNewSessionShowingTrip =>
+      'Новая сессия — показана только эта поездка';
+
+  @override
+  String mapShowingSessionFrom(String timestamp) {
+    return 'Показана сессия от $timestamp';
+  }
+
+  @override
+  String get mapPreciseLocationRequiredTitle => 'Нужна точная геолокация';
+
+  @override
+  String get mapPreciseLocationRequiredBody =>
+      'Для вардрайва нужна точная геолокация. В разрешениях приложения Android включите «Использовать точную геолокацию» и снова нажмите «Старт».';
+
+  @override
+  String get mapOpenAppSettings => 'Открыть настройки приложения';
+
+  @override
+  String get mapAllowLocationAllTheTimeTitle => 'Разрешить геолокацию всегда';
+
+  @override
+  String get mapAllowLocationAllTheTimeBody =>
+      'MeshCore Wardrive записывает при выключенном экране или когда открыто другое приложение. Android должен дать доступ к геолокации «Разрешить всегда».';
+
+  @override
+  String get mapBackgroundLocationRequiredTitle => 'Нужна фоновая геолокация';
+
+  @override
+  String get mapBackgroundLocationRequiredBody =>
+      'Выберите Разрешения → Геолокация → Разрешить всегда, затем вернитесь и снова нажмите «Старт».';
+
+  @override
+  String get mapUnrestrictedBatteryTitle =>
+      'Неограниченное использование батареи';
+
+  @override
+  String get mapUnrestrictedBatteryBody =>
+      'Разрешите MeshCore Wardrive игнорировать оптимизацию батареи, чтобы Android не приостанавливал GPS, радиосвязь и сканирование Wi-Fi во время поездки.';
+
+  @override
+  String get mapDisableWifiThrottlingTitle =>
+      'Отключить ограничение сканирования Wi-Fi';
+
+  @override
+  String get mapDisableWifiThrottlingBody =>
+      'Android не даёт приложениям менять этот параметр автоматически. В параметрах разработчика отключите «Ограничение сканирования Wi-Fi», чтобы вовремя получать позицию beaconDB.';
+
+  @override
+  String get mapDeveloperOptions => 'Параметры разработчика';
+
+  @override
+  String get mapClearMapHistoryTitle => 'Очистить историю карты?';
+
+  @override
+  String mapClearMapHistoryBody(int count) {
+    return 'Будут безвозвратно удалены все $count замеров и данные покрытия с карты.\n\nЭто действие нельзя отменить.';
+  }
+
+  @override
+  String get mapDeleteAll => 'Удалить всё';
+
+  @override
+  String mapDeletedSamples(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Удалено $count замера',
+      many: 'Удалено $count замеров',
+      few: 'Удалено $count замера',
+      one: 'Удалён $count замер',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mapExportFormat => 'Формат экспорта';
+
+  @override
+  String get mapExportJsonSubtitle => 'Полные данные со всеми полями';
+
+  @override
+  String get mapExportCsvSubtitle => 'Совместимо с таблицами';
+
+  @override
+  String get mapExportGpxSubtitle => 'GPS-трек для картографических приложений';
+
+  @override
+  String get mapExportKmlSubtitle => 'Формат Google Earth';
+
+  @override
+  String mapExportAs(String format) {
+    return 'Экспорт как $format';
+  }
+
+  @override
+  String get mapSaveToFolder => 'Сохранить в папку';
+
+  @override
+  String get mapSaveExport => 'Сохранить экспорт';
+
+  @override
+  String mapExportedSamples(int count, String format) {
+    return 'Экспортировано $count замеров как $format';
+  }
+
+  @override
+  String get mapExportShareSubject => 'MeshCore Wardrive Export';
+
+  @override
+  String mapExportShareText(int count) {
+    return 'Экспортировано $count замеров из MeshCore Wardrive';
+  }
+
+  @override
+  String get mapExportShared => 'Экспорт отправлен';
+
+  @override
+  String mapExportFailed(String error) {
+    return 'Ошибка экспорта: $error';
+  }
+
+  @override
+  String mapImportedSamples(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Импортировано $count замера',
+      many: 'Импортировано $count замеров',
+      few: 'Импортировано $count замера',
+      one: 'Импортирован $count замер',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String mapImportedSessionsSuffix(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: ', $count сессии',
+      many: ', $count сессий',
+      few: ', $count сессии',
+      one: ', $count сессия',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String mapImportedFromSources(String sources) {
+    return ' из $sources';
+  }
+
+  @override
+  String mapImportFailed(String error) {
+    return 'Ошибка импорта: $error';
+  }
+
+  @override
+  String get mapSaveSettings => 'Сохранить настройки';
+
+  @override
+  String get mapSettingsExported => 'Настройки экспортированы';
+
+  @override
+  String get mapSettingsShareText => 'Настройки MeshCore Wardrive';
+
+  @override
+  String get mapImportSettingsConfirm =>
+      'Текущие настройки приложения будут перезаписаны (отображение, пинг, серверы загрузки, Carpeater и т. д.).\n\nДанные вардрайва НЕ будут затронуты.\n\nПродолжить?';
+
+  @override
+  String mapImportedSettingsCount(int count) {
+    return 'Импортировано настроек: $count';
+  }
+
+  @override
+  String mapInvalidSettingsFile(String error) {
+    return 'Неверный файл настроек: $error';
+  }
+
+  @override
+  String get mapAddPlannedRepeater => 'Добавить запланированный репитер';
+
+  @override
+  String get mapPlannedRepeaterHint => 'напр., холм у Tracyton';
+
+  @override
+  String get mapAddMarker => 'Добавить маркер';
+
+  @override
+  String get mapPlannedRepeaterMarkerAdded =>
+      'Маркер запланированного репитера добавлен';
+
+  @override
+  String get mapPlannedRepeater => 'Запланированный репитер';
+
+  @override
+  String mapLat(String value) {
+    return 'Шир.: $value';
+  }
+
+  @override
+  String mapLon(String value) {
+    return 'Долг.: $value';
+  }
+
+  @override
+  String mapAddedOn(String date) {
+    return 'Добавлен: $date';
+  }
+
+  @override
+  String get mapMarkerDeleted => 'Маркер удалён';
+
+  @override
+  String get mapAddPrivacyZone => 'Добавить зону приватности';
+
+  @override
+  String get mapPrivacyZoneBlurb =>
+      'Данные внутри этой зоны будут исключены из загрузок и экспорта.';
+
+  @override
+  String get mapPrivacyZoneHint => 'напр., Дом';
+
+  @override
+  String get mapPrivacyZoneAdded => 'Зона приватности добавлена';
+
+  @override
+  String get mapDeleteSample => 'Удалить замер';
+
+  @override
+  String mapDeleteSampleConfirm(String kind, String timestamp) {
+    String _temp0 = intl.Intl.selectLogic(kind, {
+      'success': 'Удалить этот успешный замер от $timestamp?',
+      'fail': 'Удалить этот неудачный замер от $timestamp?',
+      'other': 'Удалить этот GPS-замер от $timestamp?',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get mapSampleDeleted => 'Замер удалён';
+
+  @override
+  String get mapDeleteCoverageCell => 'Удалить ячейку покрытия';
+
+  @override
+  String mapDeleteCoverageCellBody(int count, String cellId) {
+    return 'Удалить все $count замеров в этой области покрытия?\n\nЯчейка: $cellId\nЭто нельзя отменить.';
+  }
+
+  @override
+  String mapDeletedSamplesFromCell(int count) {
+    return 'Удалено $count замеров из ячейки';
+  }
+
+  @override
+  String get mapZoomToDeleteCell =>
+      'Приблизьте, чтобы удалить отдельную ячейку покрытия';
+
+  @override
+  String get mapZoomedPointsGrouped =>
+      'Точки сгруппированы; удаляйте в режиме покрытия';
+
+  @override
+  String get mapDeleteModeBanner =>
+      'РЕЖИМ УДАЛЕНИЯ: нажмите квадрат покрытия или замер';
+
+  @override
+  String get mapUpdateAvailable => 'Доступно обновление';
+
+  @override
+  String mapUpdateAvailableBody(String latestVersion, String currentVersion) {
+    return 'Доступна новая версия $latestVersion!\n\nТекущая версия: $currentVersion\n\nСкачать?';
+  }
+
+  @override
+  String get mapOnLatestVersion => 'У вас последняя версия!';
+
+  @override
+  String get mapCouldNotCheckUpdates => 'Не удалось проверить обновления';
+
+  @override
+  String get mapNoInternetTryAgain =>
+      'Нет подключения к интернету. Повторите, когда будете онлайн.';
+
+  @override
+  String get mapUpdateCheckTimedOut =>
+      'Проверка обновлений превысила время ожидания. Попробуйте позже.';
+
+  @override
+  String get mapCouldNotOpenGitHub => 'Не удалось открыть GitHub';
+
+  @override
+  String get mapAutoFollowEnabled => 'Автоследование включено';
+
+  @override
+  String get mapAutoFollowDisabled => 'Автоследование выключено';
+
+  @override
+  String get mapMapResetToNorth => 'Карта возвращена на север';
+
+  @override
+  String get mapHeadingUpEnabled => 'Режим «курс вверх» включён';
+
+  @override
+  String get mapHeadingUpDisabled =>
+      'Режим «курс вверх» выключен — карта на север';
+
+  @override
+  String get mapFailedToCaptureScreenshot => 'Не удалось сделать снимок экрана';
+
+  @override
+  String get mapScreenshotSavedToGallery => 'Снимок сохранён в галерею!';
+
+  @override
+  String get mapScreenshotSavedTitle => 'Снимок сохранён';
+
+  @override
+  String get mapShareScreenshotPrompt => 'Поделиться снимком экрана?';
+
+  @override
+  String get mapScreenshotShareText => 'Карта покрытия MeshCore Wardrive';
+
+  @override
+  String get mapFailedToSaveScreenshot => 'Не удалось сохранить снимок';
+
+  @override
+  String mapErrorCapturingScreenshot(String error) {
+    return 'Ошибка снимка экрана: $error';
+  }
+
+  @override
+  String get mapDebugTerminal => 'Отладочный терминал';
+
+  @override
+  String get mapScreenshotTooltip => 'Снимок экрана';
+
+  @override
+  String get mapQuickSettings => 'Быстрые настройки';
+
+  @override
+  String get mapPingDist => 'Дист. пинга: ';
+
+  @override
+  String get mapTimeout => 'Таймаут: ';
+
+  @override
+  String get mapMode => 'Режим: ';
+
+  @override
+  String get mapStopHeadingUp => 'Выключить «курс вверх» и вернуть север';
+
+  @override
+  String get mapRotateMapWithHeading =>
+      'Вращать карту по курсу. Долгое нажатие — калибровка.';
+
+  @override
+  String get mapResetToNorth => 'Вернуть на север';
+
+  @override
+  String get mapStopTracking => 'Остановить отслеживание';
+
+  @override
+  String get mapStartTracking =>
+      'Начать отслеживание. Долгое нажатие — сессия с чистой картой.';
+
+  @override
+  String get mapNoLora => 'Нет LoRa';
+
+  @override
+  String mapSamplesCount(String count) {
+    return 'Замеры: $count';
+  }
+
+  @override
+  String get mapRetryingCarpeater => 'Повторный запуск Carpeater...';
+
+  @override
+  String get mapCarpeaterReconnected => 'Carpeater снова подключён';
+
+  @override
+  String get mapCarpeaterRetryFailed => 'Повтор Carpeater не удался';
+
+  @override
+  String mapCarpeaterStatus(String state) {
+    return 'CP: $state';
+  }
+
+  @override
+  String get mapCarpeaterOff => 'Выкл.';
+
+  @override
+  String get mapCarpeaterConnecting => 'Подключение';
+
+  @override
+  String get mapCarpeaterLogin => 'Вход...';
+
+  @override
+  String get mapCarpeaterReady => 'Готов';
+
+  @override
+  String get mapCarpeaterScanning => 'Сканирование';
+
+  @override
+  String get mapCarpeaterFetching => 'Загрузка';
+
+  @override
+  String get mapCarpeaterError => 'Ошибка';
+
+  @override
+  String mapDuctingStatus(String risk) {
+    return 'Волновод: $risk';
+  }
+
+  @override
+  String get mapDuctingPossible => 'Возможен';
+
+  @override
+  String get mapDuctingLikely => 'Вероятен';
+
+  @override
+  String get mapBatterySaverBadge => '🔋 Энергосбер.';
+
+  @override
+  String get mapDisconnect => 'Отключить';
+
+  @override
+  String get mapManualPing => 'Ручной пинг';
+
+  @override
+  String get mapConnectLoraFirst => 'Сначала подключите устройство LoRa';
+
+  @override
+  String get mapWaitingForGps => 'Ожидание GPS...';
+
+  @override
+  String get mapPingAlreadyInProgress => 'Пинг уже выполняется';
+
+  @override
+  String get mapSendingPing => 'Отправка пинга...';
+
+  @override
+  String mapPingHeardBy(String nodeId) {
+    return '✅ Пинг услышан $nodeId';
+  }
+
+  @override
+  String mapDiscoveryComplete(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '✅ Обнаружение завершено: найдено $count репитера',
+      many: '✅ Обнаружение завершено: найдено $count репитеров',
+      few: '✅ Обнаружение завершено: найдено $count репитера',
+      one: '✅ Обнаружение завершено: найден $count репитер',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mapNoResponseDeadZone => '❌ Нет ответа — мёртвая зона';
+
+  @override
+  String mapPingFailed(String error) {
+    return '❌ Пинг не удался: $error';
+  }
+
+  @override
+  String get mapConnectLoraDevice => 'Подключить устройство LoRa';
+
+  @override
+  String get mapChooseConnectionMethod => 'Выберите способ подключения:';
+
+  @override
+  String get mapScanUsbDevices => 'Сканировать USB-устройства';
+
+  @override
+  String get mapScanBluetooth => 'Сканировать Bluetooth';
+
+  @override
+  String get mapNoUsbDevices => 'USB-устройства не найдены';
+
+  @override
+  String get mapSelectUsbDevice => 'Выберите USB-устройство';
+
+  @override
+  String get mapUsbDeviceFallback => 'USB-устройство';
+
+  @override
+  String mapVidPid(String vid, String pid) {
+    return 'VID: $vid, PID: $pid';
+  }
+
+  @override
+  String get mapConnectedViaUsb => 'Подключено по USB';
+
+  @override
+  String get mapFailedConnectUsb => 'Не удалось подключить USB-устройство';
+
+  @override
+  String mapUsbError(String error) {
+    return 'Ошибка USB: $error';
+  }
+
+  @override
+  String mapConnectingTo(String name) {
+    return 'Подключение к $name...';
+  }
+
+  @override
+  String get mapConnectedViaBluetooth => 'Подключено по Bluetooth!';
+
+  @override
+  String get mapFailedConnectBluetooth =>
+      'Не удалось подключить устройство Bluetooth';
+
+  @override
+  String get mapDisconnectLoraDevice => 'Отключить устройство LoRa';
+
+  @override
+  String get mapDisconnectConfirm => 'Отключить LoRa-компаньон?';
+
+  @override
+  String get mapLoraDisconnected => 'Устройство LoRa отключено';
+
+  @override
+  String get mapRefreshingContactList => 'Обновление списка контактов...';
+
+  @override
+  String get mapContactListUpdated => 'Список контактов обновлён';
+
+  @override
+  String get mapScanningForRepeaters => 'Сканирование репитеров...';
+
+  @override
+  String get mapNoRepeatersFound => 'Репитеры не найдены';
+
+  @override
+  String mapRepeatersFound(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Найдено $count репитера',
+      many: 'Найдено $count репитеров',
+      few: 'Найдено $count репитера',
+      one: 'Найден $count репитер',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get mapSampleInfo => 'Сведения о замере';
+
+  @override
+  String get mapStatusLabel => 'Статус: ';
+
+  @override
+  String get mapStatusSuccess => '✅ Успех';
+
+  @override
+  String get mapStatusFailed => '❌ Неудача';
+
+  @override
+  String get mapStatusGpsOnly => '📍 Только GPS';
+
+  @override
+  String mapTimeLabel(String timestamp) {
+    return 'Время: $timestamp';
+  }
+
+  @override
+  String get mapRepeaterLabel => 'Репитер: ';
+
+  @override
+  String get mapRssiLabel => 'RSSI: ';
+
+  @override
+  String get mapSnrLabel => 'SNR: ';
+
+  @override
+  String get mapResponseLabel => 'Ответ: ';
+
+  @override
+  String get mapDuctingLabel => 'Волновод: ';
+
+  @override
+  String mapRssiValue(String value) {
+    return 'RSSI: $value dBm';
+  }
+
+  @override
+  String mapSnrValue(String value) {
+    return 'SNR: $value dB';
+  }
+
+  @override
+  String mapGroupedSamples(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count сгруппированных замера',
+      many: '$count сгруппированных замеров',
+      few: '$count сгруппированных замера',
+      one: '$count сгруппированный замер',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String mapSuccessfulCount(int count) {
+    return 'Успешных: $count';
+  }
+
+  @override
+  String mapFailedCount(int count) {
+    return 'Неудачных: $count';
+  }
+
+  @override
+  String mapGpsOnlyCount(int count) {
+    return 'Только GPS: $count';
+  }
+
+  @override
+  String mapNewest(String timestamp) {
+    return 'Новейший: $timestamp';
+  }
+
+  @override
+  String get mapZoomForBreakdown => 'Приблизьте для подробной разбивки.';
+
+  @override
+  String mapRepeaterFallback(String id) {
+    return 'Репитер $id';
+  }
+
+  @override
+  String mapIdLabel(String id) {
+    return 'ID: $id';
+  }
+
+  @override
+  String mapFilteringBy(String id) {
+    return 'Фильтр по $id';
+  }
+
+  @override
+  String get mapFilterByThis => 'Фильтровать по этому';
+
+  @override
+  String get mapShowOnMap => 'Показать на карте';
+
+  @override
+  String get mapCoverageSquareInfo => 'Сведения о квадрате покрытия';
+
+  @override
+  String get mapSamplesLabel => 'Замеры: ';
+
+  @override
+  String get mapSuccessRateLabel => 'Успешность: ';
+
+  @override
+  String get mapReceivedLabel => 'Принято: ';
+
+  @override
+  String get mapLostLabel => 'Потеряно: ';
+
+  @override
+  String get mapRepeatersHeard => 'Слышны репитеры: ';
+
+  @override
+  String get mapRepeaterIds => 'ID репитеров: ';
+
+  @override
+  String get mapNoPingData => 'Нет данных пинга';
+
+  @override
+  String get mapNotAvailable => 'н/д';
+
+  @override
+  String mapNearbyRepeaters(int count) {
+    return 'Ближайшие репитеры ($count)';
+  }
+
+  @override
+  String mapUploadingTo(String site) {
+    return 'Загрузка на $site...';
+  }
+
+  @override
+  String get mapUploadingSamples => 'Загрузка замеров...';
+
+  @override
+  String mapUploadBatch(int current, int total) {
+    return 'Пакет $current из $total';
+  }
+
+  @override
+  String get mapUploadComplete => 'Загрузка завершена';
+
+  @override
+  String get mapUploadResults => 'Результаты загрузки';
+
+  @override
+  String mapUploadedToSites(int successCount, int total) {
+    return 'Загружено на $successCount из $total сайтов';
+  }
+
+  @override
+  String get mapUploadFallbackName => 'Загрузка';
+
+  @override
+  String mapUploadError(String error) {
+    return 'Ошибка загрузки: $error';
+  }
+
+  @override
+  String get mapSelectWhichSitesToUpload =>
+      'Выберите, на какие сайты загружать:';
+
+  @override
+  String get mapDeleteSite => 'Удалить сайт';
+
+  @override
+  String mapDeleteSiteConfirm(String name) {
+    return 'Удалить «$name»?';
+  }
+
+  @override
+  String get mapAddSite => 'Добавить сайт';
+
+  @override
+  String get mapUploadSitesUpdated => 'Сайты загрузки обновлены';
+
+  @override
+  String get mapEditUploadSite => 'Изменить сайт загрузки';
+
+  @override
+  String get mapSiteName => 'Имя сайта';
+
+  @override
+  String get mapApiUrl => 'URL API';
+
+  @override
+  String get mapAddUploadSite => 'Добавить сайт загрузки';
+
+  @override
+  String get mapSiteNameHint => 'напр., Моя карта';
+
+  @override
+  String get mapTileCacheNotInitialized => 'Кэш тайлов не инициализирован';
+
+  @override
+  String get mapDownloadTilesBlurb =>
+      'Скачать тайлы карты для текущей области просмотра.';
+
+  @override
+  String mapMinZoom(String zoom) {
+    return 'Мин. масштаб: $zoom';
+  }
+
+  @override
+  String mapMaxZoom(String zoom) {
+    return 'Макс. масштаб: $zoom';
+  }
+
+  @override
+  String mapTilesEstimate(int count, String megabytes) {
+    return '$count тайлов (~$megabytes МБ)';
+  }
+
+  @override
+  String get mapLargeDownloadWarning =>
+      'Большая загрузка — уменьшите область или диапазон масштаба';
+
+  @override
+  String get mapDownloadingTiles => 'Скачивание тайлов';
+
+  @override
+  String mapTilesProgress(int completed, int total) {
+    return '$completed / $total тайлов';
+  }
+
+  @override
+  String mapDownloadedTiles(int succeeded, int total) {
+    return 'Скачано $succeeded/$total тайлов';
+  }
+
+  @override
+  String mapDownloadCancelled(int count) {
+    return 'Загрузка отменена (в кэше $count тайлов)';
+  }
+
+  @override
+  String mapShareFailed(String error) {
+    return 'Не удалось поделиться: $error';
+  }
+
+  @override
+  String get mapCoverageShareSubject => 'Покрытие MeshCore Wardrive';
+
+  @override
+  String mapCoverageShareText(
+    String sampleCount,
+    String coverageCount,
+    String successCount,
+    String failCount,
+    String successRate,
+    String repeaterCount,
+  ) {
+    return 'Карта покрытия MeshCore Wardrive\n📍 $sampleCount замеров • $coverageCount областей покрытия\n✅ $successCount успешно • ❌ $failCount неудачно • $successRate%\n🔁 обнаружено репитеров: $repeaterCount';
+  }
+
+  @override
+  String get mapNoRepeatersYet =>
+      'Репитеры ещё не найдены — сначала проведите вардрайв!';
+
+  @override
+  String get mapFilterByRepeater => 'Фильтр по репитеру';
+
+  @override
+  String mapShowingCoverageFrom(String id) {
+    return 'Показано покрытие от $id';
+  }
+
+  @override
+  String get mapRepeaterFilterCleared => 'Фильтр репитера сброшен';
+
+  @override
+  String get mapClearFilter => 'Сбросить фильтр';
+
+  @override
+  String get mapNoCoverageYet =>
+      'Данных покрытия ещё нет — сначала проведите вардрайв!';
+
+  @override
+  String get mapNoCoverageGaps =>
+      'Провалов покрытия нет! Во всех областях успешность >30%.';
+
+  @override
+  String mapCoverageGaps(int count) {
+    return 'Провалы покрытия ($count)';
+  }
+
+  @override
+  String mapGapSuccessRate(String rate) {
+    return 'Успешность $rate%';
+  }
+
+  @override
+  String mapGapSubtitle(String coords, String received, String lost) {
+    return '$coords\nпринято $received / потеряно $lost';
+  }
+
+  @override
+  String get mapDownloadFrom => 'Скачать с';
+
+  @override
+  String get mapDownloadingCoverage => 'Скачивание данных покрытия...';
+
+  @override
+  String mapDownloadedCoverageCells(int count) {
+    return 'Скачано ячеек покрытия: $count';
+  }
+
+  @override
+  String get mapLoadedCachedCoverage =>
+      'Загружено кэшированное покрытие (офлайн)';
+
+  @override
+  String mapDownloadFailed(String error) {
+    return 'Ошибка скачивания: $error';
+  }
+
+  @override
+  String get mapUnknownError => 'неизвестная ошибка';
+
+  @override
+  String mapCommunitySuccessRate(String rate) {
+    return 'Успешность: $rate%';
+  }
+
+  @override
+  String get mapRepeatersHeader => 'Репитеры:';
+
+  @override
+  String mapLastUpdate(String timestamp) {
+    return 'Последнее обновление: $timestamp';
+  }
+
+  @override
+  String mapAppVersionLabel(String version) {
+    return 'Версия приложения: $version';
+  }
+
+  @override
+  String mapApproxRadioPositionUncertainty(String uncertainty) {
+    return 'Приблизительная радиопозиция, погрешность $uncertainty';
+  }
+
+  @override
+  String mapApproxRadioPositionSnack(int count, String uncertainty) {
+    return 'Приблизительная радиопозиция · $count репитеров · ±$uncertainty';
+  }
+
+  @override
+  String get mapCurrentWifiLocation => 'Текущая Wi-Fi-позиция от beaconDB';
+
+  @override
+  String get mapCurrentFusedLocation =>
+      'Текущая объединённая геолокация Android';
+
+  @override
+  String mapPositionHeadingSemantics(String positionLabel, String degrees) {
+    return '$positionLabel, курс $degrees градусов';
+  }
 }

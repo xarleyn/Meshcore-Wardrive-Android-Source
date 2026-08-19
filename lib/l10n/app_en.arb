@@ -412,7 +412,9 @@
   "@settingsRepeatersFound": {
     "description": "Subtitle showing how many repeaters were found",
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "settingsRefreshContactList": "Refresh Contact List",
@@ -511,7 +513,9 @@
   "@settingsIgnoringPrefix": {
     "description": "Subtitle listing ignored repeater prefixes",
     "placeholders": {
-      "prefix": {"type": "String"}
+      "prefix": {
+        "type": "String"
+      }
     }
   },
   "settingsNotFiltering": "Not filtering",
@@ -526,7 +530,9 @@
   "@settingsWhitelistPrefix": {
     "description": "Subtitle listing whitelisted repeater prefixes",
     "placeholders": {
-      "prefixes": {"type": "String"}
+      "prefixes": {
+        "type": "String"
+      }
     }
   },
   "settingsShowAllRepeaters": "Show all repeaters",
@@ -613,29 +619,39 @@
   "@settingsPingIntervalSet": {
     "description": "Snackbar after changing ping interval",
     "placeholders": {
-      "description": {"type": "String"}
+      "description": {
+        "type": "String"
+      }
     }
   },
   "settingsPingIntervalMetersFrequent": "{meters} meters (frequent)",
   "@settingsPingIntervalMetersFrequent": {
     "description": "Ping interval description under 100 meters",
     "placeholders": {
-      "meters": {"type": "int"}
+      "meters": {
+        "type": "int"
+      }
     }
   },
   "settingsPingIntervalMeters": "{meters} meters",
   "@settingsPingIntervalMeters": {
     "description": "Ping interval description in meters",
     "placeholders": {
-      "meters": {"type": "int"}
+      "meters": {
+        "type": "int"
+      }
     }
   },
   "settingsPingIntervalMiles": "{miles} miles ({meters}m)",
   "@settingsPingIntervalMiles": {
     "description": "Ping interval description in miles with meters",
     "placeholders": {
-      "miles": {"type": "String"},
-      "meters": {"type": "int"}
+      "miles": {
+        "type": "String"
+      },
+      "meters": {
+        "type": "int"
+      }
     }
   },
   "settingsCoverageResolutionPrompt": "Choose the size of coverage squares:",
@@ -706,7 +722,9 @@
   "@settingsCoverageResolutionSet": {
     "description": "Snackbar after changing coverage resolution",
     "placeholders": {
-      "description": {"type": "String"}
+      "description": {
+        "type": "String"
+      }
     }
   },
   "settingsRepeaterPrefixes": "Repeater Prefixes",
@@ -809,7 +827,9 @@
   "@settingsImpossibleZoneCount": {
     "description": "Count of configured impossible zones",
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "settingsUnnamedZone": "Unnamed zone",
@@ -828,7 +848,9 @@
   "@settingsRemoveAllZones": {
     "description": "Subtitle to remove every configured zone",
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "settingsClearImpossibleZonesConfirm": "Remove all impossible zones? GPS inside those areas will no longer be discarded.",
@@ -839,8 +861,12 @@
   "@settingsAddImpossibleZoneCenter": {
     "description": "Shows the chosen zone center coordinates",
     "placeholders": {
-      "lat": {"type": "String"},
-      "lon": {"type": "String"}
+      "lat": {
+        "type": "String"
+      },
+      "lon": {
+        "type": "String"
+      }
     }
   },
   "settingsAddImpossibleZoneBlurb": "GPS inside this area is treated as invalid and discarded.",
@@ -927,32 +953,48 @@
   "@settingsFuelEconomyMetric": {
     "description": "Displayed metric fuel economy",
     "placeholders": {
-      "value": {"type": "String"}
+      "value": {
+        "type": "String"
+      }
     }
   },
   "settingsFuelEconomyImperial": "{value} MPG",
   "@settingsFuelEconomyImperial": {
     "description": "Displayed imperial fuel economy",
     "placeholders": {
-      "value": {"type": "String"}
+      "value": {
+        "type": "String"
+      }
     }
   },
   "settingsFuelUsedLitres": "{amount} L (~${cost} @ ${price}/L)",
   "@settingsFuelUsedLitres": {
     "description": "Estimated litres used with cost",
     "placeholders": {
-      "amount": {"type": "String"},
-      "cost": {"type": "String"},
-      "price": {"type": "String"}
+      "amount": {
+        "type": "String"
+      },
+      "cost": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
     }
   },
   "settingsFuelUsedGallons": "{amount} gal (~${cost} @ ${price}/gal)",
   "@settingsFuelUsedGallons": {
     "description": "Estimated gallons used with cost",
     "placeholders": {
-      "amount": {"type": "String"},
-      "cost": {"type": "String"},
-      "price": {"type": "String"}
+      "amount": {
+        "type": "String"
+      },
+      "cost": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
     }
   },
   "settingsFuelPrice": "Fuel Price",
@@ -983,14 +1025,18 @@
   "@settingsFuelPriceDisplay": {
     "description": "Displayed metric fuel price",
     "placeholders": {
-      "price": {"type": "String"}
+      "price": {
+        "type": "String"
+      }
     }
   },
   "settingsGasPriceDisplay": "${price}/gal",
   "@settingsGasPriceDisplay": {
     "description": "Displayed imperial gas price",
     "placeholders": {
-      "price": {"type": "String"}
+      "price": {
+        "type": "String"
+      }
     }
   },
   "settingsAnalytics": "Analytics",
@@ -1081,7 +1127,9 @@
   "@settingsFilteringRepeater": {
     "description": "Subtitle when a repeater filter is active",
     "placeholders": {
-      "prefixes": {"type": "String"}
+      "prefixes": {
+        "type": "String"
+      }
     }
   },
   "settingsShowCoverageFromRepeater": "Show coverage from a specific repeater",
@@ -1100,7 +1148,9 @@
   "@settingsShowingSource": {
     "description": "Subtitle when a source filter is active",
     "placeholders": {
-      "source": {"type": "String"}
+      "source": {
+        "type": "String"
+      }
     }
   },
   "settingsFilterByDeviceOperator": "Filter by device/operator",
@@ -1123,7 +1173,9 @@
   "@settingsShowingDataFrom": {
     "description": "Snackbar after choosing a source filter",
     "placeholders": {
-      "source": {"type": "String"}
+      "source": {
+        "type": "String"
+      }
     }
   },
   "settingsFindCoverageGaps": "Find Coverage Gaps",
@@ -1154,7 +1206,9 @@
   "@settingsPlannedMarkersSubtitle": {
     "description": "Count of planned repeater markers",
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "settingsClearAllMarkers": "Clear All Markers",
@@ -1177,7 +1231,9 @@
   "@settingsPrivacyZonesSubtitle": {
     "description": "Count of privacy zones",
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "settingsClearPrivacyZones": "Clear Privacy Zones",
@@ -1292,7 +1348,9 @@
   "@settingsAboutCurrentVersion": {
     "description": "Shows the installed app version",
     "placeholders": {
-      "version": {"type": "String"}
+      "version": {
+        "type": "String"
+      }
     }
   },
   "settingsViewOnGitHub": "View on GitHub",
@@ -1379,7 +1437,9 @@
   "@bluetoothError": {
     "description": "Empty-state message when Bluetooth scan fails",
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "bluetoothSearching": "Searching for LoRa devices...",
@@ -1389,5 +1449,1476 @@
   "bluetoothNoDevices": "No LoRa devices found via Bluetooth",
   "@bluetoothNoDevices": {
     "description": "Empty-state message when no LoRa devices were found"
+  },
+  "settingsThemeLight": "Light",
+  "@settingsThemeLight": {
+    "description": "Light theme option in interface/map theme pickers"
+  },
+  "settingsThemeDark": "Dark",
+  "@settingsThemeDark": {
+    "description": "Dark theme option in interface/map theme pickers"
+  },
+  "settingsThemeSystemDefault": "System Default",
+  "@settingsThemeSystemDefault": {
+    "description": "Follow-system theme option in interface/map theme pickers"
+  },
+  "settingsChooseInterfaceTheme": "Choose Interface Theme",
+  "@settingsChooseInterfaceTheme": {
+    "description": "Dialog title for choosing the app interface theme"
+  },
+  "settingsChooseMapTheme": "Choose Map Theme",
+  "@settingsChooseMapTheme": {
+    "description": "Dialog title for choosing the map tile theme"
+  },
+  "mapClose": "Close",
+  "@mapClose": {
+    "description": "Close button on map dialogs"
+  },
+  "mapDelete": "Delete",
+  "@mapDelete": {
+    "description": "Delete button on map dialogs"
+  },
+  "mapOk": "OK",
+  "@mapOk": {
+    "description": "OK button on map dialogs"
+  },
+  "mapNotNow": "Not now",
+  "@mapNotNow": {
+    "description": "Dismiss permission/request dialogs without continuing"
+  },
+  "mapContinue": "Continue",
+  "@mapContinue": {
+    "description": "Confirm permission/request dialogs"
+  },
+  "mapShare": "Share",
+  "@mapShare": {
+    "description": "Share export or screenshot"
+  },
+  "mapImport": "Import",
+  "@mapImport": {
+    "description": "Confirm importing settings"
+  },
+  "mapAdd": "Add",
+  "@mapAdd": {
+    "description": "Confirm adding an upload site"
+  },
+  "mapDownload": "Download",
+  "@mapDownload": {
+    "description": "Confirm downloading an update or tiles"
+  },
+  "mapYes": "Yes",
+  "@mapYes": {
+    "description": "Confirm sharing a screenshot"
+  },
+  "mapNo": "No",
+  "@mapNo": {
+    "description": "Decline sharing a screenshot"
+  },
+  "mapExit": "EXIT",
+  "@mapExit": {
+    "description": "Exit map delete mode"
+  },
+  "mapConnect": "Connect",
+  "@mapConnect": {
+    "description": "Connect to a LoRa companion"
+  },
+  "mapConnecting": "Connecting...",
+  "@mapConnecting": {
+    "description": "LoRa connection in progress"
+  },
+  "mapDontSave": "Don''t save",
+  "@mapDontSave": {
+    "description": "Discard an empty tracking session"
+  },
+  "mapNewRepeaterDiscovered": "🆕 New repeater discovered: {repeaterId}",
+  "@mapNewRepeaterDiscovered": {
+    "description": "Snackbar when a never-before-seen repeater is found",
+    "placeholders": {
+      "repeaterId": {
+        "type": "String"
+      }
+    }
+  },
+  "mapEnteringDeadZone": "⚠️ Entering known dead zone ({cellHash})",
+  "@mapEnteringDeadZone": {
+    "description": "Snackbar when entering a known dead zone cell",
+    "placeholders": {
+      "cellHash": {
+        "type": "String"
+      }
+    }
+  },
+  "mapBatterySaverOn": "🔋 Battery saver ON — ping interval doubled",
+  "@mapBatterySaverOn": {
+    "description": "Snackbar when battery saver activates"
+  },
+  "mapBatterySaverOff": "🔋 Battery saver OFF — normal ping interval restored",
+  "@mapBatterySaverOff": {
+    "description": "Snackbar when battery saver deactivates"
+  },
+  "mapCompassCalibrated": "Compass calibrated",
+  "@mapCompassCalibrated": {
+    "description": "Snackbar after compass calibration completes"
+  },
+  "mapSessionEmptyTitle": "Session is empty",
+  "@mapSessionEmptyTitle": {
+    "description": "Title when stopping a session with no GPS points"
+  },
+  "mapSessionEmptyBody": "No GPS points were recorded. Save this session anyway?",
+  "@mapSessionEmptyBody": {
+    "description": "Body when stopping a session with no GPS points"
+  },
+  "mapSessionDiscarded": "Session discarded",
+  "@mapSessionDiscarded": {
+    "description": "Snackbar after discarding an empty session with no history"
+  },
+  "mapSessionDiscardedShowingLast": "Session discarded — showing last saved session",
+  "@mapSessionDiscardedShowingLast": {
+    "description": "Snackbar after discarding an empty session when older sessions exist"
+  },
+  "mapLocationTrackingStarted": "Location tracking started",
+  "@mapLocationTrackingStarted": {
+    "description": "Snackbar when GPS tracking starts without auto-ping"
+  },
+  "mapCarpeaterModeStarted": "Carpeater mode started",
+  "@mapCarpeaterModeStarted": {
+    "description": "Snackbar when Carpeater starts with tracking"
+  },
+  "mapCarpeaterFailedCheckSettings": "Carpeater failed — check settings",
+  "@mapCarpeaterFailedCheckSettings": {
+    "description": "Snackbar when Carpeater fails to start"
+  },
+  "mapLocationTrackingAndAutoPingStarted": "Location tracking and auto-ping started",
+  "@mapLocationTrackingAndAutoPingStarted": {
+    "description": "Snackbar when tracking starts with auto-ping"
+  },
+  "mapFailedToStartTracking": "Failed to start location tracking. Check Android settings.",
+  "@mapFailedToStartTracking": {
+    "description": "Fallback snackbar when tracking fails to start"
+  },
+  "mapNewSessionShowingTrip": "New session — showing this trip only",
+  "@mapNewSessionShowingTrip": {
+    "description": "Snackbar when starting a blank-map session"
+  },
+  "mapShowingSessionFrom": "Showing session from {timestamp}",
+  "@mapShowingSessionFrom": {
+    "description": "Snackbar after loading a saved session on the map",
+    "placeholders": {
+      "timestamp": {
+        "type": "String"
+      }
+    }
+  },
+  "mapPreciseLocationRequiredTitle": "Precise location required",
+  "@mapPreciseLocationRequiredTitle": {
+    "description": "Title of the precise-location permission dialog"
+  },
+  "mapPreciseLocationRequiredBody": "Wardriving needs precise location. In Android app permissions, enable “Use precise location”, then tap Start again.",
+  "@mapPreciseLocationRequiredBody": {
+    "description": "Body of the precise-location permission dialog"
+  },
+  "mapOpenAppSettings": "Open app settings",
+  "@mapOpenAppSettings": {
+    "description": "Action to open Android app settings from a permission dialog"
+  },
+  "mapAllowLocationAllTheTimeTitle": "Allow location all the time",
+  "@mapAllowLocationAllTheTimeTitle": {
+    "description": "Title asking for background location"
+  },
+  "mapAllowLocationAllTheTimeBody": "MeshCore Wardrive records while the screen is off or another app is open. Android needs location access set to “Allow all the time”.",
+  "@mapAllowLocationAllTheTimeBody": {
+    "description": "Body asking for background location"
+  },
+  "mapBackgroundLocationRequiredTitle": "Background location required",
+  "@mapBackgroundLocationRequiredTitle": {
+    "description": "Title when background location was denied"
+  },
+  "mapBackgroundLocationRequiredBody": "Select Permissions → Location → Allow all the time, then return and tap Start again.",
+  "@mapBackgroundLocationRequiredBody": {
+    "description": "Body when background location was denied"
+  },
+  "mapUnrestrictedBatteryTitle": "Unrestricted battery use",
+  "@mapUnrestrictedBatteryTitle": {
+    "description": "Title asking to ignore battery optimizations"
+  },
+  "mapUnrestrictedBatteryBody": "Allow MeshCore Wardrive to ignore battery optimizations so Android does not pause GPS, radio communication, or Wi-Fi scans during a drive.",
+  "@mapUnrestrictedBatteryBody": {
+    "description": "Body asking to ignore battery optimizations"
+  },
+  "mapDisableWifiThrottlingTitle": "Disable Wi-Fi scan throttling",
+  "@mapDisableWifiThrottlingTitle": {
+    "description": "Title asking to disable Wi-Fi scan throttling"
+  },
+  "mapDisableWifiThrottlingBody": "Android does not let apps change this setting automatically. In Developer options, turn off “Wi-Fi scan throttling” for timely beaconDB position updates.",
+  "@mapDisableWifiThrottlingBody": {
+    "description": "Body asking to disable Wi-Fi scan throttling"
+  },
+  "mapDeveloperOptions": "Developer options",
+  "@mapDeveloperOptions": {
+    "description": "Action to open Android developer options"
+  },
+  "mapClearMapHistoryTitle": "Clear Map History?",
+  "@mapClearMapHistoryTitle": {
+    "description": "Title of the clear-map confirmation dialog"
+  },
+  "mapClearMapHistoryBody": "This will permanently delete all {count} samples and coverage data from the map.\n\nThis action cannot be undone.",
+  "@mapClearMapHistoryBody": {
+    "description": "Body of the clear-map confirmation dialog",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapDeleteAll": "Delete All",
+  "@mapDeleteAll": {
+    "description": "Confirm deleting all samples or a coverage cell"
+  },
+  "mapDeletedSamples": "{count, plural, one{Deleted {count} sample} other{Deleted {count} samples}}",
+  "@mapDeletedSamples": {
+    "description": "Snackbar after clearing map history",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapExportFormat": "Export Format",
+  "@mapExportFormat": {
+    "description": "Title of the export format picker"
+  },
+  "mapExportJsonSubtitle": "Full data with all fields",
+  "@mapExportJsonSubtitle": {
+    "description": "JSON export format description"
+  },
+  "mapExportCsvSubtitle": "Spreadsheet-compatible",
+  "@mapExportCsvSubtitle": {
+    "description": "CSV export format description"
+  },
+  "mapExportGpxSubtitle": "GPS track for mapping apps",
+  "@mapExportGpxSubtitle": {
+    "description": "GPX export format description"
+  },
+  "mapExportKmlSubtitle": "Google Earth format",
+  "@mapExportKmlSubtitle": {
+    "description": "KML export format description"
+  },
+  "mapExportAs": "Export as {format}",
+  "@mapExportAs": {
+    "description": "Title of save-or-share export dialog",
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "mapSaveToFolder": "Save to Folder",
+  "@mapSaveToFolder": {
+    "description": "Save an export to a folder"
+  },
+  "mapSaveExport": "Save Export",
+  "@mapSaveExport": {
+    "description": "File-picker title when saving a data export"
+  },
+  "mapExportedSamples": "Exported {count} samples as {format}",
+  "@mapExportedSamples": {
+    "description": "Snackbar after saving a data export",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "mapExportShareSubject": "MeshCore Wardrive Export",
+  "@mapExportShareSubject": {
+    "description": "Share-sheet subject for a data export; brand untranslated"
+  },
+  "mapExportShareText": "Exported {count} samples from MeshCore Wardrive",
+  "@mapExportShareText": {
+    "description": "Share-sheet body for a data export",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapExportShared": "Export shared",
+  "@mapExportShared": {
+    "description": "Snackbar after sharing an export"
+  },
+  "mapExportFailed": "Export failed: {error}",
+  "@mapExportFailed": {
+    "description": "Snackbar when export fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "mapImportedSamples": "{count, plural, one{Imported {count} sample} other{Imported {count} samples}}",
+  "@mapImportedSamples": {
+    "description": "Snackbar prefix after importing samples",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapImportedSessionsSuffix": "{count, plural, one{, {count} session} other{, {count} sessions}}",
+  "@mapImportedSessionsSuffix": {
+    "description": "Optional session count suffix after importing data",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapImportedFromSources": " from {sources}",
+  "@mapImportedFromSources": {
+    "description": "Optional source suffix after importing data",
+    "placeholders": {
+      "sources": {
+        "type": "String"
+      }
+    }
+  },
+  "mapImportFailed": "Import failed: {error}",
+  "@mapImportFailed": {
+    "description": "Snackbar when import fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "mapSaveSettings": "Save Settings",
+  "@mapSaveSettings": {
+    "description": "File-picker title when saving a settings export"
+  },
+  "mapSettingsExported": "Settings exported",
+  "@mapSettingsExported": {
+    "description": "Snackbar after saving settings"
+  },
+  "mapSettingsShareText": "MeshCore Wardrive Settings",
+  "@mapSettingsShareText": {
+    "description": "Share-sheet text for exported settings"
+  },
+  "mapImportSettingsConfirm": "This will overwrite your current app settings (display options, ping settings, upload servers, carpeater config, etc).\n\nYour wardrive data will NOT be affected.\n\nContinue?",
+  "@mapImportSettingsConfirm": {
+    "description": "Confirmation body before importing settings"
+  },
+  "mapImportedSettingsCount": "Imported {count} settings",
+  "@mapImportedSettingsCount": {
+    "description": "Snackbar after importing settings",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapInvalidSettingsFile": "Invalid settings file: {error}",
+  "@mapInvalidSettingsFile": {
+    "description": "Snackbar when a settings file cannot be parsed",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "mapAddPlannedRepeater": "Add Planned Repeater",
+  "@mapAddPlannedRepeater": {
+    "description": "Title when dropping a planned repeater marker"
+  },
+  "mapPlannedRepeaterHint": "e.g., Hilltop near Tracyton",
+  "@mapPlannedRepeaterHint": {
+    "description": "Hint for an optional planned-repeater label"
+  },
+  "mapAddMarker": "Add Marker",
+  "@mapAddMarker": {
+    "description": "Confirm adding a planned repeater marker"
+  },
+  "mapPlannedRepeaterMarkerAdded": "Planned repeater marker added",
+  "@mapPlannedRepeaterMarkerAdded": {
+    "description": "Snackbar after adding a planned repeater"
+  },
+  "mapPlannedRepeater": "Planned Repeater",
+  "@mapPlannedRepeater": {
+    "description": "Fallback title for an unlabeled planned repeater"
+  },
+  "mapLat": "Lat: {value}",
+  "@mapLat": {
+    "description": "Latitude row in map info dialogs",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "mapLon": "Lon: {value}",
+  "@mapLon": {
+    "description": "Longitude row in map info dialogs",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "mapAddedOn": "Added: {date}",
+  "@mapAddedOn": {
+    "description": "When a planned repeater marker was created",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "mapMarkerDeleted": "Marker deleted",
+  "@mapMarkerDeleted": {
+    "description": "Snackbar after deleting a planned repeater marker"
+  },
+  "mapAddPrivacyZone": "Add Privacy Zone",
+  "@mapAddPrivacyZone": {
+    "description": "Title of the add-privacy-zone dialog"
+  },
+  "mapPrivacyZoneBlurb": "Data inside this zone will be excluded from uploads and exports.",
+  "@mapPrivacyZoneBlurb": {
+    "description": "Explanation in the add-privacy-zone dialog"
+  },
+  "mapPrivacyZoneHint": "e.g., Home",
+  "@mapPrivacyZoneHint": {
+    "description": "Hint for an optional privacy-zone label"
+  },
+  "mapPrivacyZoneAdded": "Privacy zone added",
+  "@mapPrivacyZoneAdded": {
+    "description": "Snackbar after adding a privacy zone"
+  },
+  "mapDeleteSample": "Delete Sample",
+  "@mapDeleteSample": {
+    "description": "Title of the delete-sample dialog"
+  },
+  "mapDeleteSampleConfirm": "{kind, select, success{Delete this successful sample from {timestamp}?} fail{Delete this failed sample from {timestamp}?} other{Delete this GPS-only sample from {timestamp}?}}",
+  "@mapDeleteSampleConfirm": {
+    "description": "Confirm deleting one sample; kind is success, fail, or gps",
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "timestamp": {
+        "type": "String"
+      }
+    }
+  },
+  "mapSampleDeleted": "Sample deleted",
+  "@mapSampleDeleted": {
+    "description": "Snackbar after deleting a sample"
+  },
+  "mapDeleteCoverageCell": "Delete Coverage Cell",
+  "@mapDeleteCoverageCell": {
+    "description": "Title of the delete-coverage-cell dialog"
+  },
+  "mapDeleteCoverageCellBody": "Delete all {count} samples in this coverage area?\n\nCell: {cellId}\nThis cannot be undone.",
+  "@mapDeleteCoverageCellBody": {
+    "description": "Body of the delete-coverage-cell dialog",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "cellId": {
+        "type": "String"
+      }
+    }
+  },
+  "mapDeletedSamplesFromCell": "Deleted {count} samples from cell",
+  "@mapDeletedSamplesFromCell": {
+    "description": "Snackbar after deleting a coverage cell",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapZoomToDeleteCell": "Zoom in to delete an individual coverage cell",
+  "@mapZoomToDeleteCell": {
+    "description": "Snackbar when delete-mode tap is too zoomed out"
+  },
+  "mapZoomedPointsGrouped": "Zoomed points are grouped; delete from coverage view",
+  "@mapZoomedPointsGrouped": {
+    "description": "Snackbar when a clustered sample cannot be deleted"
+  },
+  "mapDeleteModeBanner": "DELETE MODE: Tap a coverage square or sample to delete",
+  "@mapDeleteModeBanner": {
+    "description": "Banner shown while map delete mode is active"
+  },
+  "mapUpdateAvailable": "Update Available",
+  "@mapUpdateAvailable": {
+    "description": "Title when a newer app version exists"
+  },
+  "mapUpdateAvailableBody": "New version {latestVersion} is available!\n\nCurrent version: {currentVersion}\n\nWould you like to download it?",
+  "@mapUpdateAvailableBody": {
+    "description": "Body of the update-available dialog",
+    "placeholders": {
+      "latestVersion": {
+        "type": "String"
+      },
+      "currentVersion": {
+        "type": "String"
+      }
+    }
+  },
+  "mapOnLatestVersion": "You''re on the latest version!",
+  "@mapOnLatestVersion": {
+    "description": "Snackbar when the installed app is current"
+  },
+  "mapCouldNotCheckUpdates": "Could not check for updates",
+  "@mapCouldNotCheckUpdates": {
+    "description": "Snackbar when update check fails"
+  },
+  "mapNoInternetTryAgain": "No internet connection. Try again when you are online.",
+  "@mapNoInternetTryAgain": {
+    "description": "Snackbar when update check is offline"
+  },
+  "mapUpdateCheckTimedOut": "Update check timed out. Try again later.",
+  "@mapUpdateCheckTimedOut": {
+    "description": "Snackbar when update check times out"
+  },
+  "mapCouldNotOpenGitHub": "Could not open GitHub",
+  "@mapCouldNotOpenGitHub": {
+    "description": "Snackbar when the GitHub URL cannot be launched"
+  },
+  "mapAutoFollowEnabled": "Auto-follow enabled",
+  "@mapAutoFollowEnabled": {
+    "description": "Snackbar when map follow-location is enabled"
+  },
+  "mapAutoFollowDisabled": "Auto-follow disabled",
+  "@mapAutoFollowDisabled": {
+    "description": "Snackbar when map follow-location is disabled"
+  },
+  "mapMapResetToNorth": "Map reset to north",
+  "@mapMapResetToNorth": {
+    "description": "Snackbar after resetting map rotation"
+  },
+  "mapHeadingUpEnabled": "Heading-up enabled",
+  "@mapHeadingUpEnabled": {
+    "description": "Snackbar when heading-up rotation is enabled"
+  },
+  "mapHeadingUpDisabled": "Heading-up disabled — map reset to north",
+  "@mapHeadingUpDisabled": {
+    "description": "Snackbar when heading-up rotation is disabled"
+  },
+  "mapFailedToCaptureScreenshot": "Failed to capture screenshot",
+  "@mapFailedToCaptureScreenshot": {
+    "description": "Snackbar when screenshot capture returns no image"
+  },
+  "mapScreenshotSavedToGallery": "Screenshot saved to gallery!",
+  "@mapScreenshotSavedToGallery": {
+    "description": "Snackbar after saving a screenshot"
+  },
+  "mapScreenshotSavedTitle": "Screenshot Saved",
+  "@mapScreenshotSavedTitle": {
+    "description": "Title after saving a screenshot"
+  },
+  "mapShareScreenshotPrompt": "Would you like to share the screenshot?",
+  "@mapShareScreenshotPrompt": {
+    "description": "Prompt after saving a screenshot"
+  },
+  "mapScreenshotShareText": "MeshCore Wardrive Coverage Map",
+  "@mapScreenshotShareText": {
+    "description": "Share-sheet text for a coverage screenshot"
+  },
+  "mapFailedToSaveScreenshot": "Failed to save screenshot",
+  "@mapFailedToSaveScreenshot": {
+    "description": "Snackbar when gallery save fails"
+  },
+  "mapErrorCapturingScreenshot": "Error capturing screenshot: {error}",
+  "@mapErrorCapturingScreenshot": {
+    "description": "Snackbar when screenshot capture throws",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "mapDebugTerminal": "Debug Terminal",
+  "@mapDebugTerminal": {
+    "description": "AppBar tooltip for the debug log"
+  },
+  "mapScreenshotTooltip": "Screenshot",
+  "@mapScreenshotTooltip": {
+    "description": "AppBar tooltip for capturing a screenshot"
+  },
+  "mapQuickSettings": "Quick Settings",
+  "@mapQuickSettings": {
+    "description": "Title of the map quick-settings card"
+  },
+  "mapPingDist": "Ping Dist: ",
+  "@mapPingDist": {
+    "description": "Quick-settings label for ping distance"
+  },
+  "mapTimeout": "Timeout: ",
+  "@mapTimeout": {
+    "description": "Quick-settings label for discovery timeout"
+  },
+  "mapMode": "Mode: ",
+  "@mapMode": {
+    "description": "Quick-settings label for ping mode"
+  },
+  "mapStopHeadingUp": "Stop heading-up and reset north",
+  "@mapStopHeadingUp": {
+    "description": "Compass FAB tooltip while heading-up is on"
+  },
+  "mapRotateMapWithHeading": "Rotate map with heading. Long-press to calibrate.",
+  "@mapRotateMapWithHeading": {
+    "description": "Compass FAB tooltip while heading-up is off"
+  },
+  "mapResetToNorth": "Reset to North",
+  "@mapResetToNorth": {
+    "description": "Compass FAB tooltip when rotation is locked north"
+  },
+  "mapStopTracking": "Stop tracking",
+  "@mapStopTracking": {
+    "description": "Tracking FAB tooltip while a session is running"
+  },
+  "mapStartTracking": "Start tracking. Long-press for a blank-map session.",
+  "@mapStartTracking": {
+    "description": "Tracking FAB tooltip while idle"
+  },
+  "mapNoLora": "No LoRa",
+  "@mapNoLora": {
+    "description": "Status when no LoRa companion is connected"
+  },
+  "mapSamplesCount": "Samples: {count}",
+  "@mapSamplesCount": {
+    "description": "Live sample count on the map status card",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "mapRetryingCarpeater": "Retrying Carpeater...",
+  "@mapRetryingCarpeater": {
+    "description": "Snackbar when retrying Carpeater from the status chip"
+  },
+  "mapCarpeaterReconnected": "Carpeater reconnected",
+  "@mapCarpeaterReconnected": {
+    "description": "Snackbar when Carpeater retry succeeds"
+  },
+  "mapCarpeaterRetryFailed": "Carpeater retry failed",
+  "@mapCarpeaterRetryFailed": {
+    "description": "Snackbar when Carpeater retry fails"
+  },
+  "mapCarpeaterStatus": "CP: {state}",
+  "@mapCarpeaterStatus": {
+    "description": "Carpeater status chip; CP abbreviation kept",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "mapCarpeaterOff": "Off",
+  "@mapCarpeaterOff": {
+    "description": "Carpeater state: disabled"
+  },
+  "mapCarpeaterConnecting": "Connecting",
+  "@mapCarpeaterConnecting": {
+    "description": "Carpeater state: connecting"
+  },
+  "mapCarpeaterLogin": "Login...",
+  "@mapCarpeaterLogin": {
+    "description": "Carpeater state: logging in"
+  },
+  "mapCarpeaterReady": "Ready",
+  "@mapCarpeaterReady": {
+    "description": "Carpeater state: logged in"
+  },
+  "mapCarpeaterScanning": "Scanning",
+  "@mapCarpeaterScanning": {
+    "description": "Carpeater state: discovering"
+  },
+  "mapCarpeaterFetching": "Fetching",
+  "@mapCarpeaterFetching": {
+    "description": "Carpeater state: fetching neighbours"
+  },
+  "mapCarpeaterError": "Error",
+  "@mapCarpeaterError": {
+    "description": "Carpeater state: error"
+  },
+  "mapDuctingStatus": "Ducting: {risk}",
+  "@mapDuctingStatus": {
+    "description": "Atmospheric ducting status chip",
+    "placeholders": {
+      "risk": {
+        "type": "String"
+      }
+    }
+  },
+  "mapDuctingPossible": "Possible",
+  "@mapDuctingPossible": {
+    "description": "Ducting risk: possible"
+  },
+  "mapDuctingLikely": "Likely",
+  "@mapDuctingLikely": {
+    "description": "Ducting risk: likely"
+  },
+  "mapBatterySaverBadge": "🔋 Saver",
+  "@mapBatterySaverBadge": {
+    "description": "Compact battery-saver badge on the status card"
+  },
+  "mapDisconnect": "Disconnect",
+  "@mapDisconnect": {
+    "description": "Tooltip to disconnect the LoRa device"
+  },
+  "mapManualPing": "Manual Ping",
+  "@mapManualPing": {
+    "description": "Tooltip to send a manual ping"
+  },
+  "mapConnectLoraFirst": "Connect LoRa device first",
+  "@mapConnectLoraFirst": {
+    "description": "Snackbar when an action needs a connected radio"
+  },
+  "mapWaitingForGps": "Waiting for GPS location...",
+  "@mapWaitingForGps": {
+    "description": "Snackbar when a ping is blocked on GPS"
+  },
+  "mapPingAlreadyInProgress": "A ping is already in progress",
+  "@mapPingAlreadyInProgress": {
+    "description": "Snackbar when a second ping is requested"
+  },
+  "mapSendingPing": "Sending ping...",
+  "@mapSendingPing": {
+    "description": "Snackbar when a manual ping is sent"
+  },
+  "mapPingHeardBy": "✅ Ping heard by {nodeId}",
+  "@mapPingHeardBy": {
+    "description": "Snackbar when one repeater answers a ping",
+    "placeholders": {
+      "nodeId": {
+        "type": "String"
+      }
+    }
+  },
+  "mapDiscoveryComplete": "{count, plural, one{✅ Discovery complete: found {count} repeater} other{✅ Discovery complete: found {count} repeaters}}",
+  "@mapDiscoveryComplete": {
+    "description": "Snackbar when a ping discovers multiple repeaters",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapNoResponseDeadZone": "❌ No response - dead zone",
+  "@mapNoResponseDeadZone": {
+    "description": "Snackbar when a ping times out"
+  },
+  "mapPingFailed": "❌ Ping failed: {error}",
+  "@mapPingFailed": {
+    "description": "Snackbar when a ping fails with an error",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "mapConnectLoraDevice": "Connect LoRa Device",
+  "@mapConnectLoraDevice": {
+    "description": "Title of the connection-method dialog"
+  },
+  "mapChooseConnectionMethod": "Choose connection method:",
+  "@mapChooseConnectionMethod": {
+    "description": "Prompt in the connection-method dialog"
+  },
+  "mapScanUsbDevices": "Scan USB Devices",
+  "@mapScanUsbDevices": {
+    "description": "Button to scan for USB companions"
+  },
+  "mapScanBluetooth": "Scan Bluetooth",
+  "@mapScanBluetooth": {
+    "description": "Button to scan for Bluetooth companions"
+  },
+  "mapNoUsbDevices": "No USB devices found",
+  "@mapNoUsbDevices": {
+    "description": "Snackbar when USB scan finds nothing"
+  },
+  "mapSelectUsbDevice": "Select USB Device",
+  "@mapSelectUsbDevice": {
+    "description": "Title of the USB device picker"
+  },
+  "mapUsbDeviceFallback": "USB Device",
+  "@mapUsbDeviceFallback": {
+    "description": "Fallback name when a USB device has no product name"
+  },
+  "mapVidPid": "VID: {vid}, PID: {pid}",
+  "@mapVidPid": {
+    "description": "USB vendor and product IDs; VID/PID untranslated",
+    "placeholders": {
+      "vid": {
+        "type": "String"
+      },
+      "pid": {
+        "type": "String"
+      }
+    }
+  },
+  "mapConnectedViaUsb": "Connected via USB",
+  "@mapConnectedViaUsb": {
+    "description": "Snackbar after a USB connection succeeds"
+  },
+  "mapFailedConnectUsb": "Failed to connect USB device",
+  "@mapFailedConnectUsb": {
+    "description": "Snackbar when USB connect fails"
+  },
+  "mapUsbError": "USB error: {error}",
+  "@mapUsbError": {
+    "description": "Snackbar when USB connect throws",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "mapConnectingTo": "Connecting to {name}...",
+  "@mapConnectingTo": {
+    "description": "Snackbar while connecting to a named Bluetooth device",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "mapConnectedViaBluetooth": "Connected via Bluetooth!",
+  "@mapConnectedViaBluetooth": {
+    "description": "Snackbar after a Bluetooth connection succeeds"
+  },
+  "mapFailedConnectBluetooth": "Failed to connect Bluetooth device",
+  "@mapFailedConnectBluetooth": {
+    "description": "Snackbar when Bluetooth connect fails"
+  },
+  "mapDisconnectLoraDevice": "Disconnect LoRa Device",
+  "@mapDisconnectLoraDevice": {
+    "description": "Title of the disconnect confirmation"
+  },
+  "mapDisconnectConfirm": "Disconnect from your LoRa companion device?",
+  "@mapDisconnectConfirm": {
+    "description": "Body of the disconnect confirmation"
+  },
+  "mapLoraDisconnected": "LoRa device disconnected",
+  "@mapLoraDisconnected": {
+    "description": "Snackbar after disconnecting LoRa"
+  },
+  "mapRefreshingContactList": "Refreshing contact list...",
+  "@mapRefreshingContactList": {
+    "description": "Snackbar while refreshing radio contacts"
+  },
+  "mapContactListUpdated": "Contact list updated",
+  "@mapContactListUpdated": {
+    "description": "Snackbar after contact list refresh"
+  },
+  "mapScanningForRepeaters": "Scanning for repeaters...",
+  "@mapScanningForRepeaters": {
+    "description": "Snackbar while scanning for repeaters"
+  },
+  "mapNoRepeatersFound": "No repeaters found",
+  "@mapNoRepeatersFound": {
+    "description": "Snackbar when a repeater scan finds none"
+  },
+  "mapRepeatersFound": "{count, plural, one{Found {count} repeater} other{Found {count} repeaters}}",
+  "@mapRepeatersFound": {
+    "description": "Snackbar after a repeater scan finds nodes",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapSampleInfo": "Sample Info",
+  "@mapSampleInfo": {
+    "description": "Title of the sample details dialog"
+  },
+  "mapStatusLabel": "Status: ",
+  "@mapStatusLabel": {
+    "description": "Label before ping success/fail/GPS-only"
+  },
+  "mapStatusSuccess": "✅ Success",
+  "@mapStatusSuccess": {
+    "description": "Sample ping status: success"
+  },
+  "mapStatusFailed": "❌ Failed",
+  "@mapStatusFailed": {
+    "description": "Sample ping status: failed"
+  },
+  "mapStatusGpsOnly": "📍 GPS Only",
+  "@mapStatusGpsOnly": {
+    "description": "Sample ping status: GPS-only"
+  },
+  "mapTimeLabel": "Time: {timestamp}",
+  "@mapTimeLabel": {
+    "description": "Sample timestamp row",
+    "placeholders": {
+      "timestamp": {
+        "type": "String"
+      }
+    }
+  },
+  "mapRepeaterLabel": "Repeater: ",
+  "@mapRepeaterLabel": {
+    "description": "Label before the repeater name/id on a sample"
+  },
+  "mapRssiLabel": "RSSI: ",
+  "@mapRssiLabel": {
+    "description": "Label before RSSI; RSSI untranslated"
+  },
+  "mapSnrLabel": "SNR: ",
+  "@mapSnrLabel": {
+    "description": "Label before SNR; SNR untranslated"
+  },
+  "mapResponseLabel": "Response: ",
+  "@mapResponseLabel": {
+    "description": "Label before ping response time"
+  },
+  "mapDuctingLabel": "Ducting: ",
+  "@mapDuctingLabel": {
+    "description": "Label before ducting risk on sample info"
+  },
+  "mapRssiValue": "RSSI: {value} dBm",
+  "@mapRssiValue": {
+    "description": "RSSI value with dBm unit symbol",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "mapSnrValue": "SNR: {value} dB",
+  "@mapSnrValue": {
+    "description": "SNR value with dB unit symbol",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "mapGroupedSamples": "{count, plural, one{{count} grouped sample} other{{count} grouped samples}}",
+  "@mapGroupedSamples": {
+    "description": "Title of the clustered-samples dialog",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapSuccessfulCount": "Successful: {count}",
+  "@mapSuccessfulCount": {
+    "description": "Successful ping count in a sample cluster",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapFailedCount": "Failed: {count}",
+  "@mapFailedCount": {
+    "description": "Failed ping count in a sample cluster",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapGpsOnlyCount": "GPS only: {count}",
+  "@mapGpsOnlyCount": {
+    "description": "GPS-only count in a sample cluster",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapNewest": "Newest: {timestamp}",
+  "@mapNewest": {
+    "description": "Newest sample time in a cluster",
+    "placeholders": {
+      "timestamp": {
+        "type": "String"
+      }
+    }
+  },
+  "mapZoomForBreakdown": "Zoom in for a more detailed breakdown.",
+  "@mapZoomForBreakdown": {
+    "description": "Hint in the clustered-samples dialog"
+  },
+  "mapRepeaterFallback": "Repeater {id}",
+  "@mapRepeaterFallback": {
+    "description": "Fallback repeater title when the radio has no name",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "mapIdLabel": "ID: {id}",
+  "@mapIdLabel": {
+    "description": "Repeater ID row; ID untranslated",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "mapFilteringBy": "Filtering by {id}",
+  "@mapFilteringBy": {
+    "description": "Snackbar after filtering coverage to one repeater",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "mapFilterByThis": "Filter by This",
+  "@mapFilterByThis": {
+    "description": "Button to filter the map to this repeater"
+  },
+  "mapShowOnMap": "Show on Map",
+  "@mapShowOnMap": {
+    "description": "Button to pan the map to a repeater"
+  },
+  "mapCoverageSquareInfo": "Coverage Square Info",
+  "@mapCoverageSquareInfo": {
+    "description": "Title of a coverage-cell details dialog"
+  },
+  "mapSamplesLabel": "Samples: ",
+  "@mapSamplesLabel": {
+    "description": "Label before coverage sample count"
+  },
+  "mapSuccessRateLabel": "Success Rate: ",
+  "@mapSuccessRateLabel": {
+    "description": "Label before coverage success rate"
+  },
+  "mapReceivedLabel": "Received: ",
+  "@mapReceivedLabel": {
+    "description": "Label before received ping count"
+  },
+  "mapLostLabel": "Lost: ",
+  "@mapLostLabel": {
+    "description": "Label before lost ping count"
+  },
+  "mapRepeatersHeard": "Repeaters Heard: ",
+  "@mapRepeatersHeard": {
+    "description": "Label before count of heard repeaters"
+  },
+  "mapRepeaterIds": "Repeater IDs: ",
+  "@mapRepeaterIds": {
+    "description": "Label before repeater ID list"
+  },
+  "mapNoPingData": "No ping data",
+  "@mapNoPingData": {
+    "description": "Coverage success rate when there are no pings"
+  },
+  "mapNotAvailable": "N/A",
+  "@mapNotAvailable": {
+    "description": "Placeholder when a percentage cannot be computed"
+  },
+  "mapNearbyRepeaters": "Nearby Repeaters ({count})",
+  "@mapNearbyRepeaters": {
+    "description": "Title of the nearby-repeaters list",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapUploadingTo": "Uploading to {site}...",
+  "@mapUploadingTo": {
+    "description": "Progress text while uploading to a named site",
+    "placeholders": {
+      "site": {
+        "type": "String"
+      }
+    }
+  },
+  "mapUploadingSamples": "Uploading samples...",
+  "@mapUploadingSamples": {
+    "description": "Progress text while uploading samples"
+  },
+  "mapUploadBatch": "Batch {current} of {total}",
+  "@mapUploadBatch": {
+    "description": "Upload batch progress",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "mapUploadComplete": "Upload Complete",
+  "@mapUploadComplete": {
+    "description": "Title when every upload site succeeded"
+  },
+  "mapUploadResults": "Upload Results",
+  "@mapUploadResults": {
+    "description": "Title when some upload sites failed"
+  },
+  "mapUploadedToSites": "Uploaded to {successCount} of {total} sites",
+  "@mapUploadedToSites": {
+    "description": "Summary of multi-site upload results",
+    "placeholders": {
+      "successCount": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "mapUploadFallbackName": "Upload",
+  "@mapUploadFallbackName": {
+    "description": "Fallback site name for the legacy single-endpoint upload path"
+  },
+  "mapUploadError": "Upload error: {error}",
+  "@mapUploadError": {
+    "description": "Snackbar when upload throws",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "mapSelectWhichSitesToUpload": "Select which sites to upload to:",
+  "@mapSelectWhichSitesToUpload": {
+    "description": "Prompt in the manage-upload-sites sheet"
+  },
+  "mapDeleteSite": "Delete Site",
+  "@mapDeleteSite": {
+    "description": "Title of delete-upload-site confirmation"
+  },
+  "mapDeleteSiteConfirm": "Delete \"{name}\"?",
+  "@mapDeleteSiteConfirm": {
+    "description": "Confirm deleting a named upload site",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "mapAddSite": "Add Site",
+  "@mapAddSite": {
+    "description": "Button to add an upload endpoint"
+  },
+  "mapUploadSitesUpdated": "Upload sites updated",
+  "@mapUploadSitesUpdated": {
+    "description": "Snackbar after saving upload site selection"
+  },
+  "mapEditUploadSite": "Edit Upload Site",
+  "@mapEditUploadSite": {
+    "description": "Title of the edit-endpoint dialog"
+  },
+  "mapSiteName": "Site Name",
+  "@mapSiteName": {
+    "description": "Upload endpoint name field"
+  },
+  "mapApiUrl": "API URL",
+  "@mapApiUrl": {
+    "description": "Upload endpoint URL field; API untranslated"
+  },
+  "mapAddUploadSite": "Add Upload Site",
+  "@mapAddUploadSite": {
+    "description": "Title of the add-endpoint dialog"
+  },
+  "mapSiteNameHint": "e.g., My Personal Map",
+  "@mapSiteNameHint": {
+    "description": "Hint for a new upload site name"
+  },
+  "mapTileCacheNotInitialized": "Tile cache not initialized",
+  "@mapTileCacheNotInitialized": {
+    "description": "Snackbar when offline tile download is unavailable"
+  },
+  "mapDownloadTilesBlurb": "Download map tiles for the current view area.",
+  "@mapDownloadTilesBlurb": {
+    "description": "Explanation in the offline-tile download dialog"
+  },
+  "mapMinZoom": "Min Zoom: {zoom}",
+  "@mapMinZoom": {
+    "description": "Minimum zoom slider label",
+    "placeholders": {
+      "zoom": {
+        "type": "String"
+      }
+    }
+  },
+  "mapMaxZoom": "Max Zoom: {zoom}",
+  "@mapMaxZoom": {
+    "description": "Maximum zoom slider label",
+    "placeholders": {
+      "zoom": {
+        "type": "String"
+      }
+    }
+  },
+  "mapTilesEstimate": "{count} tiles (~{megabytes} MB)",
+  "@mapTilesEstimate": {
+    "description": "Estimated tile download size",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "megabytes": {
+        "type": "String"
+      }
+    }
+  },
+  "mapLargeDownloadWarning": "Large download — consider a smaller area or zoom range",
+  "@mapLargeDownloadWarning": {
+    "description": "Warning when tile estimate is very large"
+  },
+  "mapDownloadingTiles": "Downloading Tiles",
+  "@mapDownloadingTiles": {
+    "description": "Title of the tile download progress dialog"
+  },
+  "mapTilesProgress": "{completed} / {total} tiles",
+  "@mapTilesProgress": {
+    "description": "Tile download progress counts",
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "mapDownloadedTiles": "Downloaded {succeeded}/{total} tiles",
+  "@mapDownloadedTiles": {
+    "description": "Snackbar after tile download finishes",
+    "placeholders": {
+      "succeeded": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "mapDownloadCancelled": "Download cancelled ({count} tiles cached)",
+  "@mapDownloadCancelled": {
+    "description": "Snackbar after cancelling tile download",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapShareFailed": "Share failed: {error}",
+  "@mapShareFailed": {
+    "description": "Snackbar when sharing a coverage image fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "mapCoverageShareSubject": "MeshCore Wardrive Coverage",
+  "@mapCoverageShareSubject": {
+    "description": "Share-sheet subject for the coverage map image"
+  },
+  "mapCoverageShareText": "MeshCore Wardrive Coverage Map\n📍 {sampleCount} samples • {coverageCount} coverage areas\n✅ {successCount} success • ❌ {failCount} failed • {successRate}% rate\n🔁 {repeaterCount} repeaters discovered",
+  "@mapCoverageShareText": {
+    "description": "Share-sheet body summarizing coverage stats",
+    "placeholders": {
+      "sampleCount": {
+        "type": "String"
+      },
+      "coverageCount": {
+        "type": "String"
+      },
+      "successCount": {
+        "type": "String"
+      },
+      "failCount": {
+        "type": "String"
+      },
+      "successRate": {
+        "type": "String"
+      },
+      "repeaterCount": {
+        "type": "String"
+      }
+    }
+  },
+  "mapNoRepeatersYet": "No repeaters found yet - do some wardriving first!",
+  "@mapNoRepeatersYet": {
+    "description": "Snackbar when repeater filter has no IDs"
+  },
+  "mapFilterByRepeater": "Filter by Repeater",
+  "@mapFilterByRepeater": {
+    "description": "Title of the repeater filter picker"
+  },
+  "mapShowingCoverageFrom": "Showing coverage from {id}",
+  "@mapShowingCoverageFrom": {
+    "description": "Snackbar after applying a repeater filter",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "mapRepeaterFilterCleared": "Repeater filter cleared",
+  "@mapRepeaterFilterCleared": {
+    "description": "Snackbar after clearing the repeater filter"
+  },
+  "mapClearFilter": "Clear Filter",
+  "@mapClearFilter": {
+    "description": "Button to clear the repeater filter"
+  },
+  "mapNoCoverageYet": "No coverage data yet - do some wardriving first!",
+  "@mapNoCoverageYet": {
+    "description": "Snackbar when coverage-gap search has no data"
+  },
+  "mapNoCoverageGaps": "No coverage gaps found! All areas have >30% success rate.",
+  "@mapNoCoverageGaps": {
+    "description": "Snackbar when no low-success coverage cells exist"
+  },
+  "mapCoverageGaps": "Coverage Gaps ({count})",
+  "@mapCoverageGaps": {
+    "description": "Title of the coverage-gaps list",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapGapSuccessRate": "{rate}% success rate",
+  "@mapGapSuccessRate": {
+    "description": "Title row for a coverage gap",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "mapGapSubtitle": "{coords}\n{received} received / {lost} lost",
+  "@mapGapSubtitle": {
+    "description": "Subtitle for a coverage gap",
+    "placeholders": {
+      "coords": {
+        "type": "String"
+      },
+      "received": {
+        "type": "String"
+      },
+      "lost": {
+        "type": "String"
+      }
+    }
+  },
+  "mapDownloadFrom": "Download from",
+  "@mapDownloadFrom": {
+    "description": "Title when choosing a community-coverage source"
+  },
+  "mapDownloadingCoverage": "Downloading coverage data...",
+  "@mapDownloadingCoverage": {
+    "description": "Snackbar while downloading community coverage"
+  },
+  "mapDownloadedCoverageCells": "Downloaded {count} coverage cells",
+  "@mapDownloadedCoverageCells": {
+    "description": "Snackbar after community coverage download",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapLoadedCachedCoverage": "Loaded cached coverage (offline)",
+  "@mapLoadedCachedCoverage": {
+    "description": "Snackbar when using cached community coverage"
+  },
+  "mapDownloadFailed": "Download failed: {error}",
+  "@mapDownloadFailed": {
+    "description": "Snackbar when community coverage download fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "mapUnknownError": "unknown error",
+  "@mapUnknownError": {
+    "description": "Fallback error when no download error string is available"
+  },
+  "mapCommunitySuccessRate": "Success Rate: {rate}%",
+  "@mapCommunitySuccessRate": {
+    "description": "Community coverage cell success rate",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "mapRepeatersHeader": "Repeaters:",
+  "@mapRepeatersHeader": {
+    "description": "Header above community-coverage repeater list"
+  },
+  "mapLastUpdate": "Last Update: {timestamp}",
+  "@mapLastUpdate": {
+    "description": "Community coverage last-update row",
+    "placeholders": {
+      "timestamp": {
+        "type": "String"
+      }
+    }
+  },
+  "mapAppVersionLabel": "App Version: {version}",
+  "@mapAppVersionLabel": {
+    "description": "Community coverage app-version row",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "mapApproxRadioPositionUncertainty": "Approximate radio position, uncertainty {uncertainty}",
+  "@mapApproxRadioPositionUncertainty": {
+    "description": "Semantics label for the radio-position marker",
+    "placeholders": {
+      "uncertainty": {
+        "type": "String"
+      }
+    }
+  },
+  "mapApproxRadioPositionSnack": "Approximate radio position · {count} repeaters · ±{uncertainty}",
+  "@mapApproxRadioPositionSnack": {
+    "description": "Snackbar when tapping the radio-position marker",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "uncertainty": {
+        "type": "String"
+      }
+    }
+  },
+  "mapCurrentWifiLocation": "Current Wi-Fi location from beaconDB",
+  "@mapCurrentWifiLocation": {
+    "description": "Semantics for the current-position marker on Wi-Fi"
+  },
+  "mapCurrentFusedLocation": "Current fused Android location",
+  "@mapCurrentFusedLocation": {
+    "description": "Semantics for the current-position marker on fused GPS"
+  },
+  "mapPositionHeadingSemantics": "{positionLabel}, heading {degrees} degrees",
+  "@mapPositionHeadingSemantics": {
+    "description": "Semantics for the heading-up location marker",
+    "placeholders": {
+      "positionLabel": {
+        "type": "String"
+      },
+      "degrees": {
+        "type": "String"
+      }
+    }
   }
 }

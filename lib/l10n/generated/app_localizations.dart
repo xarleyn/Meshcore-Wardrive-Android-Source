@@ -2065,6 +2065,1609 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No LoRa devices found via Bluetooth'**
   String get bluetoothNoDevices;
+
+  /// Light theme option in interface/map theme pickers
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get settingsThemeLight;
+
+  /// Dark theme option in interface/map theme pickers
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get settingsThemeDark;
+
+  /// Follow-system theme option in interface/map theme pickers
+  ///
+  /// In en, this message translates to:
+  /// **'System Default'**
+  String get settingsThemeSystemDefault;
+
+  /// Dialog title for choosing the app interface theme
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Interface Theme'**
+  String get settingsChooseInterfaceTheme;
+
+  /// Dialog title for choosing the map tile theme
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Map Theme'**
+  String get settingsChooseMapTheme;
+
+  /// Close button on map dialogs
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get mapClose;
+
+  /// Delete button on map dialogs
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get mapDelete;
+
+  /// OK button on map dialogs
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get mapOk;
+
+  /// Dismiss permission/request dialogs without continuing
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get mapNotNow;
+
+  /// Confirm permission/request dialogs
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get mapContinue;
+
+  /// Share export or screenshot
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get mapShare;
+
+  /// Confirm importing settings
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get mapImport;
+
+  /// Confirm adding an upload site
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get mapAdd;
+
+  /// Confirm downloading an update or tiles
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get mapDownload;
+
+  /// Confirm sharing a screenshot
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get mapYes;
+
+  /// Decline sharing a screenshot
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get mapNo;
+
+  /// Exit map delete mode
+  ///
+  /// In en, this message translates to:
+  /// **'EXIT'**
+  String get mapExit;
+
+  /// Connect to a LoRa companion
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get mapConnect;
+
+  /// LoRa connection in progress
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting...'**
+  String get mapConnecting;
+
+  /// Discard an empty tracking session
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'\'t save'**
+  String get mapDontSave;
+
+  /// Snackbar when a never-before-seen repeater is found
+  ///
+  /// In en, this message translates to:
+  /// **'🆕 New repeater discovered: {repeaterId}'**
+  String mapNewRepeaterDiscovered(String repeaterId);
+
+  /// Snackbar when entering a known dead zone cell
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ Entering known dead zone ({cellHash})'**
+  String mapEnteringDeadZone(String cellHash);
+
+  /// Snackbar when battery saver activates
+  ///
+  /// In en, this message translates to:
+  /// **'🔋 Battery saver ON — ping interval doubled'**
+  String get mapBatterySaverOn;
+
+  /// Snackbar when battery saver deactivates
+  ///
+  /// In en, this message translates to:
+  /// **'🔋 Battery saver OFF — normal ping interval restored'**
+  String get mapBatterySaverOff;
+
+  /// Snackbar after compass calibration completes
+  ///
+  /// In en, this message translates to:
+  /// **'Compass calibrated'**
+  String get mapCompassCalibrated;
+
+  /// Title when stopping a session with no GPS points
+  ///
+  /// In en, this message translates to:
+  /// **'Session is empty'**
+  String get mapSessionEmptyTitle;
+
+  /// Body when stopping a session with no GPS points
+  ///
+  /// In en, this message translates to:
+  /// **'No GPS points were recorded. Save this session anyway?'**
+  String get mapSessionEmptyBody;
+
+  /// Snackbar after discarding an empty session with no history
+  ///
+  /// In en, this message translates to:
+  /// **'Session discarded'**
+  String get mapSessionDiscarded;
+
+  /// Snackbar after discarding an empty session when older sessions exist
+  ///
+  /// In en, this message translates to:
+  /// **'Session discarded — showing last saved session'**
+  String get mapSessionDiscardedShowingLast;
+
+  /// Snackbar when GPS tracking starts without auto-ping
+  ///
+  /// In en, this message translates to:
+  /// **'Location tracking started'**
+  String get mapLocationTrackingStarted;
+
+  /// Snackbar when Carpeater starts with tracking
+  ///
+  /// In en, this message translates to:
+  /// **'Carpeater mode started'**
+  String get mapCarpeaterModeStarted;
+
+  /// Snackbar when Carpeater fails to start
+  ///
+  /// In en, this message translates to:
+  /// **'Carpeater failed — check settings'**
+  String get mapCarpeaterFailedCheckSettings;
+
+  /// Snackbar when tracking starts with auto-ping
+  ///
+  /// In en, this message translates to:
+  /// **'Location tracking and auto-ping started'**
+  String get mapLocationTrackingAndAutoPingStarted;
+
+  /// Fallback snackbar when tracking fails to start
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to start location tracking. Check Android settings.'**
+  String get mapFailedToStartTracking;
+
+  /// Snackbar when starting a blank-map session
+  ///
+  /// In en, this message translates to:
+  /// **'New session — showing this trip only'**
+  String get mapNewSessionShowingTrip;
+
+  /// Snackbar after loading a saved session on the map
+  ///
+  /// In en, this message translates to:
+  /// **'Showing session from {timestamp}'**
+  String mapShowingSessionFrom(String timestamp);
+
+  /// Title of the precise-location permission dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Precise location required'**
+  String get mapPreciseLocationRequiredTitle;
+
+  /// Body of the precise-location permission dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Wardriving needs precise location. In Android app permissions, enable “Use precise location”, then tap Start again.'**
+  String get mapPreciseLocationRequiredBody;
+
+  /// Action to open Android app settings from a permission dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Open app settings'**
+  String get mapOpenAppSettings;
+
+  /// Title asking for background location
+  ///
+  /// In en, this message translates to:
+  /// **'Allow location all the time'**
+  String get mapAllowLocationAllTheTimeTitle;
+
+  /// Body asking for background location
+  ///
+  /// In en, this message translates to:
+  /// **'MeshCore Wardrive records while the screen is off or another app is open. Android needs location access set to “Allow all the time”.'**
+  String get mapAllowLocationAllTheTimeBody;
+
+  /// Title when background location was denied
+  ///
+  /// In en, this message translates to:
+  /// **'Background location required'**
+  String get mapBackgroundLocationRequiredTitle;
+
+  /// Body when background location was denied
+  ///
+  /// In en, this message translates to:
+  /// **'Select Permissions → Location → Allow all the time, then return and tap Start again.'**
+  String get mapBackgroundLocationRequiredBody;
+
+  /// Title asking to ignore battery optimizations
+  ///
+  /// In en, this message translates to:
+  /// **'Unrestricted battery use'**
+  String get mapUnrestrictedBatteryTitle;
+
+  /// Body asking to ignore battery optimizations
+  ///
+  /// In en, this message translates to:
+  /// **'Allow MeshCore Wardrive to ignore battery optimizations so Android does not pause GPS, radio communication, or Wi-Fi scans during a drive.'**
+  String get mapUnrestrictedBatteryBody;
+
+  /// Title asking to disable Wi-Fi scan throttling
+  ///
+  /// In en, this message translates to:
+  /// **'Disable Wi-Fi scan throttling'**
+  String get mapDisableWifiThrottlingTitle;
+
+  /// Body asking to disable Wi-Fi scan throttling
+  ///
+  /// In en, this message translates to:
+  /// **'Android does not let apps change this setting automatically. In Developer options, turn off “Wi-Fi scan throttling” for timely beaconDB position updates.'**
+  String get mapDisableWifiThrottlingBody;
+
+  /// Action to open Android developer options
+  ///
+  /// In en, this message translates to:
+  /// **'Developer options'**
+  String get mapDeveloperOptions;
+
+  /// Title of the clear-map confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Map History?'**
+  String get mapClearMapHistoryTitle;
+
+  /// Body of the clear-map confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'This will permanently delete all {count} samples and coverage data from the map.\n\nThis action cannot be undone.'**
+  String mapClearMapHistoryBody(int count);
+
+  /// Confirm deleting all samples or a coverage cell
+  ///
+  /// In en, this message translates to:
+  /// **'Delete All'**
+  String get mapDeleteAll;
+
+  /// Snackbar after clearing map history
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Deleted {count} sample} other{Deleted {count} samples}}'**
+  String mapDeletedSamples(int count);
+
+  /// Title of the export format picker
+  ///
+  /// In en, this message translates to:
+  /// **'Export Format'**
+  String get mapExportFormat;
+
+  /// JSON export format description
+  ///
+  /// In en, this message translates to:
+  /// **'Full data with all fields'**
+  String get mapExportJsonSubtitle;
+
+  /// CSV export format description
+  ///
+  /// In en, this message translates to:
+  /// **'Spreadsheet-compatible'**
+  String get mapExportCsvSubtitle;
+
+  /// GPX export format description
+  ///
+  /// In en, this message translates to:
+  /// **'GPS track for mapping apps'**
+  String get mapExportGpxSubtitle;
+
+  /// KML export format description
+  ///
+  /// In en, this message translates to:
+  /// **'Google Earth format'**
+  String get mapExportKmlSubtitle;
+
+  /// Title of save-or-share export dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Export as {format}'**
+  String mapExportAs(String format);
+
+  /// Save an export to a folder
+  ///
+  /// In en, this message translates to:
+  /// **'Save to Folder'**
+  String get mapSaveToFolder;
+
+  /// File-picker title when saving a data export
+  ///
+  /// In en, this message translates to:
+  /// **'Save Export'**
+  String get mapSaveExport;
+
+  /// Snackbar after saving a data export
+  ///
+  /// In en, this message translates to:
+  /// **'Exported {count} samples as {format}'**
+  String mapExportedSamples(int count, String format);
+
+  /// Share-sheet subject for a data export; brand untranslated
+  ///
+  /// In en, this message translates to:
+  /// **'MeshCore Wardrive Export'**
+  String get mapExportShareSubject;
+
+  /// Share-sheet body for a data export
+  ///
+  /// In en, this message translates to:
+  /// **'Exported {count} samples from MeshCore Wardrive'**
+  String mapExportShareText(int count);
+
+  /// Snackbar after sharing an export
+  ///
+  /// In en, this message translates to:
+  /// **'Export shared'**
+  String get mapExportShared;
+
+  /// Snackbar when export fails
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed: {error}'**
+  String mapExportFailed(String error);
+
+  /// Snackbar prefix after importing samples
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Imported {count} sample} other{Imported {count} samples}}'**
+  String mapImportedSamples(int count);
+
+  /// Optional session count suffix after importing data
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{, {count} session} other{, {count} sessions}}'**
+  String mapImportedSessionsSuffix(int count);
+
+  /// Optional source suffix after importing data
+  ///
+  /// In en, this message translates to:
+  /// **' from {sources}'**
+  String mapImportedFromSources(String sources);
+
+  /// Snackbar when import fails
+  ///
+  /// In en, this message translates to:
+  /// **'Import failed: {error}'**
+  String mapImportFailed(String error);
+
+  /// File-picker title when saving a settings export
+  ///
+  /// In en, this message translates to:
+  /// **'Save Settings'**
+  String get mapSaveSettings;
+
+  /// Snackbar after saving settings
+  ///
+  /// In en, this message translates to:
+  /// **'Settings exported'**
+  String get mapSettingsExported;
+
+  /// Share-sheet text for exported settings
+  ///
+  /// In en, this message translates to:
+  /// **'MeshCore Wardrive Settings'**
+  String get mapSettingsShareText;
+
+  /// Confirmation body before importing settings
+  ///
+  /// In en, this message translates to:
+  /// **'This will overwrite your current app settings (display options, ping settings, upload servers, carpeater config, etc).\n\nYour wardrive data will NOT be affected.\n\nContinue?'**
+  String get mapImportSettingsConfirm;
+
+  /// Snackbar after importing settings
+  ///
+  /// In en, this message translates to:
+  /// **'Imported {count} settings'**
+  String mapImportedSettingsCount(int count);
+
+  /// Snackbar when a settings file cannot be parsed
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid settings file: {error}'**
+  String mapInvalidSettingsFile(String error);
+
+  /// Title when dropping a planned repeater marker
+  ///
+  /// In en, this message translates to:
+  /// **'Add Planned Repeater'**
+  String get mapAddPlannedRepeater;
+
+  /// Hint for an optional planned-repeater label
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Hilltop near Tracyton'**
+  String get mapPlannedRepeaterHint;
+
+  /// Confirm adding a planned repeater marker
+  ///
+  /// In en, this message translates to:
+  /// **'Add Marker'**
+  String get mapAddMarker;
+
+  /// Snackbar after adding a planned repeater
+  ///
+  /// In en, this message translates to:
+  /// **'Planned repeater marker added'**
+  String get mapPlannedRepeaterMarkerAdded;
+
+  /// Fallback title for an unlabeled planned repeater
+  ///
+  /// In en, this message translates to:
+  /// **'Planned Repeater'**
+  String get mapPlannedRepeater;
+
+  /// Latitude row in map info dialogs
+  ///
+  /// In en, this message translates to:
+  /// **'Lat: {value}'**
+  String mapLat(String value);
+
+  /// Longitude row in map info dialogs
+  ///
+  /// In en, this message translates to:
+  /// **'Lon: {value}'**
+  String mapLon(String value);
+
+  /// When a planned repeater marker was created
+  ///
+  /// In en, this message translates to:
+  /// **'Added: {date}'**
+  String mapAddedOn(String date);
+
+  /// Snackbar after deleting a planned repeater marker
+  ///
+  /// In en, this message translates to:
+  /// **'Marker deleted'**
+  String get mapMarkerDeleted;
+
+  /// Title of the add-privacy-zone dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Add Privacy Zone'**
+  String get mapAddPrivacyZone;
+
+  /// Explanation in the add-privacy-zone dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Data inside this zone will be excluded from uploads and exports.'**
+  String get mapPrivacyZoneBlurb;
+
+  /// Hint for an optional privacy-zone label
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., Home'**
+  String get mapPrivacyZoneHint;
+
+  /// Snackbar after adding a privacy zone
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy zone added'**
+  String get mapPrivacyZoneAdded;
+
+  /// Title of the delete-sample dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Sample'**
+  String get mapDeleteSample;
+
+  /// Confirm deleting one sample; kind is success, fail, or gps
+  ///
+  /// In en, this message translates to:
+  /// **'{kind, select, success{Delete this successful sample from {timestamp}?} fail{Delete this failed sample from {timestamp}?} other{Delete this GPS-only sample from {timestamp}?}}'**
+  String mapDeleteSampleConfirm(String kind, String timestamp);
+
+  /// Snackbar after deleting a sample
+  ///
+  /// In en, this message translates to:
+  /// **'Sample deleted'**
+  String get mapSampleDeleted;
+
+  /// Title of the delete-coverage-cell dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Coverage Cell'**
+  String get mapDeleteCoverageCell;
+
+  /// Body of the delete-coverage-cell dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all {count} samples in this coverage area?\n\nCell: {cellId}\nThis cannot be undone.'**
+  String mapDeleteCoverageCellBody(int count, String cellId);
+
+  /// Snackbar after deleting a coverage cell
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted {count} samples from cell'**
+  String mapDeletedSamplesFromCell(int count);
+
+  /// Snackbar when delete-mode tap is too zoomed out
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom in to delete an individual coverage cell'**
+  String get mapZoomToDeleteCell;
+
+  /// Snackbar when a clustered sample cannot be deleted
+  ///
+  /// In en, this message translates to:
+  /// **'Zoomed points are grouped; delete from coverage view'**
+  String get mapZoomedPointsGrouped;
+
+  /// Banner shown while map delete mode is active
+  ///
+  /// In en, this message translates to:
+  /// **'DELETE MODE: Tap a coverage square or sample to delete'**
+  String get mapDeleteModeBanner;
+
+  /// Title when a newer app version exists
+  ///
+  /// In en, this message translates to:
+  /// **'Update Available'**
+  String get mapUpdateAvailable;
+
+  /// Body of the update-available dialog
+  ///
+  /// In en, this message translates to:
+  /// **'New version {latestVersion} is available!\n\nCurrent version: {currentVersion}\n\nWould you like to download it?'**
+  String mapUpdateAvailableBody(String latestVersion, String currentVersion);
+
+  /// Snackbar when the installed app is current
+  ///
+  /// In en, this message translates to:
+  /// **'You\'\'re on the latest version!'**
+  String get mapOnLatestVersion;
+
+  /// Snackbar when update check fails
+  ///
+  /// In en, this message translates to:
+  /// **'Could not check for updates'**
+  String get mapCouldNotCheckUpdates;
+
+  /// Snackbar when update check is offline
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection. Try again when you are online.'**
+  String get mapNoInternetTryAgain;
+
+  /// Snackbar when update check times out
+  ///
+  /// In en, this message translates to:
+  /// **'Update check timed out. Try again later.'**
+  String get mapUpdateCheckTimedOut;
+
+  /// Snackbar when the GitHub URL cannot be launched
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open GitHub'**
+  String get mapCouldNotOpenGitHub;
+
+  /// Snackbar when map follow-location is enabled
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-follow enabled'**
+  String get mapAutoFollowEnabled;
+
+  /// Snackbar when map follow-location is disabled
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-follow disabled'**
+  String get mapAutoFollowDisabled;
+
+  /// Snackbar after resetting map rotation
+  ///
+  /// In en, this message translates to:
+  /// **'Map reset to north'**
+  String get mapMapResetToNorth;
+
+  /// Snackbar when heading-up rotation is enabled
+  ///
+  /// In en, this message translates to:
+  /// **'Heading-up enabled'**
+  String get mapHeadingUpEnabled;
+
+  /// Snackbar when heading-up rotation is disabled
+  ///
+  /// In en, this message translates to:
+  /// **'Heading-up disabled — map reset to north'**
+  String get mapHeadingUpDisabled;
+
+  /// Snackbar when screenshot capture returns no image
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to capture screenshot'**
+  String get mapFailedToCaptureScreenshot;
+
+  /// Snackbar after saving a screenshot
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshot saved to gallery!'**
+  String get mapScreenshotSavedToGallery;
+
+  /// Title after saving a screenshot
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshot Saved'**
+  String get mapScreenshotSavedTitle;
+
+  /// Prompt after saving a screenshot
+  ///
+  /// In en, this message translates to:
+  /// **'Would you like to share the screenshot?'**
+  String get mapShareScreenshotPrompt;
+
+  /// Share-sheet text for a coverage screenshot
+  ///
+  /// In en, this message translates to:
+  /// **'MeshCore Wardrive Coverage Map'**
+  String get mapScreenshotShareText;
+
+  /// Snackbar when gallery save fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save screenshot'**
+  String get mapFailedToSaveScreenshot;
+
+  /// Snackbar when screenshot capture throws
+  ///
+  /// In en, this message translates to:
+  /// **'Error capturing screenshot: {error}'**
+  String mapErrorCapturingScreenshot(String error);
+
+  /// AppBar tooltip for the debug log
+  ///
+  /// In en, this message translates to:
+  /// **'Debug Terminal'**
+  String get mapDebugTerminal;
+
+  /// AppBar tooltip for capturing a screenshot
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshot'**
+  String get mapScreenshotTooltip;
+
+  /// Title of the map quick-settings card
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Settings'**
+  String get mapQuickSettings;
+
+  /// Quick-settings label for ping distance
+  ///
+  /// In en, this message translates to:
+  /// **'Ping Dist: '**
+  String get mapPingDist;
+
+  /// Quick-settings label for discovery timeout
+  ///
+  /// In en, this message translates to:
+  /// **'Timeout: '**
+  String get mapTimeout;
+
+  /// Quick-settings label for ping mode
+  ///
+  /// In en, this message translates to:
+  /// **'Mode: '**
+  String get mapMode;
+
+  /// Compass FAB tooltip while heading-up is on
+  ///
+  /// In en, this message translates to:
+  /// **'Stop heading-up and reset north'**
+  String get mapStopHeadingUp;
+
+  /// Compass FAB tooltip while heading-up is off
+  ///
+  /// In en, this message translates to:
+  /// **'Rotate map with heading. Long-press to calibrate.'**
+  String get mapRotateMapWithHeading;
+
+  /// Compass FAB tooltip when rotation is locked north
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to North'**
+  String get mapResetToNorth;
+
+  /// Tracking FAB tooltip while a session is running
+  ///
+  /// In en, this message translates to:
+  /// **'Stop tracking'**
+  String get mapStopTracking;
+
+  /// Tracking FAB tooltip while idle
+  ///
+  /// In en, this message translates to:
+  /// **'Start tracking. Long-press for a blank-map session.'**
+  String get mapStartTracking;
+
+  /// Status when no LoRa companion is connected
+  ///
+  /// In en, this message translates to:
+  /// **'No LoRa'**
+  String get mapNoLora;
+
+  /// Live sample count on the map status card
+  ///
+  /// In en, this message translates to:
+  /// **'Samples: {count}'**
+  String mapSamplesCount(String count);
+
+  /// Snackbar when retrying Carpeater from the status chip
+  ///
+  /// In en, this message translates to:
+  /// **'Retrying Carpeater...'**
+  String get mapRetryingCarpeater;
+
+  /// Snackbar when Carpeater retry succeeds
+  ///
+  /// In en, this message translates to:
+  /// **'Carpeater reconnected'**
+  String get mapCarpeaterReconnected;
+
+  /// Snackbar when Carpeater retry fails
+  ///
+  /// In en, this message translates to:
+  /// **'Carpeater retry failed'**
+  String get mapCarpeaterRetryFailed;
+
+  /// Carpeater status chip; CP abbreviation kept
+  ///
+  /// In en, this message translates to:
+  /// **'CP: {state}'**
+  String mapCarpeaterStatus(String state);
+
+  /// Carpeater state: disabled
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get mapCarpeaterOff;
+
+  /// Carpeater state: connecting
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting'**
+  String get mapCarpeaterConnecting;
+
+  /// Carpeater state: logging in
+  ///
+  /// In en, this message translates to:
+  /// **'Login...'**
+  String get mapCarpeaterLogin;
+
+  /// Carpeater state: logged in
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get mapCarpeaterReady;
+
+  /// Carpeater state: discovering
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning'**
+  String get mapCarpeaterScanning;
+
+  /// Carpeater state: fetching neighbours
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching'**
+  String get mapCarpeaterFetching;
+
+  /// Carpeater state: error
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get mapCarpeaterError;
+
+  /// Atmospheric ducting status chip
+  ///
+  /// In en, this message translates to:
+  /// **'Ducting: {risk}'**
+  String mapDuctingStatus(String risk);
+
+  /// Ducting risk: possible
+  ///
+  /// In en, this message translates to:
+  /// **'Possible'**
+  String get mapDuctingPossible;
+
+  /// Ducting risk: likely
+  ///
+  /// In en, this message translates to:
+  /// **'Likely'**
+  String get mapDuctingLikely;
+
+  /// Compact battery-saver badge on the status card
+  ///
+  /// In en, this message translates to:
+  /// **'🔋 Saver'**
+  String get mapBatterySaverBadge;
+
+  /// Tooltip to disconnect the LoRa device
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get mapDisconnect;
+
+  /// Tooltip to send a manual ping
+  ///
+  /// In en, this message translates to:
+  /// **'Manual Ping'**
+  String get mapManualPing;
+
+  /// Snackbar when an action needs a connected radio
+  ///
+  /// In en, this message translates to:
+  /// **'Connect LoRa device first'**
+  String get mapConnectLoraFirst;
+
+  /// Snackbar when a ping is blocked on GPS
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for GPS location...'**
+  String get mapWaitingForGps;
+
+  /// Snackbar when a second ping is requested
+  ///
+  /// In en, this message translates to:
+  /// **'A ping is already in progress'**
+  String get mapPingAlreadyInProgress;
+
+  /// Snackbar when a manual ping is sent
+  ///
+  /// In en, this message translates to:
+  /// **'Sending ping...'**
+  String get mapSendingPing;
+
+  /// Snackbar when one repeater answers a ping
+  ///
+  /// In en, this message translates to:
+  /// **'✅ Ping heard by {nodeId}'**
+  String mapPingHeardBy(String nodeId);
+
+  /// Snackbar when a ping discovers multiple repeaters
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{✅ Discovery complete: found {count} repeater} other{✅ Discovery complete: found {count} repeaters}}'**
+  String mapDiscoveryComplete(int count);
+
+  /// Snackbar when a ping times out
+  ///
+  /// In en, this message translates to:
+  /// **'❌ No response - dead zone'**
+  String get mapNoResponseDeadZone;
+
+  /// Snackbar when a ping fails with an error
+  ///
+  /// In en, this message translates to:
+  /// **'❌ Ping failed: {error}'**
+  String mapPingFailed(String error);
+
+  /// Title of the connection-method dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Connect LoRa Device'**
+  String get mapConnectLoraDevice;
+
+  /// Prompt in the connection-method dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Choose connection method:'**
+  String get mapChooseConnectionMethod;
+
+  /// Button to scan for USB companions
+  ///
+  /// In en, this message translates to:
+  /// **'Scan USB Devices'**
+  String get mapScanUsbDevices;
+
+  /// Button to scan for Bluetooth companions
+  ///
+  /// In en, this message translates to:
+  /// **'Scan Bluetooth'**
+  String get mapScanBluetooth;
+
+  /// Snackbar when USB scan finds nothing
+  ///
+  /// In en, this message translates to:
+  /// **'No USB devices found'**
+  String get mapNoUsbDevices;
+
+  /// Title of the USB device picker
+  ///
+  /// In en, this message translates to:
+  /// **'Select USB Device'**
+  String get mapSelectUsbDevice;
+
+  /// Fallback name when a USB device has no product name
+  ///
+  /// In en, this message translates to:
+  /// **'USB Device'**
+  String get mapUsbDeviceFallback;
+
+  /// USB vendor and product IDs; VID/PID untranslated
+  ///
+  /// In en, this message translates to:
+  /// **'VID: {vid}, PID: {pid}'**
+  String mapVidPid(String vid, String pid);
+
+  /// Snackbar after a USB connection succeeds
+  ///
+  /// In en, this message translates to:
+  /// **'Connected via USB'**
+  String get mapConnectedViaUsb;
+
+  /// Snackbar when USB connect fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to connect USB device'**
+  String get mapFailedConnectUsb;
+
+  /// Snackbar when USB connect throws
+  ///
+  /// In en, this message translates to:
+  /// **'USB error: {error}'**
+  String mapUsbError(String error);
+
+  /// Snackbar while connecting to a named Bluetooth device
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting to {name}...'**
+  String mapConnectingTo(String name);
+
+  /// Snackbar after a Bluetooth connection succeeds
+  ///
+  /// In en, this message translates to:
+  /// **'Connected via Bluetooth!'**
+  String get mapConnectedViaBluetooth;
+
+  /// Snackbar when Bluetooth connect fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to connect Bluetooth device'**
+  String get mapFailedConnectBluetooth;
+
+  /// Title of the disconnect confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect LoRa Device'**
+  String get mapDisconnectLoraDevice;
+
+  /// Body of the disconnect confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect from your LoRa companion device?'**
+  String get mapDisconnectConfirm;
+
+  /// Snackbar after disconnecting LoRa
+  ///
+  /// In en, this message translates to:
+  /// **'LoRa device disconnected'**
+  String get mapLoraDisconnected;
+
+  /// Snackbar while refreshing radio contacts
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshing contact list...'**
+  String get mapRefreshingContactList;
+
+  /// Snackbar after contact list refresh
+  ///
+  /// In en, this message translates to:
+  /// **'Contact list updated'**
+  String get mapContactListUpdated;
+
+  /// Snackbar while scanning for repeaters
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning for repeaters...'**
+  String get mapScanningForRepeaters;
+
+  /// Snackbar when a repeater scan finds none
+  ///
+  /// In en, this message translates to:
+  /// **'No repeaters found'**
+  String get mapNoRepeatersFound;
+
+  /// Snackbar after a repeater scan finds nodes
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{Found {count} repeater} other{Found {count} repeaters}}'**
+  String mapRepeatersFound(int count);
+
+  /// Title of the sample details dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Sample Info'**
+  String get mapSampleInfo;
+
+  /// Label before ping success/fail/GPS-only
+  ///
+  /// In en, this message translates to:
+  /// **'Status: '**
+  String get mapStatusLabel;
+
+  /// Sample ping status: success
+  ///
+  /// In en, this message translates to:
+  /// **'✅ Success'**
+  String get mapStatusSuccess;
+
+  /// Sample ping status: failed
+  ///
+  /// In en, this message translates to:
+  /// **'❌ Failed'**
+  String get mapStatusFailed;
+
+  /// Sample ping status: GPS-only
+  ///
+  /// In en, this message translates to:
+  /// **'📍 GPS Only'**
+  String get mapStatusGpsOnly;
+
+  /// Sample timestamp row
+  ///
+  /// In en, this message translates to:
+  /// **'Time: {timestamp}'**
+  String mapTimeLabel(String timestamp);
+
+  /// Label before the repeater name/id on a sample
+  ///
+  /// In en, this message translates to:
+  /// **'Repeater: '**
+  String get mapRepeaterLabel;
+
+  /// Label before RSSI; RSSI untranslated
+  ///
+  /// In en, this message translates to:
+  /// **'RSSI: '**
+  String get mapRssiLabel;
+
+  /// Label before SNR; SNR untranslated
+  ///
+  /// In en, this message translates to:
+  /// **'SNR: '**
+  String get mapSnrLabel;
+
+  /// Label before ping response time
+  ///
+  /// In en, this message translates to:
+  /// **'Response: '**
+  String get mapResponseLabel;
+
+  /// Label before ducting risk on sample info
+  ///
+  /// In en, this message translates to:
+  /// **'Ducting: '**
+  String get mapDuctingLabel;
+
+  /// RSSI value with dBm unit symbol
+  ///
+  /// In en, this message translates to:
+  /// **'RSSI: {value} dBm'**
+  String mapRssiValue(String value);
+
+  /// SNR value with dB unit symbol
+  ///
+  /// In en, this message translates to:
+  /// **'SNR: {value} dB'**
+  String mapSnrValue(String value);
+
+  /// Title of the clustered-samples dialog
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} grouped sample} other{{count} grouped samples}}'**
+  String mapGroupedSamples(int count);
+
+  /// Successful ping count in a sample cluster
+  ///
+  /// In en, this message translates to:
+  /// **'Successful: {count}'**
+  String mapSuccessfulCount(int count);
+
+  /// Failed ping count in a sample cluster
+  ///
+  /// In en, this message translates to:
+  /// **'Failed: {count}'**
+  String mapFailedCount(int count);
+
+  /// GPS-only count in a sample cluster
+  ///
+  /// In en, this message translates to:
+  /// **'GPS only: {count}'**
+  String mapGpsOnlyCount(int count);
+
+  /// Newest sample time in a cluster
+  ///
+  /// In en, this message translates to:
+  /// **'Newest: {timestamp}'**
+  String mapNewest(String timestamp);
+
+  /// Hint in the clustered-samples dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom in for a more detailed breakdown.'**
+  String get mapZoomForBreakdown;
+
+  /// Fallback repeater title when the radio has no name
+  ///
+  /// In en, this message translates to:
+  /// **'Repeater {id}'**
+  String mapRepeaterFallback(String id);
+
+  /// Repeater ID row; ID untranslated
+  ///
+  /// In en, this message translates to:
+  /// **'ID: {id}'**
+  String mapIdLabel(String id);
+
+  /// Snackbar after filtering coverage to one repeater
+  ///
+  /// In en, this message translates to:
+  /// **'Filtering by {id}'**
+  String mapFilteringBy(String id);
+
+  /// Button to filter the map to this repeater
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by This'**
+  String get mapFilterByThis;
+
+  /// Button to pan the map to a repeater
+  ///
+  /// In en, this message translates to:
+  /// **'Show on Map'**
+  String get mapShowOnMap;
+
+  /// Title of a coverage-cell details dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Coverage Square Info'**
+  String get mapCoverageSquareInfo;
+
+  /// Label before coverage sample count
+  ///
+  /// In en, this message translates to:
+  /// **'Samples: '**
+  String get mapSamplesLabel;
+
+  /// Label before coverage success rate
+  ///
+  /// In en, this message translates to:
+  /// **'Success Rate: '**
+  String get mapSuccessRateLabel;
+
+  /// Label before received ping count
+  ///
+  /// In en, this message translates to:
+  /// **'Received: '**
+  String get mapReceivedLabel;
+
+  /// Label before lost ping count
+  ///
+  /// In en, this message translates to:
+  /// **'Lost: '**
+  String get mapLostLabel;
+
+  /// Label before count of heard repeaters
+  ///
+  /// In en, this message translates to:
+  /// **'Repeaters Heard: '**
+  String get mapRepeatersHeard;
+
+  /// Label before repeater ID list
+  ///
+  /// In en, this message translates to:
+  /// **'Repeater IDs: '**
+  String get mapRepeaterIds;
+
+  /// Coverage success rate when there are no pings
+  ///
+  /// In en, this message translates to:
+  /// **'No ping data'**
+  String get mapNoPingData;
+
+  /// Placeholder when a percentage cannot be computed
+  ///
+  /// In en, this message translates to:
+  /// **'N/A'**
+  String get mapNotAvailable;
+
+  /// Title of the nearby-repeaters list
+  ///
+  /// In en, this message translates to:
+  /// **'Nearby Repeaters ({count})'**
+  String mapNearbyRepeaters(int count);
+
+  /// Progress text while uploading to a named site
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading to {site}...'**
+  String mapUploadingTo(String site);
+
+  /// Progress text while uploading samples
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading samples...'**
+  String get mapUploadingSamples;
+
+  /// Upload batch progress
+  ///
+  /// In en, this message translates to:
+  /// **'Batch {current} of {total}'**
+  String mapUploadBatch(int current, int total);
+
+  /// Title when every upload site succeeded
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Complete'**
+  String get mapUploadComplete;
+
+  /// Title when some upload sites failed
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Results'**
+  String get mapUploadResults;
+
+  /// Summary of multi-site upload results
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded to {successCount} of {total} sites'**
+  String mapUploadedToSites(int successCount, int total);
+
+  /// Fallback site name for the legacy single-endpoint upload path
+  ///
+  /// In en, this message translates to:
+  /// **'Upload'**
+  String get mapUploadFallbackName;
+
+  /// Snackbar when upload throws
+  ///
+  /// In en, this message translates to:
+  /// **'Upload error: {error}'**
+  String mapUploadError(String error);
+
+  /// Prompt in the manage-upload-sites sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Select which sites to upload to:'**
+  String get mapSelectWhichSitesToUpload;
+
+  /// Title of delete-upload-site confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Site'**
+  String get mapDeleteSite;
+
+  /// Confirm deleting a named upload site
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{name}\"?'**
+  String mapDeleteSiteConfirm(String name);
+
+  /// Button to add an upload endpoint
+  ///
+  /// In en, this message translates to:
+  /// **'Add Site'**
+  String get mapAddSite;
+
+  /// Snackbar after saving upload site selection
+  ///
+  /// In en, this message translates to:
+  /// **'Upload sites updated'**
+  String get mapUploadSitesUpdated;
+
+  /// Title of the edit-endpoint dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Upload Site'**
+  String get mapEditUploadSite;
+
+  /// Upload endpoint name field
+  ///
+  /// In en, this message translates to:
+  /// **'Site Name'**
+  String get mapSiteName;
+
+  /// Upload endpoint URL field; API untranslated
+  ///
+  /// In en, this message translates to:
+  /// **'API URL'**
+  String get mapApiUrl;
+
+  /// Title of the add-endpoint dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Add Upload Site'**
+  String get mapAddUploadSite;
+
+  /// Hint for a new upload site name
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., My Personal Map'**
+  String get mapSiteNameHint;
+
+  /// Snackbar when offline tile download is unavailable
+  ///
+  /// In en, this message translates to:
+  /// **'Tile cache not initialized'**
+  String get mapTileCacheNotInitialized;
+
+  /// Explanation in the offline-tile download dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Download map tiles for the current view area.'**
+  String get mapDownloadTilesBlurb;
+
+  /// Minimum zoom slider label
+  ///
+  /// In en, this message translates to:
+  /// **'Min Zoom: {zoom}'**
+  String mapMinZoom(String zoom);
+
+  /// Maximum zoom slider label
+  ///
+  /// In en, this message translates to:
+  /// **'Max Zoom: {zoom}'**
+  String mapMaxZoom(String zoom);
+
+  /// Estimated tile download size
+  ///
+  /// In en, this message translates to:
+  /// **'{count} tiles (~{megabytes} MB)'**
+  String mapTilesEstimate(int count, String megabytes);
+
+  /// Warning when tile estimate is very large
+  ///
+  /// In en, this message translates to:
+  /// **'Large download — consider a smaller area or zoom range'**
+  String get mapLargeDownloadWarning;
+
+  /// Title of the tile download progress dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading Tiles'**
+  String get mapDownloadingTiles;
+
+  /// Tile download progress counts
+  ///
+  /// In en, this message translates to:
+  /// **'{completed} / {total} tiles'**
+  String mapTilesProgress(int completed, int total);
+
+  /// Snackbar after tile download finishes
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded {succeeded}/{total} tiles'**
+  String mapDownloadedTiles(int succeeded, int total);
+
+  /// Snackbar after cancelling tile download
+  ///
+  /// In en, this message translates to:
+  /// **'Download cancelled ({count} tiles cached)'**
+  String mapDownloadCancelled(int count);
+
+  /// Snackbar when sharing a coverage image fails
+  ///
+  /// In en, this message translates to:
+  /// **'Share failed: {error}'**
+  String mapShareFailed(String error);
+
+  /// Share-sheet subject for the coverage map image
+  ///
+  /// In en, this message translates to:
+  /// **'MeshCore Wardrive Coverage'**
+  String get mapCoverageShareSubject;
+
+  /// Share-sheet body summarizing coverage stats
+  ///
+  /// In en, this message translates to:
+  /// **'MeshCore Wardrive Coverage Map\n📍 {sampleCount} samples • {coverageCount} coverage areas\n✅ {successCount} success • ❌ {failCount} failed • {successRate}% rate\n🔁 {repeaterCount} repeaters discovered'**
+  String mapCoverageShareText(
+    String sampleCount,
+    String coverageCount,
+    String successCount,
+    String failCount,
+    String successRate,
+    String repeaterCount,
+  );
+
+  /// Snackbar when repeater filter has no IDs
+  ///
+  /// In en, this message translates to:
+  /// **'No repeaters found yet - do some wardriving first!'**
+  String get mapNoRepeatersYet;
+
+  /// Title of the repeater filter picker
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by Repeater'**
+  String get mapFilterByRepeater;
+
+  /// Snackbar after applying a repeater filter
+  ///
+  /// In en, this message translates to:
+  /// **'Showing coverage from {id}'**
+  String mapShowingCoverageFrom(String id);
+
+  /// Snackbar after clearing the repeater filter
+  ///
+  /// In en, this message translates to:
+  /// **'Repeater filter cleared'**
+  String get mapRepeaterFilterCleared;
+
+  /// Button to clear the repeater filter
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Filter'**
+  String get mapClearFilter;
+
+  /// Snackbar when coverage-gap search has no data
+  ///
+  /// In en, this message translates to:
+  /// **'No coverage data yet - do some wardriving first!'**
+  String get mapNoCoverageYet;
+
+  /// Snackbar when no low-success coverage cells exist
+  ///
+  /// In en, this message translates to:
+  /// **'No coverage gaps found! All areas have >30% success rate.'**
+  String get mapNoCoverageGaps;
+
+  /// Title of the coverage-gaps list
+  ///
+  /// In en, this message translates to:
+  /// **'Coverage Gaps ({count})'**
+  String mapCoverageGaps(int count);
+
+  /// Title row for a coverage gap
+  ///
+  /// In en, this message translates to:
+  /// **'{rate}% success rate'**
+  String mapGapSuccessRate(String rate);
+
+  /// Subtitle for a coverage gap
+  ///
+  /// In en, this message translates to:
+  /// **'{coords}\n{received} received / {lost} lost'**
+  String mapGapSubtitle(String coords, String received, String lost);
+
+  /// Title when choosing a community-coverage source
+  ///
+  /// In en, this message translates to:
+  /// **'Download from'**
+  String get mapDownloadFrom;
+
+  /// Snackbar while downloading community coverage
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading coverage data...'**
+  String get mapDownloadingCoverage;
+
+  /// Snackbar after community coverage download
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded {count} coverage cells'**
+  String mapDownloadedCoverageCells(int count);
+
+  /// Snackbar when using cached community coverage
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded cached coverage (offline)'**
+  String get mapLoadedCachedCoverage;
+
+  /// Snackbar when community coverage download fails
+  ///
+  /// In en, this message translates to:
+  /// **'Download failed: {error}'**
+  String mapDownloadFailed(String error);
+
+  /// Fallback error when no download error string is available
+  ///
+  /// In en, this message translates to:
+  /// **'unknown error'**
+  String get mapUnknownError;
+
+  /// Community coverage cell success rate
+  ///
+  /// In en, this message translates to:
+  /// **'Success Rate: {rate}%'**
+  String mapCommunitySuccessRate(String rate);
+
+  /// Header above community-coverage repeater list
+  ///
+  /// In en, this message translates to:
+  /// **'Repeaters:'**
+  String get mapRepeatersHeader;
+
+  /// Community coverage last-update row
+  ///
+  /// In en, this message translates to:
+  /// **'Last Update: {timestamp}'**
+  String mapLastUpdate(String timestamp);
+
+  /// Community coverage app-version row
+  ///
+  /// In en, this message translates to:
+  /// **'App Version: {version}'**
+  String mapAppVersionLabel(String version);
+
+  /// Semantics label for the radio-position marker
+  ///
+  /// In en, this message translates to:
+  /// **'Approximate radio position, uncertainty {uncertainty}'**
+  String mapApproxRadioPositionUncertainty(String uncertainty);
+
+  /// Snackbar when tapping the radio-position marker
+  ///
+  /// In en, this message translates to:
+  /// **'Approximate radio position · {count} repeaters · ±{uncertainty}'**
+  String mapApproxRadioPositionSnack(int count, String uncertainty);
+
+  /// Semantics for the current-position marker on Wi-Fi
+  ///
+  /// In en, this message translates to:
+  /// **'Current Wi-Fi location from beaconDB'**
+  String get mapCurrentWifiLocation;
+
+  /// Semantics for the current-position marker on fused GPS
+  ///
+  /// In en, this message translates to:
+  /// **'Current fused Android location'**
+  String get mapCurrentFusedLocation;
+
+  /// Semantics for the heading-up location marker
+  ///
+  /// In en, this message translates to:
+  /// **'{positionLabel}, heading {degrees} degrees'**
+  String mapPositionHeadingSemantics(String positionLabel, String degrees);
 }
 
 class _AppLocalizationsDelegate
