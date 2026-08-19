@@ -18,6 +18,7 @@ import '../services/database_service.dart';
 import '../services/upload_service.dart';
 import '../services/settings_service.dart';
 import '../utils/geohash_utils.dart';
+import '../utils/initial_map_camera.dart';
 import '../utils/compass_calibration.dart';
 import '../utils/heading_utils.dart';
 import '../utils/discovery_timeout_options.dart';
@@ -140,6 +141,9 @@ class _MapScreenState extends State<MapScreen> {
   List<Repeater> _repeaters = [];
 
   LatLng? _currentPosition;
+  InitialMapCamera? _sampleMapCamera;
+  bool _mapReady = false;
+  bool _hasAppliedInitialSampleCamera = false;
   Timer? _updateTimer;
   StreamSubscription<LatLng>? _positionSubscription;
   StreamSubscription<LocationPositionSource>? _positionSourceSubscription;
@@ -358,7 +362,9 @@ class _MapScreenState extends State<MapScreen> {
 
       if (shouldCenterMap) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) _mapController.move(position, 13.0);
+          if (mounted) {
+            _mapController.move(position, InitialMapCamera.fallbackZoom);
+          }
         });
       }
 
@@ -841,6 +847,23 @@ class _MapScreenState extends State<MapScreen> {
       successRate: rate,
       distance: dist,
     );
+
+    _maybeApplyInitialSampleCamera();
+  }
+
+  void _maybeApplyInitialSampleCamera() {
+    if (_hasAppliedInitialSampleCamera || _currentPosition != null) return;
+
+    final camera = InitialMapCamera.fromPositions(
+      _samples.map((sample) => sample.position),
+    );
+    if (camera == null) return;
+
+    _sampleMapCamera = camera;
+    if (!_mapReady || !mounted) return;
+
+    _hasAppliedInitialSampleCamera = true;
+    _mapController.move(camera.center, camera.zoom);
   }
 
   void _applySessionMapView(SessionMapView view) {
@@ -2478,10 +2501,19 @@ $placemarks  </Document>
     return FlutterMap(
       mapController: _mapController,
       options: MapOptions(
-        initialCenter: _currentPosition ?? GeohashUtils.centerPos,
-        initialZoom: 13.0,
+        initialCenter:
+            _currentPosition ??
+            _sampleMapCamera?.center ??
+            InitialMapCamera.fallbackCenter,
+        initialZoom: _currentPosition != null
+            ? InitialMapCamera.fallbackZoom
+            : (_sampleMapCamera?.zoom ?? InitialMapCamera.fallbackZoom),
         minZoom: 3.0,
         maxZoom: 18.0,
+        onMapReady: () {
+          _mapReady = true;
+          _maybeApplyInitialSampleCamera();
+        },
         interactionOptions: InteractionOptions(
           flags: _lockRotationNorth
               ? InteractiveFlag.all &

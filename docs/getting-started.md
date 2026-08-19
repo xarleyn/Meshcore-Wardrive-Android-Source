@@ -143,7 +143,8 @@ Exported JSON contains an array of samples:
   supported
 - **Coverage Precision**: ~0.61km × 1.22km grid
 - **Sample Precision**: ~19m × 19m grid
-- **Center Point**: 47.7776, -122.4247 (Puget Sound area)
+- **Initial Map View**: Centroid of stored samples at city-scale zoom; if there
+  are no samples and GPS is not available yet, 47.7776, -122.4247 (Puget Sound)
 - **Max Distance**: 60 miles from center
 
 ## Development

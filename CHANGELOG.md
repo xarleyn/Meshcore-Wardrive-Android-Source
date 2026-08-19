@@ -3,6 +3,10 @@
 ## Unreleased
 
 ### Added
+- Before a GPS fix is available, the map opens on the average of stored
+  measurements at a city-scale zoom. Spread-out samples zoom out to fit. With
+  no samples it keeps the previous default view, and the first GPS fix still
+  recenters as before.
 - Long-press the map Play button to start a new recording on a blank map
   without deleting stored samples. Short press still shows all coverage. An
   empty session (no GPS points) asks whether to keep it; discarding or deleting
