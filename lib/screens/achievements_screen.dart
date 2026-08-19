@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../services/achievement_service.dart';
 
 class AchievementsScreen extends StatefulWidget {
@@ -31,11 +32,12 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final unlocked = _achievements.where((a) => a.unlocked).length;
     final total = _achievements.length;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Achievements')),
+      appBar: AppBar(title: Text(l10n.settingsAchievements)),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : Column(
@@ -61,8 +63,8 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                       const SizedBox(height: 4),
                       Text(
                         unlocked == total
-                            ? 'All achievements unlocked!'
-                            : '${total - unlocked} remaining',
+                            ? l10n.achievementsAllUnlocked
+                            : l10n.achievementsRemaining(total - unlocked),
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.grey,
@@ -79,6 +81,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                     itemCount: _achievements.length,
                     itemBuilder: (context, index) {
                       final a = _achievements[index];
+                      final locale = Localizations.localeOf(context).toString();
                       return ListTile(
                         leading: Text(
                           a.unlocked ? a.icon : '🔒',
@@ -96,7 +99,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                         ),
                         subtitle: Text(
                           a.unlocked && a.unlockedAt != null
-                              ? '${a.description}\nUnlocked ${DateFormat('MMM d, yyyy').format(a.unlockedAt!)}'
+                              ? '${a.description}\n${l10n.achievementsUnlockedOn(DateFormat.yMMMd(locale).format(a.unlockedAt!))}'
                               : a.description,
                           style: TextStyle(
                             color: a.unlocked ? null : Colors.grey,

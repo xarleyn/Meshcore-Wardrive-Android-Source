@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../models/models.dart';
 import '../services/database_service.dart';
 import '../services/settings_service.dart';
@@ -45,44 +46,46 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
     });
   }
 
-  String _formatDuration(Duration duration) {
+  String _formatDuration(AppLocalizations l10n, Duration duration) {
     final hours = duration.inHours;
     final minutes = duration.inMinutes.remainder(60);
     final seconds = duration.inSeconds.remainder(60);
     if (hours > 0) {
-      return '${hours}h ${minutes}m';
+      return l10n.sessionDurationHoursMinutes(hours, minutes);
     } else if (minutes > 0) {
-      return '${minutes}m ${seconds}s';
+      return l10n.sessionDurationMinutesSeconds(minutes, seconds);
     }
-    return '${seconds}s';
+    return l10n.sessionDurationSeconds(seconds);
   }
 
-  String _formatDistance(double meters) {
+  String _formatDistance(AppLocalizations l10n, double meters) {
     if (_distanceUnit == 'km') {
       final km = meters / 1000.0;
-      return '${km.toStringAsFixed(1)} km';
+      return l10n.sessionDistanceKm(km.toStringAsFixed(1));
     } else {
       final miles = meters / 1609.34;
-      return '${miles.toStringAsFixed(1)} mi';
+      return l10n.sessionDistanceMi(miles.toStringAsFixed(1));
     }
   }
 
   Future<void> _deleteSession(WSession session) async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Session?'),
-        content: const Text(
-          'This will remove the session record. Sample data is not affected.',
-        ),
+        title: Text(l10n.sessionDeleteTitle),
+        content: Text(l10n.sessionDeleteBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.settingsCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(
+              l10n.mapDelete,
+              style: const TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),
@@ -96,27 +99,28 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
   }
 
   Future<void> _editNotes(WSession session) async {
+    final l10n = AppLocalizations.of(context);
     final controller = TextEditingController(text: session.notes ?? '');
     final result = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Session Notes'),
+        title: Text(l10n.sessionNotesTitle),
         content: TextField(
           controller: controller,
           maxLines: 3,
-          decoration: const InputDecoration(
-            hintText: 'Add notes about this session...',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            hintText: l10n.sessionNotesHint,
+            border: const OutlineInputBorder(),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.settingsCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, controller.text),
-            child: const Text('Save'),
+            child: Text(l10n.settingsSave),
           ),
         ],
       ),
@@ -140,15 +144,16 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Session History')),
+      appBar: AppBar(title: Text(l10n.settingsSessionHistory)),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _sessions.isEmpty
-          ? const Center(
+          ? Center(
               child: Text(
-                'No sessions yet.\n\nStart tracking to record your first session!',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
+                l10n.sessionEmpty,
+                style: const TextStyle(fontSize: 16, color: Colors.grey),
                 textAlign: TextAlign.center,
               ),
             )
@@ -164,8 +169,10 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
   }
 
   Widget _buildSessionCard(WSession session) {
-    final dateFormat = DateFormat('MMM d, yyyy');
-    final timeFormat = DateFormat('h:mm a');
+    final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
+    final dateFormat = DateFormat.yMMMd(locale);
+    final timeFormat = DateFormat.jm(locale);
     final duration = session.duration;
     final successRate = session.successRate;
 
@@ -213,7 +220,7 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
                       IconButton(
                         icon: const Icon(Icons.note_add, size: 20),
                         onPressed: () => _editNotes(session),
-                        tooltip: 'Edit Notes',
+                        tooltip: l10n.sessionEditNotes,
                         constraints: const BoxConstraints(),
                         padding: const EdgeInsets.all(4),
                       ),
@@ -224,7 +231,7 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
                           color: Colors.red,
                         ),
                         onPressed: () => _deleteSession(session),
-                        tooltip: 'Delete',
+                        tooltip: l10n.mapDelete,
                         constraints: const BoxConstraints(),
                         padding: const EdgeInsets.all(4),
                       ),
@@ -235,8 +242,14 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
 
               // Time range
               Text(
-                '${timeFormat.format(session.startTime)}'
-                '${session.endTime != null ? ' – ${timeFormat.format(session.endTime!)}' : ' – In progress'}',
+                session.endTime != null
+                    ? l10n.sessionTimeRange(
+                        timeFormat.format(session.startTime),
+                        timeFormat.format(session.endTime!),
+                      )
+                    : l10n.sessionTimeInProgress(
+                        timeFormat.format(session.startTime),
+                      ),
                 style: TextStyle(color: Colors.grey[600], fontSize: 13),
               ),
 
@@ -247,15 +260,18 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
                 children: [
                   _buildStat(
                     Icons.timer,
-                    duration != null ? _formatDuration(duration) : '--',
+                    duration != null ? _formatDuration(l10n, duration) : '--',
                   ),
                   const SizedBox(width: 16),
                   _buildStat(
                     Icons.straighten,
-                    _formatDistance(session.distanceMeters),
+                    _formatDistance(l10n, session.distanceMeters),
                   ),
                   const SizedBox(width: 16),
-                  _buildStat(Icons.location_on, '${session.sampleCount} pts'),
+                  _buildStat(
+                    Icons.location_on,
+                    l10n.sessionPoints(session.sampleCount),
+                  ),
                 ],
               ),
 
@@ -264,11 +280,14 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
               // Ping stats row
               Row(
                 children: [
-                  _buildStat(Icons.cell_tower, '${session.pingCount} pings'),
+                  _buildStat(
+                    Icons.cell_tower,
+                    l10n.analyticsPingsCount(session.pingCount),
+                  ),
                   const SizedBox(width: 16),
                   _buildStat(
                     Icons.check_circle,
-                    '${session.successCount} heard',
+                    l10n.sessionHeard(session.successCount),
                     color: Colors.green,
                   ),
                   const SizedBox(width: 16),
@@ -300,7 +319,7 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
               if (widget.onSessionSelected != null) ...[
                 const SizedBox(height: 4),
                 Text(
-                  'Tap to view on map',
+                  l10n.sessionTapToViewOnMap,
                   style: TextStyle(
                     color: Theme.of(context).primaryColor,
                     fontSize: 12,

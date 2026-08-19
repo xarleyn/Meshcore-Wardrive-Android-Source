@@ -2150,4 +2150,928 @@ class AppLocalizationsEn extends AppLocalizations {
   String mapPositionHeadingSemantics(String positionLabel, String degrees) {
     return '$positionLabel, heading $degrees degrees';
   }
+
+  @override
+  String get analyticsTabScore => 'Score';
+
+  @override
+  String get analyticsTabTime => 'Time';
+
+  @override
+  String get analyticsTabGoals => 'Goals';
+
+  @override
+  String get analyticsTabCompare => 'Compare';
+
+  @override
+  String get analyticsTabRepeaters => 'Repeaters';
+
+  @override
+  String get analyticsNoPingData =>
+      'No ping data yet.\nDo some wardriving first!';
+
+  @override
+  String get analyticsNoRepeaterData =>
+      'No repeater data yet.\nDo some wardriving first!';
+
+  @override
+  String get analyticsCoverageScore => 'Coverage Score';
+
+  @override
+  String get analyticsStatCells => 'Cells';
+
+  @override
+  String get analyticsStatSuccess => 'Success';
+
+  @override
+  String get analyticsStatFresh => 'Fresh';
+
+  @override
+  String get analyticsStatRepeaters => 'Repeaters';
+
+  @override
+  String get analyticsHowCalculated => 'How it\'s calculated';
+
+  @override
+  String get analyticsScoreFormula =>
+      'Score = Unique Cells × Success Rate × Freshness';
+
+  @override
+  String analyticsScoreBreakdown(
+    String cells,
+    String rate,
+    String freshness,
+    String score,
+  ) {
+    return '• $cells cells × $rate × $freshness = $score';
+  }
+
+  @override
+  String get analyticsFreshnessLegend =>
+      '• Freshness: <1d=100%, <7d=80%, <30d=50%, older=20%';
+
+  @override
+  String get analyticsShareScore => 'Share Score';
+
+  @override
+  String analyticsShareText(
+    String score,
+    String grade,
+    String cells,
+    String success,
+    String freshness,
+    String repeaters,
+    String pings,
+  ) {
+    return 'MeshCore Wardrive Score: $score ($grade)\nCells: $cells • Success: $success% • Freshness: $freshness%\nRepeaters: $repeaters • Pings: $pings';
+  }
+
+  @override
+  String get analyticsSuccessRateByHour => 'Success Rate by Hour';
+
+  @override
+  String analyticsPingsAnalyzed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pings analyzed',
+      one: '$count ping analyzed',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String analyticsPingsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pings',
+      one: '$count ping',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String analyticsHourTooltip(String time, String rate, String pings) {
+    return '$time\n$rate% ($pings)';
+  }
+
+  @override
+  String get analyticsSummary => 'Summary';
+
+  @override
+  String get analyticsBestHour => 'Best hour';
+
+  @override
+  String get analyticsWorstHour => 'Worst hour';
+
+  @override
+  String analyticsHourValue(String hour, String rate) {
+    return '$hour:00 — $rate%';
+  }
+
+  @override
+  String get analyticsByPeriod => 'By Period';
+
+  @override
+  String get analyticsPeriodNight => 'Night (0-6)';
+
+  @override
+  String get analyticsPeriodMorning => 'Morning (6-12)';
+
+  @override
+  String get analyticsPeriodAfternoon => 'Afternoon (12-18)';
+
+  @override
+  String get analyticsPeriodEvening => 'Evening (18-24)';
+
+  @override
+  String get analyticsNoData => 'No data';
+
+  @override
+  String get analyticsNoCoverageGoal => 'No coverage goal set';
+
+  @override
+  String get analyticsSetGoalHint =>
+      'Set a target area to track your wardriving progress.';
+
+  @override
+  String get analyticsSetGoalArea => 'Set Goal Area';
+
+  @override
+  String get analyticsCoverageGoal => 'Coverage Goal';
+
+  @override
+  String get analyticsEdit => 'Edit';
+
+  @override
+  String analyticsGoalCenterRadius(String lat, String lon, String radius) {
+    return 'Center: $lat, $lon\nRadius: $radius';
+  }
+
+  @override
+  String get analyticsCovered => 'covered';
+
+  @override
+  String get analyticsTotalCellsInArea => 'Total cells in area';
+
+  @override
+  String get analyticsCoveredAboveZero => 'Covered (>0% success)';
+
+  @override
+  String get analyticsPartialBelow30 => 'Partial (<30% success)';
+
+  @override
+  String get analyticsUncovered => 'Uncovered';
+
+  @override
+  String get analyticsPingsInArea => 'Pings in area';
+
+  @override
+  String analyticsRadiusMiles(String miles) {
+    return '$miles miles';
+  }
+
+  @override
+  String analyticsRadiusMeters(String meters) {
+    return '$meters m';
+  }
+
+  @override
+  String get analyticsMile1 => '1 mile';
+
+  @override
+  String get analyticsMiles5 => '5 miles';
+
+  @override
+  String get analyticsMiles10 => '10 miles';
+
+  @override
+  String get analyticsMiles25 => '25 miles';
+
+  @override
+  String get analyticsSetCoverageGoal => 'Set Coverage Goal';
+
+  @override
+  String get analyticsCenterCurrentGps => 'Center: Your current GPS location';
+
+  @override
+  String analyticsCenterCoords(String lat, String lon) {
+    return 'Center: $lat, $lon';
+  }
+
+  @override
+  String get analyticsRadiusLabel => 'Radius:';
+
+  @override
+  String get analyticsSetGoal => 'Set Goal';
+
+  @override
+  String get analyticsNeedTwoSessions =>
+      'Need at least 2 completed sessions\nwith ping data to compare.';
+
+  @override
+  String get analyticsCompareSessions => 'Compare Sessions';
+
+  @override
+  String get analyticsSessionABaseline => 'Session A (baseline)';
+
+  @override
+  String get analyticsSessionBCompare => 'Session B (compare)';
+
+  @override
+  String get analyticsSamples => 'Samples';
+
+  @override
+  String get analyticsSuccessRate => 'Success Rate';
+
+  @override
+  String get analyticsDistance => 'Distance';
+
+  @override
+  String analyticsDistanceMiles(String miles) {
+    return '$miles mi';
+  }
+
+  @override
+  String get analyticsCoverageChanges => 'Coverage Changes';
+
+  @override
+  String get analyticsNewCoverage => 'New coverage';
+
+  @override
+  String get analyticsLostCoverage => 'Lost coverage';
+
+  @override
+  String get analyticsImproved => 'Improved (>10%)';
+
+  @override
+  String get analyticsDegraded => 'Degraded (>10%)';
+
+  @override
+  String get analyticsUnchanged => 'Unchanged';
+
+  @override
+  String analyticsSessionOption(String date, String pings, String rate) {
+    return '$date — $pings, $rate%';
+  }
+
+  @override
+  String analyticsSessionSelected(String date, String pings) {
+    return '$date — $pings';
+  }
+
+  @override
+  String analyticsRepeaterCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count repeaters',
+      one: '$count repeater',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get analyticsSort => 'Sort: ';
+
+  @override
+  String get analyticsSortReliability => 'Reliability';
+
+  @override
+  String get analyticsSortResponseTime => 'Response Time';
+
+  @override
+  String get analyticsSortPingCount => 'Ping Count';
+
+  @override
+  String get analyticsMiniPings => 'Pings';
+
+  @override
+  String get analyticsMiniAvgResponse => 'Avg Response';
+
+  @override
+  String get analyticsMiniConsistency => 'Consistency';
+
+  @override
+  String get analyticsMiniTrend => 'Trend';
+
+  @override
+  String analyticsAvgResponseMs(String ms) {
+    return '$ms ms';
+  }
+
+  @override
+  String analyticsTrend(String trend) {
+    String _temp0 = intl.Intl.selectLogic(trend, {
+      'improving': 'improving',
+      'degrading': 'degrading',
+      'other': 'stable',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String analyticsFirstLastSeen(String first, String last) {
+    return 'First seen: $first • Last: $last';
+  }
+
+  @override
+  String get sessionDeleteTitle => 'Delete Session?';
+
+  @override
+  String get sessionDeleteBody =>
+      'This will remove the session record. Sample data is not affected.';
+
+  @override
+  String get sessionNotesTitle => 'Session Notes';
+
+  @override
+  String get sessionNotesHint => 'Add notes about this session...';
+
+  @override
+  String get sessionEmpty =>
+      'No sessions yet.\n\nStart tracking to record your first session!';
+
+  @override
+  String get sessionEditNotes => 'Edit Notes';
+
+  @override
+  String sessionTimeInProgress(String start) {
+    return '$start – In progress';
+  }
+
+  @override
+  String sessionTimeRange(String start, String end) {
+    return '$start – $end';
+  }
+
+  @override
+  String sessionDurationHoursMinutes(int hours, int minutes) {
+    return '${hours}h ${minutes}m';
+  }
+
+  @override
+  String sessionDurationMinutesSeconds(int minutes, int seconds) {
+    return '${minutes}m ${seconds}s';
+  }
+
+  @override
+  String sessionDurationSeconds(int seconds) {
+    return '${seconds}s';
+  }
+
+  @override
+  String sessionDistanceKm(String km) {
+    return '$km km';
+  }
+
+  @override
+  String sessionDistanceMi(String mi) {
+    return '$mi mi';
+  }
+
+  @override
+  String sessionPoints(int count) {
+    return '$count pts';
+  }
+
+  @override
+  String sessionHeard(int count) {
+    return '$count heard';
+  }
+
+  @override
+  String get sessionTapToViewOnMap => 'Tap to view on map';
+
+  @override
+  String get repeaterHealthEmpty =>
+      'No repeater data yet.\nDo some wardriving first!';
+
+  @override
+  String repeaterHealthOfflineCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count offline',
+      one: '$count offline',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String repeaterHealthDegradingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count degrading',
+      one: '$count degrading',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String repeaterHealthRepeaterCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count repeaters',
+      one: '$count repeater',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get repeaterHealthSort => 'Sort: ';
+
+  @override
+  String get repeaterHealthSortReliability => 'Reliability';
+
+  @override
+  String get repeaterHealthSortResponseTime => 'Response Time';
+
+  @override
+  String get repeaterHealthSortPingCount => 'Ping Count';
+
+  @override
+  String get repeaterHealthSortAlertsFirst => 'Alerts First';
+
+  @override
+  String get repeaterHealthMiniPings => 'Pings';
+
+  @override
+  String get repeaterHealthMiniAvgResp => 'Avg Resp';
+
+  @override
+  String get repeaterHealthMiniCells => 'Cells';
+
+  @override
+  String get repeaterHealthMiniTrend => 'Trend';
+
+  @override
+  String repeaterHealthAvgRespMs(String ms) {
+    return '${ms}ms';
+  }
+
+  @override
+  String get repeaterHealthTrendUp => '▲ Up';
+
+  @override
+  String get repeaterHealthTrendDown => '▼ Down';
+
+  @override
+  String get repeaterHealthTrendStable => '— Stable';
+
+  @override
+  String repeaterHealthFirstLast(String first, String last) {
+    return 'First: $first • Last: $last';
+  }
+
+  @override
+  String repeaterHealthFirstLastOffline(String first, String last, int days) {
+    return 'First: $first • Last: $last • ⚠️ Offline ${days}d';
+  }
+
+  @override
+  String repeaterHealthDetailTitle(String id) {
+    return 'Repeater $id';
+  }
+
+  @override
+  String get repeaterHealthSnrOverTime => 'SNR Over Time';
+
+  @override
+  String get repeaterHealthWeeklySuccessRate => 'Weekly Success Rate';
+
+  @override
+  String get repeaterHealthBestTimeOfDay => 'Best Time of Day';
+
+  @override
+  String get repeaterHealthRecentPings => 'Recent Pings';
+
+  @override
+  String get repeaterHealthSuccessRate => 'Success Rate';
+
+  @override
+  String get repeaterHealthTotalPings => 'Total Pings';
+
+  @override
+  String get repeaterHealthHeard => 'Heard';
+
+  @override
+  String get repeaterHealthCoverage => 'Coverage';
+
+  @override
+  String repeaterHealthCellCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count cells',
+      one: '$count cell',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String repeaterHealthDegradingAlert(String rate7, String rate30) {
+    return '7-day rate ($rate7) dropped vs 30-day ($rate30)';
+  }
+
+  @override
+  String repeaterHealthAvgResponse(String value) {
+    return 'Avg response: $value';
+  }
+
+  @override
+  String get repeaterHealthAvgResponseNa => 'N/A';
+
+  @override
+  String get repeaterHealthNoSnrData => 'No SNR data';
+
+  @override
+  String get repeaterHealthNoData => 'No data';
+
+  @override
+  String get repeaterHealthNoWeeklyData => 'No weekly data';
+
+  @override
+  String get repeaterHealthPeriodNight => 'Night (0-6)';
+
+  @override
+  String get repeaterHealthPeriodMorning => 'Morning (6-12)';
+
+  @override
+  String get repeaterHealthPeriodAfternoon => 'Afternoon (12-18)';
+
+  @override
+  String get repeaterHealthPeriodEvening => 'Evening (18-24)';
+
+  @override
+  String repeaterHealthPeriodRate(String rate, String pings) {
+    return '$rate% ($pings)';
+  }
+
+  @override
+  String repeaterHealthWeekTooltip(String week, String rate, String pings) {
+    return '$week\n$rate% ($pings)';
+  }
+
+  @override
+  String get repeaterHealthNoPingsRecorded => 'No pings recorded';
+
+  @override
+  String get deviceComparisonEmpty =>
+      'No devices tracked yet.\n\nConnect a LoRa device and start wardriving — the app will automatically log which device you use.';
+
+  @override
+  String deviceComparisonTracked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count devices tracked',
+      one: '$count device tracked',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deviceComparisonCompareDevices => 'Compare Devices';
+
+  @override
+  String get deviceComparisonDeviceA => 'Device A';
+
+  @override
+  String get deviceComparisonDeviceB => 'Device B';
+
+  @override
+  String get deviceComparisonVs => 'vs';
+
+  @override
+  String get deviceComparisonMiniPings => 'Pings';
+
+  @override
+  String get deviceComparisonMiniCells => 'Cells';
+
+  @override
+  String get deviceComparisonMiniAvgResp => 'Avg Resp';
+
+  @override
+  String get deviceComparisonMiniAvgSnr => 'Avg SNR';
+
+  @override
+  String deviceComparisonAvgRespMs(String ms) {
+    return '${ms}ms';
+  }
+
+  @override
+  String deviceComparisonFirstLast(String first, String last) {
+    return 'First: $first • Last: $last';
+  }
+
+  @override
+  String get deviceComparisonStat => 'Stat';
+
+  @override
+  String get deviceComparisonWinner => 'Winner';
+
+  @override
+  String get deviceComparisonTotalPings => 'Total Pings';
+
+  @override
+  String get deviceComparisonSuccessRate => 'Success Rate';
+
+  @override
+  String get deviceComparisonFailures => 'Failures';
+
+  @override
+  String get deviceComparisonUniqueCells => 'Unique Cells';
+
+  @override
+  String get deviceComparisonAvgResponse => 'Avg Response';
+
+  @override
+  String get deviceComparisonAvgSnr => 'Avg SNR';
+
+  @override
+  String get deviceComparisonAvgRssi => 'Avg RSSI';
+
+  @override
+  String get deviceComparisonTie => 'Tie';
+
+  @override
+  String get signalTrendRssi => 'RSSI';
+
+  @override
+  String get signalTrendSnr => 'SNR';
+
+  @override
+  String get signalTrendResponse => 'Response';
+
+  @override
+  String get signalTrendEmpty =>
+      'No signal data yet.\nDo some wardriving with pings enabled.';
+
+  @override
+  String signalTrendNoMetricData(String label) {
+    return 'No $label data available.';
+  }
+
+  @override
+  String get signalTrendResponseTimeLabel => 'response time';
+
+  @override
+  String get signalTrendMin => 'Min';
+
+  @override
+  String get signalTrendAvg => 'Avg';
+
+  @override
+  String get signalTrendMax => 'Max';
+
+  @override
+  String get signalTrendPts => 'Pts';
+
+  @override
+  String get ductingTitle => 'Tropo Ducting Forecast';
+
+  @override
+  String get ductingOpenInBrowser => 'Open in browser';
+
+  @override
+  String get ductingRegion => 'Region';
+
+  @override
+  String get ductingFailedToLoad =>
+      'Failed to load forecast image.\nCheck internet connection.';
+
+  @override
+  String ductingTimeHours(int hours) {
+    return '+${hours}h';
+  }
+
+  @override
+  String ductingTimeDays(int days) {
+    return '+${days}d';
+  }
+
+  @override
+  String ductingTimeDaysHours(int days, int hours) {
+    return '+${days}d ${hours}h';
+  }
+
+  @override
+  String ductingFrameIndex(int current, int total) {
+    return '$current / $total';
+  }
+
+  @override
+  String get ductingLegendNone => 'None';
+
+  @override
+  String get ductingLegendMarginal => 'Marginal';
+
+  @override
+  String get ductingLegendModerate => 'Moderate';
+
+  @override
+  String get ductingLegendHigh => 'High';
+
+  @override
+  String get ductingLegendExtreme => 'Extreme';
+
+  @override
+  String get ductingAttribution =>
+      'Forecast © William R. Hepburn — dxinfocentre.com';
+
+  @override
+  String get ductingRegionWam => 'Western North America';
+
+  @override
+  String get ductingRegionEam => 'Eastern North America';
+
+  @override
+  String get ductingRegionEnp => 'Eastern North Pacific';
+
+  @override
+  String get ductingRegionEsp => 'Eastern South Pacific';
+
+  @override
+  String get ductingRegionCar => 'Gulf-Caribbean';
+
+  @override
+  String get ductingRegionNsa => 'Northern South America';
+
+  @override
+  String get ductingRegionSam => 'Central South America';
+
+  @override
+  String get ductingRegionSat => 'South Atlantic';
+
+  @override
+  String get ductingRegionNat => 'North Atlantic';
+
+  @override
+  String get ductingRegionEnt => 'Eastern North Atlantic';
+
+  @override
+  String get ductingRegionNwe => 'Northwestern Europe';
+
+  @override
+  String get ductingRegionEur => 'Europe';
+
+  @override
+  String get ductingRegionEeu => 'Eastern Europe';
+
+  @override
+  String get ductingRegionAfi => 'South Africa';
+
+  @override
+  String get ductingRegionMid => 'Middle East';
+
+  @override
+  String get ductingRegionNca => 'North Central Asia';
+
+  @override
+  String get ductingRegionIno => 'Indian Ocean';
+
+  @override
+  String get ductingRegionSea => 'Southeast Asia';
+
+  @override
+  String get ductingRegionEas => 'Far East';
+
+  @override
+  String get ductingRegionNea => 'Eastern Siberia';
+
+  @override
+  String get ductingRegionAus => 'Australia & New Zealand';
+
+  @override
+  String get ductingRegionOce => 'Oceania';
+
+  @override
+  String get ductingRegionWnp => 'Western North Pacific';
+
+  @override
+  String get debugLogNoLogsToExport => 'No logs to export';
+
+  @override
+  String get debugLogChooseSaveLocation => 'Choose save location';
+
+  @override
+  String debugLogSavedTo(String fileName) {
+    return 'Logs saved to:\n$fileName';
+  }
+
+  @override
+  String get debugLogAutoScrollOn => 'Auto-scroll ON';
+
+  @override
+  String get debugLogAutoScrollOff => 'Auto-scroll OFF';
+
+  @override
+  String get debugLogExportLogs => 'Export logs';
+
+  @override
+  String get debugLogClearLogs => 'Clear logs';
+
+  @override
+  String get debugLogEmpty =>
+      'No logs yet.\n\nConnect your LoRa device and start pinging!';
+
+  @override
+  String get debugDiagnosticsShareSubject => 'MeshCore Wardrive Debug Log';
+
+  @override
+  String get debugDiagnosticsShareText =>
+      'Debug log for troubleshooting GPS and auto-ping issues';
+
+  @override
+  String debugDiagnosticsErrorSharing(String error) {
+    return 'Error sharing file: $error';
+  }
+
+  @override
+  String get debugDiagnosticsDeleteTitle => 'Delete Log';
+
+  @override
+  String get debugDiagnosticsDeleteBody =>
+      'Are you sure you want to delete this log file?';
+
+  @override
+  String get debugDiagnosticsLogDeleted => 'Log file deleted';
+
+  @override
+  String debugDiagnosticsErrorDeleting(String error) {
+    return 'Error deleting file: $error';
+  }
+
+  @override
+  String debugDiagnosticsErrorReading(String error) {
+    return 'Error reading file: $error';
+  }
+
+  @override
+  String get debugDiagnosticsRefresh => 'Refresh';
+
+  @override
+  String get debugDiagnosticsSamsungTitle => 'Troubleshooting Samsung Devices';
+
+  @override
+  String get debugDiagnosticsSamsungBody =>
+      'This screen shows detailed debug logs for tracking GPS, auto-ping, and service events. If you\'re experiencing issues with auto-ping or GPS tracking, share the latest log file with the developer.';
+
+  @override
+  String debugDiagnosticsCurrentSession(String name) {
+    return 'Current session: $name';
+  }
+
+  @override
+  String get debugDiagnosticsNotStarted => 'Not started';
+
+  @override
+  String get debugDiagnosticsEmpty =>
+      'No debug logs found.\nStart tracking to generate logs.';
+
+  @override
+  String get debugDiagnosticsView => 'View';
+
+  @override
+  String debugDiagnosticsShareSubjectWithFile(String fileName) {
+    return 'MeshCore Wardrive Debug Log: $fileName';
+  }
+
+  @override
+  String debugDiagnosticsSizeBytes(int bytes) {
+    return '$bytes B';
+  }
+
+  @override
+  String debugDiagnosticsSizeKb(String kb) {
+    return '$kb KB';
+  }
+
+  @override
+  String debugDiagnosticsSizeMb(String mb) {
+    return '$mb MB';
+  }
+
+  @override
+  String get achievementsAllUnlocked => 'All achievements unlocked!';
+
+  @override
+  String achievementsRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count remaining',
+      one: '$count remaining',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String achievementsUnlockedOn(String date) {
+    return 'Unlocked $date';
+  }
 }

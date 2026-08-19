@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../models/models.dart';
 
 /// Repeater Health Dashboard — per-repeater drill-down with charts,
@@ -23,12 +24,14 @@ class _RepeaterHealthScreenState extends State<RepeaterHealthScreen> {
 
     if (byRepeater.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Repeater Health')),
-        body: const Center(
+        appBar: AppBar(
+          title: Text(AppLocalizations.of(context).settingsRepeaterHealth),
+        ),
+        body: Center(
           child: Text(
-            'No repeater data yet.\nDo some wardriving first!',
+            AppLocalizations.of(context).repeaterHealthEmpty,
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey),
+            style: const TextStyle(color: Colors.grey),
           ),
         ),
       );
@@ -63,9 +66,10 @@ class _RepeaterHealthScreenState extends State<RepeaterHealthScreen> {
     final degradingCount = stats.where((s) => s.isDegrading).length;
     final offlineCount = stats.where((s) => s.isOffline).length;
 
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Repeater Health'),
+        title: Text(l10n.settingsRepeaterHealth),
         actions: [
           if (offlineCount > 0)
             Padding(
@@ -77,7 +81,7 @@ class _RepeaterHealthScreenState extends State<RepeaterHealthScreen> {
                   color: Colors.red,
                 ),
                 label: Text(
-                  '$offlineCount offline',
+                  l10n.repeaterHealthOfflineCount(offlineCount),
                   style: const TextStyle(fontSize: 11),
                 ),
                 backgroundColor: Colors.red.withValues(alpha: 0.15),
@@ -94,7 +98,7 @@ class _RepeaterHealthScreenState extends State<RepeaterHealthScreen> {
                   color: Colors.orange,
                 ),
                 label: Text(
-                  '$degradingCount degrading',
+                  l10n.repeaterHealthDegradingCount(degradingCount),
                   style: const TextStyle(fontSize: 11),
                 ),
                 backgroundColor: Colors.orange.withValues(alpha: 0.15),
@@ -111,41 +115,47 @@ class _RepeaterHealthScreenState extends State<RepeaterHealthScreen> {
             child: Row(
               children: [
                 Text(
-                  '${stats.length} repeaters',
+                  l10n.repeaterHealthRepeaterCount(stats.length),
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const Spacer(),
-                const Text('Sort: ', style: TextStyle(fontSize: 12)),
+                Text(
+                  l10n.repeaterHealthSort,
+                  style: const TextStyle(fontSize: 12),
+                ),
                 DropdownButton<String>(
                   value: _sortBy,
                   isDense: true,
-                  items: const [
+                  items: [
                     DropdownMenuItem(
                       value: 'reliability',
                       child: Text(
-                        'Reliability',
-                        style: TextStyle(fontSize: 12),
+                        l10n.repeaterHealthSortReliability,
+                        style: const TextStyle(fontSize: 12),
                       ),
                     ),
                     DropdownMenuItem(
                       value: 'responseTime',
                       child: Text(
-                        'Response Time',
-                        style: TextStyle(fontSize: 12),
+                        l10n.repeaterHealthSortResponseTime,
+                        style: const TextStyle(fontSize: 12),
                       ),
                     ),
                     DropdownMenuItem(
                       value: 'pings',
-                      child: Text('Ping Count', style: TextStyle(fontSize: 12)),
+                      child: Text(
+                        l10n.repeaterHealthSortPingCount,
+                        style: const TextStyle(fontSize: 12),
+                      ),
                     ),
                     DropdownMenuItem(
                       value: 'degrading',
                       child: Text(
-                        'Alerts First',
-                        style: TextStyle(fontSize: 12),
+                        l10n.repeaterHealthSortAlertsFirst,
+                        style: const TextStyle(fontSize: 12),
                       ),
                     ),
                   ],
@@ -285,6 +295,8 @@ class _RepeaterCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
     final displayId = stats.id.length > 8
         ? stats.id.substring(0, 8).toUpperCase()
         : stats.id.toUpperCase();
@@ -339,25 +351,41 @@ class _RepeaterCard extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  _miniStat('Pings', '${stats.totalPings}'),
                   _miniStat(
-                    'Avg Resp',
+                    l10n.repeaterHealthMiniPings,
+                    '${stats.totalPings}',
+                  ),
+                  _miniStat(
+                    l10n.repeaterHealthMiniAvgResp,
                     stats.avgResponseMs != null
-                        ? '${stats.avgResponseMs!.toStringAsFixed(0)}ms'
+                        ? l10n.repeaterHealthAvgRespMs(
+                            stats.avgResponseMs!.toStringAsFixed(0),
+                          )
                         : '—',
                   ),
-                  _miniStat('Cells', '${stats.coverageCells}'),
                   _miniStat(
-                    'Trend',
-                    _trendLabel(stats.trend),
+                    l10n.repeaterHealthMiniCells,
+                    '${stats.coverageCells}',
+                  ),
+                  _miniStat(
+                    l10n.repeaterHealthMiniTrend,
+                    _trendLabel(l10n, stats.trend),
                     color: _trendColor(stats.trend),
                   ),
                 ],
               ),
               const SizedBox(height: 4),
               Text(
-                'First: ${DateFormat('MMM d').format(stats.firstSeen)} • Last: ${DateFormat('MMM d').format(stats.lastSeen)}'
-                '${stats.isOffline ? ' • ⚠️ Offline ${stats.daysSinceSeen}d' : ''}',
+                stats.isOffline
+                    ? l10n.repeaterHealthFirstLastOffline(
+                        DateFormat.MMMd(locale).format(stats.firstSeen),
+                        DateFormat.MMMd(locale).format(stats.lastSeen),
+                        stats.daysSinceSeen,
+                      )
+                    : l10n.repeaterHealthFirstLast(
+                        DateFormat.MMMd(locale).format(stats.firstSeen),
+                        DateFormat.MMMd(locale).format(stats.lastSeen),
+                      ),
                 style: TextStyle(
                   fontSize: 10,
                   color: stats.isOffline ? Colors.red : Colors.grey,
@@ -388,14 +416,14 @@ class _RepeaterCard extends StatelessWidget {
     );
   }
 
-  String _trendLabel(String trend) {
+  String _trendLabel(AppLocalizations l10n, String trend) {
     switch (trend) {
       case 'improving':
-        return '▲ Up';
+        return l10n.repeaterHealthTrendUp;
       case 'degrading':
-        return '▼ Down';
+        return l10n.repeaterHealthTrendDown;
       default:
-        return '— Stable';
+        return l10n.repeaterHealthTrendStable;
     }
   }
 
@@ -431,7 +459,11 @@ class _RepeaterDetailScreen extends StatelessWidget {
       ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
 
     return Scaffold(
-      appBar: AppBar(title: Text('Repeater $displayId')),
+      appBar: AppBar(
+        title: Text(
+          AppLocalizations.of(context).repeaterHealthDetailTitle(displayId),
+        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -442,39 +474,39 @@ class _RepeaterDetailScreen extends StatelessWidget {
             const SizedBox(height: 16),
 
             // SNR over time chart
-            const Text(
-              'SNR Over Time',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            Text(
+              AppLocalizations.of(context).repeaterHealthSnrOverTime,
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            SizedBox(height: 200, child: _buildSnrChart(sorted)),
+            SizedBox(height: 200, child: _buildSnrChart(context, sorted)),
             const SizedBox(height: 24),
 
             // Success rate by week
-            const Text(
-              'Weekly Success Rate',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            Text(
+              AppLocalizations.of(context).repeaterHealthWeeklySuccessRate,
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            SizedBox(height: 200, child: _buildWeeklyChart(sorted)),
+            SizedBox(height: 200, child: _buildWeeklyChart(context, sorted)),
             const SizedBox(height: 24),
 
             // Time of day analysis
-            const Text(
-              'Best Time of Day',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            Text(
+              AppLocalizations.of(context).repeaterHealthBestTimeOfDay,
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            _buildTimeOfDay(sorted),
+            _buildTimeOfDay(context, sorted),
             const SizedBox(height: 24),
 
             // Recent pings
-            const Text(
-              'Recent Pings',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            Text(
+              AppLocalizations.of(context).repeaterHealthRecentPings,
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            _buildRecentPings(sorted),
+            _buildRecentPings(context, sorted),
           ],
         ),
       ),
@@ -482,6 +514,7 @@ class _RepeaterDetailScreen extends StatelessWidget {
   }
 
   Widget _buildSummaryCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final rateColor = stats.responseRate > 0.7
         ? Colors.green
         : stats.responseRate > 0.3
@@ -497,13 +530,25 @@ class _RepeaterDetailScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _statColumn(
-                  'Success Rate',
+                  l10n.repeaterHealthSuccessRate,
                   '${(stats.responseRate * 100).toStringAsFixed(0)}%',
                   rateColor,
                 ),
-                _statColumn('Total Pings', '${stats.totalPings}', null),
-                _statColumn('Heard', '${stats.successCount}', Colors.green),
-                _statColumn('Coverage', '${stats.coverageCells} cells', null),
+                _statColumn(
+                  l10n.repeaterHealthTotalPings,
+                  '${stats.totalPings}',
+                  null,
+                ),
+                _statColumn(
+                  l10n.repeaterHealthHeard,
+                  '${stats.successCount}',
+                  Colors.green,
+                ),
+                _statColumn(
+                  l10n.repeaterHealthCoverage,
+                  l10n.repeaterHealthCellCount(stats.coverageCells),
+                  null,
+                ),
               ],
             ),
             if (stats.isDegrading) ...[
@@ -523,8 +568,14 @@ class _RepeaterDetailScreen extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        '7-day rate (${stats.rate7day != null ? "${(stats.rate7day! * 100).toStringAsFixed(0)}%" : "?"}) '
-                        'dropped vs 30-day (${stats.rate30day != null ? "${(stats.rate30day! * 100).toStringAsFixed(0)}%" : "?"})',
+                        l10n.repeaterHealthDegradingAlert(
+                          stats.rate7day != null
+                              ? '${(stats.rate7day! * 100).toStringAsFixed(0)}%'
+                              : '?',
+                          stats.rate30day != null
+                              ? '${(stats.rate30day! * 100).toStringAsFixed(0)}%'
+                              : '?',
+                        ),
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.orange,
@@ -537,7 +588,13 @@ class _RepeaterDetailScreen extends StatelessWidget {
             ],
             const SizedBox(height: 8),
             Text(
-              'Avg response: ${stats.avgResponseMs != null ? "${stats.avgResponseMs!.toStringAsFixed(0)}ms" : "N/A"}',
+              l10n.repeaterHealthAvgResponse(
+                stats.avgResponseMs != null
+                    ? l10n.repeaterHealthAvgRespMs(
+                        stats.avgResponseMs!.toStringAsFixed(0),
+                      )
+                    : l10n.repeaterHealthAvgResponseNa,
+              ),
               style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
           ],
@@ -562,7 +619,9 @@ class _RepeaterDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSnrChart(List<Sample> sorted) {
+  Widget _buildSnrChart(BuildContext context, List<Sample> sorted) {
+    final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
     final spots = <FlSpot>[];
     final timestamps = <double, DateTime>{};
 
@@ -574,8 +633,11 @@ class _RepeaterDetailScreen extends StatelessWidget {
     }
 
     if (spots.isEmpty) {
-      return const Center(
-        child: Text('No SNR data', style: TextStyle(color: Colors.grey)),
+      return Center(
+        child: Text(
+          l10n.repeaterHealthNoSnrData,
+          style: const TextStyle(color: Colors.grey),
+        ),
       );
     }
 
@@ -609,7 +671,7 @@ class _RepeaterDetailScreen extends StatelessWidget {
                 final ts = timestamps[v];
                 if (ts == null) return const SizedBox.shrink();
                 return Text(
-                  DateFormat('M/d').format(ts),
+                  DateFormat.Md(locale).format(ts),
                   style: const TextStyle(fontSize: 8),
                 );
               },
@@ -641,10 +703,15 @@ class _RepeaterDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildWeeklyChart(List<Sample> sorted) {
+  Widget _buildWeeklyChart(BuildContext context, List<Sample> sorted) {
+    final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
     if (sorted.isEmpty) {
-      return const Center(
-        child: Text('No data', style: TextStyle(color: Colors.grey)),
+      return Center(
+        child: Text(
+          l10n.repeaterHealthNoData,
+          style: const TextStyle(color: Colors.grey),
+        ),
       );
     }
 
@@ -655,15 +722,18 @@ class _RepeaterDetailScreen extends StatelessWidget {
       final weekStart = s.timestamp.subtract(
         Duration(days: s.timestamp.weekday - 1),
       );
-      final key = DateFormat('M/d').format(weekStart);
+      final key = DateFormat.Md(locale).format(weekStart);
       byWeek.putIfAbsent(key, () => []);
       byWeek[key]!.add(s);
     }
 
     final weeks = byWeek.entries.toList();
     if (weeks.isEmpty) {
-      return const Center(
-        child: Text('No weekly data', style: TextStyle(color: Colors.grey)),
+      return Center(
+        child: Text(
+          l10n.repeaterHealthNoWeeklyData,
+          style: const TextStyle(color: Colors.grey),
+        ),
       );
     }
 
@@ -678,7 +748,11 @@ class _RepeaterDetailScreen extends StatelessWidget {
               final week = weeks[group.x];
               final count = week.value.length;
               return BarTooltipItem(
-                '${week.key}\n${(rod.toY * 100).toStringAsFixed(0)}% ($count pings)',
+                l10n.repeaterHealthWeekTooltip(
+                  week.key,
+                  (rod.toY * 100).toStringAsFixed(0),
+                  l10n.analyticsPingsCount(count),
+                ),
                 const TextStyle(color: Colors.white, fontSize: 11),
               );
             },
@@ -743,18 +817,19 @@ class _RepeaterDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTimeOfDay(List<Sample> sorted) {
+  Widget _buildTimeOfDay(BuildContext context, List<Sample> sorted) {
+    final l10n = AppLocalizations.of(context);
     final Map<String, List<Sample>> periods = {
-      'Night (0-6)': sorted
+      l10n.repeaterHealthPeriodNight: sorted
           .where((s) => s.timestamp.hour >= 0 && s.timestamp.hour < 6)
           .toList(),
-      'Morning (6-12)': sorted
+      l10n.repeaterHealthPeriodMorning: sorted
           .where((s) => s.timestamp.hour >= 6 && s.timestamp.hour < 12)
           .toList(),
-      'Afternoon (12-18)': sorted
+      l10n.repeaterHealthPeriodAfternoon: sorted
           .where((s) => s.timestamp.hour >= 12 && s.timestamp.hour < 18)
           .toList(),
-      'Evening (18-24)': sorted
+      l10n.repeaterHealthPeriodEvening: sorted
           .where((s) => s.timestamp.hour >= 18 && s.timestamp.hour < 24)
           .toList(),
     };
@@ -765,8 +840,11 @@ class _RepeaterDetailScreen extends StatelessWidget {
         final successes = e.value.where((s) => s.pingSuccess == true).length;
         final rate = total > 0 ? successes / total : null;
         final label = rate != null
-            ? '${(rate * 100).toStringAsFixed(0)}% ($total pings)'
-            : 'No data';
+            ? l10n.repeaterHealthPeriodRate(
+                (rate * 100).toStringAsFixed(0),
+                l10n.analyticsPingsCount(total),
+              )
+            : l10n.repeaterHealthNoData;
         final color = rate == null
             ? Colors.grey
             : rate > 0.7
@@ -796,19 +874,21 @@ class _RepeaterDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRecentPings(List<Sample> sorted) {
+  Widget _buildRecentPings(BuildContext context, List<Sample> sorted) {
+    final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
     final recent = sorted.reversed.take(20).toList();
 
     if (recent.isEmpty) {
-      return const Text(
-        'No pings recorded',
-        style: TextStyle(color: Colors.grey),
+      return Text(
+        l10n.repeaterHealthNoPingsRecorded,
+        style: const TextStyle(color: Colors.grey),
       );
     }
 
     return Column(
       children: recent.map((s) {
-        final time = DateFormat('MMM d HH:mm').format(s.timestamp);
+        final time = DateFormat.MMMd(locale).add_Hm().format(s.timestamp);
         final success = s.pingSuccess == true;
         final snrText = s.snr != null ? 'SNR: ${s.snr}' : '';
         final rssiText = s.rssi != null ? 'RSSI: ${s.rssi}' : '';

@@ -2187,4 +2187,945 @@ class AppLocalizationsRu extends AppLocalizations {
   String mapPositionHeadingSemantics(String positionLabel, String degrees) {
     return '$positionLabel, курс $degrees градусов';
   }
+
+  @override
+  String get analyticsTabScore => 'Оценка';
+
+  @override
+  String get analyticsTabTime => 'Время';
+
+  @override
+  String get analyticsTabGoals => 'Цели';
+
+  @override
+  String get analyticsTabCompare => 'Сравнение';
+
+  @override
+  String get analyticsTabRepeaters => 'Репитеры';
+
+  @override
+  String get analyticsNoPingData =>
+      'Пока нет данных пингов.\nСначала проведите вардрайв!';
+
+  @override
+  String get analyticsNoRepeaterData =>
+      'Пока нет данных репитеров.\nСначала проведите вардрайв!';
+
+  @override
+  String get analyticsCoverageScore => 'Оценка покрытия';
+
+  @override
+  String get analyticsStatCells => 'Ячейки';
+
+  @override
+  String get analyticsStatSuccess => 'Успех';
+
+  @override
+  String get analyticsStatFresh => 'Свежесть';
+
+  @override
+  String get analyticsStatRepeaters => 'Репитеры';
+
+  @override
+  String get analyticsHowCalculated => 'Как считается';
+
+  @override
+  String get analyticsScoreFormula =>
+      'Оценка = уникальные ячейки × успешность × свежесть';
+
+  @override
+  String analyticsScoreBreakdown(
+    String cells,
+    String rate,
+    String freshness,
+    String score,
+  ) {
+    return '• $cells ячеек × $rate × $freshness = $score';
+  }
+
+  @override
+  String get analyticsFreshnessLegend =>
+      '• Свежесть: <1д=100%, <7д=80%, <30д=50%, старше=20%';
+
+  @override
+  String get analyticsShareScore => 'Поделиться оценкой';
+
+  @override
+  String analyticsShareText(
+    String score,
+    String grade,
+    String cells,
+    String success,
+    String freshness,
+    String repeaters,
+    String pings,
+  ) {
+    return 'Оценка MeshCore Wardrive: $score ($grade)\nЯчейки: $cells • Успех: $success% • Свежесть: $freshness%\nРепитеры: $repeaters • Пинги: $pings';
+  }
+
+  @override
+  String get analyticsSuccessRateByHour => 'Успешность по часам';
+
+  @override
+  String analyticsPingsAnalyzed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count пинга проанализировано',
+      many: '$count пингов проанализировано',
+      few: '$count пинга проанализировано',
+      one: '$count пинг проанализирован',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String analyticsPingsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count пинга',
+      many: '$count пингов',
+      few: '$count пинга',
+      one: '$count пинг',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String analyticsHourTooltip(String time, String rate, String pings) {
+    return '$time\n$rate% ($pings)';
+  }
+
+  @override
+  String get analyticsSummary => 'Сводка';
+
+  @override
+  String get analyticsBestHour => 'Лучший час';
+
+  @override
+  String get analyticsWorstHour => 'Худший час';
+
+  @override
+  String analyticsHourValue(String hour, String rate) {
+    return '$hour:00 — $rate%';
+  }
+
+  @override
+  String get analyticsByPeriod => 'По периодам';
+
+  @override
+  String get analyticsPeriodNight => 'Ночь (0–6)';
+
+  @override
+  String get analyticsPeriodMorning => 'Утро (6–12)';
+
+  @override
+  String get analyticsPeriodAfternoon => 'День (12–18)';
+
+  @override
+  String get analyticsPeriodEvening => 'Вечер (18–24)';
+
+  @override
+  String get analyticsNoData => 'Нет данных';
+
+  @override
+  String get analyticsNoCoverageGoal => 'Цель покрытия не задана';
+
+  @override
+  String get analyticsSetGoalHint =>
+      'Задайте целевую область, чтобы отслеживать прогресс вардрайва.';
+
+  @override
+  String get analyticsSetGoalArea => 'Задать область цели';
+
+  @override
+  String get analyticsCoverageGoal => 'Цель покрытия';
+
+  @override
+  String get analyticsEdit => 'Изменить';
+
+  @override
+  String analyticsGoalCenterRadius(String lat, String lon, String radius) {
+    return 'Центр: $lat, $lon\nРадиус: $radius';
+  }
+
+  @override
+  String get analyticsCovered => 'покрыто';
+
+  @override
+  String get analyticsTotalCellsInArea => 'Всего ячеек в области';
+
+  @override
+  String get analyticsCoveredAboveZero => 'Покрыто (>0% успеха)';
+
+  @override
+  String get analyticsPartialBelow30 => 'Частично (<30% успеха)';
+
+  @override
+  String get analyticsUncovered => 'Не покрыто';
+
+  @override
+  String get analyticsPingsInArea => 'Пингов в области';
+
+  @override
+  String analyticsRadiusMiles(String miles) {
+    return '$miles миль';
+  }
+
+  @override
+  String analyticsRadiusMeters(String meters) {
+    return '$meters м';
+  }
+
+  @override
+  String get analyticsMile1 => '1 миля';
+
+  @override
+  String get analyticsMiles5 => '5 миль';
+
+  @override
+  String get analyticsMiles10 => '10 миль';
+
+  @override
+  String get analyticsMiles25 => '25 миль';
+
+  @override
+  String get analyticsSetCoverageGoal => 'Задать цель покрытия';
+
+  @override
+  String get analyticsCenterCurrentGps => 'Центр: текущая GPS-позиция';
+
+  @override
+  String analyticsCenterCoords(String lat, String lon) {
+    return 'Центр: $lat, $lon';
+  }
+
+  @override
+  String get analyticsRadiusLabel => 'Радиус:';
+
+  @override
+  String get analyticsSetGoal => 'Задать цель';
+
+  @override
+  String get analyticsNeedTwoSessions =>
+      'Нужны минимум 2 завершённые сессии\nс данными пингов для сравнения.';
+
+  @override
+  String get analyticsCompareSessions => 'Сравнить сессии';
+
+  @override
+  String get analyticsSessionABaseline => 'Сессия A (базовая)';
+
+  @override
+  String get analyticsSessionBCompare => 'Сессия B (сравнение)';
+
+  @override
+  String get analyticsSamples => 'Замеры';
+
+  @override
+  String get analyticsSuccessRate => 'Успешность';
+
+  @override
+  String get analyticsDistance => 'Дистанция';
+
+  @override
+  String analyticsDistanceMiles(String miles) {
+    return '$miles миль';
+  }
+
+  @override
+  String get analyticsCoverageChanges => 'Изменения покрытия';
+
+  @override
+  String get analyticsNewCoverage => 'Новое покрытие';
+
+  @override
+  String get analyticsLostCoverage => 'Потерянное покрытие';
+
+  @override
+  String get analyticsImproved => 'Улучшение (>10%)';
+
+  @override
+  String get analyticsDegraded => 'Ухудшение (>10%)';
+
+  @override
+  String get analyticsUnchanged => 'Без изменений';
+
+  @override
+  String analyticsSessionOption(String date, String pings, String rate) {
+    return '$date — $pings, $rate%';
+  }
+
+  @override
+  String analyticsSessionSelected(String date, String pings) {
+    return '$date — $pings';
+  }
+
+  @override
+  String analyticsRepeaterCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count репитера',
+      many: '$count репитеров',
+      few: '$count репитера',
+      one: '$count репитер',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get analyticsSort => 'Сортировка: ';
+
+  @override
+  String get analyticsSortReliability => 'Надёжность';
+
+  @override
+  String get analyticsSortResponseTime => 'Время ответа';
+
+  @override
+  String get analyticsSortPingCount => 'Число пингов';
+
+  @override
+  String get analyticsMiniPings => 'Пинги';
+
+  @override
+  String get analyticsMiniAvgResponse => 'Ср. ответ';
+
+  @override
+  String get analyticsMiniConsistency => 'Стабильность';
+
+  @override
+  String get analyticsMiniTrend => 'Тренд';
+
+  @override
+  String analyticsAvgResponseMs(String ms) {
+    return '$ms мс';
+  }
+
+  @override
+  String analyticsTrend(String trend) {
+    String _temp0 = intl.Intl.selectLogic(trend, {
+      'improving': 'растёт',
+      'degrading': 'падает',
+      'other': 'стабильно',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String analyticsFirstLastSeen(String first, String last) {
+    return 'Впервые: $first • Последний: $last';
+  }
+
+  @override
+  String get sessionDeleteTitle => 'Удалить сессию?';
+
+  @override
+  String get sessionDeleteBody =>
+      'Запись сессии будет удалена. Данные замеров не изменятся.';
+
+  @override
+  String get sessionNotesTitle => 'Заметки сессии';
+
+  @override
+  String get sessionNotesHint => 'Добавьте заметки об этой сессии...';
+
+  @override
+  String get sessionEmpty =>
+      'Сессий пока нет.\n\nНачните трекинг, чтобы записать первую сессию!';
+
+  @override
+  String get sessionEditNotes => 'Изменить заметки';
+
+  @override
+  String sessionTimeInProgress(String start) {
+    return '$start – идёт';
+  }
+
+  @override
+  String sessionTimeRange(String start, String end) {
+    return '$start – $end';
+  }
+
+  @override
+  String sessionDurationHoursMinutes(int hours, int minutes) {
+    return '$hoursч $minutesм';
+  }
+
+  @override
+  String sessionDurationMinutesSeconds(int minutes, int seconds) {
+    return '$minutesм $secondsс';
+  }
+
+  @override
+  String sessionDurationSeconds(int seconds) {
+    return '$secondsс';
+  }
+
+  @override
+  String sessionDistanceKm(String km) {
+    return '$km км';
+  }
+
+  @override
+  String sessionDistanceMi(String mi) {
+    return '$mi миль';
+  }
+
+  @override
+  String sessionPoints(int count) {
+    return '$count тчк';
+  }
+
+  @override
+  String sessionHeard(int count) {
+    return 'принято $count';
+  }
+
+  @override
+  String get sessionTapToViewOnMap => 'Нажмите, чтобы открыть на карте';
+
+  @override
+  String get repeaterHealthEmpty =>
+      'Пока нет данных репитеров.\nСначала проведите вардрайв!';
+
+  @override
+  String repeaterHealthOfflineCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count офлайн',
+      many: '$count офлайн',
+      few: '$count офлайн',
+      one: '$count офлайн',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String repeaterHealthDegradingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count деградируют',
+      many: '$count деградируют',
+      few: '$count деградируют',
+      one: '$count деградирует',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String repeaterHealthRepeaterCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count репитера',
+      many: '$count репитеров',
+      few: '$count репитера',
+      one: '$count репитер',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get repeaterHealthSort => 'Сортировка: ';
+
+  @override
+  String get repeaterHealthSortReliability => 'Надёжность';
+
+  @override
+  String get repeaterHealthSortResponseTime => 'Время ответа';
+
+  @override
+  String get repeaterHealthSortPingCount => 'Число пингов';
+
+  @override
+  String get repeaterHealthSortAlertsFirst => 'Сначала оповещения';
+
+  @override
+  String get repeaterHealthMiniPings => 'Пинги';
+
+  @override
+  String get repeaterHealthMiniAvgResp => 'Ср. отв.';
+
+  @override
+  String get repeaterHealthMiniCells => 'Ячейки';
+
+  @override
+  String get repeaterHealthMiniTrend => 'Тренд';
+
+  @override
+  String repeaterHealthAvgRespMs(String ms) {
+    return '$msмс';
+  }
+
+  @override
+  String get repeaterHealthTrendUp => '▲ Рост';
+
+  @override
+  String get repeaterHealthTrendDown => '▼ Спад';
+
+  @override
+  String get repeaterHealthTrendStable => '— Стабильно';
+
+  @override
+  String repeaterHealthFirstLast(String first, String last) {
+    return 'Впервые: $first • Последний: $last';
+  }
+
+  @override
+  String repeaterHealthFirstLastOffline(String first, String last, int days) {
+    return 'Впервые: $first • Последний: $last • ⚠️ Офлайн $daysд';
+  }
+
+  @override
+  String repeaterHealthDetailTitle(String id) {
+    return 'Репитер $id';
+  }
+
+  @override
+  String get repeaterHealthSnrOverTime => 'SNR во времени';
+
+  @override
+  String get repeaterHealthWeeklySuccessRate => 'Недельная успешность';
+
+  @override
+  String get repeaterHealthBestTimeOfDay => 'Лучшее время суток';
+
+  @override
+  String get repeaterHealthRecentPings => 'Недавние пинги';
+
+  @override
+  String get repeaterHealthSuccessRate => 'Успешность';
+
+  @override
+  String get repeaterHealthTotalPings => 'Всего пингов';
+
+  @override
+  String get repeaterHealthHeard => 'Принято';
+
+  @override
+  String get repeaterHealthCoverage => 'Покрытие';
+
+  @override
+  String repeaterHealthCellCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ячейки',
+      many: '$count ячеек',
+      few: '$count ячейки',
+      one: '$count ячейка',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String repeaterHealthDegradingAlert(String rate7, String rate30) {
+    return 'Успешность за 7 дней ($rate7) упала относительно 30 дней ($rate30)';
+  }
+
+  @override
+  String repeaterHealthAvgResponse(String value) {
+    return 'Средний ответ: $value';
+  }
+
+  @override
+  String get repeaterHealthAvgResponseNa => 'н/д';
+
+  @override
+  String get repeaterHealthNoSnrData => 'Нет данных SNR';
+
+  @override
+  String get repeaterHealthNoData => 'Нет данных';
+
+  @override
+  String get repeaterHealthNoWeeklyData => 'Нет недельных данных';
+
+  @override
+  String get repeaterHealthPeriodNight => 'Ночь (0–6)';
+
+  @override
+  String get repeaterHealthPeriodMorning => 'Утро (6–12)';
+
+  @override
+  String get repeaterHealthPeriodAfternoon => 'День (12–18)';
+
+  @override
+  String get repeaterHealthPeriodEvening => 'Вечер (18–24)';
+
+  @override
+  String repeaterHealthPeriodRate(String rate, String pings) {
+    return '$rate% ($pings)';
+  }
+
+  @override
+  String repeaterHealthWeekTooltip(String week, String rate, String pings) {
+    return '$week\n$rate% ($pings)';
+  }
+
+  @override
+  String get repeaterHealthNoPingsRecorded => 'Пинги не записаны';
+
+  @override
+  String get deviceComparisonEmpty =>
+      'Устройства ещё не отслеживаются.\n\nПодключите LoRa-устройство и начните вардрайв — приложение автоматически запишет, какое устройство вы используете.';
+
+  @override
+  String deviceComparisonTracked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count устройства отслеживаются',
+      many: '$count устройств отслеживаются',
+      few: '$count устройства отслеживаются',
+      one: '$count устройство отслеживается',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deviceComparisonCompareDevices => 'Сравнить устройства';
+
+  @override
+  String get deviceComparisonDeviceA => 'Устройство A';
+
+  @override
+  String get deviceComparisonDeviceB => 'Устройство B';
+
+  @override
+  String get deviceComparisonVs => 'против';
+
+  @override
+  String get deviceComparisonMiniPings => 'Пинги';
+
+  @override
+  String get deviceComparisonMiniCells => 'Ячейки';
+
+  @override
+  String get deviceComparisonMiniAvgResp => 'Ср. отв.';
+
+  @override
+  String get deviceComparisonMiniAvgSnr => 'Ср. SNR';
+
+  @override
+  String deviceComparisonAvgRespMs(String ms) {
+    return '$msмс';
+  }
+
+  @override
+  String deviceComparisonFirstLast(String first, String last) {
+    return 'Впервые: $first • Последний: $last';
+  }
+
+  @override
+  String get deviceComparisonStat => 'Показатель';
+
+  @override
+  String get deviceComparisonWinner => 'Победитель';
+
+  @override
+  String get deviceComparisonTotalPings => 'Всего пингов';
+
+  @override
+  String get deviceComparisonSuccessRate => 'Успешность';
+
+  @override
+  String get deviceComparisonFailures => 'Неудачи';
+
+  @override
+  String get deviceComparisonUniqueCells => 'Уникальные ячейки';
+
+  @override
+  String get deviceComparisonAvgResponse => 'Ср. ответ';
+
+  @override
+  String get deviceComparisonAvgSnr => 'Ср. SNR';
+
+  @override
+  String get deviceComparisonAvgRssi => 'Ср. RSSI';
+
+  @override
+  String get deviceComparisonTie => 'Ничья';
+
+  @override
+  String get signalTrendRssi => 'RSSI';
+
+  @override
+  String get signalTrendSnr => 'SNR';
+
+  @override
+  String get signalTrendResponse => 'Ответ';
+
+  @override
+  String get signalTrendEmpty =>
+      'Пока нет данных сигнала.\nПроведите вардрайв с включёнными пингами.';
+
+  @override
+  String signalTrendNoMetricData(String label) {
+    return 'Нет данных $label.';
+  }
+
+  @override
+  String get signalTrendResponseTimeLabel => 'времени ответа';
+
+  @override
+  String get signalTrendMin => 'Мин';
+
+  @override
+  String get signalTrendAvg => 'Ср.';
+
+  @override
+  String get signalTrendMax => 'Макс';
+
+  @override
+  String get signalTrendPts => 'Точки';
+
+  @override
+  String get ductingTitle => 'Прогноз тропосферного волновода';
+
+  @override
+  String get ductingOpenInBrowser => 'Открыть в браузере';
+
+  @override
+  String get ductingRegion => 'Регион';
+
+  @override
+  String get ductingFailedToLoad =>
+      'Не удалось загрузить карту прогноза.\nПроверьте подключение к интернету.';
+
+  @override
+  String ductingTimeHours(int hours) {
+    return '+$hoursч';
+  }
+
+  @override
+  String ductingTimeDays(int days) {
+    return '+$daysд';
+  }
+
+  @override
+  String ductingTimeDaysHours(int days, int hours) {
+    return '+$daysд $hoursч';
+  }
+
+  @override
+  String ductingFrameIndex(int current, int total) {
+    return '$current / $total';
+  }
+
+  @override
+  String get ductingLegendNone => 'Нет';
+
+  @override
+  String get ductingLegendMarginal => 'Слабый';
+
+  @override
+  String get ductingLegendModerate => 'Умеренный';
+
+  @override
+  String get ductingLegendHigh => 'Высокий';
+
+  @override
+  String get ductingLegendExtreme => 'Экстремальный';
+
+  @override
+  String get ductingAttribution =>
+      'Прогноз © William R. Hepburn — dxinfocentre.com';
+
+  @override
+  String get ductingRegionWam => 'Запад Северной Америки';
+
+  @override
+  String get ductingRegionEam => 'Восток Северной Америки';
+
+  @override
+  String get ductingRegionEnp => 'Восточная северная часть Тихого океана';
+
+  @override
+  String get ductingRegionEsp => 'Восточная южная часть Тихого океана';
+
+  @override
+  String get ductingRegionCar => 'Мексиканский залив и Карибы';
+
+  @override
+  String get ductingRegionNsa => 'Север Южной Америки';
+
+  @override
+  String get ductingRegionSam => 'Центр Южной Америки';
+
+  @override
+  String get ductingRegionSat => 'Южная Атлантика';
+
+  @override
+  String get ductingRegionNat => 'Северная Атлантика';
+
+  @override
+  String get ductingRegionEnt => 'Восточная Северная Атлантика';
+
+  @override
+  String get ductingRegionNwe => 'Северо-Западная Европа';
+
+  @override
+  String get ductingRegionEur => 'Европа';
+
+  @override
+  String get ductingRegionEeu => 'Восточная Европа';
+
+  @override
+  String get ductingRegionAfi => 'Южная Африка';
+
+  @override
+  String get ductingRegionMid => 'Ближний Восток';
+
+  @override
+  String get ductingRegionNca => 'Север Центральной Азии';
+
+  @override
+  String get ductingRegionIno => 'Индийский океан';
+
+  @override
+  String get ductingRegionSea => 'Юго-Восточная Азия';
+
+  @override
+  String get ductingRegionEas => 'Дальний Восток';
+
+  @override
+  String get ductingRegionNea => 'Восточная Сибирь';
+
+  @override
+  String get ductingRegionAus => 'Австралия и Новая Зеландия';
+
+  @override
+  String get ductingRegionOce => 'Океания';
+
+  @override
+  String get ductingRegionWnp => 'Западная северная часть Тихого океана';
+
+  @override
+  String get debugLogNoLogsToExport => 'Нет журналов для экспорта';
+
+  @override
+  String get debugLogChooseSaveLocation => 'Выберите папку для сохранения';
+
+  @override
+  String debugLogSavedTo(String fileName) {
+    return 'Журнал сохранён:\n$fileName';
+  }
+
+  @override
+  String get debugLogAutoScrollOn => 'Автопрокрутка ВКЛ';
+
+  @override
+  String get debugLogAutoScrollOff => 'Автопрокрутка ВЫКЛ';
+
+  @override
+  String get debugLogExportLogs => 'Экспорт журнала';
+
+  @override
+  String get debugLogClearLogs => 'Очистить журнал';
+
+  @override
+  String get debugLogEmpty =>
+      'Журнал пока пуст.\n\nПодключите LoRa-устройство и начните пинговать!';
+
+  @override
+  String get debugDiagnosticsShareSubject => 'Журнал отладки MeshCore Wardrive';
+
+  @override
+  String get debugDiagnosticsShareText =>
+      'Журнал отладки для диагностики GPS и автопингов';
+
+  @override
+  String debugDiagnosticsErrorSharing(String error) {
+    return 'Ошибка отправки файла: $error';
+  }
+
+  @override
+  String get debugDiagnosticsDeleteTitle => 'Удалить журнал';
+
+  @override
+  String get debugDiagnosticsDeleteBody => 'Удалить этот файл журнала?';
+
+  @override
+  String get debugDiagnosticsLogDeleted => 'Файл журнала удалён';
+
+  @override
+  String debugDiagnosticsErrorDeleting(String error) {
+    return 'Ошибка удаления файла: $error';
+  }
+
+  @override
+  String debugDiagnosticsErrorReading(String error) {
+    return 'Ошибка чтения файла: $error';
+  }
+
+  @override
+  String get debugDiagnosticsRefresh => 'Обновить';
+
+  @override
+  String get debugDiagnosticsSamsungTitle => 'Устранение неполадок на Samsung';
+
+  @override
+  String get debugDiagnosticsSamsungBody =>
+      'На этом экране подробные журналы GPS, автопингов и событий службы. Если автопинг или GPS работают неверно, отправьте последний файл журнала разработчику.';
+
+  @override
+  String debugDiagnosticsCurrentSession(String name) {
+    return 'Текущая сессия: $name';
+  }
+
+  @override
+  String get debugDiagnosticsNotStarted => 'Не начата';
+
+  @override
+  String get debugDiagnosticsEmpty =>
+      'Журналы отладки не найдены.\nНачните трекинг, чтобы создать журналы.';
+
+  @override
+  String get debugDiagnosticsView => 'Просмотр';
+
+  @override
+  String debugDiagnosticsShareSubjectWithFile(String fileName) {
+    return 'Журнал отладки MeshCore Wardrive: $fileName';
+  }
+
+  @override
+  String debugDiagnosticsSizeBytes(int bytes) {
+    return '$bytes Б';
+  }
+
+  @override
+  String debugDiagnosticsSizeKb(String kb) {
+    return '$kb КБ';
+  }
+
+  @override
+  String debugDiagnosticsSizeMb(String mb) {
+    return '$mb МБ';
+  }
+
+  @override
+  String get achievementsAllUnlocked => 'Все достижения открыты!';
+
+  @override
+  String achievementsRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'осталось $count',
+      many: 'осталось $count',
+      few: 'осталось $count',
+      one: 'осталось $count',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String achievementsUnlockedOn(String date) {
+    return 'Открыто $date';
+  }
 }

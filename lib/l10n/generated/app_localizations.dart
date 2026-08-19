@@ -3668,6 +3668,1459 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{positionLabel}, heading {degrees} degrees'**
   String mapPositionHeadingSemantics(String positionLabel, String degrees);
+
+  /// Analytics bottom tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Score'**
+  String get analyticsTabScore;
+
+  /// Analytics bottom tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get analyticsTabTime;
+
+  /// Analytics bottom tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Goals'**
+  String get analyticsTabGoals;
+
+  /// Analytics bottom tab and compare button
+  ///
+  /// In en, this message translates to:
+  /// **'Compare'**
+  String get analyticsTabCompare;
+
+  /// Analytics bottom tab label
+  ///
+  /// In en, this message translates to:
+  /// **'Repeaters'**
+  String get analyticsTabRepeaters;
+
+  /// Empty state when analytics has no ping samples
+  ///
+  /// In en, this message translates to:
+  /// **'No ping data yet.\nDo some wardriving first!'**
+  String get analyticsNoPingData;
+
+  /// Empty state when analytics has no repeater samples
+  ///
+  /// In en, this message translates to:
+  /// **'No repeater data yet.\nDo some wardriving first!'**
+  String get analyticsNoRepeaterData;
+
+  /// Coverage score card subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Coverage Score'**
+  String get analyticsCoverageScore;
+
+  /// Coverage score statistic label
+  ///
+  /// In en, this message translates to:
+  /// **'Cells'**
+  String get analyticsStatCells;
+
+  /// Coverage score statistic label
+  ///
+  /// In en, this message translates to:
+  /// **'Success'**
+  String get analyticsStatSuccess;
+
+  /// Coverage score statistic label
+  ///
+  /// In en, this message translates to:
+  /// **'Fresh'**
+  String get analyticsStatFresh;
+
+  /// Coverage score statistic label
+  ///
+  /// In en, this message translates to:
+  /// **'Repeaters'**
+  String get analyticsStatRepeaters;
+
+  /// Score formula card title
+  ///
+  /// In en, this message translates to:
+  /// **'How it\'\'s calculated'**
+  String get analyticsHowCalculated;
+
+  /// Coverage score formula
+  ///
+  /// In en, this message translates to:
+  /// **'Score = Unique Cells × Success Rate × Freshness'**
+  String get analyticsScoreFormula;
+
+  /// Numeric breakdown of the coverage score
+  ///
+  /// In en, this message translates to:
+  /// **'• {cells} cells × {rate} × {freshness} = {score}'**
+  String analyticsScoreBreakdown(
+    String cells,
+    String rate,
+    String freshness,
+    String score,
+  );
+
+  /// Freshness weighting legend
+  ///
+  /// In en, this message translates to:
+  /// **'• Freshness: <1d=100%, <7d=80%, <30d=50%, older=20%'**
+  String get analyticsFreshnessLegend;
+
+  /// Button to share coverage score
+  ///
+  /// In en, this message translates to:
+  /// **'Share Score'**
+  String get analyticsShareScore;
+
+  /// Share-sheet body for coverage score
+  ///
+  /// In en, this message translates to:
+  /// **'MeshCore Wardrive Score: {score} ({grade})\nCells: {cells} • Success: {success}% • Freshness: {freshness}%\nRepeaters: {repeaters} • Pings: {pings}'**
+  String analyticsShareText(
+    String score,
+    String grade,
+    String cells,
+    String success,
+    String freshness,
+    String repeaters,
+    String pings,
+  );
+
+  /// Time-of-day chart title
+  ///
+  /// In en, this message translates to:
+  /// **'Success Rate by Hour'**
+  String get analyticsSuccessRateByHour;
+
+  /// Count of pings used in the hourly chart
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} ping analyzed} other{{count} pings analyzed}}'**
+  String analyticsPingsAnalyzed(int count);
+
+  /// Short ping count for tooltips and session pickers
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} ping} other{{count} pings}}'**
+  String analyticsPingsCount(int count);
+
+  /// Hourly bar chart tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'{time}\n{rate}% ({pings})'**
+  String analyticsHourTooltip(String time, String rate, String pings);
+
+  /// Best/worst hour section title
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get analyticsSummary;
+
+  /// Best hour row label
+  ///
+  /// In en, this message translates to:
+  /// **'Best hour'**
+  String get analyticsBestHour;
+
+  /// Worst hour row label
+  ///
+  /// In en, this message translates to:
+  /// **'Worst hour'**
+  String get analyticsWorstHour;
+
+  /// Hour and success-rate value
+  ///
+  /// In en, this message translates to:
+  /// **'{hour}:00 — {rate}%'**
+  String analyticsHourValue(String hour, String rate);
+
+  /// Time-of-day period section title
+  ///
+  /// In en, this message translates to:
+  /// **'By Period'**
+  String get analyticsByPeriod;
+
+  /// Night period label
+  ///
+  /// In en, this message translates to:
+  /// **'Night (0-6)'**
+  String get analyticsPeriodNight;
+
+  /// Morning period label
+  ///
+  /// In en, this message translates to:
+  /// **'Morning (6-12)'**
+  String get analyticsPeriodMorning;
+
+  /// Afternoon period label
+  ///
+  /// In en, this message translates to:
+  /// **'Afternoon (12-18)'**
+  String get analyticsPeriodAfternoon;
+
+  /// Evening period label
+  ///
+  /// In en, this message translates to:
+  /// **'Evening (18-24)'**
+  String get analyticsPeriodEvening;
+
+  /// Placeholder when a period has no samples
+  ///
+  /// In en, this message translates to:
+  /// **'No data'**
+  String get analyticsNoData;
+
+  /// Empty coverage-goal title
+  ///
+  /// In en, this message translates to:
+  /// **'No coverage goal set'**
+  String get analyticsNoCoverageGoal;
+
+  /// Empty coverage-goal hint
+  ///
+  /// In en, this message translates to:
+  /// **'Set a target area to track your wardriving progress.'**
+  String get analyticsSetGoalHint;
+
+  /// Button to create a coverage goal
+  ///
+  /// In en, this message translates to:
+  /// **'Set Goal Area'**
+  String get analyticsSetGoalArea;
+
+  /// Coverage goal section title
+  ///
+  /// In en, this message translates to:
+  /// **'Coverage Goal'**
+  String get analyticsCoverageGoal;
+
+  /// Edit coverage goal button
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get analyticsEdit;
+
+  /// Coverage goal center and radius summary
+  ///
+  /// In en, this message translates to:
+  /// **'Center: {lat}, {lon}\nRadius: {radius}'**
+  String analyticsGoalCenterRadius(String lat, String lon, String radius);
+
+  /// Label under the coverage-goal percent
+  ///
+  /// In en, this message translates to:
+  /// **'covered'**
+  String get analyticsCovered;
+
+  /// Goal statistic label
+  ///
+  /// In en, this message translates to:
+  /// **'Total cells in area'**
+  String get analyticsTotalCellsInArea;
+
+  /// Goal statistic for covered cells
+  ///
+  /// In en, this message translates to:
+  /// **'Covered (>0% success)'**
+  String get analyticsCoveredAboveZero;
+
+  /// Goal statistic for partial cells
+  ///
+  /// In en, this message translates to:
+  /// **'Partial (<30% success)'**
+  String get analyticsPartialBelow30;
+
+  /// Goal statistic for uncovered cells
+  ///
+  /// In en, this message translates to:
+  /// **'Uncovered'**
+  String get analyticsUncovered;
+
+  /// Goal statistic for pings in the goal area
+  ///
+  /// In en, this message translates to:
+  /// **'Pings in area'**
+  String get analyticsPingsInArea;
+
+  /// Goal radius in miles
+  ///
+  /// In en, this message translates to:
+  /// **'{miles} miles'**
+  String analyticsRadiusMiles(String miles);
+
+  /// Goal radius in meters
+  ///
+  /// In en, this message translates to:
+  /// **'{meters} m'**
+  String analyticsRadiusMeters(String meters);
+
+  /// Coverage goal radius option
+  ///
+  /// In en, this message translates to:
+  /// **'1 mile'**
+  String get analyticsMile1;
+
+  /// Coverage goal radius option
+  ///
+  /// In en, this message translates to:
+  /// **'5 miles'**
+  String get analyticsMiles5;
+
+  /// Coverage goal radius option
+  ///
+  /// In en, this message translates to:
+  /// **'10 miles'**
+  String get analyticsMiles10;
+
+  /// Coverage goal radius option
+  ///
+  /// In en, this message translates to:
+  /// **'25 miles'**
+  String get analyticsMiles25;
+
+  /// Set-goal dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Set Coverage Goal'**
+  String get analyticsSetCoverageGoal;
+
+  /// Goal dialog when centering on GPS
+  ///
+  /// In en, this message translates to:
+  /// **'Center: Your current GPS location'**
+  String get analyticsCenterCurrentGps;
+
+  /// Goal dialog center coordinates
+  ///
+  /// In en, this message translates to:
+  /// **'Center: {lat}, {lon}'**
+  String analyticsCenterCoords(String lat, String lon);
+
+  /// Goal dialog radius heading
+  ///
+  /// In en, this message translates to:
+  /// **'Radius:'**
+  String get analyticsRadiusLabel;
+
+  /// Confirm coverage goal button
+  ///
+  /// In en, this message translates to:
+  /// **'Set Goal'**
+  String get analyticsSetGoal;
+
+  /// Empty state when fewer than two sessions exist
+  ///
+  /// In en, this message translates to:
+  /// **'Need at least 2 completed sessions\nwith ping data to compare.'**
+  String get analyticsNeedTwoSessions;
+
+  /// Session comparison heading
+  ///
+  /// In en, this message translates to:
+  /// **'Compare Sessions'**
+  String get analyticsCompareSessions;
+
+  /// Baseline session picker label
+  ///
+  /// In en, this message translates to:
+  /// **'Session A (baseline)'**
+  String get analyticsSessionABaseline;
+
+  /// Compare session picker label
+  ///
+  /// In en, this message translates to:
+  /// **'Session B (compare)'**
+  String get analyticsSessionBCompare;
+
+  /// Comparison row label
+  ///
+  /// In en, this message translates to:
+  /// **'Samples'**
+  String get analyticsSamples;
+
+  /// Comparison row label
+  ///
+  /// In en, this message translates to:
+  /// **'Success Rate'**
+  String get analyticsSuccessRate;
+
+  /// Comparison row label
+  ///
+  /// In en, this message translates to:
+  /// **'Distance'**
+  String get analyticsDistance;
+
+  /// Session distance in miles
+  ///
+  /// In en, this message translates to:
+  /// **'{miles} mi'**
+  String analyticsDistanceMiles(String miles);
+
+  /// Comparison changes heading
+  ///
+  /// In en, this message translates to:
+  /// **'Coverage Changes'**
+  String get analyticsCoverageChanges;
+
+  /// Comparison change row
+  ///
+  /// In en, this message translates to:
+  /// **'New coverage'**
+  String get analyticsNewCoverage;
+
+  /// Comparison change row
+  ///
+  /// In en, this message translates to:
+  /// **'Lost coverage'**
+  String get analyticsLostCoverage;
+
+  /// Comparison change row
+  ///
+  /// In en, this message translates to:
+  /// **'Improved (>10%)'**
+  String get analyticsImproved;
+
+  /// Comparison change row
+  ///
+  /// In en, this message translates to:
+  /// **'Degraded (>10%)'**
+  String get analyticsDegraded;
+
+  /// Comparison change row
+  ///
+  /// In en, this message translates to:
+  /// **'Unchanged'**
+  String get analyticsUnchanged;
+
+  /// Session picker dialog option
+  ///
+  /// In en, this message translates to:
+  /// **'{date} — {pings}, {rate}%'**
+  String analyticsSessionOption(String date, String pings, String rate);
+
+  /// Selected session summary
+  ///
+  /// In en, this message translates to:
+  /// **'{date} — {pings}'**
+  String analyticsSessionSelected(String date, String pings);
+
+  /// Repeater reliability list count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} repeater} other{{count} repeaters}}'**
+  String analyticsRepeaterCount(int count);
+
+  /// Sort dropdown prefix
+  ///
+  /// In en, this message translates to:
+  /// **'Sort: '**
+  String get analyticsSort;
+
+  /// Repeater sort option
+  ///
+  /// In en, this message translates to:
+  /// **'Reliability'**
+  String get analyticsSortReliability;
+
+  /// Repeater sort option
+  ///
+  /// In en, this message translates to:
+  /// **'Response Time'**
+  String get analyticsSortResponseTime;
+
+  /// Repeater sort option
+  ///
+  /// In en, this message translates to:
+  /// **'Ping Count'**
+  String get analyticsSortPingCount;
+
+  /// Repeater card mini-stat label
+  ///
+  /// In en, this message translates to:
+  /// **'Pings'**
+  String get analyticsMiniPings;
+
+  /// Repeater card mini-stat label
+  ///
+  /// In en, this message translates to:
+  /// **'Avg Response'**
+  String get analyticsMiniAvgResponse;
+
+  /// Repeater card mini-stat label
+  ///
+  /// In en, this message translates to:
+  /// **'Consistency'**
+  String get analyticsMiniConsistency;
+
+  /// Repeater card mini-stat label
+  ///
+  /// In en, this message translates to:
+  /// **'Trend'**
+  String get analyticsMiniTrend;
+
+  /// Average response time value
+  ///
+  /// In en, this message translates to:
+  /// **'{ms} ms'**
+  String analyticsAvgResponseMs(String ms);
+
+  /// Repeater reliability trend label
+  ///
+  /// In en, this message translates to:
+  /// **'{trend, select, improving{improving} degrading{degrading} other{stable}}'**
+  String analyticsTrend(String trend);
+
+  /// Repeater first/last seen line
+  ///
+  /// In en, this message translates to:
+  /// **'First seen: {first} • Last: {last}'**
+  String analyticsFirstLastSeen(String first, String last);
+
+  /// Delete session dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Session?'**
+  String get sessionDeleteTitle;
+
+  /// Delete session dialog body
+  ///
+  /// In en, this message translates to:
+  /// **'This will remove the session record. Sample data is not affected.'**
+  String get sessionDeleteBody;
+
+  /// Edit notes dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Session Notes'**
+  String get sessionNotesTitle;
+
+  /// Session notes field hint
+  ///
+  /// In en, this message translates to:
+  /// **'Add notes about this session...'**
+  String get sessionNotesHint;
+
+  /// Empty session history body
+  ///
+  /// In en, this message translates to:
+  /// **'No sessions yet.\n\nStart tracking to record your first session!'**
+  String get sessionEmpty;
+
+  /// Tooltip to edit session notes
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Notes'**
+  String get sessionEditNotes;
+
+  /// Time range for an active session
+  ///
+  /// In en, this message translates to:
+  /// **'{start} – In progress'**
+  String sessionTimeInProgress(String start);
+
+  /// Completed session time range
+  ///
+  /// In en, this message translates to:
+  /// **'{start} – {end}'**
+  String sessionTimeRange(String start, String end);
+
+  /// Session duration in hours and minutes
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h {minutes}m'**
+  String sessionDurationHoursMinutes(int hours, int minutes);
+
+  /// Session duration in minutes and seconds
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m {seconds}s'**
+  String sessionDurationMinutesSeconds(int minutes, int seconds);
+
+  /// Session duration in seconds
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds}s'**
+  String sessionDurationSeconds(int seconds);
+
+  /// Session distance in kilometers
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km'**
+  String sessionDistanceKm(String km);
+
+  /// Session distance in miles
+  ///
+  /// In en, this message translates to:
+  /// **'{mi} mi'**
+  String sessionDistanceMi(String mi);
+
+  /// Session GPS point count
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pts'**
+  String sessionPoints(int count);
+
+  /// Successful ping count on a session card
+  ///
+  /// In en, this message translates to:
+  /// **'{count} heard'**
+  String sessionHeard(int count);
+
+  /// Hint when a session can open the map
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to view on map'**
+  String get sessionTapToViewOnMap;
+
+  /// Empty repeater health body
+  ///
+  /// In en, this message translates to:
+  /// **'No repeater data yet.\nDo some wardriving first!'**
+  String get repeaterHealthEmpty;
+
+  /// AppBar chip for offline repeaters
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} offline} other{{count} offline}}'**
+  String repeaterHealthOfflineCount(int count);
+
+  /// AppBar chip for degrading repeaters
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} degrading} other{{count} degrading}}'**
+  String repeaterHealthDegradingCount(int count);
+
+  /// Repeater health list count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} repeater} other{{count} repeaters}}'**
+  String repeaterHealthRepeaterCount(int count);
+
+  /// Sort dropdown prefix
+  ///
+  /// In en, this message translates to:
+  /// **'Sort: '**
+  String get repeaterHealthSort;
+
+  /// Repeater health sort option
+  ///
+  /// In en, this message translates to:
+  /// **'Reliability'**
+  String get repeaterHealthSortReliability;
+
+  /// Repeater health sort option
+  ///
+  /// In en, this message translates to:
+  /// **'Response Time'**
+  String get repeaterHealthSortResponseTime;
+
+  /// Repeater health sort option
+  ///
+  /// In en, this message translates to:
+  /// **'Ping Count'**
+  String get repeaterHealthSortPingCount;
+
+  /// Repeater health sort option
+  ///
+  /// In en, this message translates to:
+  /// **'Alerts First'**
+  String get repeaterHealthSortAlertsFirst;
+
+  /// Repeater card mini-stat label
+  ///
+  /// In en, this message translates to:
+  /// **'Pings'**
+  String get repeaterHealthMiniPings;
+
+  /// Repeater card mini-stat label
+  ///
+  /// In en, this message translates to:
+  /// **'Avg Resp'**
+  String get repeaterHealthMiniAvgResp;
+
+  /// Repeater card mini-stat label
+  ///
+  /// In en, this message translates to:
+  /// **'Cells'**
+  String get repeaterHealthMiniCells;
+
+  /// Repeater card mini-stat label
+  ///
+  /// In en, this message translates to:
+  /// **'Trend'**
+  String get repeaterHealthMiniTrend;
+
+  /// Average response time on a repeater card
+  ///
+  /// In en, this message translates to:
+  /// **'{ms}ms'**
+  String repeaterHealthAvgRespMs(String ms);
+
+  /// Improving trend label
+  ///
+  /// In en, this message translates to:
+  /// **'▲ Up'**
+  String get repeaterHealthTrendUp;
+
+  /// Degrading trend label
+  ///
+  /// In en, this message translates to:
+  /// **'▼ Down'**
+  String get repeaterHealthTrendDown;
+
+  /// Stable trend label
+  ///
+  /// In en, this message translates to:
+  /// **'— Stable'**
+  String get repeaterHealthTrendStable;
+
+  /// Repeater first/last seen line
+  ///
+  /// In en, this message translates to:
+  /// **'First: {first} • Last: {last}'**
+  String repeaterHealthFirstLast(String first, String last);
+
+  /// Repeater first/last seen line when offline
+  ///
+  /// In en, this message translates to:
+  /// **'First: {first} • Last: {last} • ⚠️ Offline {days}d'**
+  String repeaterHealthFirstLastOffline(String first, String last, int days);
+
+  /// Repeater detail AppBar title
+  ///
+  /// In en, this message translates to:
+  /// **'Repeater {id}'**
+  String repeaterHealthDetailTitle(String id);
+
+  /// SNR chart title
+  ///
+  /// In en, this message translates to:
+  /// **'SNR Over Time'**
+  String get repeaterHealthSnrOverTime;
+
+  /// Weekly chart title
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Success Rate'**
+  String get repeaterHealthWeeklySuccessRate;
+
+  /// Time-of-day section title
+  ///
+  /// In en, this message translates to:
+  /// **'Best Time of Day'**
+  String get repeaterHealthBestTimeOfDay;
+
+  /// Recent pings section title
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Pings'**
+  String get repeaterHealthRecentPings;
+
+  /// Detail summary label
+  ///
+  /// In en, this message translates to:
+  /// **'Success Rate'**
+  String get repeaterHealthSuccessRate;
+
+  /// Detail summary label
+  ///
+  /// In en, this message translates to:
+  /// **'Total Pings'**
+  String get repeaterHealthTotalPings;
+
+  /// Detail summary label
+  ///
+  /// In en, this message translates to:
+  /// **'Heard'**
+  String get repeaterHealthHeard;
+
+  /// Detail summary label
+  ///
+  /// In en, this message translates to:
+  /// **'Coverage'**
+  String get repeaterHealthCoverage;
+
+  /// Coverage cell count on the detail card
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} cell} other{{count} cells}}'**
+  String repeaterHealthCellCount(int count);
+
+  /// Degrading-rate warning on the detail card
+  ///
+  /// In en, this message translates to:
+  /// **'7-day rate ({rate7}) dropped vs 30-day ({rate30})'**
+  String repeaterHealthDegradingAlert(String rate7, String rate30);
+
+  /// Average response footer on the detail card
+  ///
+  /// In en, this message translates to:
+  /// **'Avg response: {value}'**
+  String repeaterHealthAvgResponse(String value);
+
+  /// Fallback when average response is missing
+  ///
+  /// In en, this message translates to:
+  /// **'N/A'**
+  String get repeaterHealthAvgResponseNa;
+
+  /// Empty SNR chart
+  ///
+  /// In en, this message translates to:
+  /// **'No SNR data'**
+  String get repeaterHealthNoSnrData;
+
+  /// Empty weekly chart
+  ///
+  /// In en, this message translates to:
+  /// **'No data'**
+  String get repeaterHealthNoData;
+
+  /// Empty weekly chart after grouping
+  ///
+  /// In en, this message translates to:
+  /// **'No weekly data'**
+  String get repeaterHealthNoWeeklyData;
+
+  /// Detail time-of-day period
+  ///
+  /// In en, this message translates to:
+  /// **'Night (0-6)'**
+  String get repeaterHealthPeriodNight;
+
+  /// Detail time-of-day period
+  ///
+  /// In en, this message translates to:
+  /// **'Morning (6-12)'**
+  String get repeaterHealthPeriodMorning;
+
+  /// Detail time-of-day period
+  ///
+  /// In en, this message translates to:
+  /// **'Afternoon (12-18)'**
+  String get repeaterHealthPeriodAfternoon;
+
+  /// Detail time-of-day period
+  ///
+  /// In en, this message translates to:
+  /// **'Evening (18-24)'**
+  String get repeaterHealthPeriodEvening;
+
+  /// Period success rate with ping count
+  ///
+  /// In en, this message translates to:
+  /// **'{rate}% ({pings})'**
+  String repeaterHealthPeriodRate(String rate, String pings);
+
+  /// Weekly bar tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'{week}\n{rate}% ({pings})'**
+  String repeaterHealthWeekTooltip(String week, String rate, String pings);
+
+  /// Empty recent-pings list
+  ///
+  /// In en, this message translates to:
+  /// **'No pings recorded'**
+  String get repeaterHealthNoPingsRecorded;
+
+  /// Empty device comparison body
+  ///
+  /// In en, this message translates to:
+  /// **'No devices tracked yet.\n\nConnect a LoRa device and start wardriving — the app will automatically log which device you use.'**
+  String get deviceComparisonEmpty;
+
+  /// Tracked device count heading
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} device tracked} other{{count} devices tracked}}'**
+  String deviceComparisonTracked(int count);
+
+  /// Device comparison section title
+  ///
+  /// In en, this message translates to:
+  /// **'Compare Devices'**
+  String get deviceComparisonCompareDevices;
+
+  /// First device dropdown hint
+  ///
+  /// In en, this message translates to:
+  /// **'Device A'**
+  String get deviceComparisonDeviceA;
+
+  /// Second device dropdown hint
+  ///
+  /// In en, this message translates to:
+  /// **'Device B'**
+  String get deviceComparisonDeviceB;
+
+  /// Between the two device dropdowns
+  ///
+  /// In en, this message translates to:
+  /// **'vs'**
+  String get deviceComparisonVs;
+
+  /// Device card mini-stat label
+  ///
+  /// In en, this message translates to:
+  /// **'Pings'**
+  String get deviceComparisonMiniPings;
+
+  /// Device card mini-stat label
+  ///
+  /// In en, this message translates to:
+  /// **'Cells'**
+  String get deviceComparisonMiniCells;
+
+  /// Device card mini-stat label
+  ///
+  /// In en, this message translates to:
+  /// **'Avg Resp'**
+  String get deviceComparisonMiniAvgResp;
+
+  /// Device card mini-stat label
+  ///
+  /// In en, this message translates to:
+  /// **'Avg SNR'**
+  String get deviceComparisonMiniAvgSnr;
+
+  /// Average response on a device card
+  ///
+  /// In en, this message translates to:
+  /// **'{ms}ms'**
+  String deviceComparisonAvgRespMs(String ms);
+
+  /// Device first/last used line
+  ///
+  /// In en, this message translates to:
+  /// **'First: {first} • Last: {last}'**
+  String deviceComparisonFirstLast(String first, String last);
+
+  /// Comparison table header
+  ///
+  /// In en, this message translates to:
+  /// **'Stat'**
+  String get deviceComparisonStat;
+
+  /// Comparison table header
+  ///
+  /// In en, this message translates to:
+  /// **'Winner'**
+  String get deviceComparisonWinner;
+
+  /// Comparison row label
+  ///
+  /// In en, this message translates to:
+  /// **'Total Pings'**
+  String get deviceComparisonTotalPings;
+
+  /// Comparison row label
+  ///
+  /// In en, this message translates to:
+  /// **'Success Rate'**
+  String get deviceComparisonSuccessRate;
+
+  /// Comparison row label
+  ///
+  /// In en, this message translates to:
+  /// **'Failures'**
+  String get deviceComparisonFailures;
+
+  /// Comparison row label
+  ///
+  /// In en, this message translates to:
+  /// **'Unique Cells'**
+  String get deviceComparisonUniqueCells;
+
+  /// Comparison row label
+  ///
+  /// In en, this message translates to:
+  /// **'Avg Response'**
+  String get deviceComparisonAvgResponse;
+
+  /// Comparison row label
+  ///
+  /// In en, this message translates to:
+  /// **'Avg SNR'**
+  String get deviceComparisonAvgSnr;
+
+  /// Comparison row label
+  ///
+  /// In en, this message translates to:
+  /// **'Avg RSSI'**
+  String get deviceComparisonAvgRssi;
+
+  /// Comparison winner when values are equal
+  ///
+  /// In en, this message translates to:
+  /// **'Tie'**
+  String get deviceComparisonTie;
+
+  /// Signal trend metric segment; keep RSSI
+  ///
+  /// In en, this message translates to:
+  /// **'RSSI'**
+  String get signalTrendRssi;
+
+  /// Signal trend metric segment; keep SNR
+  ///
+  /// In en, this message translates to:
+  /// **'SNR'**
+  String get signalTrendSnr;
+
+  /// Signal trend metric segment
+  ///
+  /// In en, this message translates to:
+  /// **'Response'**
+  String get signalTrendResponse;
+
+  /// Empty signal trend body
+  ///
+  /// In en, this message translates to:
+  /// **'No signal data yet.\nDo some wardriving with pings enabled.'**
+  String get signalTrendEmpty;
+
+  /// Empty chart for the selected metric
+  ///
+  /// In en, this message translates to:
+  /// **'No {label} data available.'**
+  String signalTrendNoMetricData(String label);
+
+  /// Metric name used in the empty-chart message
+  ///
+  /// In en, this message translates to:
+  /// **'response time'**
+  String get signalTrendResponseTimeLabel;
+
+  /// Signal stats card label
+  ///
+  /// In en, this message translates to:
+  /// **'Min'**
+  String get signalTrendMin;
+
+  /// Signal stats card label
+  ///
+  /// In en, this message translates to:
+  /// **'Avg'**
+  String get signalTrendAvg;
+
+  /// Signal stats card label
+  ///
+  /// In en, this message translates to:
+  /// **'Max'**
+  String get signalTrendMax;
+
+  /// Signal stats card label
+  ///
+  /// In en, this message translates to:
+  /// **'Pts'**
+  String get signalTrendPts;
+
+  /// Ducting forecast AppBar title
+  ///
+  /// In en, this message translates to:
+  /// **'Tropo Ducting Forecast'**
+  String get ductingTitle;
+
+  /// Tooltip to open the forecast website
+  ///
+  /// In en, this message translates to:
+  /// **'Open in browser'**
+  String get ductingOpenInBrowser;
+
+  /// Forecast region dropdown label
+  ///
+  /// In en, this message translates to:
+  /// **'Region'**
+  String get ductingRegion;
+
+  /// Forecast image error
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load forecast image.\nCheck internet connection.'**
+  String get ductingFailedToLoad;
+
+  /// Forecast offset in hours
+  ///
+  /// In en, this message translates to:
+  /// **'+{hours}h'**
+  String ductingTimeHours(int hours);
+
+  /// Forecast offset in whole days
+  ///
+  /// In en, this message translates to:
+  /// **'+{days}d'**
+  String ductingTimeDays(int days);
+
+  /// Forecast offset in days and leftover hours
+  ///
+  /// In en, this message translates to:
+  /// **'+{days}d {hours}h'**
+  String ductingTimeDaysHours(int days, int hours);
+
+  /// Current forecast frame index
+  ///
+  /// In en, this message translates to:
+  /// **'{current} / {total}'**
+  String ductingFrameIndex(int current, int total);
+
+  /// Ducting intensity legend
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get ductingLegendNone;
+
+  /// Ducting intensity legend
+  ///
+  /// In en, this message translates to:
+  /// **'Marginal'**
+  String get ductingLegendMarginal;
+
+  /// Ducting intensity legend
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate'**
+  String get ductingLegendModerate;
+
+  /// Ducting intensity legend
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get ductingLegendHigh;
+
+  /// Ducting intensity legend
+  ///
+  /// In en, this message translates to:
+  /// **'Extreme'**
+  String get ductingLegendExtreme;
+
+  /// Forecast map attribution
+  ///
+  /// In en, this message translates to:
+  /// **'Forecast © William R. Hepburn — dxinfocentre.com'**
+  String get ductingAttribution;
+
+  /// Ducting forecast region
+  ///
+  /// In en, this message translates to:
+  /// **'Western North America'**
+  String get ductingRegionWam;
+
+  /// Ducting forecast region
+  ///
+  /// In en, this message translates to:
+  /// **'Eastern North America'**
+  String get ductingRegionEam;
+
+  /// Ducting forecast region
+  ///
+  /// In en, this message translates to:
+  /// **'Eastern North Pacific'**
+  String get ductingRegionEnp;
+
+  /// Ducting forecast region
+  ///
+  /// In en, this message translates to:
+  /// **'Eastern South Pacific'**
+  String get ductingRegionEsp;
+
+  /// Ducting forecast region
+  ///
+  /// In en, this message translates to:
+  /// **'Gulf-Caribbean'**
+  String get ductingRegionCar;
+
+  /// Ducting forecast region
+  ///
+  /// In en, this message translates to:
+  /// **'Northern South America'**
+  String get ductingRegionNsa;
+
+  /// Ducting forecast region
+  ///
+  /// In en, this message translates to:
+  /// **'Central South America'**
+  String get ductingRegionSam;
+
+  /// Ducting forecast region
+  ///
+  /// In en, this message translates to:
+  /// **'South Atlantic'**
+  String get ductingRegionSat;
+
+  /// Ducting forecast region
+  ///
+  /// In en, this message translates to:
+  /// **'North Atlantic'**
+  String get ductingRegionNat;
+
+  /// Ducting forecast region
+  ///
+  /// In en, this message translates to:
+  /// **'Eastern North Atlantic'**
+  String get ductingRegionEnt;
+
+  /// Ducting forecast region
+  ///
+  /// In en, this message translates to:
+  /// **'Northwestern Europe'**
+  String get ductingRegionNwe;
+
+  /// Ducting forecast region
+  ///
+  /// In en, this message translates to:
+  /// **'Europe'**
+  String get ductingRegionEur;
+
+  /// Ducting forecast region
+  ///
+  /// In en, this message translates to:
+  /// **'Eastern Europe'**
+  String get ductingRegionEeu;
+
+  /// Ducting forecast region
+  ///
+  /// In en, this message translates to:
+  /// **'South Africa'**
+  String get ductingRegionAfi;
+
+  /// Ducting forecast region
+  ///
+  /// In en, this message translates to:
+  /// **'Middle East'**
+  String get ductingRegionMid;
+
+  /// Ducting forecast region
+  ///
+  /// In en, this message translates to:
+  /// **'North Central Asia'**
+  String get ductingRegionNca;
+
+  /// Ducting forecast region
+  ///
+  /// In en, this message translates to:
+  /// **'Indian Ocean'**
+  String get ductingRegionIno;
+
+  /// Ducting forecast region
+  ///
+  /// In en, this message translates to:
+  /// **'Southeast Asia'**
+  String get ductingRegionSea;
+
+  /// Ducting forecast region
+  ///
+  /// In en, this message translates to:
+  /// **'Far East'**
+  String get ductingRegionEas;
+
+  /// Ducting forecast region
+  ///
+  /// In en, this message translates to:
+  /// **'Eastern Siberia'**
+  String get ductingRegionNea;
+
+  /// Ducting forecast region
+  ///
+  /// In en, this message translates to:
+  /// **'Australia & New Zealand'**
+  String get ductingRegionAus;
+
+  /// Ducting forecast region
+  ///
+  /// In en, this message translates to:
+  /// **'Oceania'**
+  String get ductingRegionOce;
+
+  /// Ducting forecast region
+  ///
+  /// In en, this message translates to:
+  /// **'Western North Pacific'**
+  String get ductingRegionWnp;
+
+  /// Snackbar when export has no logs
+  ///
+  /// In en, this message translates to:
+  /// **'No logs to export'**
+  String get debugLogNoLogsToExport;
+
+  /// File picker title when exporting logs
+  ///
+  /// In en, this message translates to:
+  /// **'Choose save location'**
+  String get debugLogChooseSaveLocation;
+
+  /// Snackbar after exporting logs
+  ///
+  /// In en, this message translates to:
+  /// **'Logs saved to:\n{fileName}'**
+  String debugLogSavedTo(String fileName);
+
+  /// Tooltip when auto-scroll is enabled
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-scroll ON'**
+  String get debugLogAutoScrollOn;
+
+  /// Tooltip when auto-scroll is disabled
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-scroll OFF'**
+  String get debugLogAutoScrollOff;
+
+  /// Tooltip to export debug logs
+  ///
+  /// In en, this message translates to:
+  /// **'Export logs'**
+  String get debugLogExportLogs;
+
+  /// Tooltip to clear debug logs
+  ///
+  /// In en, this message translates to:
+  /// **'Clear logs'**
+  String get debugLogClearLogs;
+
+  /// Empty debug terminal body
+  ///
+  /// In en, this message translates to:
+  /// **'No logs yet.\n\nConnect your LoRa device and start pinging!'**
+  String get debugLogEmpty;
+
+  /// Share-sheet subject for a debug log file
+  ///
+  /// In en, this message translates to:
+  /// **'MeshCore Wardrive Debug Log'**
+  String get debugDiagnosticsShareSubject;
+
+  /// Share-sheet body for a debug log file
+  ///
+  /// In en, this message translates to:
+  /// **'Debug log for troubleshooting GPS and auto-ping issues'**
+  String get debugDiagnosticsShareText;
+
+  /// Snackbar when sharing a log file fails
+  ///
+  /// In en, this message translates to:
+  /// **'Error sharing file: {error}'**
+  String debugDiagnosticsErrorSharing(String error);
+
+  /// Delete log dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Log'**
+  String get debugDiagnosticsDeleteTitle;
+
+  /// Delete log dialog body
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this log file?'**
+  String get debugDiagnosticsDeleteBody;
+
+  /// Snackbar after deleting a log file
+  ///
+  /// In en, this message translates to:
+  /// **'Log file deleted'**
+  String get debugDiagnosticsLogDeleted;
+
+  /// Snackbar when deleting a log file fails
+  ///
+  /// In en, this message translates to:
+  /// **'Error deleting file: {error}'**
+  String debugDiagnosticsErrorDeleting(String error);
+
+  /// Snackbar when reading a log file fails
+  ///
+  /// In en, this message translates to:
+  /// **'Error reading file: {error}'**
+  String debugDiagnosticsErrorReading(String error);
+
+  /// Tooltip to reload log files
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get debugDiagnosticsRefresh;
+
+  /// Diagnostics intro heading
+  ///
+  /// In en, this message translates to:
+  /// **'Troubleshooting Samsung Devices'**
+  String get debugDiagnosticsSamsungTitle;
+
+  /// Diagnostics intro body
+  ///
+  /// In en, this message translates to:
+  /// **'This screen shows detailed debug logs for tracking GPS, auto-ping, and service events. If you\'\'re experiencing issues with auto-ping or GPS tracking, share the latest log file with the developer.'**
+  String get debugDiagnosticsSamsungBody;
+
+  /// Current debug-log session filename
+  ///
+  /// In en, this message translates to:
+  /// **'Current session: {name}'**
+  String debugDiagnosticsCurrentSession(String name);
+
+  /// Fallback when no debug session file exists
+  ///
+  /// In en, this message translates to:
+  /// **'Not started'**
+  String get debugDiagnosticsNotStarted;
+
+  /// Empty diagnostics log list
+  ///
+  /// In en, this message translates to:
+  /// **'No debug logs found.\nStart tracking to generate logs.'**
+  String get debugDiagnosticsEmpty;
+
+  /// Log file menu action
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get debugDiagnosticsView;
+
+  /// Share-sheet subject when viewing a log file
+  ///
+  /// In en, this message translates to:
+  /// **'MeshCore Wardrive Debug Log: {fileName}'**
+  String debugDiagnosticsShareSubjectWithFile(String fileName);
+
+  /// Log file size in bytes
+  ///
+  /// In en, this message translates to:
+  /// **'{bytes} B'**
+  String debugDiagnosticsSizeBytes(int bytes);
+
+  /// Log file size in kilobytes
+  ///
+  /// In en, this message translates to:
+  /// **'{kb} KB'**
+  String debugDiagnosticsSizeKb(String kb);
+
+  /// Log file size in megabytes
+  ///
+  /// In en, this message translates to:
+  /// **'{mb} MB'**
+  String debugDiagnosticsSizeMb(String mb);
+
+  /// Progress text when every achievement is unlocked
+  ///
+  /// In en, this message translates to:
+  /// **'All achievements unlocked!'**
+  String get achievementsAllUnlocked;
+
+  /// Progress text for remaining achievements
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} remaining} other{{count} remaining}}'**
+  String achievementsRemaining(int count);
+
+  /// Unlock date line under an achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked {date}'**
+  String achievementsUnlockedOn(String date);
 }
 
 class _AppLocalizationsDelegate

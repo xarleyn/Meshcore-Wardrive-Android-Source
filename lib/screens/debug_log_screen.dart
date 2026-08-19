@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../services/debug_log_service.dart';
 
 class DebugLogScreen extends StatefulWidget {
@@ -69,12 +70,13 @@ class _DebugLogScreenState extends State<DebugLogScreen> {
   }
 
   Future<void> _exportLogs() async {
+    final l10n = AppLocalizations.of(context);
     try {
       final logs = _logService.logs;
       if (logs.isEmpty) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('No logs to export')));
+        ).showSnackBar(SnackBar(content: Text(l10n.debugLogNoLogsToExport)));
         return;
       }
 
@@ -91,7 +93,7 @@ class _DebugLogScreenState extends State<DebugLogScreen> {
 
       // Let user choose directory
       final selectedDirectory = await FilePicker.platform.getDirectoryPath(
-        dialogTitle: 'Choose save location',
+        dialogTitle: l10n.debugLogChooseSaveLocation,
       );
 
       if (selectedDirectory == null) {
@@ -106,27 +108,30 @@ class _DebugLogScreenState extends State<DebugLogScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Logs saved to:\n$fileName'),
+            content: Text(l10n.debugLogSavedTo(fileName)),
             duration: const Duration(seconds: 3),
           ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Export failed: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context).mapExportFailed('$e')),
+          ),
+        );
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final logs = _logService.logs;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Debug Terminal'),
+        title: Text(l10n.mapDebugTerminal),
         actions: [
           IconButton(
             icon: Icon(
@@ -139,12 +144,14 @@ class _DebugLogScreenState extends State<DebugLogScreen> {
                 _autoScroll = !_autoScroll;
               });
             },
-            tooltip: _autoScroll ? 'Auto-scroll ON' : 'Auto-scroll OFF',
+            tooltip: _autoScroll
+                ? l10n.debugLogAutoScrollOn
+                : l10n.debugLogAutoScrollOff,
           ),
           IconButton(
             icon: const Icon(Icons.save),
             onPressed: _exportLogs,
-            tooltip: 'Export logs',
+            tooltip: l10n.debugLogExportLogs,
           ),
           IconButton(
             icon: const Icon(Icons.delete_sweep),
@@ -152,17 +159,17 @@ class _DebugLogScreenState extends State<DebugLogScreen> {
               _logService.clear();
               setState(() {});
             },
-            tooltip: 'Clear logs',
+            tooltip: l10n.debugLogClearLogs,
           ),
         ],
       ),
       body: Container(
         color: Colors.black,
         child: logs.isEmpty
-            ? const Center(
+            ? Center(
                 child: Text(
-                  'No logs yet.\n\nConnect your LoRa device and start pinging!',
-                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                  l10n.debugLogEmpty,
+                  style: const TextStyle(color: Colors.grey, fontSize: 16),
                   textAlign: TextAlign.center,
                 ),
               )

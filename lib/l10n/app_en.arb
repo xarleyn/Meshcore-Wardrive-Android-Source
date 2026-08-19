@@ -2920,5 +2920,1346 @@
         "type": "String"
       }
     }
+  },
+  "analyticsTabScore": "Score",
+  "@analyticsTabScore": {
+    "description": "Analytics bottom tab label"
+  },
+  "analyticsTabTime": "Time",
+  "@analyticsTabTime": {
+    "description": "Analytics bottom tab label"
+  },
+  "analyticsTabGoals": "Goals",
+  "@analyticsTabGoals": {
+    "description": "Analytics bottom tab label"
+  },
+  "analyticsTabCompare": "Compare",
+  "@analyticsTabCompare": {
+    "description": "Analytics bottom tab and compare button"
+  },
+  "analyticsTabRepeaters": "Repeaters",
+  "@analyticsTabRepeaters": {
+    "description": "Analytics bottom tab label"
+  },
+  "analyticsNoPingData": "No ping data yet.\nDo some wardriving first!",
+  "@analyticsNoPingData": {
+    "description": "Empty state when analytics has no ping samples"
+  },
+  "analyticsNoRepeaterData": "No repeater data yet.\nDo some wardriving first!",
+  "@analyticsNoRepeaterData": {
+    "description": "Empty state when analytics has no repeater samples"
+  },
+  "analyticsCoverageScore": "Coverage Score",
+  "@analyticsCoverageScore": {
+    "description": "Coverage score card subtitle"
+  },
+  "analyticsStatCells": "Cells",
+  "@analyticsStatCells": {
+    "description": "Coverage score statistic label"
+  },
+  "analyticsStatSuccess": "Success",
+  "@analyticsStatSuccess": {
+    "description": "Coverage score statistic label"
+  },
+  "analyticsStatFresh": "Fresh",
+  "@analyticsStatFresh": {
+    "description": "Coverage score statistic label"
+  },
+  "analyticsStatRepeaters": "Repeaters",
+  "@analyticsStatRepeaters": {
+    "description": "Coverage score statistic label"
+  },
+  "analyticsHowCalculated": "How it''s calculated",
+  "@analyticsHowCalculated": {
+    "description": "Score formula card title"
+  },
+  "analyticsScoreFormula": "Score = Unique Cells × Success Rate × Freshness",
+  "@analyticsScoreFormula": {
+    "description": "Coverage score formula"
+  },
+  "analyticsScoreBreakdown": "• {cells} cells × {rate} × {freshness} = {score}",
+  "@analyticsScoreBreakdown": {
+    "description": "Numeric breakdown of the coverage score",
+    "placeholders": {
+      "cells": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "freshness": {
+        "type": "String"
+      },
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsFreshnessLegend": "• Freshness: <1d=100%, <7d=80%, <30d=50%, older=20%",
+  "@analyticsFreshnessLegend": {
+    "description": "Freshness weighting legend"
+  },
+  "analyticsShareScore": "Share Score",
+  "@analyticsShareScore": {
+    "description": "Button to share coverage score"
+  },
+  "analyticsShareText": "MeshCore Wardrive Score: {score} ({grade})\nCells: {cells} • Success: {success}% • Freshness: {freshness}%\nRepeaters: {repeaters} • Pings: {pings}",
+  "@analyticsShareText": {
+    "description": "Share-sheet body for coverage score",
+    "placeholders": {
+      "score": {
+        "type": "String"
+      },
+      "grade": {
+        "type": "String"
+      },
+      "cells": {
+        "type": "String"
+      },
+      "success": {
+        "type": "String"
+      },
+      "freshness": {
+        "type": "String"
+      },
+      "repeaters": {
+        "type": "String"
+      },
+      "pings": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsSuccessRateByHour": "Success Rate by Hour",
+  "@analyticsSuccessRateByHour": {
+    "description": "Time-of-day chart title"
+  },
+  "analyticsPingsAnalyzed": "{count, plural, one{{count} ping analyzed} other{{count} pings analyzed}}",
+  "@analyticsPingsAnalyzed": {
+    "description": "Count of pings used in the hourly chart",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsPingsCount": "{count, plural, one{{count} ping} other{{count} pings}}",
+  "@analyticsPingsCount": {
+    "description": "Short ping count for tooltips and session pickers",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsHourTooltip": "{time}\n{rate}% ({pings})",
+  "@analyticsHourTooltip": {
+    "description": "Hourly bar chart tooltip",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "pings": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsSummary": "Summary",
+  "@analyticsSummary": {
+    "description": "Best/worst hour section title"
+  },
+  "analyticsBestHour": "Best hour",
+  "@analyticsBestHour": {
+    "description": "Best hour row label"
+  },
+  "analyticsWorstHour": "Worst hour",
+  "@analyticsWorstHour": {
+    "description": "Worst hour row label"
+  },
+  "analyticsHourValue": "{hour}:00 — {rate}%",
+  "@analyticsHourValue": {
+    "description": "Hour and success-rate value",
+    "placeholders": {
+      "hour": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsByPeriod": "By Period",
+  "@analyticsByPeriod": {
+    "description": "Time-of-day period section title"
+  },
+  "analyticsPeriodNight": "Night (0-6)",
+  "@analyticsPeriodNight": {
+    "description": "Night period label"
+  },
+  "analyticsPeriodMorning": "Morning (6-12)",
+  "@analyticsPeriodMorning": {
+    "description": "Morning period label"
+  },
+  "analyticsPeriodAfternoon": "Afternoon (12-18)",
+  "@analyticsPeriodAfternoon": {
+    "description": "Afternoon period label"
+  },
+  "analyticsPeriodEvening": "Evening (18-24)",
+  "@analyticsPeriodEvening": {
+    "description": "Evening period label"
+  },
+  "analyticsNoData": "No data",
+  "@analyticsNoData": {
+    "description": "Placeholder when a period has no samples"
+  },
+  "analyticsNoCoverageGoal": "No coverage goal set",
+  "@analyticsNoCoverageGoal": {
+    "description": "Empty coverage-goal title"
+  },
+  "analyticsSetGoalHint": "Set a target area to track your wardriving progress.",
+  "@analyticsSetGoalHint": {
+    "description": "Empty coverage-goal hint"
+  },
+  "analyticsSetGoalArea": "Set Goal Area",
+  "@analyticsSetGoalArea": {
+    "description": "Button to create a coverage goal"
+  },
+  "analyticsCoverageGoal": "Coverage Goal",
+  "@analyticsCoverageGoal": {
+    "description": "Coverage goal section title"
+  },
+  "analyticsEdit": "Edit",
+  "@analyticsEdit": {
+    "description": "Edit coverage goal button"
+  },
+  "analyticsGoalCenterRadius": "Center: {lat}, {lon}\nRadius: {radius}",
+  "@analyticsGoalCenterRadius": {
+    "description": "Coverage goal center and radius summary",
+    "placeholders": {
+      "lat": {
+        "type": "String"
+      },
+      "lon": {
+        "type": "String"
+      },
+      "radius": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsCovered": "covered",
+  "@analyticsCovered": {
+    "description": "Label under the coverage-goal percent"
+  },
+  "analyticsTotalCellsInArea": "Total cells in area",
+  "@analyticsTotalCellsInArea": {
+    "description": "Goal statistic label"
+  },
+  "analyticsCoveredAboveZero": "Covered (>0% success)",
+  "@analyticsCoveredAboveZero": {
+    "description": "Goal statistic for covered cells"
+  },
+  "analyticsPartialBelow30": "Partial (<30% success)",
+  "@analyticsPartialBelow30": {
+    "description": "Goal statistic for partial cells"
+  },
+  "analyticsUncovered": "Uncovered",
+  "@analyticsUncovered": {
+    "description": "Goal statistic for uncovered cells"
+  },
+  "analyticsPingsInArea": "Pings in area",
+  "@analyticsPingsInArea": {
+    "description": "Goal statistic for pings in the goal area"
+  },
+  "analyticsRadiusMiles": "{miles} miles",
+  "@analyticsRadiusMiles": {
+    "description": "Goal radius in miles",
+    "placeholders": {
+      "miles": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsRadiusMeters": "{meters} m",
+  "@analyticsRadiusMeters": {
+    "description": "Goal radius in meters",
+    "placeholders": {
+      "meters": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsMile1": "1 mile",
+  "@analyticsMile1": {
+    "description": "Coverage goal radius option"
+  },
+  "analyticsMiles5": "5 miles",
+  "@analyticsMiles5": {
+    "description": "Coverage goal radius option"
+  },
+  "analyticsMiles10": "10 miles",
+  "@analyticsMiles10": {
+    "description": "Coverage goal radius option"
+  },
+  "analyticsMiles25": "25 miles",
+  "@analyticsMiles25": {
+    "description": "Coverage goal radius option"
+  },
+  "analyticsSetCoverageGoal": "Set Coverage Goal",
+  "@analyticsSetCoverageGoal": {
+    "description": "Set-goal dialog title"
+  },
+  "analyticsCenterCurrentGps": "Center: Your current GPS location",
+  "@analyticsCenterCurrentGps": {
+    "description": "Goal dialog when centering on GPS"
+  },
+  "analyticsCenterCoords": "Center: {lat}, {lon}",
+  "@analyticsCenterCoords": {
+    "description": "Goal dialog center coordinates",
+    "placeholders": {
+      "lat": {
+        "type": "String"
+      },
+      "lon": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsRadiusLabel": "Radius:",
+  "@analyticsRadiusLabel": {
+    "description": "Goal dialog radius heading"
+  },
+  "analyticsSetGoal": "Set Goal",
+  "@analyticsSetGoal": {
+    "description": "Confirm coverage goal button"
+  },
+  "analyticsNeedTwoSessions": "Need at least 2 completed sessions\nwith ping data to compare.",
+  "@analyticsNeedTwoSessions": {
+    "description": "Empty state when fewer than two sessions exist"
+  },
+  "analyticsCompareSessions": "Compare Sessions",
+  "@analyticsCompareSessions": {
+    "description": "Session comparison heading"
+  },
+  "analyticsSessionABaseline": "Session A (baseline)",
+  "@analyticsSessionABaseline": {
+    "description": "Baseline session picker label"
+  },
+  "analyticsSessionBCompare": "Session B (compare)",
+  "@analyticsSessionBCompare": {
+    "description": "Compare session picker label"
+  },
+  "analyticsSamples": "Samples",
+  "@analyticsSamples": {
+    "description": "Comparison row label"
+  },
+  "analyticsSuccessRate": "Success Rate",
+  "@analyticsSuccessRate": {
+    "description": "Comparison row label"
+  },
+  "analyticsDistance": "Distance",
+  "@analyticsDistance": {
+    "description": "Comparison row label"
+  },
+  "analyticsDistanceMiles": "{miles} mi",
+  "@analyticsDistanceMiles": {
+    "description": "Session distance in miles",
+    "placeholders": {
+      "miles": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsCoverageChanges": "Coverage Changes",
+  "@analyticsCoverageChanges": {
+    "description": "Comparison changes heading"
+  },
+  "analyticsNewCoverage": "New coverage",
+  "@analyticsNewCoverage": {
+    "description": "Comparison change row"
+  },
+  "analyticsLostCoverage": "Lost coverage",
+  "@analyticsLostCoverage": {
+    "description": "Comparison change row"
+  },
+  "analyticsImproved": "Improved (>10%)",
+  "@analyticsImproved": {
+    "description": "Comparison change row"
+  },
+  "analyticsDegraded": "Degraded (>10%)",
+  "@analyticsDegraded": {
+    "description": "Comparison change row"
+  },
+  "analyticsUnchanged": "Unchanged",
+  "@analyticsUnchanged": {
+    "description": "Comparison change row"
+  },
+  "analyticsSessionOption": "{date} — {pings}, {rate}%",
+  "@analyticsSessionOption": {
+    "description": "Session picker dialog option",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "pings": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsSessionSelected": "{date} — {pings}",
+  "@analyticsSessionSelected": {
+    "description": "Selected session summary",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "pings": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsRepeaterCount": "{count, plural, one{{count} repeater} other{{count} repeaters}}",
+  "@analyticsRepeaterCount": {
+    "description": "Repeater reliability list count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsSort": "Sort: ",
+  "@analyticsSort": {
+    "description": "Sort dropdown prefix"
+  },
+  "analyticsSortReliability": "Reliability",
+  "@analyticsSortReliability": {
+    "description": "Repeater sort option"
+  },
+  "analyticsSortResponseTime": "Response Time",
+  "@analyticsSortResponseTime": {
+    "description": "Repeater sort option"
+  },
+  "analyticsSortPingCount": "Ping Count",
+  "@analyticsSortPingCount": {
+    "description": "Repeater sort option"
+  },
+  "analyticsMiniPings": "Pings",
+  "@analyticsMiniPings": {
+    "description": "Repeater card mini-stat label"
+  },
+  "analyticsMiniAvgResponse": "Avg Response",
+  "@analyticsMiniAvgResponse": {
+    "description": "Repeater card mini-stat label"
+  },
+  "analyticsMiniConsistency": "Consistency",
+  "@analyticsMiniConsistency": {
+    "description": "Repeater card mini-stat label"
+  },
+  "analyticsMiniTrend": "Trend",
+  "@analyticsMiniTrend": {
+    "description": "Repeater card mini-stat label"
+  },
+  "analyticsAvgResponseMs": "{ms} ms",
+  "@analyticsAvgResponseMs": {
+    "description": "Average response time value",
+    "placeholders": {
+      "ms": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsTrend": "{trend, select, improving{improving} degrading{degrading} other{stable}}",
+  "@analyticsTrend": {
+    "description": "Repeater reliability trend label",
+    "placeholders": {
+      "trend": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsFirstLastSeen": "First seen: {first} • Last: {last}",
+  "@analyticsFirstLastSeen": {
+    "description": "Repeater first/last seen line",
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "last": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionDeleteTitle": "Delete Session?",
+  "@sessionDeleteTitle": {
+    "description": "Delete session dialog title"
+  },
+  "sessionDeleteBody": "This will remove the session record. Sample data is not affected.",
+  "@sessionDeleteBody": {
+    "description": "Delete session dialog body"
+  },
+  "sessionNotesTitle": "Session Notes",
+  "@sessionNotesTitle": {
+    "description": "Edit notes dialog title"
+  },
+  "sessionNotesHint": "Add notes about this session...",
+  "@sessionNotesHint": {
+    "description": "Session notes field hint"
+  },
+  "sessionEmpty": "No sessions yet.\n\nStart tracking to record your first session!",
+  "@sessionEmpty": {
+    "description": "Empty session history body"
+  },
+  "sessionEditNotes": "Edit Notes",
+  "@sessionEditNotes": {
+    "description": "Tooltip to edit session notes"
+  },
+  "sessionTimeInProgress": "{start} – In progress",
+  "@sessionTimeInProgress": {
+    "description": "Time range for an active session",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionTimeRange": "{start} – {end}",
+  "@sessionTimeRange": {
+    "description": "Completed session time range",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionDurationHoursMinutes": "{hours}h {minutes}m",
+  "@sessionDurationHoursMinutes": {
+    "description": "Session duration in hours and minutes",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionDurationMinutesSeconds": "{minutes}m {seconds}s",
+  "@sessionDurationMinutesSeconds": {
+    "description": "Session duration in minutes and seconds",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionDurationSeconds": "{seconds}s",
+  "@sessionDurationSeconds": {
+    "description": "Session duration in seconds",
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionDistanceKm": "{km} km",
+  "@sessionDistanceKm": {
+    "description": "Session distance in kilometers",
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionDistanceMi": "{mi} mi",
+  "@sessionDistanceMi": {
+    "description": "Session distance in miles",
+    "placeholders": {
+      "mi": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionPoints": "{count} pts",
+  "@sessionPoints": {
+    "description": "Session GPS point count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionHeard": "{count} heard",
+  "@sessionHeard": {
+    "description": "Successful ping count on a session card",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionTapToViewOnMap": "Tap to view on map",
+  "@sessionTapToViewOnMap": {
+    "description": "Hint when a session can open the map"
+  },
+  "repeaterHealthEmpty": "No repeater data yet.\nDo some wardriving first!",
+  "@repeaterHealthEmpty": {
+    "description": "Empty repeater health body"
+  },
+  "repeaterHealthOfflineCount": "{count, plural, one{{count} offline} other{{count} offline}}",
+  "@repeaterHealthOfflineCount": {
+    "description": "AppBar chip for offline repeaters",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "repeaterHealthDegradingCount": "{count, plural, one{{count} degrading} other{{count} degrading}}",
+  "@repeaterHealthDegradingCount": {
+    "description": "AppBar chip for degrading repeaters",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "repeaterHealthRepeaterCount": "{count, plural, one{{count} repeater} other{{count} repeaters}}",
+  "@repeaterHealthRepeaterCount": {
+    "description": "Repeater health list count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "repeaterHealthSort": "Sort: ",
+  "@repeaterHealthSort": {
+    "description": "Sort dropdown prefix"
+  },
+  "repeaterHealthSortReliability": "Reliability",
+  "@repeaterHealthSortReliability": {
+    "description": "Repeater health sort option"
+  },
+  "repeaterHealthSortResponseTime": "Response Time",
+  "@repeaterHealthSortResponseTime": {
+    "description": "Repeater health sort option"
+  },
+  "repeaterHealthSortPingCount": "Ping Count",
+  "@repeaterHealthSortPingCount": {
+    "description": "Repeater health sort option"
+  },
+  "repeaterHealthSortAlertsFirst": "Alerts First",
+  "@repeaterHealthSortAlertsFirst": {
+    "description": "Repeater health sort option"
+  },
+  "repeaterHealthMiniPings": "Pings",
+  "@repeaterHealthMiniPings": {
+    "description": "Repeater card mini-stat label"
+  },
+  "repeaterHealthMiniAvgResp": "Avg Resp",
+  "@repeaterHealthMiniAvgResp": {
+    "description": "Repeater card mini-stat label"
+  },
+  "repeaterHealthMiniCells": "Cells",
+  "@repeaterHealthMiniCells": {
+    "description": "Repeater card mini-stat label"
+  },
+  "repeaterHealthMiniTrend": "Trend",
+  "@repeaterHealthMiniTrend": {
+    "description": "Repeater card mini-stat label"
+  },
+  "repeaterHealthAvgRespMs": "{ms}ms",
+  "@repeaterHealthAvgRespMs": {
+    "description": "Average response time on a repeater card",
+    "placeholders": {
+      "ms": {
+        "type": "String"
+      }
+    }
+  },
+  "repeaterHealthTrendUp": "▲ Up",
+  "@repeaterHealthTrendUp": {
+    "description": "Improving trend label"
+  },
+  "repeaterHealthTrendDown": "▼ Down",
+  "@repeaterHealthTrendDown": {
+    "description": "Degrading trend label"
+  },
+  "repeaterHealthTrendStable": "— Stable",
+  "@repeaterHealthTrendStable": {
+    "description": "Stable trend label"
+  },
+  "repeaterHealthFirstLast": "First: {first} • Last: {last}",
+  "@repeaterHealthFirstLast": {
+    "description": "Repeater first/last seen line",
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "last": {
+        "type": "String"
+      }
+    }
+  },
+  "repeaterHealthFirstLastOffline": "First: {first} • Last: {last} • ⚠️ Offline {days}d",
+  "@repeaterHealthFirstLastOffline": {
+    "description": "Repeater first/last seen line when offline",
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "last": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "repeaterHealthDetailTitle": "Repeater {id}",
+  "@repeaterHealthDetailTitle": {
+    "description": "Repeater detail AppBar title",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "repeaterHealthSnrOverTime": "SNR Over Time",
+  "@repeaterHealthSnrOverTime": {
+    "description": "SNR chart title"
+  },
+  "repeaterHealthWeeklySuccessRate": "Weekly Success Rate",
+  "@repeaterHealthWeeklySuccessRate": {
+    "description": "Weekly chart title"
+  },
+  "repeaterHealthBestTimeOfDay": "Best Time of Day",
+  "@repeaterHealthBestTimeOfDay": {
+    "description": "Time-of-day section title"
+  },
+  "repeaterHealthRecentPings": "Recent Pings",
+  "@repeaterHealthRecentPings": {
+    "description": "Recent pings section title"
+  },
+  "repeaterHealthSuccessRate": "Success Rate",
+  "@repeaterHealthSuccessRate": {
+    "description": "Detail summary label"
+  },
+  "repeaterHealthTotalPings": "Total Pings",
+  "@repeaterHealthTotalPings": {
+    "description": "Detail summary label"
+  },
+  "repeaterHealthHeard": "Heard",
+  "@repeaterHealthHeard": {
+    "description": "Detail summary label"
+  },
+  "repeaterHealthCoverage": "Coverage",
+  "@repeaterHealthCoverage": {
+    "description": "Detail summary label"
+  },
+  "repeaterHealthCellCount": "{count, plural, one{{count} cell} other{{count} cells}}",
+  "@repeaterHealthCellCount": {
+    "description": "Coverage cell count on the detail card",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "repeaterHealthDegradingAlert": "7-day rate ({rate7}) dropped vs 30-day ({rate30})",
+  "@repeaterHealthDegradingAlert": {
+    "description": "Degrading-rate warning on the detail card",
+    "placeholders": {
+      "rate7": {
+        "type": "String"
+      },
+      "rate30": {
+        "type": "String"
+      }
+    }
+  },
+  "repeaterHealthAvgResponse": "Avg response: {value}",
+  "@repeaterHealthAvgResponse": {
+    "description": "Average response footer on the detail card",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "repeaterHealthAvgResponseNa": "N/A",
+  "@repeaterHealthAvgResponseNa": {
+    "description": "Fallback when average response is missing"
+  },
+  "repeaterHealthNoSnrData": "No SNR data",
+  "@repeaterHealthNoSnrData": {
+    "description": "Empty SNR chart"
+  },
+  "repeaterHealthNoData": "No data",
+  "@repeaterHealthNoData": {
+    "description": "Empty weekly chart"
+  },
+  "repeaterHealthNoWeeklyData": "No weekly data",
+  "@repeaterHealthNoWeeklyData": {
+    "description": "Empty weekly chart after grouping"
+  },
+  "repeaterHealthPeriodNight": "Night (0-6)",
+  "@repeaterHealthPeriodNight": {
+    "description": "Detail time-of-day period"
+  },
+  "repeaterHealthPeriodMorning": "Morning (6-12)",
+  "@repeaterHealthPeriodMorning": {
+    "description": "Detail time-of-day period"
+  },
+  "repeaterHealthPeriodAfternoon": "Afternoon (12-18)",
+  "@repeaterHealthPeriodAfternoon": {
+    "description": "Detail time-of-day period"
+  },
+  "repeaterHealthPeriodEvening": "Evening (18-24)",
+  "@repeaterHealthPeriodEvening": {
+    "description": "Detail time-of-day period"
+  },
+  "repeaterHealthPeriodRate": "{rate}% ({pings})",
+  "@repeaterHealthPeriodRate": {
+    "description": "Period success rate with ping count",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "pings": {
+        "type": "String"
+      }
+    }
+  },
+  "repeaterHealthWeekTooltip": "{week}\n{rate}% ({pings})",
+  "@repeaterHealthWeekTooltip": {
+    "description": "Weekly bar tooltip",
+    "placeholders": {
+      "week": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "pings": {
+        "type": "String"
+      }
+    }
+  },
+  "repeaterHealthNoPingsRecorded": "No pings recorded",
+  "@repeaterHealthNoPingsRecorded": {
+    "description": "Empty recent-pings list"
+  },
+  "deviceComparisonEmpty": "No devices tracked yet.\n\nConnect a LoRa device and start wardriving — the app will automatically log which device you use.",
+  "@deviceComparisonEmpty": {
+    "description": "Empty device comparison body"
+  },
+  "deviceComparisonTracked": "{count, plural, one{{count} device tracked} other{{count} devices tracked}}",
+  "@deviceComparisonTracked": {
+    "description": "Tracked device count heading",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deviceComparisonCompareDevices": "Compare Devices",
+  "@deviceComparisonCompareDevices": {
+    "description": "Device comparison section title"
+  },
+  "deviceComparisonDeviceA": "Device A",
+  "@deviceComparisonDeviceA": {
+    "description": "First device dropdown hint"
+  },
+  "deviceComparisonDeviceB": "Device B",
+  "@deviceComparisonDeviceB": {
+    "description": "Second device dropdown hint"
+  },
+  "deviceComparisonVs": "vs",
+  "@deviceComparisonVs": {
+    "description": "Between the two device dropdowns"
+  },
+  "deviceComparisonMiniPings": "Pings",
+  "@deviceComparisonMiniPings": {
+    "description": "Device card mini-stat label"
+  },
+  "deviceComparisonMiniCells": "Cells",
+  "@deviceComparisonMiniCells": {
+    "description": "Device card mini-stat label"
+  },
+  "deviceComparisonMiniAvgResp": "Avg Resp",
+  "@deviceComparisonMiniAvgResp": {
+    "description": "Device card mini-stat label"
+  },
+  "deviceComparisonMiniAvgSnr": "Avg SNR",
+  "@deviceComparisonMiniAvgSnr": {
+    "description": "Device card mini-stat label"
+  },
+  "deviceComparisonAvgRespMs": "{ms}ms",
+  "@deviceComparisonAvgRespMs": {
+    "description": "Average response on a device card",
+    "placeholders": {
+      "ms": {
+        "type": "String"
+      }
+    }
+  },
+  "deviceComparisonFirstLast": "First: {first} • Last: {last}",
+  "@deviceComparisonFirstLast": {
+    "description": "Device first/last used line",
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "last": {
+        "type": "String"
+      }
+    }
+  },
+  "deviceComparisonStat": "Stat",
+  "@deviceComparisonStat": {
+    "description": "Comparison table header"
+  },
+  "deviceComparisonWinner": "Winner",
+  "@deviceComparisonWinner": {
+    "description": "Comparison table header"
+  },
+  "deviceComparisonTotalPings": "Total Pings",
+  "@deviceComparisonTotalPings": {
+    "description": "Comparison row label"
+  },
+  "deviceComparisonSuccessRate": "Success Rate",
+  "@deviceComparisonSuccessRate": {
+    "description": "Comparison row label"
+  },
+  "deviceComparisonFailures": "Failures",
+  "@deviceComparisonFailures": {
+    "description": "Comparison row label"
+  },
+  "deviceComparisonUniqueCells": "Unique Cells",
+  "@deviceComparisonUniqueCells": {
+    "description": "Comparison row label"
+  },
+  "deviceComparisonAvgResponse": "Avg Response",
+  "@deviceComparisonAvgResponse": {
+    "description": "Comparison row label"
+  },
+  "deviceComparisonAvgSnr": "Avg SNR",
+  "@deviceComparisonAvgSnr": {
+    "description": "Comparison row label"
+  },
+  "deviceComparisonAvgRssi": "Avg RSSI",
+  "@deviceComparisonAvgRssi": {
+    "description": "Comparison row label"
+  },
+  "deviceComparisonTie": "Tie",
+  "@deviceComparisonTie": {
+    "description": "Comparison winner when values are equal"
+  },
+  "signalTrendRssi": "RSSI",
+  "@signalTrendRssi": {
+    "description": "Signal trend metric segment; keep RSSI"
+  },
+  "signalTrendSnr": "SNR",
+  "@signalTrendSnr": {
+    "description": "Signal trend metric segment; keep SNR"
+  },
+  "signalTrendResponse": "Response",
+  "@signalTrendResponse": {
+    "description": "Signal trend metric segment"
+  },
+  "signalTrendEmpty": "No signal data yet.\nDo some wardriving with pings enabled.",
+  "@signalTrendEmpty": {
+    "description": "Empty signal trend body"
+  },
+  "signalTrendNoMetricData": "No {label} data available.",
+  "@signalTrendNoMetricData": {
+    "description": "Empty chart for the selected metric",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "signalTrendResponseTimeLabel": "response time",
+  "@signalTrendResponseTimeLabel": {
+    "description": "Metric name used in the empty-chart message"
+  },
+  "signalTrendMin": "Min",
+  "@signalTrendMin": {
+    "description": "Signal stats card label"
+  },
+  "signalTrendAvg": "Avg",
+  "@signalTrendAvg": {
+    "description": "Signal stats card label"
+  },
+  "signalTrendMax": "Max",
+  "@signalTrendMax": {
+    "description": "Signal stats card label"
+  },
+  "signalTrendPts": "Pts",
+  "@signalTrendPts": {
+    "description": "Signal stats card label"
+  },
+  "ductingTitle": "Tropo Ducting Forecast",
+  "@ductingTitle": {
+    "description": "Ducting forecast AppBar title"
+  },
+  "ductingOpenInBrowser": "Open in browser",
+  "@ductingOpenInBrowser": {
+    "description": "Tooltip to open the forecast website"
+  },
+  "ductingRegion": "Region",
+  "@ductingRegion": {
+    "description": "Forecast region dropdown label"
+  },
+  "ductingFailedToLoad": "Failed to load forecast image.\nCheck internet connection.",
+  "@ductingFailedToLoad": {
+    "description": "Forecast image error"
+  },
+  "ductingTimeHours": "+{hours}h",
+  "@ductingTimeHours": {
+    "description": "Forecast offset in hours",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "ductingTimeDays": "+{days}d",
+  "@ductingTimeDays": {
+    "description": "Forecast offset in whole days",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "ductingTimeDaysHours": "+{days}d {hours}h",
+  "@ductingTimeDaysHours": {
+    "description": "Forecast offset in days and leftover hours",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "ductingFrameIndex": "{current} / {total}",
+  "@ductingFrameIndex": {
+    "description": "Current forecast frame index",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "ductingLegendNone": "None",
+  "@ductingLegendNone": {
+    "description": "Ducting intensity legend"
+  },
+  "ductingLegendMarginal": "Marginal",
+  "@ductingLegendMarginal": {
+    "description": "Ducting intensity legend"
+  },
+  "ductingLegendModerate": "Moderate",
+  "@ductingLegendModerate": {
+    "description": "Ducting intensity legend"
+  },
+  "ductingLegendHigh": "High",
+  "@ductingLegendHigh": {
+    "description": "Ducting intensity legend"
+  },
+  "ductingLegendExtreme": "Extreme",
+  "@ductingLegendExtreme": {
+    "description": "Ducting intensity legend"
+  },
+  "ductingAttribution": "Forecast © William R. Hepburn — dxinfocentre.com",
+  "@ductingAttribution": {
+    "description": "Forecast map attribution"
+  },
+  "ductingRegionWam": "Western North America",
+  "@ductingRegionWam": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionEam": "Eastern North America",
+  "@ductingRegionEam": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionEnp": "Eastern North Pacific",
+  "@ductingRegionEnp": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionEsp": "Eastern South Pacific",
+  "@ductingRegionEsp": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionCar": "Gulf-Caribbean",
+  "@ductingRegionCar": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionNsa": "Northern South America",
+  "@ductingRegionNsa": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionSam": "Central South America",
+  "@ductingRegionSam": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionSat": "South Atlantic",
+  "@ductingRegionSat": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionNat": "North Atlantic",
+  "@ductingRegionNat": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionEnt": "Eastern North Atlantic",
+  "@ductingRegionEnt": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionNwe": "Northwestern Europe",
+  "@ductingRegionNwe": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionEur": "Europe",
+  "@ductingRegionEur": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionEeu": "Eastern Europe",
+  "@ductingRegionEeu": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionAfi": "South Africa",
+  "@ductingRegionAfi": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionMid": "Middle East",
+  "@ductingRegionMid": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionNca": "North Central Asia",
+  "@ductingRegionNca": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionIno": "Indian Ocean",
+  "@ductingRegionIno": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionSea": "Southeast Asia",
+  "@ductingRegionSea": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionEas": "Far East",
+  "@ductingRegionEas": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionNea": "Eastern Siberia",
+  "@ductingRegionNea": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionAus": "Australia & New Zealand",
+  "@ductingRegionAus": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionOce": "Oceania",
+  "@ductingRegionOce": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionWnp": "Western North Pacific",
+  "@ductingRegionWnp": {
+    "description": "Ducting forecast region"
+  },
+  "debugLogNoLogsToExport": "No logs to export",
+  "@debugLogNoLogsToExport": {
+    "description": "Snackbar when export has no logs"
+  },
+  "debugLogChooseSaveLocation": "Choose save location",
+  "@debugLogChooseSaveLocation": {
+    "description": "File picker title when exporting logs"
+  },
+  "debugLogSavedTo": "Logs saved to:\n{fileName}",
+  "@debugLogSavedTo": {
+    "description": "Snackbar after exporting logs",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "debugLogAutoScrollOn": "Auto-scroll ON",
+  "@debugLogAutoScrollOn": {
+    "description": "Tooltip when auto-scroll is enabled"
+  },
+  "debugLogAutoScrollOff": "Auto-scroll OFF",
+  "@debugLogAutoScrollOff": {
+    "description": "Tooltip when auto-scroll is disabled"
+  },
+  "debugLogExportLogs": "Export logs",
+  "@debugLogExportLogs": {
+    "description": "Tooltip to export debug logs"
+  },
+  "debugLogClearLogs": "Clear logs",
+  "@debugLogClearLogs": {
+    "description": "Tooltip to clear debug logs"
+  },
+  "debugLogEmpty": "No logs yet.\n\nConnect your LoRa device and start pinging!",
+  "@debugLogEmpty": {
+    "description": "Empty debug terminal body"
+  },
+  "debugDiagnosticsShareSubject": "MeshCore Wardrive Debug Log",
+  "@debugDiagnosticsShareSubject": {
+    "description": "Share-sheet subject for a debug log file"
+  },
+  "debugDiagnosticsShareText": "Debug log for troubleshooting GPS and auto-ping issues",
+  "@debugDiagnosticsShareText": {
+    "description": "Share-sheet body for a debug log file"
+  },
+  "debugDiagnosticsErrorSharing": "Error sharing file: {error}",
+  "@debugDiagnosticsErrorSharing": {
+    "description": "Snackbar when sharing a log file fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "debugDiagnosticsDeleteTitle": "Delete Log",
+  "@debugDiagnosticsDeleteTitle": {
+    "description": "Delete log dialog title"
+  },
+  "debugDiagnosticsDeleteBody": "Are you sure you want to delete this log file?",
+  "@debugDiagnosticsDeleteBody": {
+    "description": "Delete log dialog body"
+  },
+  "debugDiagnosticsLogDeleted": "Log file deleted",
+  "@debugDiagnosticsLogDeleted": {
+    "description": "Snackbar after deleting a log file"
+  },
+  "debugDiagnosticsErrorDeleting": "Error deleting file: {error}",
+  "@debugDiagnosticsErrorDeleting": {
+    "description": "Snackbar when deleting a log file fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "debugDiagnosticsErrorReading": "Error reading file: {error}",
+  "@debugDiagnosticsErrorReading": {
+    "description": "Snackbar when reading a log file fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "debugDiagnosticsRefresh": "Refresh",
+  "@debugDiagnosticsRefresh": {
+    "description": "Tooltip to reload log files"
+  },
+  "debugDiagnosticsSamsungTitle": "Troubleshooting Samsung Devices",
+  "@debugDiagnosticsSamsungTitle": {
+    "description": "Diagnostics intro heading"
+  },
+  "debugDiagnosticsSamsungBody": "This screen shows detailed debug logs for tracking GPS, auto-ping, and service events. If you''re experiencing issues with auto-ping or GPS tracking, share the latest log file with the developer.",
+  "@debugDiagnosticsSamsungBody": {
+    "description": "Diagnostics intro body"
+  },
+  "debugDiagnosticsCurrentSession": "Current session: {name}",
+  "@debugDiagnosticsCurrentSession": {
+    "description": "Current debug-log session filename",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debugDiagnosticsNotStarted": "Not started",
+  "@debugDiagnosticsNotStarted": {
+    "description": "Fallback when no debug session file exists"
+  },
+  "debugDiagnosticsEmpty": "No debug logs found.\nStart tracking to generate logs.",
+  "@debugDiagnosticsEmpty": {
+    "description": "Empty diagnostics log list"
+  },
+  "debugDiagnosticsView": "View",
+  "@debugDiagnosticsView": {
+    "description": "Log file menu action"
+  },
+  "debugDiagnosticsShareSubjectWithFile": "MeshCore Wardrive Debug Log: {fileName}",
+  "@debugDiagnosticsShareSubjectWithFile": {
+    "description": "Share-sheet subject when viewing a log file",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "debugDiagnosticsSizeBytes": "{bytes} B",
+  "@debugDiagnosticsSizeBytes": {
+    "description": "Log file size in bytes",
+    "placeholders": {
+      "bytes": {
+        "type": "int"
+      }
+    }
+  },
+  "debugDiagnosticsSizeKb": "{kb} KB",
+  "@debugDiagnosticsSizeKb": {
+    "description": "Log file size in kilobytes",
+    "placeholders": {
+      "kb": {
+        "type": "String"
+      }
+    }
+  },
+  "debugDiagnosticsSizeMb": "{mb} MB",
+  "@debugDiagnosticsSizeMb": {
+    "description": "Log file size in megabytes",
+    "placeholders": {
+      "mb": {
+        "type": "String"
+      }
+    }
+  },
+  "achievementsAllUnlocked": "All achievements unlocked!",
+  "@achievementsAllUnlocked": {
+    "description": "Progress text when every achievement is unlocked"
+  },
+  "achievementsRemaining": "{count, plural, one{{count} remaining} other{{count} remaining}}",
+  "@achievementsRemaining": {
+    "description": "Progress text for remaining achievements",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "achievementsUnlockedOn": "Unlocked {date}",
+  "@achievementsUnlockedOn": {
+    "description": "Unlock date line under an achievement",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   }
 }
