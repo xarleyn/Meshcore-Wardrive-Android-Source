@@ -129,6 +129,7 @@ class LocationService {
   final Battery _battery = Battery();
   StreamSubscription<BatteryState>? _batteryStateSubscription;
   bool _batterySaverActive = false;
+  bool _batterySaverEnabled = true;
   double _normalPingInterval = 805.0; // Saved before battery saver doubles it
   final _batterySaverController = StreamController<bool>.broadcast();
   Stream<bool> get batterySaverStream => _batterySaverController.stream;
@@ -195,6 +196,18 @@ class LocationService {
     } else if (!enabled) {
       _ductingFetchTimer?.cancel();
       _ductingFetchTimer = null;
+    }
+  }
+
+  /// Enable or disable automatic battery-saver ping doubling.
+  void setBatterySaverEnabled(bool enabled) {
+    _batterySaverEnabled = enabled;
+    if (!enabled) {
+      _stopBatteryMonitoring();
+      return;
+    }
+    if (_isTracking) {
+      _startBatteryMonitoring();
     }
   }
 
@@ -607,8 +620,11 @@ class LocationService {
       _isTracking = true;
       WidgetService.updateTrackingStatus(true);
 
-      // Start monitoring device battery for battery saver mode
-      _startBatteryMonitoring();
+      // Start monitoring device battery for battery saver mode (if enabled)
+      _batterySaverEnabled = await _settings.getBatterySaverEnabled();
+      if (_batterySaverEnabled) {
+        _startBatteryMonitoring();
+      }
 
       // Load alert settings
       _deadZoneAlertsEnabled = await _settings.getDeadZoneAlertsEnabled();
@@ -1043,6 +1059,7 @@ class LocationService {
     _batteryStateSubscription = _battery.onBatteryStateChanged.listen((
       _,
     ) async {
+      if (!_batterySaverEnabled) return;
       try {
         final level = await _battery.batteryLevel;
         if (level <= 20 && !_batterySaverActive) {
@@ -1057,6 +1074,7 @@ class LocationService {
     // Also check immediately
     _battery.batteryLevel
         .then((level) {
+          if (!_batterySaverEnabled) return;
           if (level <= 20 && !_batterySaverActive) {
             _activateBatterySaver();
           }
@@ -1064,7 +1082,16 @@ class LocationService {
         .catchError((_) {});
   }
 
+  void _stopBatteryMonitoring() {
+    _batteryStateSubscription?.cancel();
+    _batteryStateSubscription = null;
+    if (_batterySaverActive) {
+      _deactivateBatterySaver();
+    }
+  }
+
   void _activateBatterySaver() {
+    if (!_batterySaverEnabled) return;
     _batterySaverActive = true;
     _normalPingInterval = _pingIntervalMeters;
     _pingIntervalMeters = _normalPingInterval * 2;
@@ -1251,11 +1278,7 @@ class LocationService {
     _timePingTimer = null;
 
     // Stop battery monitoring and deactivate battery saver
-    _batteryStateSubscription?.cancel();
-    _batteryStateSubscription = null;
-    if (_batterySaverActive) {
-      _deactivateBatterySaver();
-    }
+    _stopBatteryMonitoring();
 
     // Stop Carpeater mode
     _carpeaterNeighboursSubscription?.cancel();

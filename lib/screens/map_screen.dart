@@ -24,6 +24,7 @@ import '../utils/discovery_timeout_options.dart';
 import '../utils/ping_distance_options.dart';
 import '../utils/session_map_view.dart';
 import '../utils/color_blind_palette.dart';
+import '../utils/community_coverage.dart';
 import '../utils/bluetooth_scan.dart';
 import '../widgets/compass_calibration.dart';
 import '../widgets/bluetooth_device_picker_dialog.dart';
@@ -266,6 +267,7 @@ class _MapScreenState extends State<MapScreen> {
 
   // Battery saver mode
   bool _batterySaverActive = false;
+  bool _batterySaverEnabled = true;
   StreamSubscription<bool>? _batterySaverSubscription;
 
   // Quick settings overlay
@@ -601,10 +603,13 @@ class _MapScreenState extends State<MapScreen> {
     final deadZoneAlerts = await _settingsService.getDeadZoneAlertsEnabled();
     final newRepeaterAlerts = await _settingsService
         .getNewRepeaterAlertsEnabled();
+    final batterySaverEnabled = await _settingsService.getBatterySaverEnabled();
     setState(() {
       _deadZoneAlertsEnabled = deadZoneAlerts;
       _newRepeaterAlertsEnabled = newRepeaterAlerts;
+      _batterySaverEnabled = batterySaverEnabled;
     });
+    _locationService.setBatterySaverEnabled(batterySaverEnabled);
 
     // Load Carpeater settings
     final carpeaterEnabled = await _settingsService.getCarpeaterEnabled();
@@ -5141,59 +5146,39 @@ $placemarks  </Document>
 
     final polygons = <Polygon>[];
     final bounds = _mapController.camera.visibleBounds;
+    final cells = CommunityCoverage.aggregate(
+      _communityCoverage!,
+      precision: _coverageLodPrecision,
+    );
 
-    _communityCoverage!.forEach((hash, cellData) {
-      if (cellData is! Map<String, dynamic>) return;
-      final received = (cellData['received'] as num?)?.toDouble() ?? 0;
-      final lost = (cellData['lost'] as num?)?.toDouble() ?? 0;
-      final total = received + lost;
-      if (total == 0) return;
+    for (final cell in cells.values) {
+      final total = cell.received + cell.lost;
+      if (total == 0) continue;
+      if (!cell.intersectsViewport(
+        south: bounds.south,
+        north: bounds.north,
+        west: bounds.west,
+        east: bounds.east,
+      )) {
+        continue;
+      }
 
-      // Decode geohash to center position
-      try {
-        final center = GeohashUtils.posFromHash(hash);
+      final successRate = cell.received / total;
+      final color = successRate >= 0.7
+          ? const Color(0x2200CC00)
+          : successRate >= 0.3
+          ? const Color(0x22CCCC00)
+          : const Color(0x22CC0000);
 
-        // Viewport culling
-        if (!bounds.contains(center)) return;
-
-        final successRate = received / total;
-        final color = successRate >= 0.7
-            ? const Color(0x4400CC00)
-            : successRate >= 0.3
-            ? const Color(0x44CCCC00)
-            : const Color(0x44CC0000);
-
-        // Approximate cell size from geohash precision
-        final precision = hash.length;
-        final latDelta = precision >= 7
-            ? 0.0007
-            : precision >= 6
-            ? 0.005
-            : 0.04;
-        final lonDelta = precision >= 7
-            ? 0.001
-            : precision >= 6
-            ? 0.01
-            : 0.08;
-
-        final points = [
-          LatLng(center.latitude - latDelta, center.longitude - lonDelta),
-          LatLng(center.latitude - latDelta, center.longitude + lonDelta),
-          LatLng(center.latitude + latDelta, center.longitude + lonDelta),
-          LatLng(center.latitude + latDelta, center.longitude - lonDelta),
-        ];
-
-        polygons.add(
-          Polygon(
-            points: points,
-            color: color,
-            borderColor: const Color(0x8800AAEE),
-            borderStrokeWidth: 1,
-            isFilled: true,
-          ),
-        );
-      } catch (_) {}
-    });
+      polygons.add(
+        Polygon(
+          points: cell.polygonPoints,
+          color: color,
+          borderColor: const Color(0x4400AAEE),
+          borderStrokeWidth: 1,
+        ),
+      );
+    }
 
     return PolygonLayer(polygons: polygons);
   }
@@ -5201,53 +5186,27 @@ $placemarks  </Document>
   void _handleMapTap(LatLng point) {
     if (!_showCommunityCoverage || _communityCoverage == null) return;
 
-    // Check if tap hits a community coverage cell
-    for (final entry in _communityCoverage!.entries) {
-      final hash = entry.key;
-      final cellData = entry.value;
-      if (cellData is! Map<String, dynamic>) continue;
-
-      try {
-        final center = GeohashUtils.posFromHash(hash);
-        final precision = hash.length;
-        final latDelta = precision >= 7
-            ? 0.0007
-            : precision >= 6
-            ? 0.005
-            : 0.04;
-        final lonDelta = precision >= 7
-            ? 0.001
-            : precision >= 6
-            ? 0.01
-            : 0.08;
-
-        if (point.latitude >= center.latitude - latDelta &&
-            point.latitude <= center.latitude + latDelta &&
-            point.longitude >= center.longitude - lonDelta &&
-            point.longitude <= center.longitude + lonDelta) {
-          _showCommunityCellInfo(hash, cellData);
-          return;
-        }
-      } catch (_) {}
+    final cells = CommunityCoverage.aggregate(
+      _communityCoverage!,
+      precision: _coverageLodPrecision,
+    );
+    final hit = CommunityCoverage.hitTest(cells, point);
+    if (hit != null) {
+      _showCommunityCellInfo(hit);
     }
   }
 
-  void _showCommunityCellInfo(String hash, Map<String, dynamic> cell) {
-    final received = (cell['received'] as num?)?.toDouble() ?? 0;
-    final lost = (cell['lost'] as num?)?.toDouble() ?? 0;
-    final total = received + lost;
-    final samples = cell['samples'] ?? 0;
+  void _showCommunityCellInfo(CommunityCoverageCell cell) {
+    final total = cell.received + cell.lost;
     final successRate = total > 0
-        ? ((received / total) * 100).toStringAsFixed(1)
+        ? ((cell.received / total) * 100).toStringAsFixed(1)
         : '0';
-    final lastUpdate = cell['lastUpdate'] as String? ?? 'Unknown';
-    final appVersion = cell['appVersion'] as String? ?? 'Unknown';
+    final lastUpdate = cell.lastUpdate.isEmpty ? 'Unknown' : cell.lastUpdate;
+    final appVersion = cell.appVersion.isEmpty ? 'Unknown' : cell.appVersion;
 
-    // Build repeater list
     String repeatersText = 'None';
-    final repeaters = cell['repeaters'];
-    if (repeaters is Map<String, dynamic> && repeaters.isNotEmpty) {
-      repeatersText = repeaters.entries
+    if (cell.repeaters.isNotEmpty) {
+      repeatersText = cell.repeaters.entries
           .map((e) {
             final rep = e.value as Map<String, dynamic>;
             final name = rep['name'] ?? e.key;
@@ -5275,9 +5234,9 @@ $placemarks  </Document>
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 8),
-            Text('Received: ${received.toStringAsFixed(1)}'),
-            Text('Lost: ${lost.toStringAsFixed(1)}'),
-            Text('Samples: $samples'),
+            Text('Received: ${cell.received.toStringAsFixed(1)}'),
+            Text('Lost: ${cell.lost.toStringAsFixed(1)}'),
+            Text('Samples: ${cell.samples}'),
             const SizedBox(height: 8),
             const Text(
               'Repeaters:',

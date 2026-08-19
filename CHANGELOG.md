@@ -7,6 +7,9 @@
   without deleting stored samples. Short press still shows all coverage. An
   empty session (no GPS points) asks whether to keep it; discarding or deleting
   the session on the map falls back to the latest saved session.
+- Battery saver can now be turned off in Settings → App & device. Automatic
+  ping-interval doubling at ≤20% battery stays on by default and can be changed
+  while a recording is running.
 - Direction-arrow mode now offers a figure-8 compass calibration when Android
   reports the magnetometer as unreliable. A compact map banner appears after a
   short delay, Later snoozes it for a day, and Calibrate Compass remains in
@@ -56,6 +59,10 @@
   in map settings without disabling its calculation.
 
 ### Fixed
+- Community coverage tiles now use exact geohash bounds and the same LOD
+  precision as local coverage, so they line up with the user's grid. They stay
+  visible regardless of the session filter and are hidden only by their own
+  map-display toggle. Tap details use the same aggregated cells as the overlay.
 - Quick Settings no longer crashes when Discovery Timeout is 5s or 25s, or when
   ping distance is Frequent (50 m) or another value missing from the compact
   menus. Those lists now match Settings and still accept unknown saved values.

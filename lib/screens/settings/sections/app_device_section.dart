@@ -49,6 +49,20 @@ extension _AppDeviceSettingsSection on _MapScreenState {
       },
     ),
     SwitchListTile(
+      title: const Text('Battery Saver'),
+      subtitle: const Text('Auto-double ping interval when battery ≤20%'),
+      secondary: const Icon(Icons.battery_saver),
+      value: _batterySaverEnabled,
+      onChanged: (value) async {
+        _updateMapState(() {
+          _batterySaverEnabled = value;
+        });
+        setModalState(() {});
+        await _settingsService.setBatterySaverEnabled(value);
+        _locationService.setBatterySaverEnabled(value);
+      },
+    ),
+    SwitchListTile(
       title: const Text('Lock Map Rotation'),
       subtitle: const Text('Prevent map rotation'),
       value: _lockRotationNorth,

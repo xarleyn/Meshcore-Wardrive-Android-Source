@@ -161,6 +161,33 @@ void main() {
     });
   });
 
+  group('battery saver setting', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('defaults to enabled', () async {
+      expect(await SettingsService().getBatterySaverEnabled(), isTrue);
+    });
+
+    test('persists the selected value', () async {
+      final settings = SettingsService();
+
+      await settings.setBatterySaverEnabled(false);
+
+      expect(await settings.getBatterySaverEnabled(), isFalse);
+    });
+
+    test('includes battery saver in settings backup', () async {
+      final settings = SettingsService();
+      await settings.setBatterySaverEnabled(false);
+
+      final exported = await settings.exportSettings();
+
+      expect(exported['battery_saver_enabled'], isFalse);
+    });
+  });
+
   group('radio position visibility setting', () {
     setUp(() {
       SharedPreferences.setMockInitialValues({});
