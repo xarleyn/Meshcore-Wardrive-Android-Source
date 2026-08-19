@@ -12,6 +12,7 @@ import '../models/models.dart';
 import '../models/location_quality_settings.dart';
 import '../services/location_service.dart';
 import '../services/aggregation_service.dart';
+import '../services/map_lod_service.dart';
 import '../services/lora_companion_service.dart';
 import '../services/database_service.dart';
 import '../services/upload_service.dart';
@@ -96,6 +97,19 @@ class _MapScreenState extends State<MapScreen> {
   int _sampleCount = 0;
   List<Sample> _samples = [];
   AggregationResult? _aggregationResult;
+  double _mapLodZoom = 13;
+  final LayerHitNotifier<Coverage> _coverageHitNotifier = ValueNotifier(null);
+  final LayerHitNotifier<SampleCluster> _sampleHitNotifier = ValueNotifier(
+    null,
+  );
+  AggregationResult? _cachedLodAggregation;
+  int? _cachedCoverageLodPrecision;
+  List<Coverage> _cachedLodCoverages = const [];
+  List<Edge> _cachedLodEdges = const [];
+  List<Sample>? _cachedSampleLodSource;
+  int? _cachedSampleLodPrecision;
+  String? _cachedSampleLodFilter;
+  List<SampleCluster> _cachedSampleClusters = const [];
 
   String _colorMode = 'quality';
   bool _showSamples = false;
@@ -1693,6 +1707,102 @@ $placemarks  </Document>
     setState(callback);
   }
 
+  int get _coverageLodPrecision => MapLodService.precisionForZoom(
+    _mapLodZoom,
+    maxPrecision: _coveragePrecision,
+  );
+
+  int get _sampleLodPrecision =>
+      MapLodService.precisionForZoom(_mapLodZoom, maxPrecision: 8);
+
+  void _updateMapLodZoom(double zoom) {
+    final oldCoveragePrecision = _coverageLodPrecision;
+    final oldSamplePrecision = _sampleLodPrecision;
+    final newCoveragePrecision = MapLodService.precisionForZoom(
+      zoom,
+      maxPrecision: _coveragePrecision,
+    );
+    final newSamplePrecision = MapLodService.precisionForZoom(
+      zoom,
+      maxPrecision: 8,
+    );
+
+    if (oldCoveragePrecision == newCoveragePrecision &&
+        oldSamplePrecision == newSamplePrecision) {
+      return;
+    }
+
+    setState(() {
+      _mapLodZoom = zoom;
+    });
+  }
+
+  void _ensureCoverageLod() {
+    final aggregation = _aggregationResult;
+    final precision = _coverageLodPrecision;
+    if (aggregation == null) {
+      _cachedLodAggregation = null;
+      _cachedLodCoverages = const [];
+      _cachedLodEdges = const [];
+      return;
+    }
+    if (identical(_cachedLodAggregation, aggregation) &&
+        _cachedCoverageLodPrecision == precision) {
+      return;
+    }
+
+    final coverages = MapLodService.aggregateCoverages(
+      aggregation.coverages,
+      precision: precision,
+    );
+    _cachedLodAggregation = aggregation;
+    _cachedCoverageLodPrecision = precision;
+    _cachedLodCoverages = coverages;
+    _cachedLodEdges = MapLodService.aggregateEdges(
+      aggregation.edges,
+      coverages,
+      precision: precision,
+    );
+  }
+
+  List<SampleCluster> _sampleClustersForCurrentLod() {
+    final filterKey = [
+      _showGpsSamples,
+      _showSuccessfulOnly,
+      _includeOnlyRepeaters ?? '',
+    ].join('|');
+    final precision = _sampleLodPrecision;
+    if (identical(_cachedSampleLodSource, _samples) &&
+        _cachedSampleLodPrecision == precision &&
+        _cachedSampleLodFilter == filterKey) {
+      return _cachedSampleClusters;
+    }
+
+    final allowedPrefixes = _includeOnlyRepeaters
+        ?.split(',')
+        .map((value) => value.trim().toUpperCase())
+        .where((value) => value.isNotEmpty)
+        .toList(growable: false);
+    final filteredSamples = _samples.where((sample) {
+      if (!_showGpsSamples && sample.pingSuccess == null) return false;
+      if (_showSuccessfulOnly && sample.pingSuccess != true) return false;
+      if (allowedPrefixes != null && allowedPrefixes.isNotEmpty) {
+        final sampleNodeId = sample.path?.toUpperCase() ?? '';
+        if (!allowedPrefixes.any(sampleNodeId.startsWith)) return false;
+      }
+      return true;
+    });
+
+    _cachedSampleLodSource = _samples;
+    _cachedSampleLodPrecision = precision;
+    _cachedSampleLodFilter = filterKey;
+    _cachedSampleClusters = MapLodService.aggregateSamples(
+      filteredSamples,
+      precision: precision,
+    );
+    return _cachedSampleClusters;
+  }
+
   Future<void> _checkForUpdates() async {
     try {
       final response = await http
@@ -1906,6 +2016,8 @@ $placemarks  </Document>
     _radioPositionExpiryTimer?.cancel();
     _batterySaverSubscription?.cancel();
     _heatmapRebuildStream.close();
+    _coverageHitNotifier.dispose();
+    _sampleHitNotifier.dispose();
     _locationService.dispose();
     super.dispose();
   }
@@ -2230,6 +2342,8 @@ $placemarks  </Document>
         onTap: (tapPosition, point) => _handleMapTap(point),
         onLongPress: (tapPosition, point) => _handleMapLongPress(point),
         onMapEvent: (event) {
+          _updateMapLodZoom(event.camera.zoom);
+
           if (event is MapEventRotate &&
               event.source != MapEventSource.mapController &&
               _followHeading) {
@@ -2396,11 +2510,11 @@ $placemarks  </Document>
 
   List<Widget> _buildCoverageLayers() {
     if (_aggregationResult == null) return [];
+    _ensureCoverageLod();
 
-    final coveragePolygons = <Polygon>[];
-    final coverageMarkers = <Marker>[];
+    final coveragePolygons = <Polygon<Coverage>>[];
 
-    for (final coverage in _aggregationResult!.coverages) {
+    for (final coverage in _cachedLodCoverages) {
       final gh = geohash.GeoHash.decode(coverage.id);
       final color = Color(
         AggregationService.getCoverageColor(
@@ -2416,7 +2530,7 @@ $placemarks  </Document>
       final ne = gh.bounds.northEast;
 
       coveragePolygons.add(
-        Polygon(
+        Polygon<Coverage>(
           points: [
             LatLng(sw.latitude, sw.longitude),
             LatLng(sw.latitude, ne.longitude),
@@ -2426,112 +2540,93 @@ $placemarks  </Document>
           color: color.withValues(alpha: opacity),
           borderColor: color,
           borderStrokeWidth: 1,
-          isFilled: true,
-        ),
-      );
-
-      // Add invisible tap target at center of coverage square
-      coverageMarkers.add(
-        Marker(
-          point: coverage.position,
-          width: 100,
-          height: 100,
-          child: GestureDetector(
-            onTap: () => _deleteMode
-                ? _deleteCoverageCell(coverage)
-                : _showCoverageInfo(coverage),
-            child: Container(color: Colors.transparent),
-          ),
+          hitValue: coverage,
         ),
       );
     }
 
     return [
-      PolygonLayer(polygons: coveragePolygons),
-      MarkerLayer(markers: coverageMarkers),
+      GestureDetector(
+        onTap: () {
+          final hits = _coverageHitNotifier.value?.hitValues;
+          if (hits == null || hits.isEmpty) return;
+          final coverage = hits.first;
+          if (_deleteMode && _coverageLodPrecision < _coveragePrecision) {
+            _showSnackBar('Zoom in to delete an individual coverage cell');
+            return;
+          }
+          if (_deleteMode) {
+            _deleteCoverageCell(coverage);
+          } else {
+            _showCoverageInfo(coverage);
+          }
+        },
+        child: PolygonLayer<Coverage>(
+          polygons: coveragePolygons,
+          hitNotifier: _coverageHitNotifier,
+        ),
+      ),
     ];
   }
 
   Widget _buildSampleLayer() {
     if (_samples.isEmpty) return const SizedBox.shrink();
+    final clusters = _sampleClustersForCurrentLod();
+    final circles = clusters
+        .map((cluster) {
+          final Color color;
+          if (cluster.successfulCount >= cluster.failedCount &&
+              cluster.successfulCount > 0) {
+            color = ColorBlindPalette.getSuccessColor(_colorBlindMode);
+          } else if (cluster.failedCount > 0) {
+            color = ColorBlindPalette.getFailureColor(_colorBlindMode);
+          } else {
+            color = ColorBlindPalette.getGpsOnlyColor(_colorBlindMode);
+          }
+          final radius = math.min(
+            9.0,
+            3.0 + math.log(cluster.sampleCount + 1) / math.ln2,
+          );
 
-    // Filter samples based on settings
-    final filteredSamples = _samples.where((sample) {
-      // If showing GPS samples is disabled, hide samples with null pingSuccess
-      if (!_showGpsSamples && sample.pingSuccess == null) {
-        return false;
-      }
+          return CircleMarker<SampleCluster>(
+            point: cluster.position,
+            radius: radius,
+            color: color.withValues(alpha: 0.7),
+            borderColor: color.withValues(alpha: 0.95),
+            borderStrokeWidth: 1,
+            hitValue: cluster,
+          );
+        })
+        .toList(growable: false);
 
-      // If showing successful only, hide failed pings and GPS-only samples
-      if (_showSuccessfulOnly && sample.pingSuccess != true) {
-        return false;
-      }
-
-      // If include-only repeaters is set, only show samples from those repeaters
-      if (_includeOnlyRepeaters != null && _includeOnlyRepeaters!.isNotEmpty) {
-        final allowedPrefixes = _includeOnlyRepeaters!
-            .split(',')
-            .map((s) => s.trim().toUpperCase())
-            .toList();
-        final sampleNodeId = sample.path?.toUpperCase() ?? '';
-
-        // Check if sample's repeater matches any allowed prefix
-        final matches = allowedPrefixes.any(
-          (prefix) => sampleNodeId.startsWith(prefix),
-        );
-        if (!matches) {
-          return false;
+    return GestureDetector(
+      onTap: () {
+        final hits = _sampleHitNotifier.value?.hitValues;
+        if (hits == null || hits.isEmpty) return;
+        final cluster = hits.first;
+        if (_deleteMode && cluster.sampleCount == 1) {
+          _deleteSample(cluster.newestSample);
+        } else if (_deleteMode) {
+          _showSnackBar('Zoomed points are grouped; delete from coverage view');
+        } else if (cluster.sampleCount == 1) {
+          _showSampleInfo(cluster.newestSample);
+        } else {
+          _showSampleClusterInfo(cluster);
         }
-      }
-
-      return true;
-    }).toList();
-
-    // Sort by timestamp (oldest first) so newer samples render on top
-    filteredSamples.sort((a, b) => a.timestamp.compareTo(b.timestamp));
-
-    final markers = filteredSamples.map((sample) {
-      // Determine color based on ping result and color blind mode
-      Color markerColor;
-      if (sample.pingSuccess == true) {
-        markerColor = ColorBlindPalette.getSuccessColor(_colorBlindMode);
-      } else if (sample.pingSuccess == false) {
-        markerColor = ColorBlindPalette.getFailureColor(_colorBlindMode);
-      } else {
-        markerColor = ColorBlindPalette.getGpsOnlyColor(_colorBlindMode);
-      }
-
-      return Marker(
-        point: sample.position,
-        width: 12,
-        height: 12,
-        child: GestureDetector(
-          onTap: () =>
-              _deleteMode ? _deleteSample(sample) : _showSampleInfo(sample),
-          child: Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(
-              color: markerColor.withValues(alpha: 0.7),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: markerColor.withValues(alpha: 0.9),
-                width: 1,
-              ),
-            ),
-          ),
-        ),
-      );
-    }).toList();
-
-    return MarkerLayer(markers: markers);
+      },
+      child: CircleLayer<SampleCluster>(
+        circles: circles,
+        hitNotifier: _sampleHitNotifier,
+      ),
+    );
   }
 
   Widget _buildEdgeLayer() {
     if (_aggregationResult == null) return const SizedBox.shrink();
+    _ensureCoverageLod();
 
     // Filter edges by whitelist if enabled
-    var edges = _aggregationResult!.edges;
+    var edges = _cachedLodEdges;
 
     if (_filterEdgesByWhitelist &&
         _includeOnlyRepeaters != null &&
@@ -3791,6 +3886,37 @@ $placemarks  </Document>
                 ],
               ),
             ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSampleClusterInfo(SampleCluster cluster) {
+    final newestTimestamp = DateFormat(
+      'MMM d, yyyy HH:mm:ss',
+    ).format(cluster.newestSample.timestamp);
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('${cluster.sampleCount} grouped samples'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Successful: ${cluster.successfulCount}'),
+            Text('Failed: ${cluster.failedCount}'),
+            Text('GPS only: ${cluster.gpsOnlyCount}'),
+            const SizedBox(height: 8),
+            Text('Newest: $newestTimestamp'),
+            const SizedBox(height: 8),
+            const Text('Zoom in for a more detailed breakdown.'),
           ],
         ),
         actions: [
