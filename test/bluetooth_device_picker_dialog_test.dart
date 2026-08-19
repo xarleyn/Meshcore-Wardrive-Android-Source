@@ -2,35 +2,38 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meshcore_wardrive/l10n/generated/app_localizations.dart';
 import 'package:meshcore_wardrive/utils/bluetooth_scan.dart';
 import 'package:meshcore_wardrive/widgets/bluetooth_device_picker_dialog.dart';
 
+import 'helpers/l10n_harness.dart';
+
 void main() {
-  Future<void> showPicker(
+  Future<AppLocalizations> showPicker(
     WidgetTester tester, {
     required Stream<BluetoothScanSnapshot> scan,
     ValueNotifier<BluetoothScanEntry?>? result,
   }) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Builder(
-            builder: (context) => FilledButton(
-              onPressed: () async {
-                final selected = await showDialog<BluetoothScanEntry>(
-                  context: context,
-                  builder: (context) => BluetoothDevicePickerDialog(scan: scan),
-                );
-                result?.value = selected;
-              },
-              child: const Text('Open'),
-            ),
+    final l10n = await pumpWithL10n(
+      tester,
+      Scaffold(
+        body: Builder(
+          builder: (context) => FilledButton(
+            onPressed: () async {
+              final selected = await showDialog<BluetoothScanEntry>(
+                context: context,
+                builder: (context) => BluetoothDevicePickerDialog(scan: scan),
+              );
+              result?.value = selected;
+            },
+            child: const Text('Open'),
           ),
         ),
       ),
     );
     await tester.tap(find.text('Open'));
     await tester.pump();
+    return l10n;
   }
 
   testWidgets('shows previously used devices while the scan is still running', (
@@ -39,7 +42,7 @@ void main() {
     final scan = StreamController<BluetoothScanSnapshot>.broadcast();
     addTearDown(scan.close);
 
-    await showPicker(tester, scan: scan.stream);
+    final l10n = await showPicker(tester, scan: scan.stream);
     scan.add(
       BluetoothScanSnapshot(
         devices: [
@@ -54,9 +57,9 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Select Bluetooth Device'), findsOneWidget);
+    expect(find.text(l10n.bluetoothSelectDevice), findsOneWidget);
     expect(find.text('MeshCore One'), findsOneWidget);
-    expect(find.text('Previously used'), findsOneWidget);
+    expect(find.text(l10n.bluetoothPreviouslyUsed), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
   });
 
@@ -66,7 +69,7 @@ void main() {
     final scan = StreamController<BluetoothScanSnapshot>.broadcast();
     addTearDown(scan.close);
 
-    await showPicker(tester, scan: scan.stream);
+    final l10n = await showPicker(tester, scan: scan.stream);
     scan.add(
       const BluetoothScanSnapshot(
         devices: [
@@ -102,7 +105,7 @@ void main() {
 
     expect(find.text('MeshCore One'), findsOneWidget);
     expect(find.text('Heltec V3'), findsOneWidget);
-    expect(find.text('Nearby'), findsOneWidget);
+    expect(find.text(l10n.bluetoothNearby), findsOneWidget);
   });
 
   testWidgets('returns the tapped device and hides the scanning indicator', (
@@ -112,7 +115,7 @@ void main() {
     addTearDown(scan.close);
     final result = ValueNotifier<BluetoothScanEntry?>(null);
 
-    await showPicker(tester, scan: scan.stream, result: result);
+    final l10n = await showPicker(tester, scan: scan.stream, result: result);
     scan.add(
       const BluetoothScanSnapshot(
         devices: [
@@ -134,6 +137,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(result.value?.remoteId, 'AA:BB:CC:DD:EE:FF');
-    expect(find.text('Select Bluetooth Device'), findsNothing);
+    expect(find.text(l10n.bluetoothSelectDevice), findsNothing);
   });
 }

@@ -1939,6 +1939,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Source code and releases'**
   String get settingsViewOnGitHubSubtitle;
+
+  /// Visible text on the app-wide offline banner
+  ///
+  /// In en, this message translates to:
+  /// **'You\'\'re offline - local tracking continues'**
+  String get offlineBannerMessage;
+
+  /// Accessibility label for the app-wide offline banner
+  ///
+  /// In en, this message translates to:
+  /// **'You are offline. Local tracking continues.'**
+  String get offlineBannerSemantics;
+
+  /// Title on the map compass calibration banner
+  ///
+  /// In en, this message translates to:
+  /// **'Compass needs calibration'**
+  String get compassNeedsCalibration;
+
+  /// Hint on the map compass calibration banner
+  ///
+  /// In en, this message translates to:
+  /// **'Move the phone in a figure-8 if heading looks wrong.'**
+  String get compassBannerHint;
+
+  /// Dismiss the compass calibration banner for now
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get compassLater;
+
+  /// Open the compass calibration sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Calibrate'**
+  String get compassCalibrate;
+
+  /// Status when compass sensor accuracy is already reliable
+  ///
+  /// In en, this message translates to:
+  /// **'Sensor accuracy looks good'**
+  String get compassSensorAccuracyGood;
+
+  /// Status while the user is still moving the phone
+  ///
+  /// In en, this message translates to:
+  /// **'Keep drawing a figure-8'**
+  String get compassKeepDrawing;
+
+  /// Status shown just before the calibration sheet closes
+  ///
+  /// In en, this message translates to:
+  /// **'Calibration complete'**
+  String get compassCalibrationComplete;
+
+  /// Title of the compass calibration bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Calibrate compass'**
+  String get compassSheetTitle;
+
+  /// Instructions on the compass calibration bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Hold the phone and draw a figure-8 in the air until the bar fills.'**
+  String get compassSheetInstructions;
+
+  /// Default status before the user starts moving the phone
+  ///
+  /// In en, this message translates to:
+  /// **'Move the phone through a figure-8'**
+  String get compassMoveThroughFigureEight;
+
+  /// Skip compass calibration without completing it
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get compassSkip;
+
+  /// Accessibility label for the animated figure-8 graphic
+  ///
+  /// In en, this message translates to:
+  /// **'Figure-8 calibration motion'**
+  String get compassFigureEightSemantics;
+
+  /// Title of the Bluetooth companion device picker
+  ///
+  /// In en, this message translates to:
+  /// **'Select Bluetooth Device'**
+  String get bluetoothSelectDevice;
+
+  /// Subtitle for a remembered Bluetooth device
+  ///
+  /// In en, this message translates to:
+  /// **'Previously used'**
+  String get bluetoothPreviouslyUsed;
+
+  /// Subtitle for a currently visible Bluetooth device
+  ///
+  /// In en, this message translates to:
+  /// **'Nearby'**
+  String get bluetoothNearby;
+
+  /// Cancel button on the Bluetooth device picker
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get bluetoothCancel;
+
+  /// Empty-state message when Bluetooth scan fails
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth error: {error}'**
+  String bluetoothError(String error);
+
+  /// Empty-state message while scanning for LoRa devices
+  ///
+  /// In en, this message translates to:
+  /// **'Searching for LoRa devices...'**
+  String get bluetoothSearching;
+
+  /// Empty-state message when no LoRa devices were found
+  ///
+  /// In en, this message translates to:
+  /// **'No LoRa devices found via Bluetooth'**
+  String get bluetoothNoDevices;
 }
 
 class _AppLocalizationsDelegate

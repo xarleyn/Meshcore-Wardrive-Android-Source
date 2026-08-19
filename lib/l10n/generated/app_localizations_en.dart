@@ -1066,4 +1066,74 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsViewOnGitHubSubtitle => 'Source code and releases';
+
+  @override
+  String get offlineBannerMessage =>
+      'You\'re offline - local tracking continues';
+
+  @override
+  String get offlineBannerSemantics =>
+      'You are offline. Local tracking continues.';
+
+  @override
+  String get compassNeedsCalibration => 'Compass needs calibration';
+
+  @override
+  String get compassBannerHint =>
+      'Move the phone in a figure-8 if heading looks wrong.';
+
+  @override
+  String get compassLater => 'Later';
+
+  @override
+  String get compassCalibrate => 'Calibrate';
+
+  @override
+  String get compassSensorAccuracyGood => 'Sensor accuracy looks good';
+
+  @override
+  String get compassKeepDrawing => 'Keep drawing a figure-8';
+
+  @override
+  String get compassCalibrationComplete => 'Calibration complete';
+
+  @override
+  String get compassSheetTitle => 'Calibrate compass';
+
+  @override
+  String get compassSheetInstructions =>
+      'Hold the phone and draw a figure-8 in the air until the bar fills.';
+
+  @override
+  String get compassMoveThroughFigureEight =>
+      'Move the phone through a figure-8';
+
+  @override
+  String get compassSkip => 'Skip';
+
+  @override
+  String get compassFigureEightSemantics => 'Figure-8 calibration motion';
+
+  @override
+  String get bluetoothSelectDevice => 'Select Bluetooth Device';
+
+  @override
+  String get bluetoothPreviouslyUsed => 'Previously used';
+
+  @override
+  String get bluetoothNearby => 'Nearby';
+
+  @override
+  String get bluetoothCancel => 'Cancel';
+
+  @override
+  String bluetoothError(String error) {
+    return 'Bluetooth error: $error';
+  }
+
+  @override
+  String get bluetoothSearching => 'Searching for LoRa devices...';
+
+  @override
+  String get bluetoothNoDevices => 'No LoRa devices found via Bluetooth';
 }

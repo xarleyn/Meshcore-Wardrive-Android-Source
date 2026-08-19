@@ -1085,4 +1085,73 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsViewOnGitHubSubtitle => 'Исходный код и релизы';
+
+  @override
+  String get offlineBannerMessage =>
+      'Вы офлайн — локальное отслеживание продолжается';
+
+  @override
+  String get offlineBannerSemantics =>
+      'Вы офлайн. Локальное отслеживание продолжается.';
+
+  @override
+  String get compassNeedsCalibration => 'Компас нужно откалибровать';
+
+  @override
+  String get compassBannerHint =>
+      'Если направление выглядит неверно, подвигайте телефон восьмёркой.';
+
+  @override
+  String get compassLater => 'Позже';
+
+  @override
+  String get compassCalibrate => 'Калибровать';
+
+  @override
+  String get compassSensorAccuracyGood => 'Точность датчика в норме';
+
+  @override
+  String get compassKeepDrawing => 'Продолжайте рисовать восьмёрку';
+
+  @override
+  String get compassCalibrationComplete => 'Калибровка завершена';
+
+  @override
+  String get compassSheetTitle => 'Калибровка компаса';
+
+  @override
+  String get compassSheetInstructions =>
+      'Держите телефон и рисуйте восьмёрку в воздухе, пока шкала не заполнится.';
+
+  @override
+  String get compassMoveThroughFigureEight => 'Подвигайте телефон по восьмёрке';
+
+  @override
+  String get compassSkip => 'Пропустить';
+
+  @override
+  String get compassFigureEightSemantics => 'Движение калибровки восьмёркой';
+
+  @override
+  String get bluetoothSelectDevice => 'Выберите устройство Bluetooth';
+
+  @override
+  String get bluetoothPreviouslyUsed => 'Использовалось ранее';
+
+  @override
+  String get bluetoothNearby => 'Рядом';
+
+  @override
+  String get bluetoothCancel => 'Отмена';
+
+  @override
+  String bluetoothError(String error) {
+    return 'Ошибка Bluetooth: $error';
+  }
+
+  @override
+  String get bluetoothSearching => 'Поиск устройств LoRa...';
+
+  @override
+  String get bluetoothNoDevices => 'Устройства LoRa по Bluetooth не найдены';
 }

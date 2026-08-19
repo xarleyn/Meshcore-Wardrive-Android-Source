@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 
+import '../l10n/generated/app_localizations.dart';
 import '../utils/compass_calibration.dart';
 
 class CompassCalibrationBanner extends StatelessWidget {
@@ -18,6 +19,7 @@ class CompassCalibrationBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).colorScheme;
     return Material(
       elevation: 4,
@@ -35,7 +37,7 @@ class CompassCalibrationBanner extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Compass needs calibration',
+                    l10n.compassNeedsCalibration,
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ),
@@ -43,17 +45,17 @@ class CompassCalibrationBanner extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'Move the phone in a figure-8 if heading looks wrong.',
+              l10n.compassBannerHint,
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                TextButton(onPressed: onLater, child: const Text('Later')),
+                TextButton(onPressed: onLater, child: Text(l10n.compassLater)),
                 FilledButton(
                   onPressed: onCalibrate,
-                  child: const Text('Calibrate'),
+                  child: Text(l10n.compassCalibrate),
                 ),
               ],
             ),
@@ -154,11 +156,12 @@ class _CompassCalibrationSheetState extends State<CompassCalibrationSheet> {
         _sampler.isComplete ||
         (reliable && (movedEnough || elapsed >= const Duration(seconds: 2)));
 
+    final l10n = AppLocalizations.of(context);
     setState(() {
       if (reliable && !_sampler.isComplete) {
-        _statusMessage = 'Sensor accuracy looks good';
+        _statusMessage = l10n.compassSensorAccuracyGood;
       } else if (_sampler.progress > 0) {
-        _statusMessage = 'Keep drawing a figure-8';
+        _statusMessage = l10n.compassKeepDrawing;
       }
     });
 
@@ -171,7 +174,7 @@ class _CompassCalibrationSheetState extends State<CompassCalibrationSheet> {
     if (_completing || !mounted) return;
     setState(() {
       _completing = true;
-      _statusMessage = 'Calibration complete';
+      _statusMessage = AppLocalizations.of(context).compassCalibrationComplete;
     });
     await Future<void>.delayed(const Duration(milliseconds: 700));
     if (mounted) {
@@ -181,6 +184,7 @@ class _CompassCalibrationSheetState extends State<CompassCalibrationSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final progress = _completing ? 1.0 : _sampler.progress;
     return SafeArea(
       child: Padding(
@@ -189,12 +193,12 @@ class _CompassCalibrationSheetState extends State<CompassCalibrationSheet> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Calibrate compass',
+              l10n.compassSheetTitle,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
             Text(
-              'Hold the phone and draw a figure-8 in the air until the bar fills.',
+              l10n.compassSheetInstructions,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
@@ -204,7 +208,7 @@ class _CompassCalibrationSheetState extends State<CompassCalibrationSheet> {
             LinearProgressIndicator(value: progress.clamp(0.0, 1.0)),
             const SizedBox(height: 8),
             Text(
-              _statusMessage ?? 'Move the phone through a figure-8',
+              _statusMessage ?? l10n.compassMoveThroughFigureEight,
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 16),
@@ -212,7 +216,7 @@ class _CompassCalibrationSheetState extends State<CompassCalibrationSheet> {
               onPressed: _completing
                   ? null
                   : () => Navigator.pop(context, false),
-              child: const Text('Skip'),
+              child: Text(l10n.compassSkip),
             ),
           ],
         ),
@@ -251,7 +255,7 @@ class _CompassFigureEightState extends State<CompassFigureEight>
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme.primary;
     return Semantics(
-      label: 'Figure-8 calibration motion',
+      label: AppLocalizations.of(context).compassFigureEightSemantics,
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, _) {

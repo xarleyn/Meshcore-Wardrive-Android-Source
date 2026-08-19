@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../l10n/generated/app_localizations.dart';
 import '../utils/bluetooth_scan.dart';
 
 class BluetoothDevicePickerDialog extends StatefulWidget {
@@ -39,11 +40,12 @@ class _BluetoothDevicePickerDialogState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final devices = _snapshot.devices;
     return AlertDialog(
       title: Row(
         children: [
-          const Expanded(child: Text('Select Bluetooth Device')),
+          Expanded(child: Text(l10n.bluetoothSelectDevice)),
           if (_snapshot.isScanning)
             const SizedBox(
               width: 20,
@@ -57,12 +59,13 @@ class _BluetoothDevicePickerDialogState
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxHeight: 420),
           child: devices.isEmpty
-              ? Text(_emptyMessage)
+              ? Text(_emptyMessage(l10n))
               : ListView.builder(
                   shrinkWrap: true,
                   itemCount: devices.length,
                   itemBuilder: (context, index) {
                     final device = devices[index];
+                    final statusLabel = _statusLabel(l10n, device);
                     return ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: Icon(
@@ -74,8 +77,7 @@ class _BluetoothDevicePickerDialogState
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (device.statusLabel.isNotEmpty)
-                            Text(device.statusLabel),
+                          if (statusLabel != null) Text(statusLabel),
                           Text(device.remoteId),
                         ],
                       ),
@@ -88,15 +90,22 @@ class _BluetoothDevicePickerDialogState
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l10n.bluetoothCancel),
         ),
       ],
     );
   }
 
-  String get _emptyMessage {
-    if (_snapshot.error != null) return 'Bluetooth error: ${_snapshot.error}';
-    if (_snapshot.isScanning) return 'Searching for LoRa devices...';
-    return 'No LoRa devices found via Bluetooth';
+  String _emptyMessage(AppLocalizations l10n) {
+    final error = _snapshot.error;
+    if (error != null) return l10n.bluetoothError(error);
+    if (_snapshot.isScanning) return l10n.bluetoothSearching;
+    return l10n.bluetoothNoDevices;
+  }
+
+  String? _statusLabel(AppLocalizations l10n, BluetoothScanEntry device) {
+    if (device.previouslyUsed) return l10n.bluetoothPreviouslyUsed;
+    if (device.currentlyVisible) return l10n.bluetoothNearby;
+    return null;
   }
 }

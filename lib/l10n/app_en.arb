@@ -1302,5 +1302,92 @@
   "settingsViewOnGitHubSubtitle": "Source code and releases",
   "@settingsViewOnGitHubSubtitle": {
     "description": "Subtitle for GitHub tile"
+  },
+  "offlineBannerMessage": "You''re offline - local tracking continues",
+  "@offlineBannerMessage": {
+    "description": "Visible text on the app-wide offline banner"
+  },
+  "offlineBannerSemantics": "You are offline. Local tracking continues.",
+  "@offlineBannerSemantics": {
+    "description": "Accessibility label for the app-wide offline banner"
+  },
+  "compassNeedsCalibration": "Compass needs calibration",
+  "@compassNeedsCalibration": {
+    "description": "Title on the map compass calibration banner"
+  },
+  "compassBannerHint": "Move the phone in a figure-8 if heading looks wrong.",
+  "@compassBannerHint": {
+    "description": "Hint on the map compass calibration banner"
+  },
+  "compassLater": "Later",
+  "@compassLater": {
+    "description": "Dismiss the compass calibration banner for now"
+  },
+  "compassCalibrate": "Calibrate",
+  "@compassCalibrate": {
+    "description": "Open the compass calibration sheet"
+  },
+  "compassSensorAccuracyGood": "Sensor accuracy looks good",
+  "@compassSensorAccuracyGood": {
+    "description": "Status when compass sensor accuracy is already reliable"
+  },
+  "compassKeepDrawing": "Keep drawing a figure-8",
+  "@compassKeepDrawing": {
+    "description": "Status while the user is still moving the phone"
+  },
+  "compassCalibrationComplete": "Calibration complete",
+  "@compassCalibrationComplete": {
+    "description": "Status shown just before the calibration sheet closes"
+  },
+  "compassSheetTitle": "Calibrate compass",
+  "@compassSheetTitle": {
+    "description": "Title of the compass calibration bottom sheet"
+  },
+  "compassSheetInstructions": "Hold the phone and draw a figure-8 in the air until the bar fills.",
+  "@compassSheetInstructions": {
+    "description": "Instructions on the compass calibration bottom sheet"
+  },
+  "compassMoveThroughFigureEight": "Move the phone through a figure-8",
+  "@compassMoveThroughFigureEight": {
+    "description": "Default status before the user starts moving the phone"
+  },
+  "compassSkip": "Skip",
+  "@compassSkip": {
+    "description": "Skip compass calibration without completing it"
+  },
+  "compassFigureEightSemantics": "Figure-8 calibration motion",
+  "@compassFigureEightSemantics": {
+    "description": "Accessibility label for the animated figure-8 graphic"
+  },
+  "bluetoothSelectDevice": "Select Bluetooth Device",
+  "@bluetoothSelectDevice": {
+    "description": "Title of the Bluetooth companion device picker"
+  },
+  "bluetoothPreviouslyUsed": "Previously used",
+  "@bluetoothPreviouslyUsed": {
+    "description": "Subtitle for a remembered Bluetooth device"
+  },
+  "bluetoothNearby": "Nearby",
+  "@bluetoothNearby": {
+    "description": "Subtitle for a currently visible Bluetooth device"
+  },
+  "bluetoothCancel": "Cancel",
+  "@bluetoothCancel": {
+    "description": "Cancel button on the Bluetooth device picker"
+  },
+  "bluetoothError": "Bluetooth error: {error}",
+  "@bluetoothError": {
+    "description": "Empty-state message when Bluetooth scan fails",
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "bluetoothSearching": "Searching for LoRa devices...",
+  "@bluetoothSearching": {
+    "description": "Empty-state message while scanning for LoRa devices"
+  },
+  "bluetoothNoDevices": "No LoRa devices found via Bluetooth",
+  "@bluetoothNoDevices": {
+    "description": "Empty-state message when no LoRa devices were found"
   }
 }
