@@ -3963,9 +3963,18 @@ $placemarks  </Document>
   }
 
   Future<void> _uploadSamples() async {
-    // Check if multiple sites are selected
-    final selectedSites = await _uploadService.getSelectedEndpoints();
     final endpoints = await _uploadService.getUploadEndpoints();
+    final savedSelectedSites = await _uploadService.getSelectedEndpoints();
+    if (!mounted) return;
+
+    final selectedSites = await showDialog<List<String>>(
+      context: context,
+      builder: (context) => UploadEndpointSelectionDialog(
+        endpoints: endpoints,
+        initiallySelectedNames: savedSelectedSites,
+      ),
+    );
+    if (!mounted || selectedSites == null || selectedSites.isEmpty) return;
 
     // Track progress state
     int currentBatch = 0;
@@ -4027,6 +4036,7 @@ $placemarks  </Document>
       // This ensures custom endpoints work correctly
       if (selectedSites.isNotEmpty && endpoints.isNotEmpty) {
         results = await _uploadService.uploadToSelectedEndpoints(
+          endpointNames: selectedSites,
           repeaterNames: repeaterNames,
           onProgress: (siteName, current, total) {
             if (mounted) {

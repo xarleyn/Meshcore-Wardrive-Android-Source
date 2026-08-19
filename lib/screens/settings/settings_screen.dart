@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 export 'widgets/settings_section_header.dart';
 export 'widgets/settings_text_input_dialog.dart';
+export 'widgets/upload_endpoint_selection_dialog.dart';
 
 typedef SettingsContentBuilder =
     Widget Function(

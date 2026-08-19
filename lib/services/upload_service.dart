@@ -416,11 +416,12 @@ class UploadService {
 
   /// Upload to all selected endpoints
   Future<Map<String, UploadResult>> uploadToSelectedEndpoints({
+    List<String>? endpointNames,
     Map<String, String>? repeaterNames,
     Function(String endpointName, int current, int total)? onProgress,
   }) async {
     final endpoints = await getUploadEndpoints();
-    final selectedNames = await getSelectedEndpoints();
+    final selectedNames = endpointNames ?? await getSelectedEndpoints();
     final results = <String, UploadResult>{};
 
     // Check if any endpoint has samples to upload
@@ -600,7 +601,7 @@ class UploadEndpoint {
   final String name;
   final String url;
 
-  UploadEndpoint({required this.name, required this.url});
+  const UploadEndpoint({required this.name, required this.url});
 
   Map<String, dynamic> toJson() => {'name': name, 'url': url};
 
