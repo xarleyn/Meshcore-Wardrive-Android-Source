@@ -142,6 +142,15 @@ extension _AppDeviceSettingsSection on _MapScreenState {
         _showMapThemeSelector();
       },
     ),
+    ListTile(
+      title: Text(AppLocalizations.of(context).language),
+      subtitle: Text(_getAppLocalePreferenceText()),
+      trailing: const Icon(Icons.language),
+      onTap: () {
+        Navigator.pop(context);
+        _showLanguageSelector();
+      },
+    ),
     if (_loraConnected)
       ListTile(
         title: const Text('Scan for Repeaters'),

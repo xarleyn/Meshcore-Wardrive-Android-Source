@@ -52,6 +52,8 @@ import 'debug_diagnostics_screen.dart';
 import 'session_history_screen.dart';
 import 'signal_trend_screen.dart';
 import '../main.dart';
+import '../l10n/app_locale.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../constants/app_version.dart';
 import '../services/ducting_service.dart';
 import '../services/carpeater_service.dart';
@@ -3869,6 +3871,58 @@ $placemarks  </Document>
 
     if (selected != null) {
       await appState.setThemeMode(selected);
+    }
+  }
+
+  String _getAppLocalePreferenceText() {
+    final l10n = AppLocalizations.of(context);
+    switch (MyApp.of(context)?.localePreference) {
+      case AppLocalePreference.en:
+        return l10n.languageEnglish;
+      case AppLocalePreference.ru:
+        return l10n.languageRussian;
+      case AppLocalePreference.system:
+      case null:
+        return l10n.languageSystem;
+    }
+  }
+
+  Future<void> _showLanguageSelector() async {
+    final appState = MyApp.of(context);
+    if (appState == null) return;
+
+    final selected = await showDialog<AppLocalePreference>(
+      context: context,
+      builder: (context) {
+        final l10n = AppLocalizations.of(context);
+        return AlertDialog(
+          title: Text(l10n.languagePickerTitle),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: Text(l10n.languageSystem),
+                leading: const Icon(Icons.brightness_auto),
+                onTap: () => Navigator.pop(context, AppLocalePreference.system),
+              ),
+              ListTile(
+                title: Text(l10n.languageEnglish),
+                leading: const Icon(Icons.language),
+                onTap: () => Navigator.pop(context, AppLocalePreference.en),
+              ),
+              ListTile(
+                title: Text(l10n.languageRussian),
+                leading: const Icon(Icons.language),
+                onTap: () => Navigator.pop(context, AppLocalePreference.ru),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (selected != null) {
+      await appState.setAppLocalePreference(selected);
     }
   }
 
