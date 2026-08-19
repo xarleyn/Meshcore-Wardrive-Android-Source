@@ -45,6 +45,31 @@ void main() {
     });
   });
 
+  group('compass calibration quiet period', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('defaults to unset', () async {
+      expect(await SettingsService().getCompassCalibrationQuietUntil(), isNull);
+    });
+
+    test('persists and clears the quiet timestamp', () async {
+      final settings = SettingsService();
+      final until = DateTime.utc(2026, 8, 20, 12);
+
+      await settings.setCompassCalibrationQuietUntil(until);
+      expect(
+        (await settings.getCompassCalibrationQuietUntil())
+            ?.millisecondsSinceEpoch,
+        until.millisecondsSinceEpoch,
+      );
+
+      await settings.setCompassCalibrationQuietUntil(null);
+      expect(await settings.getCompassCalibrationQuietUntil(), isNull);
+    });
+  });
+
   group('keep screen on setting', () {
     setUp(() {
       SharedPreferences.setMockInitialValues({});

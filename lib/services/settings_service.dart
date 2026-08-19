@@ -58,6 +58,8 @@ class SettingsService {
   static const String _keepScreenOnKey = 'keep_screen_on';
   static const String _currentLocationMarkerStyleKey =
       'current_location_marker_style';
+  static const String _compassCalibrationQuietUntilKey =
+      'compass_calibration_quiet_until_ms';
   static const String _showSuccessfulOnlyKey = 'show_successful_only';
   static const String _deadZoneAlertsKey = 'dead_zone_alerts_enabled';
   static const String _newRepeaterAlertsKey = 'new_repeater_alerts_enabled';
@@ -645,6 +647,26 @@ class SettingsService {
   ) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_currentLocationMarkerStyleKey, value.name);
+  }
+
+  /// Local quiet period for the compass calibration banner. Not exported.
+  Future<DateTime?> getCompassCalibrationQuietUntil() async {
+    final prefs = await SharedPreferences.getInstance();
+    final millis = prefs.getInt(_compassCalibrationQuietUntilKey);
+    if (millis == null) return null;
+    return DateTime.fromMillisecondsSinceEpoch(millis);
+  }
+
+  Future<void> setCompassCalibrationQuietUntil(DateTime? value) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (value == null) {
+      await prefs.remove(_compassCalibrationQuietUntilKey);
+      return;
+    }
+    await prefs.setInt(
+      _compassCalibrationQuietUntilKey,
+      value.millisecondsSinceEpoch,
+    );
   }
 
   /// Returns the independently selected map theme.

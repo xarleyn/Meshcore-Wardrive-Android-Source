@@ -101,6 +101,13 @@ Exported JSON contains an array of samples:
 
 ## Troubleshooting
 
+### Compass heading looks wrong
+- Switch the current-location marker to **Direction arrow** in Settings
+- If a calibration banner appears, tap **Calibrate** and move the phone in a
+  figure-8 until the bar fills. **Later** hides the banner for a day
+- You can also long-press the compass button or open **Calibrate Compass** in
+  Settings at any time
+
 ### Location Not Updating
 - Check Location Services are enabled
 - Grant "Allow all the time" permission

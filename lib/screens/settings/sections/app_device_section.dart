@@ -99,6 +99,18 @@ extension _AppDeviceSettingsSection on _MapScreenState {
       ),
     ),
     ListTile(
+      title: const Text('Calibrate Compass'),
+      subtitle: const Text(
+        'Draw a figure-8 in the air if the heading looks wrong',
+      ),
+      leading: const Icon(Icons.explore),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () {
+        Navigator.pop(context);
+        _openCompassCalibration(snoozeOnDismiss: false);
+      },
+    ),
+    ListTile(
       title: const Text('Interface Theme'),
       subtitle: Text(_getInterfaceThemeModeText()),
       trailing: const Icon(Icons.brightness_6),

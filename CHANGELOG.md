@@ -3,6 +3,10 @@
 ## Unreleased
 
 ### Added
+- Direction-arrow mode now offers a figure-8 compass calibration when Android
+  reports the magnetometer as unreliable. A compact map banner appears after a
+  short delay, Later snoozes it for a day, and Calibrate Compass remains in
+  Settings or via a long-press on the compass button.
 - Interface and map themes can now be selected independently. Existing installs
   keep their previous map appearance when the new setting is initialized.
 - Map LOD (geohash grouping of coverage, edges, and samples at low zoom) can now

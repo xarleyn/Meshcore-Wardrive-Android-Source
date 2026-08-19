@@ -18,8 +18,10 @@ import '../services/database_service.dart';
 import '../services/upload_service.dart';
 import '../services/settings_service.dart';
 import '../utils/geohash_utils.dart';
+import '../utils/compass_calibration.dart';
 import '../utils/heading_utils.dart';
 import '../utils/color_blind_palette.dart';
+import '../widgets/compass_calibration.dart';
 import '../services/widget_service.dart';
 import 'package:geohash_plus/geohash_plus.dart' as geohash;
 import 'package:usb_serial/usb_serial.dart';
@@ -195,6 +197,10 @@ class _MapScreenState extends State<MapScreen> {
   Timer? _headingUpdateTimer;
   bool _hasCompassHeading = false;
   bool _followHeading = false;
+  final CompassAccuracyMonitor _compassAccuracyMonitor =
+      CompassAccuracyMonitor();
+  CompassAccuracyStatus _compassAccuracyStatus = CompassAccuracyStatus.unknown;
+  DateTime? _compassCalibrationQuietUntil;
 
   // Route trail
   bool _showRouteTrail = false;
@@ -575,11 +581,14 @@ class _MapScreenState extends State<MapScreen> {
     final currentLocationMarkerStyle = await _settingsService
         .getCurrentLocationMarkerStyle();
     final showSuccessfulOnly = await _settingsService.getShowSuccessfulOnly();
+    final compassQuietUntil = await _settingsService
+        .getCompassCalibrationQuietUntil();
     setState(() {
       _lockRotationNorth = lockRotation;
       _keepScreenOn = keepScreenOn;
       _currentLocationMarkerStyle = currentLocationMarkerStyle;
       _showSuccessfulOnly = showSuccessfulOnly;
+      _compassCalibrationQuietUntil = compassQuietUntil;
     });
     await ScreenWakeService.instance.setAlwaysOn(keepScreenOn);
 
@@ -612,26 +621,81 @@ class _MapScreenState extends State<MapScreen> {
     _locationService.loraCompanion.setIgnoredRepeaterPrefix(ignoredPrefix);
   }
 
+  bool get _compassInUse =>
+      _currentLocationMarkerStyle == CurrentLocationMarkerStyle.arrow;
+
+  bool get _showCompassCalibrationBanner {
+    return CompassCalibrationPolicy.shouldShowBanner(
+      status: _compassAccuracyStatus,
+      compassInUse: _compassInUse,
+      now: DateTime.now(),
+      quietUntil: _compassCalibrationQuietUntil,
+    );
+  }
+
   void _syncCompassSubscription() {
     _compassSubscription?.cancel();
     _compassSubscription = null;
     _hasCompassHeading = false;
+    _compassAccuracyMonitor.reset();
+    if (_compassAccuracyStatus != CompassAccuracyStatus.unknown) {
+      _compassAccuracyStatus = CompassAccuracyStatus.unknown;
+    }
 
-    if (_currentLocationMarkerStyle != CurrentLocationMarkerStyle.arrow) {
+    if (!_compassInUse) {
       return;
     }
 
     _compassSubscription = FlutterCompass.events?.listen(
       (event) {
         final heading = event.heading;
-        if (heading == null || !heading.isFinite) return;
-        _hasCompassHeading = true;
-        _scheduleHeadingUpdate(heading);
+        if (heading != null && heading.isFinite) {
+          _hasCompassHeading = true;
+          _scheduleHeadingUpdate(heading);
+        }
+
+        final status = _compassAccuracyMonitor.observe(
+          now: DateTime.now(),
+          heading: heading,
+          accuracy: event.accuracy,
+        );
+        if (status != _compassAccuracyStatus && mounted) {
+          setState(() {
+            _compassAccuracyStatus = status;
+          });
+        }
       },
       onError: (_) {
         _hasCompassHeading = false;
       },
     );
+  }
+
+  Future<void> _quietCompassCalibration(Duration duration) async {
+    final until = DateTime.now().add(duration);
+    if (mounted) {
+      setState(() {
+        _compassCalibrationQuietUntil = until;
+      });
+    }
+    await _settingsService.setCompassCalibrationQuietUntil(until);
+  }
+
+  Future<void> _openCompassCalibration({required bool snoozeOnDismiss}) async {
+    final completed = await showCompassCalibrationSheet(context);
+    if (!mounted) return;
+    if (completed == true) {
+      await _quietCompassCalibration(
+        CompassCalibrationPolicy.postSuccessQuietDuration,
+      );
+      if (mounted) {
+        _showSnackBar('Compass calibrated');
+      }
+      return;
+    }
+    if (snoozeOnDismiss) {
+      await _quietCompassCalibration(CompassCalibrationPolicy.snoozeDuration);
+    }
   }
 
   void _scheduleHeadingUpdate(double heading, {double factor = 0.3}) {
@@ -2254,6 +2318,19 @@ $placemarks  </Document>
                   ),
                 ),
               ),
+            if (_showCompassCalibrationBanner && !_hideUIForScreenshot)
+              Positioned(
+                left: 16,
+                right: 88,
+                bottom: 16,
+                child: CompassCalibrationBanner(
+                  onCalibrate: () =>
+                      _openCompassCalibration(snoozeOnDismiss: true),
+                  onLater: () => _quietCompassCalibration(
+                    CompassCalibrationPolicy.snoozeDuration,
+                  ),
+                ),
+              ),
             if (_deleteMode)
               Positioned(
                 top: 0,
@@ -2304,20 +2381,38 @@ $placemarks  </Document>
           : Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                FloatingActionButton(
-                  heroTag: 'compass',
-                  mini: true,
-                  onPressed: _handleCompassButton,
-                  tooltip:
-                      _currentLocationMarkerStyle ==
-                              CurrentLocationMarkerStyle.arrow &&
-                          !_lockRotationNorth
-                      ? _followHeading
-                            ? 'Stop heading-up and reset north'
-                            : 'Rotate map with heading'
-                      : 'Reset to North',
-                  backgroundColor: _followHeading ? Colors.blue : null,
-                  child: const Icon(Icons.navigation),
+                GestureDetector(
+                  onLongPress: () =>
+                      _openCompassCalibration(snoozeOnDismiss: false),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      FloatingActionButton(
+                        heroTag: 'compass',
+                        mini: true,
+                        onPressed: _handleCompassButton,
+                        tooltip: _compassInUse && !_lockRotationNorth
+                            ? _followHeading
+                                  ? 'Stop heading-up and reset north'
+                                  : 'Rotate map with heading. Long-press to calibrate.'
+                            : 'Reset to North',
+                        backgroundColor: _followHeading ? Colors.blue : null,
+                        child: const Icon(Icons.navigation),
+                      ),
+                      if (_compassInUse &&
+                          _compassAccuracyStatus ==
+                              CompassAccuracyStatus.needsCalibration)
+                        const Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Icon(
+                            Icons.error,
+                            size: 14,
+                            color: Colors.orange,
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 8),
                 FloatingActionButton(
