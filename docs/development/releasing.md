@@ -70,3 +70,47 @@ dart run tool/version.dart bump 1.0.43
 Commit `pubspec.yaml` and `lib/constants/app_version.dart` together after a
 successful release build. Never commit `android/key.properties`, a keystore,
 or generated APK files.
+
+## GitHub Actions release
+
+The repository includes a manual workflow that builds a signed release APK from
+the version already committed in `pubspec.yaml` and publishes it to GitHub
+Releases in the same repository. It does not bump versions.
+
+### Repository secrets
+
+Configure these secrets on the fork before the first Actions release:
+
+| Secret | Value |
+| --- | --- |
+| `ANDROID_KEYSTORE_BASE64` | Base64 encoding of the `.jks` / `.keystore` file |
+| `ANDROID_KEYSTORE_PASSWORD` | `storePassword` from `key.properties` |
+| `ANDROID_KEY_PASSWORD` | `keyPassword` from `key.properties` |
+| `ANDROID_KEY_ALIAS` | `keyAlias` from `key.properties` |
+
+On Linux or macOS:
+
+```sh
+base64 -w0 /path/to/meshcore-wardrive-upload.jks | pbcopy   # macOS
+base64 -w0 /path/to/meshcore-wardrive-upload.jks            # Linux
+```
+
+On Windows PowerShell:
+
+```powershell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes('C:\secure\meshcore-wardrive-upload.jks')) | Set-Clipboard
+```
+
+### Publish
+
+1. Commit the desired `version:` in `pubspec.yaml` (and matching
+   `lib/constants/app_version.dart`) on the branch you want to ship.
+2. Open **Actions → Release APK → Run workflow**.
+3. Optionally mark the GitHub Release as a pre-release.
+4. The workflow creates tag `v{versionName}` (for example `v1.0.42` from
+   `1.0.42+45`) and attaches
+   `meshcore-wardrive-{versionName}-{versionCode}.apk`.
+
+If that tag or release already exists, the workflow fails so you can bump the
+version first. Continuous integration on `main` runs format checks, analyzer,
+tests, and a debug APK build; it does not publish releases.

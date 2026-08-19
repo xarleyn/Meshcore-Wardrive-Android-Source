@@ -10,6 +10,9 @@
   shows native coverage cells and individual GPS sample points.
 - Added a map-provider investigation covering Yandex Tiles API, Yandex MapKit,
   hosted alternatives, offline support, migration effort, and licensing risks.
+- GitHub Actions CI runs format checks, analyzer, tests, and a debug APK build
+  on `main`. A manual **Release APK** workflow publishes a signed APK to GitHub
+  Releases using repository signing secrets and the version from `pubspec.yaml`.
 - Location rejection thresholds are now configurable in a dedicated expandable
   Settings group, with user-friendly km/h speed inputs and one-tap restoration
   of the previous built-in defaults.

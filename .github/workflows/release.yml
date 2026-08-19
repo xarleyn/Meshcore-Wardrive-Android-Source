@@ -1,0 +1,148 @@
+name: Release APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      prerelease:
+        description: Mark GitHub Release as pre-release
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-apk
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build signed APK and publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Read version from pubspec
+        id: version
+        run: |
+          set -euo pipefail
+          raw="$(sed -nE 's/^version:[[:space:]]*//p' pubspec.yaml | head -n1 | tr -d '\r')"
+          if [[ ! "$raw" =~ ^([0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?)\+([0-9]+)$ ]]; then
+            echo "Unexpected pubspec version format: $raw" >&2
+            exit 1
+          fi
+          version_name="${BASH_REMATCH[1]}"
+          version_code="${BASH_REMATCH[3]}"
+          tag="v${version_name}"
+          asset_name="meshcore-wardrive-${version_name}-${version_code}.apk"
+          {
+            echo "raw=${raw}"
+            echo "version_name=${version_name}"
+            echo "version_code=${version_code}"
+            echo "tag=${tag}"
+            echo "asset_name=${asset_name}"
+          } >> "$GITHUB_OUTPUT"
+          echo "Publishing ${raw} as ${tag} (${asset_name})"
+
+      - name: Ensure release tag is free
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "GitHub Release ${TAG} already exists. Bump pubspec.yaml first." >&2
+            exit 1
+          fi
+          if git ls-remote --exit-code --tags origin "refs/tags/${TAG}" >/dev/null 2>&1; then
+            echo "Git tag ${TAG} already exists on origin. Bump pubspec.yaml first." >&2
+            exit 1
+          fi
+
+      - name: Decode release keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${ANDROID_KEYSTORE_BASE64}" ]]; then
+            echo "Missing secret ANDROID_KEYSTORE_BASE64" >&2
+            exit 1
+          fi
+          mkdir -p android/keystore
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/keystore/upload.jks
+          test -s android/keystore/upload.jks
+
+      - name: Write key.properties
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          for name in ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_PASSWORD ANDROID_KEY_ALIAS; do
+            if [[ -z "${!name}" ]]; then
+              echo "Missing secret ${name}" >&2
+              exit 1
+            fi
+          done
+          # storeFile is resolved relative to android/app/
+          printf '%s\n' \
+            "storePassword=${ANDROID_KEYSTORE_PASSWORD}" \
+            "keyPassword=${ANDROID_KEY_PASSWORD}" \
+            "keyAlias=${ANDROID_KEY_ALIAS}" \
+            "storeFile=../keystore/upload.jks" \
+            > android/key.properties
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Check version consistency
+        run: dart run tool/version.dart check
+
+      - name: Build release APK
+        run: flutter build apk --release
+
+      - name: Prepare release asset
+        env:
+          ASSET_NAME: ${{ steps.version.outputs.asset_name }}
+        run: |
+          set -euo pipefail
+          src="build/app/outputs/flutter-apk/app-release.apk"
+          test -f "$src"
+          cp "$src" "$ASSET_NAME"
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+          VERSION_NAME: ${{ steps.version.outputs.version_name }}
+          VERSION_CODE: ${{ steps.version.outputs.version_code }}
+          ASSET_NAME: ${{ steps.version.outputs.asset_name }}
+          PRERELEASE: ${{ inputs.prerelease }}
+        run: |
+          set -euo pipefail
+          args=(gh release create "$TAG" "$ASSET_NAME"
+            --title "$TAG"
+            --notes "Signed release APK for ${VERSION_NAME} (versionCode ${VERSION_CODE})."
+            --target "${{ github.sha }}"
+          )
+          if [[ "$PRERELEASE" == "true" ]]; then
+            args+=(--prerelease)
+          fi
+          "${args[@]}"

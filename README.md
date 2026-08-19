@@ -129,9 +129,13 @@ Build a signed release APK with automatic build-number incrementing:
 .\tool\build_release.ps1
 ```
 
-The generated APK is written below `build/app/outputs/flutter-apk/`. Publish
-release binaries through [GitHub Releases](https://github.com/mintylinux/Meshcore-Wardrive-Android/releases);
-do not commit them to the repository.
+The generated APK is written below `build/app/outputs/flutter-apk/`. Do not
+commit APK files. To publish from CI, set the signing secrets described in
+[Android release builds](docs/development/releasing.md) and run the **Release
+APK** workflow under Actions.
+
+Continuous integration on `main` runs `dart format`, `flutter analyze`,
+`flutter test`, and a debug APK build.
 
 ## Repository layout
 
