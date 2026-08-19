@@ -1,0 +1,23 @@
+{
+  "@@locale": "en",
+  "language": "Language",
+  "@language": {
+    "description": "Settings tile title for in-app language"
+  },
+  "languageSystem": "System default",
+  "@languageSystem": {
+    "description": "Language choice that follows the device locale"
+  },
+  "languageEnglish": "English",
+  "@languageEnglish": {
+    "description": "English endonym; do not translate in other ARBs"
+  },
+  "languageRussian": "Русский",
+  "@languageRussian": {
+    "description": "Russian endonym; do not translate in other ARBs"
+  },
+  "languagePickerTitle": "Choose language",
+  "@languagePickerTitle": {
+    "description": "Dialog title for the language picker"
+  }
+}

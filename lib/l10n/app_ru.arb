@@ -1,0 +1,8 @@
+{
+  "@@locale": "ru",
+  "language": "Язык",
+  "languageSystem": "Системный язык",
+  "languageEnglish": "English",
+  "languageRussian": "Русский",
+  "languagePickerTitle": "Выбор языка"
+}
