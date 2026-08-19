@@ -91,6 +91,9 @@
   service error.
 
 ### Changed
+- Bluetooth device selection no longer waits for the scan timeout. Previously
+  used and paired companion radios appear immediately, and newly found devices
+  are added to the list while scanning continues.
 - Settings now open as a dedicated full-screen page and are grouped into
   Android-style categories for map display, positioning, alerts, Carpeater,
   app/device preferences, discovery, statistics, data, diagnostics, and online

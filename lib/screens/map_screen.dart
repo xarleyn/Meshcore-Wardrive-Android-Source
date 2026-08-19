@@ -21,7 +21,9 @@ import '../utils/geohash_utils.dart';
 import '../utils/compass_calibration.dart';
 import '../utils/heading_utils.dart';
 import '../utils/color_blind_palette.dart';
+import '../utils/bluetooth_scan.dart';
 import '../widgets/compass_calibration.dart';
+import '../widgets/bluetooth_device_picker_dialog.dart';
 import '../services/widget_service.dart';
 import 'package:geohash_plus/geohash_plus.dart' as geohash;
 import 'package:usb_serial/usb_serial.dart';
@@ -3540,46 +3542,51 @@ $placemarks  </Document>
     if (_isConnecting) return;
     setState(() => _isConnecting = true);
     try {
-      _showSnackBar('Scanning for Bluetooth devices...');
-      final devices = await _locationService.loraCompanion
-          .scanBluetoothDevices();
+      final recent = await _settingsService.getRecentBluetoothDevices();
+      final tracked = [
+        for (final row in await DatabaseService().getAllDevices())
+          if (row['connection_type'] == 'bluetooth')
+            KnownBluetoothDevice(
+              remoteId:
+                  bluetoothRemoteIdFromStoredId('${row['public_key'] ?? ''}') ??
+                  '',
+              name: '${row['name'] ?? ''}',
+            ),
+      ].where((device) => device.remoteId.isNotEmpty).toList();
+      final bonded = await _locationService.loraCompanion
+          .getBondedCompanionDevices();
+      final known = collectKnownBluetoothDevices(
+        recent: recent,
+        tracked: tracked,
+        bonded: bonded,
+      );
 
       if (!mounted) return;
-
-      if (devices.isEmpty) {
-        _showSnackBar('No LoRa devices found via Bluetooth');
-        return;
-      }
-
-      final selected = await showDialog<BluetoothDevice>(
+      final selected = await showDialog<BluetoothScanEntry>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Select Bluetooth Device'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: devices.map((device) {
-              return ListTile(
-                title: Text(device.platformName),
-                subtitle: Text(device.remoteId.toString()),
-                onTap: () => Navigator.pop(context, device),
-              );
-            }).toList(),
+        builder: (context) => BluetoothDevicePickerDialog(
+          scan: _locationService.loraCompanion.watchBluetoothScan(
+            knownDevices: known,
           ),
         ),
       );
 
-      if (selected != null) {
-        _showSnackBar('Connecting to ${selected.platformName}...');
+      if (selected == null) return;
 
-        final connected = await _locationService.loraCompanion.connectBluetooth(
-          selected,
+      _showSnackBar('Connecting to ${selected.displayName}...');
+
+      final connected = await _locationService.loraCompanion.connectBluetooth(
+        BluetoothDevice.fromId(selected.remoteId),
+      );
+      if (connected) {
+        await _settingsService.rememberBluetoothDevice(
+          remoteId: selected.remoteId,
+          name: _locationService.loraCompanion.deviceName ?? selected.name,
         );
-        if (connected) {
-          _showSnackBar('Connected via Bluetooth!');
-          await _loadSamples();
-        } else {
-          _showSnackBar('Failed to connect Bluetooth device');
-        }
+        _showSnackBar('Connected via Bluetooth!');
+        await _loadSamples();
+      } else {
+        _showSnackBar('Failed to connect Bluetooth device');
       }
     } catch (e) {
       _showSnackBar('Bluetooth error: $e');

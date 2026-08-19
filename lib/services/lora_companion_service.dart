@@ -10,6 +10,7 @@ import 'package:latlong2/latlong.dart';
 import 'debug_log_service.dart';
 import 'meshcore_protocol.dart';
 import '../models/models.dart';
+import '../utils/bluetooth_scan.dart';
 
 const String _meshCoreServiceUuid = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
 const String _meshCoreRxUuid = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
@@ -333,45 +334,136 @@ class LoRaCompanionService {
   // DEVICE CONNECTION - BLUETOOTH
   // ============================================================================
 
-  /// Scan for Bluetooth LoRa devices
-  Future<List<BluetoothDevice>> scanBluetoothDevices({
-    Duration timeout = const Duration(seconds: 10),
-  }) async {
-    final devices = <BluetoothDevice>[];
+  KnownBluetoothDevice _toKnownBluetoothDevice(BluetoothDevice device) {
+    return KnownBluetoothDevice(
+      remoteId: device.remoteId.toString(),
+      name: device.platformName,
+    );
+  }
 
+  /// Bonded and currently connected companion radios that can appear before a
+  /// scan result arrives.
+  Future<List<KnownBluetoothDevice>> getBondedCompanionDevices() async {
     try {
-      if (await FlutterBluePlus.isSupported == false) {
-        throw Exception('Bluetooth not supported');
-      }
+      if (await FlutterBluePlus.isSupported == false) return const [];
 
-      await FlutterBluePlus.startScan(timeout: timeout);
-
-      final subscription = FlutterBluePlus.scanResults.listen((results) {
-        for (ScanResult r in results) {
-          // Look for LoRa/Meshtastic/WhisperOS devices
-          final name = r.device.platformName.toLowerCase();
-          if (name.contains('lora') ||
-              name.contains('meshtastic') ||
-              name.contains('meshcore') ||
-              name.contains('whisper') ||
-              name.contains('t-beam') ||
-              name.contains('heltec')) {
-            if (!devices.contains(r.device)) {
-              devices.add(r.device);
-            }
-          }
-        }
-      });
-
-      await Future.delayed(timeout);
-      await subscription.cancel();
-      await FlutterBluePlus.stopScan();
-
-      return devices;
+      final bonded = await FlutterBluePlus.bondedDevices;
+      final connected = await FlutterBluePlus.systemDevices([
+        Guid(meshCoreNordicUartServiceUuid),
+      ]);
+      return collectKnownBluetoothDevices(
+        recent: const [],
+        bonded: [
+          for (final device in [...bonded, ...connected])
+            if (isLikelyLoRaCompanion(
+              name: device.platformName,
+              remoteId: device.remoteId.toString(),
+            ))
+              _toKnownBluetoothDevice(device),
+        ],
+      );
     } catch (e) {
-      print('Error scanning Bluetooth: $e');
-      return [];
+      print('Error listing bonded Bluetooth devices: $e');
+      return const [];
     }
+  }
+
+  /// Emits known devices immediately, then the growing scan list.
+  ///
+  /// Cancelling the subscription stops the BLE scan.
+  Stream<BluetoothScanSnapshot> watchBluetoothScan({
+    List<KnownBluetoothDevice> knownDevices = const [],
+    Duration timeout = const Duration(seconds: 10),
+  }) {
+    late final StreamController<BluetoothScanSnapshot> controller;
+    StreamSubscription<List<ScanResult>>? resultsSub;
+    StreamSubscription<bool>? scanningSub;
+    var latest = BluetoothScanSnapshot(
+      devices: mergeBluetoothScanResults(
+        known: knownDevices,
+        discovered: const [],
+      ),
+      isScanning: true,
+    );
+
+    void emit(BluetoothScanSnapshot snapshot) {
+      latest = snapshot;
+      if (!controller.isClosed) controller.add(snapshot);
+    }
+
+    List<DiscoveredBluetoothDevice> toDiscovered(List<ScanResult> results) {
+      final devices = <DiscoveredBluetoothDevice>[];
+      final seen = <String>{};
+      for (final result in results) {
+        final name = result.device.platformName.isNotEmpty
+            ? result.device.platformName
+            : result.advertisementData.advName;
+        final remoteId = result.device.remoteId.toString();
+        if (!isLikelyLoRaCompanion(
+          name: name,
+          remoteId: remoteId,
+          serviceUuids: result.advertisementData.serviceUuids.map(
+            (uuid) => uuid.toString(),
+          ),
+          knownRemoteIds: knownDevices.map((device) => device.remoteId),
+        )) {
+          continue;
+        }
+        if (!seen.add(normalizeBluetoothId(remoteId))) continue;
+        devices.add(DiscoveredBluetoothDevice(remoteId: remoteId, name: name));
+      }
+      return devices;
+    }
+
+    controller = StreamController<BluetoothScanSnapshot>(
+      onListen: () async {
+        emit(latest);
+        try {
+          if (await FlutterBluePlus.isSupported == false) {
+            emit(
+              latest.copyWith(
+                isScanning: false,
+                error: 'Bluetooth not supported',
+              ),
+            );
+            return;
+          }
+
+          resultsSub = FlutterBluePlus.scanResults.listen((results) {
+            emit(
+              BluetoothScanSnapshot(
+                devices: mergeBluetoothScanResults(
+                  known: knownDevices,
+                  discovered: toDiscovered(results),
+                ),
+                isScanning: FlutterBluePlus.isScanningNow,
+                error: latest.error,
+              ),
+            );
+          });
+          scanningSub = FlutterBluePlus.isScanning.listen((scanning) {
+            emit(latest.copyWith(isScanning: scanning));
+          });
+
+          await FlutterBluePlus.startScan(timeout: timeout);
+        } catch (e) {
+          emit(latest.copyWith(isScanning: false, error: e.toString()));
+        }
+      },
+      onCancel: () async {
+        await resultsSub?.cancel();
+        await scanningSub?.cancel();
+        resultsSub = null;
+        scanningSub = null;
+        try {
+          if (FlutterBluePlus.isScanningNow) {
+            await FlutterBluePlus.stopScan();
+          }
+        } catch (_) {}
+      },
+    );
+
+    return controller.stream;
   }
 
   /// Connect to LoRa device via Bluetooth

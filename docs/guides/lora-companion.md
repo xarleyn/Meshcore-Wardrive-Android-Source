@@ -34,7 +34,8 @@ This app now works **exactly like the mesh-map.pages.dev website** - using your 
 **Option B: Bluetooth**
 1. Pair LoRa device in Android Bluetooth settings
 2. In app: Tap "Scan Bluetooth Devices"
-3. Select your device (e.g., "Meshtastic_xxxx")
+3. Select your device from the live list (e.g., "Meshtastic_xxxx"). Previously
+   used devices appear immediately.
 4. Wait for "Connected via Bluetooth"
 
 ### 2. Connect to MQTT

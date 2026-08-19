@@ -295,4 +295,41 @@ void main() {
       },
     );
   });
+
+  group('recent Bluetooth devices', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('defaults to an empty list', () async {
+      expect(await SettingsService().getRecentBluetoothDevices(), isEmpty);
+    });
+
+    test(
+      'moves a remembered device to the front and keeps a short history',
+      () async {
+        final settings = SettingsService();
+
+        await settings.rememberBluetoothDevice(
+          remoteId: '11:22:33:44:55:66',
+          name: 'Heltec V3',
+        );
+        await settings.rememberBluetoothDevice(
+          remoteId: 'AA:BB:CC:DD:EE:FF',
+          name: 'MeshCore One',
+        );
+        await settings.rememberBluetoothDevice(
+          remoteId: '11:22:33:44:55:66',
+          name: 'Heltec V3 Updated',
+        );
+
+        final recent = await settings.getRecentBluetoothDevices();
+        expect(recent.map((device) => device.remoteId), [
+          '11:22:33:44:55:66',
+          'AA:BB:CC:DD:EE:FF',
+        ]);
+        expect(recent.first.name, 'Heltec V3 Updated');
+      },
+    );
+  });
 }

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/location_quality_settings.dart';
+import '../utils/bluetooth_scan.dart';
 
 enum CurrentLocationMarkerStyle { circle, arrow }
 
@@ -65,6 +66,8 @@ class SettingsService {
   static const String _newRepeaterAlertsKey = 'new_repeater_alerts_enabled';
   static const String _mapThemeModeKey = 'map_theme_mode';
   static const String _mapLodEnabledKey = 'map_lod_enabled';
+  static const String _recentBluetoothDevicesKey = 'recent_bluetooth_devices';
+  static const int _maxRecentBluetoothDevices = 8;
 
   // Alert toggles
   Future<bool> getDeadZoneAlertsEnabled() async {
@@ -588,6 +591,47 @@ class SettingsService {
     } else {
       await prefs.setString(_deviceNameKey, value);
     }
+  }
+
+  Future<List<KnownBluetoothDevice>> getRecentBluetoothDevices() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_recentBluetoothDevicesKey);
+    if (raw == null || raw.isEmpty) return const [];
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! List) return const [];
+      return [
+        for (final item in decoded)
+          if (item is Map)
+            KnownBluetoothDevice(
+              remoteId: '${item['remoteId'] ?? ''}',
+              name: '${item['name'] ?? ''}',
+            ),
+      ].where((device) => device.remoteId.trim().isNotEmpty).toList();
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  Future<void> rememberBluetoothDevice({
+    required String remoteId,
+    required String name,
+  }) async {
+    if (remoteId.trim().isEmpty) return;
+    final remembered = collectKnownBluetoothDevices(
+      recent: [
+        KnownBluetoothDevice(remoteId: remoteId, name: name),
+        ...await getRecentBluetoothDevices(),
+      ],
+    );
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      _recentBluetoothDevicesKey,
+      jsonEncode([
+        for (final device in remembered.take(_maxRecentBluetoothDevices))
+          {'remoteId': device.remoteId, 'name': device.name},
+      ]),
+    );
   }
 
   Future<bool> getShowSuccessfulOnly() async {

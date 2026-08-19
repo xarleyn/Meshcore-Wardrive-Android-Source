@@ -45,7 +45,8 @@ On first launch, grant these permissions:
 1. Pair your device in Android Settings → Bluetooth first
 2. Open MeshCore Wardrive app
 3. Tap **Connect** → **Scan Bluetooth**
-4. Select your paired device
+4. Select your device from the live list. Previously used radios appear
+   immediately; newly found devices are added while scanning continues.
 5. Wait for connection (green indicator)
 
 ### Start Wardriving
