@@ -280,7 +280,8 @@ class _CoverageScoreTab extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           ElevatedButton.icon(
-            onPressed: () => Share.share(shareText),
+            onPressed: () =>
+                SharePlus.instance.share(ShareParams(text: shareText)),
             icon: const Icon(Icons.share, size: 18),
             label: Text(l10n.analyticsShareScore),
           ),

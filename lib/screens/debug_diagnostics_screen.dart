@@ -60,10 +60,12 @@ class _DebugDiagnosticsScreenState extends State<DebugDiagnosticsScreen> {
   Future<void> _shareLogFile(File file) async {
     final l10n = AppLocalizations.of(context);
     try {
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        subject: l10n.debugDiagnosticsShareSubject,
-        text: l10n.debugDiagnosticsShareText,
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path)],
+          subject: l10n.debugDiagnosticsShareSubject,
+          text: l10n.debugDiagnosticsShareText,
+        ),
       );
     } catch (e) {
       if (mounted) {
@@ -348,10 +350,12 @@ class _LogViewerScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.share),
             onPressed: () {
-              Share.share(
-                content,
-                subject: AppLocalizations.of(context)
-                    .debugDiagnosticsShareSubjectWithFile(fileName),
+              SharePlus.instance.share(
+                ShareParams(
+                  text: content,
+                  subject: AppLocalizations.of(context)
+                      .debugDiagnosticsShareSubjectWithFile(fileName),
+                ),
               );
             },
           ),

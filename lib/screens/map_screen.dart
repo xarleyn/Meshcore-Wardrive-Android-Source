@@ -1322,10 +1322,13 @@ class _MapScreenState extends State<MapScreen> {
         final file = File('${directory!.path}/$fileName');
         await file.writeAsString(content);
 
-        await Share.shareXFiles(
-          [XFile(file.path)],
-          subject: AppLocalizations.of(context).mapExportShareSubject,
-          text: AppLocalizations.of(context).mapExportShareText(samples.length),
+        await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile(file.path)],
+            subject: AppLocalizations.of(context).mapExportShareSubject,
+            text: AppLocalizations.of(context)
+                .mapExportShareText(samples.length),
+          ),
         );
         _showSnackBar(AppLocalizations.of(context).mapExportShared);
       }
@@ -1525,9 +1528,12 @@ $placemarks  </Document>
         final dir = await getApplicationDocumentsDirectory();
         final file = File('${dir.path}/$fileName');
         await file.writeAsString(jsonString);
-        await Share.shareXFiles([
-          XFile(file.path),
-        ], text: AppLocalizations.of(context).mapSettingsShareText);
+        await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile(file.path)],
+            text: AppLocalizations.of(context).mapSettingsShareText,
+          ),
+        );
       }
     } catch (e) {
       _showSnackBar(AppLocalizations.of(context).mapExportFailed('$e'));
@@ -1541,9 +1547,10 @@ $placemarks  </Document>
         allowedExtensions: ['json'],
       );
 
-      if (result == null || result.files.single.path == null) return;
+      if (result == null || result.files.isEmpty) return;
+      final pickedFile = result.files.single;
 
-      final file = File(result.files.single.path!);
+      final file = File(pickedFile.path!);
       final jsonString = await file.readAsString();
 
       // Show confirmation dialog
@@ -2203,7 +2210,7 @@ $placemarks  </Document>
         imageBytes,
         quality: 100,
         fileName: fileName,
-        androidRelativePath: "Pictures/MeshCore",
+        androidRelativePath: 'MeshCore',
         skipIfExists: false,
       );
 
@@ -2231,9 +2238,12 @@ $placemarks  </Document>
                   final tempDir = await getTemporaryDirectory();
                   final file = File('${tempDir.path}/meshcore_screenshot.png');
                   await file.writeAsBytes(imageBytes);
-                  await Share.shareXFiles([
-                    XFile(file.path),
-                  ], text: AppLocalizations.of(context).mapScreenshotShareText);
+                  await SharePlus.instance.share(
+                    ShareParams(
+                      files: [XFile(file.path)],
+                      text: AppLocalizations.of(context).mapScreenshotShareText,
+                    ),
+                  );
                 },
                 child: Text(AppLocalizations.of(context).mapYes),
               ),
@@ -5160,10 +5170,12 @@ $placemarks  </Document>
       );
       await file.writeAsBytes(imageBytes);
 
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        subject: AppLocalizations.of(context).mapCoverageShareSubject,
-        text: statsText,
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path)],
+          subject: AppLocalizations.of(context).mapCoverageShareSubject,
+          text: statsText,
+        ),
       );
     } catch (e) {
       setState(() {
