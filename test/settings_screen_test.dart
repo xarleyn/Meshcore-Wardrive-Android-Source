@@ -110,10 +110,66 @@ void main() {
     expect(find.textContaining(RegExp(r'^v\d')), findsNothing);
   });
 
-  testWidgets('scrolls settings to the bottom and back to the top', (
+  testWidgets('opens a category from a modern settings overview card', (
     tester,
   ) async {
-    final l10n = await pumpWithL10n(
+    await pumpWithL10n(
+      tester,
+      SettingsScreen(
+        version: '1.2.3',
+        contentBuilder: (context, setPageState, scrollController) => ListView(
+          controller: scrollController,
+          padding: const EdgeInsets.all(16),
+          children: [
+            SettingsOverviewCard(
+              children: [
+                SettingsCategoryTile(
+                  title: 'Map display',
+                  icon: Icons.map_outlined,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (context) => SettingsScreen.category(
+                          title: 'Map display',
+                          contentBuilder:
+                              (context, setPageState, scrollController) =>
+                                  ListView(
+                                    controller: scrollController,
+                                    padding: const EdgeInsets.all(16),
+                                    children: const [
+                                      SettingsContentCard(
+                                        children: [
+                                          ListTile(title: Text('Show cells')),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.byType(SettingsOverviewCard), findsOneWidget);
+    expect(find.text('Map display'), findsOneWidget);
+
+    await tester.tap(find.text('Map display'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SettingsContentCard), findsOneWidget);
+    expect(find.text('Show cells'), findsOneWidget);
+  });
+
+  testWidgets('supports standard scrolling on long category pages', (
+    tester,
+  ) async {
+    await pumpWithL10n(
       tester,
       SettingsScreen.category(
         title: 'Long settings',
@@ -130,13 +186,13 @@ void main() {
     expect(find.text('Setting 0'), findsOneWidget);
     expect(find.text('Setting 29'), findsNothing);
 
-    await tester.tap(find.byTooltip(l10n.settingsScrollToBottom));
+    await tester.drag(find.byType(ListView), const Offset(0, -2000));
     await tester.pumpAndSettle();
 
     expect(find.text('Setting 0'), findsNothing);
     expect(find.text('Setting 29'), findsOneWidget);
 
-    await tester.tap(find.byTooltip(l10n.settingsScrollToTop));
+    await tester.drag(find.byType(ListView), const Offset(0, 2000));
     await tester.pumpAndSettle();
 
     expect(find.text('Setting 0'), findsOneWidget);

@@ -38,28 +38,6 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   final ScrollController _scrollController = ScrollController();
 
-  Future<void> _scrollTo(double offset) async {
-    if (!_scrollController.hasClients) {
-      return;
-    }
-
-    await _scrollController.animateTo(
-      offset,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOut,
-    );
-  }
-
-  Future<void> _scrollToTop() => _scrollTo(0);
-
-  Future<void> _scrollToBottom() async {
-    if (!_scrollController.hasClients) {
-      return;
-    }
-
-    await _scrollTo(_scrollController.position.maxScrollExtent);
-  }
-
   @override
   void dispose() {
     _scrollController.dispose();
@@ -69,21 +47,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).colorScheme;
+    final isOverview = widget.version != null;
 
     return Scaffold(
+      backgroundColor: colors.surface,
       appBar: AppBar(
+        toolbarHeight: isOverview ? 76 : 64,
+        backgroundColor: colors.surface,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
         title: Text(widget.title ?? l10n.settingsTitle),
+        titleTextStyle:
+            (isOverview
+                    ? Theme.of(context).textTheme.headlineMedium
+                    : Theme.of(context).textTheme.titleLarge)
+                ?.copyWith(
+                  color: colors.onSurface,
+                  fontWeight: FontWeight.w600,
+                ),
         actions: [
-          IconButton(
-            onPressed: _scrollToTop,
-            tooltip: l10n.settingsScrollToTop,
-            icon: const Icon(Icons.vertical_align_top),
-          ),
-          IconButton(
-            onPressed: _scrollToBottom,
-            tooltip: l10n.settingsScrollToBottom,
-            icon: const Icon(Icons.vertical_align_bottom),
-          ),
           if (widget.version case final version?)
             Center(
               child: Padding(
@@ -116,6 +99,111 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class SettingsOverviewCard extends StatelessWidget {
+  const SettingsOverviewCard({required this.children, super.key});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    return Material(
+      color: colors.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(24),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var index = 0; index < children.length; index++) ...[
+            children[index],
+            if (index != children.length - 1)
+              Divider(
+                height: 1,
+                indent: 76,
+                endIndent: 20,
+                color: colors.outlineVariant.withValues(alpha: 0.55),
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class SettingsCategoryTile extends StatelessWidget {
+  const SettingsCategoryTile({
+    required this.title,
+    required this.icon,
+    required this.onTap,
+    super.key,
+  });
+
+  final String title;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    return ListTile(
+      minTileHeight: 72,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+      leading: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colors.primaryContainer,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: SizedBox.square(
+          dimension: 44,
+          child: Icon(icon, color: colors.onPrimaryContainer, size: 24),
+        ),
+      ),
+      title: Text(title),
+      titleTextStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
+        color: colors.onSurface,
+        fontWeight: FontWeight.w500,
+      ),
+      trailing: Icon(Icons.chevron_right, color: colors.onSurfaceVariant),
+      onTap: onTap,
+    );
+  }
+}
+
+class SettingsContentCard extends StatelessWidget {
+  const SettingsContentCard({required this.children, super.key});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    return Material(
+      color: colors.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(24),
+      clipBehavior: Clip.antiAlias,
+      child: ListTileTheme(
+        data: ListTileThemeData(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+          iconColor: colors.primary,
+          minVerticalPadding: 12,
+          titleTextStyle: theme.textTheme.titleMedium?.copyWith(
+            color: colors.onSurface,
+            fontWeight: FontWeight.w500,
+          ),
+          subtitleTextStyle: theme.textTheme.bodyMedium?.copyWith(
+            color: colors.onSurfaceVariant,
+          ),
+        ),
+        child: Column(mainAxisSize: MainAxisSize.min, children: children),
       ),
     );
   }
