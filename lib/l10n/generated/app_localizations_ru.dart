@@ -42,7 +42,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsClear => 'Очистить';
 
   @override
-  String get settingsUpload => 'Загрузить';
+  String get settingsUpload => 'Отправить';
 
   @override
   String get settingsReset => 'Сбросить';
@@ -66,7 +66,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsSectionLocation => 'Геолокация и позиционирование';
 
   @override
-  String get settingsSectionFeedback => 'Обратная связь и оповещения';
+  String get settingsSectionFeedback => 'Звук и оповещения';
 
   @override
   String get settingsSectionCarpeater => 'Режим Carpeater (бета)';
@@ -99,10 +99,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsSectionThresholds => 'Пороги';
 
   @override
-  String get settingsSectionImpossibleZones => 'Невозможные зоны';
+  String get settingsSectionImpossibleZones => 'Зоны исключения GPS';
 
   @override
-  String get settingsShowCoverageBoxes => 'Показывать квадраты покрытия';
+  String get settingsShowCoverageBoxes => 'Показывать ячейки покрытия';
 
   @override
   String get settingsSimplifyMapAtLowZoom =>
@@ -116,7 +116,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsShowSamples => 'Показывать замеры';
 
   @override
-  String get settingsShowEdges => 'Показывать рёбра';
+  String get settingsShowEdges => 'Показывать связи';
 
   @override
   String get settingsShowRepeaters => 'Показывать репитеры';
@@ -143,7 +143,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Рисовать пройденный путь на карте';
 
   @override
-  String get settingsCommunityCoverage => 'Общественное покрытие';
+  String get settingsCommunityCoverage => 'Покрытие сообщества';
 
   @override
   String get settingsCommunityCoverageDownloaded =>
@@ -158,8 +158,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Очистить скачанное покрытие';
 
   @override
-  String get settingsCommunityCoverageCleared =>
-      'Общественное покрытие очищено';
+  String get settingsCommunityCoverageCleared => 'Покрытие сообщества очищено';
 
   @override
   String get settingsShowHeatmap => 'Показывать тепловую карту';
@@ -168,7 +167,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsShowHeatmapSubtitle => 'Градиент активности пингов';
 
   @override
-  String get settingsShowPredictionRings => 'Показывать кольца прогноза';
+  String get settingsShowPredictionRings =>
+      'Показывать оценочные кольца покрытия';
 
   @override
   String get settingsShowPredictionRingsSubtitle =>
@@ -190,7 +190,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsLocationQualityFiltersSubtitle =>
-      'Точность, неправдоподобное движение и невозможные места';
+      'Точность, неправдоподобное движение и зоны исключения GPS';
 
   @override
   String get settingsShowApproximatePosition =>
@@ -215,7 +215,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Следить за условиями волновода (нужен интернет)';
 
   @override
-  String get settingsSoundFeedback => 'Звуковая обратная связь';
+  String get settingsSoundFeedback => 'Звуковые сигналы';
 
   @override
   String get settingsSoundFeedbackSubtitle => 'Сигналы по результатам пинга';
@@ -368,10 +368,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsColorModeQuality => 'Качество';
 
   @override
-  String get settingsColorModeAge => 'Возраст';
+  String get settingsColorModeAge => 'Давность';
 
   @override
-  String get settingsColorModeRedundancy => 'Избыточность';
+  String get settingsColorModeRedundancy => 'Плотность';
 
   @override
   String get settingsDistanceUnit => 'Единицы расстояния';
@@ -392,7 +392,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsFuelUnitMetric => 'л/100 км / литры';
 
   @override
-  String get settingsColorBlindMode => 'Режим цветовой слепоты';
+  String get settingsColorBlindMode => 'Режим для дальтоников';
 
   @override
   String get settingsColorBlindNormal => 'Обычный';
@@ -447,11 +447,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsShowAllRepeaters => 'Показывать все репитеры';
 
   @override
-  String get settingsApplyWhitelistToEdges => 'Применять белый список к рёбрам';
+  String get settingsApplyWhitelistToEdges => 'Применять белый список к связям';
 
   @override
   String get settingsApplyWhitelistToEdgesSubtitle =>
-      'Показывать рёбра только для репитеров из белого списка';
+      'Показывать связи только для репитеров из белого списка';
 
   @override
   String get settingsPingMode => 'Режим пинга';
@@ -466,7 +466,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsPingModeBoth => 'Оба';
 
   @override
-  String get settingsPingDistance => 'Дистанция пинга';
+  String get settingsPingDistance => 'Расстояние пинга';
 
   @override
   String get settingsPingTimeInterval => 'Интервал пинга по времени';
@@ -526,54 +526,55 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsCoverageResolutionPrompt =>
-      'Выберите размер квадратов покрытия:';
+      'Выберите размер ячеек покрытия:';
 
   @override
   String get settingsCoverageRegional => 'Региональный';
 
   @override
-  String get settingsCoverageRegionalSubtitle => 'квадраты ~20 km (точность 4)';
+  String get settingsCoverageRegionalSubtitle => 'ячейки ~20 km (точность 4)';
 
   @override
-  String get settingsCoverageCity => 'Городской';
+  String get settingsCoverageCity => 'Уровень города';
 
   @override
-  String get settingsCoverageCitySubtitle => 'квадраты ~5 km (точность 5)';
+  String get settingsCoverageCitySubtitle => 'ячейки ~5 km (точность 5)';
 
   @override
-  String get settingsCoverageNeighborhood => 'Районный';
+  String get settingsCoverageNeighborhood => 'Уровень района';
 
   @override
   String get settingsCoverageNeighborhoodSubtitle =>
-      'квадраты ~1,2 km (точность 6, по умолчанию)';
+      'ячейки ~1,2 km (точность 6, по умолчанию)';
 
   @override
-  String get settingsCoverageStreet => 'Уличный';
+  String get settingsCoverageStreet => 'Уровень улицы';
 
   @override
-  String get settingsCoverageStreetSubtitle => 'квадраты ~153 m (точность 7)';
+  String get settingsCoverageStreetSubtitle => 'ячейки ~153 m (точность 7)';
 
   @override
-  String get settingsCoverageBuilding => 'Зданий';
+  String get settingsCoverageBuilding => 'Уровень здания';
 
   @override
   String get settingsCoverageBuildingSubtitle =>
-      'квадраты ~38 m (точность 8, подробно)';
+      'ячейки ~38 m (точность 8, подробно)';
 
   @override
-  String get settingsCoverageRegionalDesc => 'Региональный (квадраты ~20 km)';
+  String get settingsCoverageRegionalDesc => 'Региональный (ячейки ~20 km)';
 
   @override
-  String get settingsCoverageCityDesc => 'Городской (квадраты ~5 km)';
+  String get settingsCoverageCityDesc => 'Уровень города (ячейки ~5 km)';
 
   @override
-  String get settingsCoverageNeighborhoodDesc => 'Районный (квадраты ~1,2 km)';
+  String get settingsCoverageNeighborhoodDesc =>
+      'Уровень района (ячейки ~1,2 km)';
 
   @override
-  String get settingsCoverageStreetDesc => 'Уличный (квадраты ~153 m)';
+  String get settingsCoverageStreetDesc => 'Уровень улицы (ячейки ~153 m)';
 
   @override
-  String get settingsCoverageBuildingDesc => 'Зданий (квадраты ~38 m)';
+  String get settingsCoverageBuildingDesc => 'Уровень здания (ячейки ~38 m)';
 
   @override
   String settingsCoverageResolutionSet(String description) {
@@ -660,7 +661,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Места, где вы физически не можете быть. GPS внутри зоны отбрасывается, сохраняется последняя достоверная позиция. Зоны на карте не показываются.';
 
   @override
-  String get settingsAddImpossibleZone => 'Добавить невозможную зону';
+  String get settingsAddImpossibleZone => 'Добавить зону исключения GPS';
 
   @override
   String get settingsImpossibleZoneEmptySubtitle =>
@@ -686,7 +687,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsDeleteZoneTooltip => 'Удалить зону';
 
   @override
-  String get settingsClearImpossibleZones => 'Очистить невозможные зоны';
+  String get settingsClearImpossibleZones => 'Очистить зоны исключения GPS';
 
   @override
   String settingsRemoveAllZones(int count) {
@@ -696,14 +697,14 @@ class AppLocalizationsRu extends AppLocalizations {
       other: 'Удалить все $count зоны',
       many: 'Удалить все $count зон',
       few: 'Удалить все $count зоны',
-      one: 'Удалить все $count зону',
+      one: 'Удалить $count зону',
     );
     return '$_temp0';
   }
 
   @override
   String get settingsClearImpossibleZonesConfirm =>
-      'Удалить все невозможные зоны? GPS в этих областях больше не будет отбрасываться.';
+      'Удалить все зоны исключения GPS? Координаты в этих областях больше не будут отбрасываться.';
 
   @override
   String settingsAddImpossibleZoneCenter(String lat, String lon) {
@@ -739,7 +740,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsAddZone => 'Добавить зону';
 
   @override
-  String get settingsImpossibleZoneAdded => 'Невозможная зона добавлена';
+  String get settingsImpossibleZoneAdded => 'Зона исключения GPS добавлена';
 
   @override
   String get settingsTotalDistanceDriven => 'Всего пройдено';
@@ -840,8 +841,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Сравнить работу LoRa-компаньонов';
 
   @override
-  String get settingsDownloadCommunityCoverage =>
-      'Скачать общественное покрытие';
+  String get settingsDownloadCommunityCoverage => 'Скачать покрытие сообщества';
 
   @override
   String get settingsCommunityCoverageCached =>
@@ -849,7 +849,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsPullCoverageFromWeb =>
-      'Загрузить данные покрытия с веб-карты';
+      'Скачать данные покрытия с веб-карты';
 
   @override
   String get settingsSessionHistory => 'История сессий';
@@ -927,7 +927,7 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get settingsFindCoverageGaps => 'Найти пробелы покрытия';
+  String get settingsFindCoverageGaps => 'Найти провалы покрытия';
 
   @override
   String get settingsFindCoverageGapsSubtitle =>
@@ -942,7 +942,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsDeleteModeOn =>
-      'Режим удаления ВКЛ — коснитесь квадрата покрытия или замера';
+      'Режим удаления ВКЛ — коснитесь ячейки покрытия или замера';
 
   @override
   String get settingsPlannedRepeaters => 'Планируемые репитеры';
@@ -978,10 +978,10 @@ class AppLocalizationsRu extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count зоны — данные исключаются из загрузок',
-      many: '$count зон — данные исключаются из загрузок',
-      few: '$count зоны — данные исключаются из загрузок',
-      one: '$count зона — данные исключаются из загрузок',
+      other: '$count зоны — данные исключаются из отправок',
+      many: '$count зон — данные исключаются из отправок',
+      few: '$count зоны — данные исключаются из отправок',
+      one: '$count зона — данные исключаются из отправок',
     );
     return '$_temp0';
   }
@@ -991,7 +991,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsClearPrivacyZonesConfirm =>
-      'Удалить все зоны приватности? Данные больше не будут исключаться из загрузок.';
+      'Удалить все зоны приватности? Данные больше не будут исключаться из отправок.';
 
   @override
   String get settingsPrivacyZonesCleared => 'Зоны приватности очищены';
@@ -1054,23 +1054,23 @@ class AppLocalizationsRu extends AppLocalizations {
       'Просмотр журналов для устранения неполадок';
 
   @override
-  String get settingsUploadData => 'Загрузить данные';
+  String get settingsUploadData => 'Отправить данные';
 
   @override
   String get settingsUploadDataSubtitle => 'Отправить замеры на веб-карту';
 
   @override
-  String get settingsManageUploadSites => 'Управление сайтами загрузки';
+  String get settingsManageUploadSites => 'Управление сайтами отправки';
 
   @override
   String get settingsManageUploadSitesSubtitle =>
-      'Добавить или изменить точки загрузки';
+      'Добавить или изменить точки отправки';
 
   @override
-  String get settingsUploadNoSites => 'Сайты загрузки не настроены';
+  String get settingsUploadNoSites => 'Сайты отправки не настроены';
 
   @override
-  String get settingsUploadSelectSites => 'Выберите сайты для загрузки:';
+  String get settingsUploadSelectSites => 'Выберите сайты для отправки:';
 
   @override
   String get settingsCheckForUpdates => 'Проверить обновления';
@@ -1376,7 +1376,7 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get mapExportShareSubject => 'MeshCore Wardrive Export';
+  String get mapExportShareSubject => 'Экспорт MeshCore Wardrive';
 
   @override
   String mapExportShareText(int count) {
@@ -1438,7 +1438,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get mapImportSettingsConfirm =>
-      'Текущие настройки приложения будут перезаписаны (отображение, пинг, серверы загрузки, Carpeater и т. д.).\n\nДанные вардрайва НЕ будут затронуты.\n\nПродолжить?';
+      'Текущие настройки приложения будут перезаписаны (отображение, пинг, серверы отправки, Carpeater и т. д.).\n\nДанные вардрайва НЕ будут затронуты.\n\nПродолжить?';
 
   @override
   String mapImportedSettingsCount(int count) {
@@ -1489,7 +1489,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get mapPrivacyZoneBlurb =>
-      'Данные внутри этой зоны будут исключены из загрузок и экспорта.';
+      'Данные внутри этой зоны будут исключены из отправок и экспорта.';
 
   @override
   String get mapPrivacyZoneHint => 'напр., Дом';
@@ -1536,7 +1536,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get mapDeleteModeBanner =>
-      'РЕЖИМ УДАЛЕНИЯ: нажмите квадрат покрытия или замер';
+      'РЕЖИМ УДАЛЕНИЯ: нажмите ячейку покрытия или замер';
 
   @override
   String get mapUpdateAvailable => 'Доступно обновление';
@@ -1924,7 +1924,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mapShowOnMap => 'Показать на карте';
 
   @override
-  String get mapCoverageSquareInfo => 'Сведения о квадрате покрытия';
+  String get mapCoverageSquareInfo => 'Сведения о ячейке покрытия';
 
   @override
   String get mapSamplesLabel => 'Замеры: ';
@@ -1957,11 +1957,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String mapUploadingTo(String site) {
-    return 'Загрузка на $site...';
+    return 'Отправка на $site...';
   }
 
   @override
-  String get mapUploadingSamples => 'Загрузка замеров...';
+  String get mapUploadingSamples => 'Отправка замеров...';
 
   @override
   String mapUploadBatch(int current, int total) {
@@ -1969,27 +1969,27 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get mapUploadComplete => 'Загрузка завершена';
+  String get mapUploadComplete => 'Отправка завершена';
 
   @override
-  String get mapUploadResults => 'Результаты загрузки';
+  String get mapUploadResults => 'Результаты отправки';
 
   @override
   String mapUploadedToSites(int successCount, int total) {
-    return 'Загружено на $successCount из $total сайтов';
+    return 'Отправлено на $successCount из $total сайтов';
   }
 
   @override
-  String get mapUploadFallbackName => 'Загрузка';
+  String get mapUploadFallbackName => 'Отправка';
 
   @override
   String mapUploadError(String error) {
-    return 'Ошибка загрузки: $error';
+    return 'Ошибка отправки: $error';
   }
 
   @override
   String get mapSelectWhichSitesToUpload =>
-      'Выберите, на какие сайты загружать:';
+      'Выберите, на какие сайты отправлять:';
 
   @override
   String get mapDeleteSite => 'Удалить сайт';
@@ -2003,10 +2003,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mapAddSite => 'Добавить сайт';
 
   @override
-  String get mapUploadSitesUpdated => 'Сайты загрузки обновлены';
+  String get mapUploadSitesUpdated => 'Сайты отправки обновлены';
 
   @override
-  String get mapEditUploadSite => 'Изменить сайт загрузки';
+  String get mapEditUploadSite => 'Изменить сайт отправки';
 
   @override
   String get mapSiteName => 'Имя сайта';
@@ -2015,7 +2015,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mapApiUrl => 'URL API';
 
   @override
-  String get mapAddUploadSite => 'Добавить сайт загрузки';
+  String get mapAddUploadSite => 'Добавить сайт отправки';
 
   @override
   String get mapSiteNameHint => 'напр., Моя карта';
@@ -2044,7 +2044,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get mapLargeDownloadWarning =>
-      'Большая загрузка — уменьшите область или диапазон масштаба';
+      'Большое скачивание — уменьшите область или диапазон масштаба';
 
   @override
   String get mapDownloadingTiles => 'Скачивание тайлов';
@@ -2061,7 +2061,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String mapDownloadCancelled(int count) {
-    return 'Загрузка отменена (в кэше $count тайлов)';
+    return 'Скачивание отменено (в кэше $count тайлов)';
   }
 
   @override
@@ -2427,7 +2427,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get analyticsSuccessRate => 'Успешность';
 
   @override
-  String get analyticsDistance => 'Дистанция';
+  String get analyticsDistance => 'Расстояние';
 
   @override
   String analyticsDistanceMiles(String miles) {
