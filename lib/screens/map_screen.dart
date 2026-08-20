@@ -30,12 +30,18 @@ import '../widgets/compass_calibration.dart';
 import '../widgets/bluetooth_device_picker_dialog.dart';
 import 'map/layers/coverage_prediction_layer.dart';
 import 'map/layers/coverage_layer.dart';
+import 'map/layers/community_coverage_layer.dart';
 import 'map/layers/current_position_layer.dart';
 import 'map/layers/edge_layer.dart';
+import 'map/layers/planned_marker_layer.dart';
+import 'map/layers/privacy_zone_layer.dart';
+import 'map/layers/radio_position_layer.dart';
 import 'map/layers/repeater_layer.dart';
 import 'map/layers/route_trail_layer.dart';
 import 'map/layers/sample_cluster_layer.dart';
 import 'map/layers/sample_heatmap_layer.dart';
+import 'map/dialogs/map_entity_dialogs.dart';
+import 'map/dialogs/upload_endpoint_dialog.dart';
 import 'map/widgets/delete_mode_banner.dart';
 import 'map/widgets/map_action_buttons.dart';
 import 'map/widgets/map_control_panel.dart';
@@ -1639,28 +1645,6 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  Widget _buildPlannedMarkersLayer() {
-    if (_plannedMarkers.isEmpty) return const SizedBox.shrink();
-
-    final markers = _plannedMarkers.map((m) {
-      final lat = m['lat'] as double;
-      final lon = m['lon'] as double;
-      final label = m['label'] as String?;
-
-      return Marker(
-        point: LatLng(lat, lon),
-        width: 36,
-        height: 36,
-        child: GestureDetector(
-          onTap: () => _showMarkerInfo(m),
-          child: const Icon(Icons.add_location, color: Colors.amber, size: 36),
-        ),
-      );
-    }).toList();
-
-    return MarkerLayer(markers: markers);
-  }
-
   // ============================================================================
   // PRIVACY ZONES
   // ============================================================================
@@ -1771,27 +1755,6 @@ class _MapScreenState extends State<MapScreen> {
       await _loadPrivacyZones();
       _showSnackBar(l10n.mapPrivacyZoneAdded);
     }
-  }
-
-  Widget _buildPrivacyZonesLayer() {
-    if (_privacyZones.isEmpty) return const SizedBox.shrink();
-
-    final polygons = <Polygon>[];
-    for (final zone in _privacyZones) {
-      final center = LatLng(zone['lat'] as double, zone['lon'] as double);
-      final radius = zone['radius_meters'] as double;
-      final points = _circlePoints(center, radius, segments: 48);
-      polygons.add(
-        Polygon(
-          points: points,
-          color: Colors.grey.withValues(alpha: 0.15),
-          borderColor: Colors.grey.withValues(alpha: 0.5),
-          borderStrokeWidth: 2,
-        ),
-      );
-    }
-
-    return PolygonLayer(polygons: polygons);
   }
 
   // ============================================================================
@@ -2449,9 +2412,13 @@ class _MapScreenState extends State<MapScreen> {
             repeaters: _repeaters,
             includeOnlyRepeaters: _includeOnlyRepeaters,
           ),
-        _buildPrivacyZonesLayer(),
+        PrivacyZoneLayer(zones: _privacyZones),
         if (_showCommunityCoverage && _communityCoverage != null)
-          _buildCommunityCoverageLayer(),
+          CommunityCoverageLayer(
+            rawCoverage: _communityCoverage!,
+            precision: _coverageLodPrecision,
+            visibleBounds: _mapController.camera.visibleBounds,
+          ),
         if (_showCoverage) ..._buildCoverageLayers(),
         if (_showSamples) _buildSampleLayer(),
         if (_showEdges) _buildEdgeLayer(),
@@ -2461,8 +2428,15 @@ class _MapScreenState extends State<MapScreen> {
             colorBlindMode: _colorBlindMode,
             onRepeaterTap: _showRepeaterInfo,
           ),
-        if (_showRadioPosition) ..._buildRadioPositionLayers(),
-        _buildPlannedMarkersLayer(),
+        if (_showRadioPosition && _radioPositionEstimate != null)
+          RadioPositionLayer(
+            estimate: _radioPositionEstimate!,
+            onTap: _showSnackBar,
+          ),
+        PlannedMarkerLayer(
+          markers: _plannedMarkers,
+          onMarkerTap: _showMarkerInfo,
+        ),
         if (_currentPosition != null && !_hideUIForScreenshot)
           CurrentPositionLayer(
             position: _currentPosition!,
@@ -2544,91 +2518,6 @@ class _MapScreenState extends State<MapScreen> {
       responses: result.responses,
       repeaters: repeaters,
     );
-  }
-
-  List<Widget> _buildRadioPositionLayers() {
-    final estimate = _radioPositionEstimate;
-    if (estimate == null) return const [];
-
-    const color = Colors.grey;
-    final uncertaintyText = estimate.uncertaintyMeters >= 1000
-        ? '${(estimate.uncertaintyMeters / 1000).toStringAsFixed(1)} km'
-        : '${estimate.uncertaintyMeters.round()} m';
-
-    return [
-      PolygonLayer(
-        polygons: [
-          Polygon(
-            points: _circlePoints(
-              estimate.position,
-              estimate.uncertaintyMeters,
-            ),
-            color: color.withValues(alpha: 0.12),
-            borderColor: color.withValues(alpha: 0.7),
-            borderStrokeWidth: 2,
-          ),
-        ],
-      ),
-      MarkerLayer(
-        markers: [
-          Marker(
-            point: estimate.position,
-            width: 28,
-            height: 28,
-            child: Semantics(
-              label: AppLocalizations.of(
-                context,
-              ).mapApproxRadioPositionUncertainty(uncertaintyText),
-              button: true,
-              child: GestureDetector(
-                onTap: () => _showSnackBar(
-                  AppLocalizations.of(context).mapApproxRadioPositionSnack(
-                    estimate.repeaterCount,
-                    uncertaintyText,
-                  ),
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.85),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
-                  ),
-                  child: const Icon(
-                    Icons.wifi_tethering,
-                    color: Colors.white,
-                    size: 16,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    ];
-  }
-
-  /// Generate polygon points approximating a circle at a given radius
-  List<LatLng> _circlePoints(
-    LatLng center,
-    double radiusMeters, {
-    int segments = 72,
-  }) {
-    const distance = Distance();
-    return List.generate(segments, (i) {
-      final bearing = (360.0 / segments) * i;
-      return distance.offset(center, radiusMeters, bearing);
-    });
-  }
-
-  void _toggleAutoPing(bool? value) {
-    if (value == true) {
-      _locationService.enableAutoPing();
-    } else {
-      _locationService.disableAutoPing();
-    }
-    setState(() {
-      _autoPingEnabled = value ?? false;
-    });
   }
 
   Future<void> _manualPing() async {
@@ -3252,436 +3141,80 @@ class _MapScreenState extends State<MapScreen> {
 
   void _showSampleInfo(Sample sample) {
     final l10n = AppLocalizations.of(context);
-    final timestamp = DateFormat.yMMMd(
-      Localizations.localeOf(context).toString(),
-    ).add_Hms().format(sample.timestamp);
-    final hasSignalData = sample.rssi != null || sample.snr != null;
-    final pingStatus = sample.pingSuccess == true
-        ? l10n.mapStatusSuccess
-        : sample.pingSuccess == false
-        ? l10n.mapStatusFailed
-        : l10n.mapStatusGpsOnly;
-
-    // Get repeater name if available (sample.path holds repeater/node ID)
     final repeaterName = sample.path != null
         ? _getRepeaterName(sample.path)
         : null;
     final idOrName = repeaterName ?? sample.path ?? l10n.settingsUnknown;
-    final repeaterDisplay = (repeaterName != null)
-        ? repeaterName
-        : (idOrName.length > 8
-              ? idOrName.substring(0, 8).toUpperCase()
-              : idOrName.toUpperCase());
+    final repeaterDisplay =
+        repeaterName ??
+        (idOrName.length > 8
+            ? idOrName.substring(0, 8).toUpperCase()
+            : idOrName.toUpperCase());
+    final ductingRisk = sample.ductingRisk;
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.mapSampleInfo),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text(
-                  l10n.mapStatusLabel,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Text(pingStatus),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.mapTimeLabel(timestamp),
-              style: const TextStyle(fontSize: 12),
-            ),
-            const SizedBox(height: 8),
-            Text(l10n.mapLat(sample.position.latitude.toStringAsFixed(6))),
-            Text(l10n.mapLon(sample.position.longitude.toStringAsFixed(6))),
-            if (sample.path != null) ...[
-              const Divider(height: 16),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Text(
-                    l10n.mapRepeaterLabel,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Expanded(
-                    child: Text(
-                      repeaterDisplay,
-                      style: const TextStyle(fontFamily: 'monospace'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-            if (hasSignalData) const Divider(height: 16),
-            if (hasSignalData) const SizedBox(height: 8),
-            if (sample.rssi != null)
-              Row(
-                children: [
-                  Text(
-                    l10n.mapRssiLabel,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text('${sample.rssi} dBm'),
-                ],
-              ),
-            if (sample.snr != null)
-              Row(
-                children: [
-                  Text(
-                    l10n.mapSnrLabel,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text('${sample.snr} dB'),
-                ],
-              ),
-            if (sample.responseTimeMs != null) ...[
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Text(
-                    l10n.mapResponseLabel,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text('${sample.responseTimeMs} ms'),
-                ],
-              ),
-            ],
-            if (sample.ductingRisk != null) ...[
-              const Divider(height: 16),
-              Row(
-                children: [
-                  Text(
-                    l10n.mapDuctingLabel,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _getDuctingColor(
-                        sample.ductingRisk!,
-                      ).withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      _localizedDuctingRisk(l10n, sample.ductingRisk!),
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: _getDuctingColor(sample.ductingRisk!),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context).mapClose),
-          ),
-        ],
+      builder: (context) => SampleInfoDialog(
+        sample: sample,
+        repeaterDisplay: repeaterDisplay,
+        ductingLabel: ductingRisk == null
+            ? null
+            : _localizedDuctingRisk(l10n, ductingRisk),
+        ductingColor: ductingRisk == null
+            ? null
+            : _getDuctingColor(ductingRisk),
       ),
     );
   }
 
   void _showSampleClusterInfo(SampleCluster cluster) {
-    final l10n = AppLocalizations.of(context);
-    final newestTimestamp = DateFormat.yMMMd(
-      Localizations.localeOf(context).toString(),
-    ).add_Hms().format(cluster.newestSample.timestamp);
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.mapGroupedSamples(cluster.sampleCount)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l10n.mapSuccessfulCount(cluster.successfulCount)),
-            Text(l10n.mapFailedCount(cluster.failedCount)),
-            Text(l10n.mapGpsOnlyCount(cluster.gpsOnlyCount)),
-            const SizedBox(height: 8),
-            Text(l10n.mapNewest(newestTimestamp)),
-            const SizedBox(height: 8),
-            Text(l10n.mapZoomForBreakdown),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context).mapClose),
-          ),
-        ],
-      ),
+      builder: (context) => SampleClusterInfoDialog(cluster: cluster),
     );
   }
 
-  void _showRepeaterInfo(Repeater repeater) {
-    showDialog(
+  Future<void> _showRepeaterInfo(Repeater repeater) async {
+    final action = await showDialog<RepeaterInfoAction>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          repeater.name ??
-              AppLocalizations.of(context).mapRepeaterFallback(
-                (repeater.id.length > 8
-                        ? repeater.id.substring(0, 8)
-                        : repeater.id)
-                    .toUpperCase(),
-              ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              AppLocalizations.of(context).mapIdLabel(
-                (repeater.id.length > 8
-                        ? repeater.id.substring(0, 8)
-                        : repeater.id)
-                    .toUpperCase(),
-              ),
-              style: const TextStyle(fontFamily: 'monospace'),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              AppLocalizations.of(
-                context,
-              ).mapLat(repeater.position.latitude.toStringAsFixed(6)),
-            ),
-            Text(
-              AppLocalizations.of(
-                context,
-              ).mapLon(repeater.position.longitude.toStringAsFixed(6)),
-            ),
-            if (repeater.rssi != null) const SizedBox(height: 8),
-            if (repeater.rssi != null)
-              Text(
-                AppLocalizations.of(context).mapRssiValue('${repeater.rssi}'),
-              ),
-            if (repeater.snr != null)
-              Text(AppLocalizations.of(context).mapSnrValue('${repeater.snr}')),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              final filterLabel =
-                  (repeater.id.length > 8
-                          ? repeater.id.substring(0, 8)
-                          : repeater.id)
-                      .toUpperCase();
-              final message = AppLocalizations.of(
-                context,
-              ).mapFilteringBy(filterLabel);
-              Navigator.pop(context);
-              setState(() {
-                _includeOnlyRepeaters = repeater.id;
-              });
-              await _settingsService.setIncludeOnlyRepeaters(repeater.id);
-              _loadSamples();
-              if (!mounted) return;
-              _showSnackBar(message);
-            },
-            child: Text(AppLocalizations.of(context).mapFilterByThis),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _mapController.move(repeater.position, 15.0);
-            },
-            child: Text(AppLocalizations.of(context).mapShowOnMap),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context).mapClose),
-          ),
-        ],
-      ),
+      builder: (context) => RepeaterInfoDialog(repeater: repeater),
     );
+    if (!mounted) return;
+
+    if (action == RepeaterInfoAction.showOnMap) {
+      _mapController.move(repeater.position, 15.0);
+      return;
+    }
+    if (action != RepeaterInfoAction.filter || !mounted) return;
+
+    final shortId =
+        (repeater.id.length > 8 ? repeater.id.substring(0, 8) : repeater.id)
+            .toUpperCase();
+    final message = AppLocalizations.of(context).mapFilteringBy(shortId);
+    setState(() => _includeOnlyRepeaters = repeater.id);
+    await _settingsService.setIncludeOnlyRepeaters(repeater.id);
+    await _loadSamples();
+    if (mounted) _showSnackBar(message);
   }
 
   void _showCoverageInfo(Coverage coverage) {
-    // Calculate total samples and success rate
-    final total = coverage.received + coverage.lost;
-    final successRate = total > 0
-        ? ((coverage.received / total) * 100).toStringAsFixed(0)
-        : AppLocalizations.of(context).mapNotAvailable;
-    final reliabilityText = total > 0
-        ? '$successRate%'
-        : AppLocalizations.of(context).mapNoPingData;
-
-    // Round weighted values to 1 decimal place for display
-    final receivedDisplay = coverage.received.toStringAsFixed(1);
-    final lostDisplay = coverage.lost.toStringAsFixed(1);
-    final totalDisplay = total.toStringAsFixed(1);
-
-    // Show two-byte repeater prefixes so IDs stay compact but distinguishable.
-    final uniquePrefixes =
-        coverage.repeaters
-            .map((id) => id.substring(0, id.length >= 4 ? 4 : id.length))
-            .toSet()
-            .toList()
-          ..sort();
-    final repeaterText = uniquePrefixes.isNotEmpty
-        ? uniquePrefixes.join(', ')
-        : AppLocalizations.of(context).settingsNone;
-
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context).mapCoverageSquareInfo),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text(
-                  AppLocalizations.of(context).mapSamplesLabel,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Text(totalDisplay),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Text(
-                  AppLocalizations.of(context).mapSuccessRateLabel,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Text(reliabilityText),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Text(
-                  AppLocalizations.of(context).mapReceivedLabel,
-                  style: const TextStyle(
-                    color: Colors.green,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Flexible(child: Text(receivedDisplay)),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Text(
-                  AppLocalizations.of(context).mapLostLabel,
-                  style: const TextStyle(
-                    color: Colors.red,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Flexible(child: Text(lostDisplay)),
-              ],
-            ),
-            if (coverage.received > 0) const SizedBox(height: 8),
-            if (coverage.received > 0)
-              Row(
-                children: [
-                  Text(
-                    AppLocalizations.of(context).mapRepeatersHeard,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Text('${uniquePrefixes.length}'),
-                ],
-              ),
-            if (coverage.received > 0) const SizedBox(height: 4),
-            if (coverage.received > 0)
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    AppLocalizations.of(context).mapRepeaterIds,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  Expanded(
-                    child: Text(
-                      repeaterText,
-                      style: const TextStyle(
-                        fontFamily: 'monospace',
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context).mapClose),
-          ),
-        ],
-      ),
+      builder: (context) => CoverageInfoDialog(coverage: coverage),
     );
   }
 
-  void _showRepeatersDialog() {
-    showDialog(
+  Future<void> _showRepeatersDialog() async {
+    final result = await showDialog<RepeaterListResult>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          AppLocalizations.of(context).mapNearbyRepeaters(_repeaters.length),
-        ),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: _repeaters.length,
-            itemBuilder: (context, index) {
-              final repeater = _repeaters[index];
-              return ListTile(
-                leading: const Icon(Icons.cell_tower, color: Colors.purple),
-                title: Text(
-                  repeater.name ??
-                      AppLocalizations.of(
-                        context,
-                      ).mapRepeaterFallback(repeater.id),
-                ),
-                subtitle: Text(
-                  '${repeater.position.latitude.toStringAsFixed(4)}, '
-                  '${repeater.position.longitude.toStringAsFixed(4)}'
-                  '${repeater.snr != null ? " • SNR: ${repeater.snr} dB" : ""}'
-                  '${repeater.rssi != null ? " • RSSI: ${repeater.rssi} dBm" : ""}',
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  _showRepeaterInfo(repeater);
-                },
-                trailing: IconButton(
-                  icon: const Icon(Icons.location_searching),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _mapController.move(repeater.position, 15.0);
-                  },
-                ),
-              );
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context).mapClose),
-          ),
-        ],
-      ),
+      builder: (context) => RepeaterListDialog(repeaters: _repeaters),
     );
+    if (result == null || !mounted) return;
+    if (result.action == RepeaterListAction.showOnMap) {
+      _mapController.move(result.repeater.position, 15.0);
+    } else {
+      await _showRepeaterInfo(result.repeater);
+    }
   }
 
   Future<void> _uploadSamples() async {
@@ -4603,48 +4136,6 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  Widget _buildCommunityCoverageLayer() {
-    if (_communityCoverage == null) return const SizedBox.shrink();
-
-    final polygons = <Polygon>[];
-    final bounds = _mapController.camera.visibleBounds;
-    final cells = CommunityCoverage.aggregate(
-      _communityCoverage!,
-      precision: _coverageLodPrecision,
-    );
-
-    for (final cell in cells.values) {
-      final total = cell.received + cell.lost;
-      if (total == 0) continue;
-      if (!cell.intersectsViewport(
-        south: bounds.south,
-        north: bounds.north,
-        west: bounds.west,
-        east: bounds.east,
-      )) {
-        continue;
-      }
-
-      final successRate = cell.received / total;
-      final color = successRate >= 0.7
-          ? const Color(0x2200CC00)
-          : successRate >= 0.3
-          ? const Color(0x22CCCC00)
-          : const Color(0x22CC0000);
-
-      polygons.add(
-        Polygon(
-          points: cell.polygonPoints,
-          color: color,
-          borderColor: const Color(0x4400AAEE),
-          borderStrokeWidth: 1,
-        ),
-      );
-    }
-
-    return PolygonLayer(polygons: polygons);
-  }
-
   void _handleMapTap(LatLng point) {
     if (!_showCommunityCoverage || _communityCoverage == null) return;
 
@@ -4659,192 +4150,25 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _showCommunityCellInfo(CommunityCoverageCell cell) {
-    final total = cell.received + cell.lost;
-    final successRate = total > 0
-        ? ((cell.received / total) * 100).toStringAsFixed(1)
-        : '0';
-    final l10n = AppLocalizations.of(context);
-    final lastUpdate = cell.lastUpdate.isEmpty
-        ? l10n.settingsUnknown
-        : cell.lastUpdate;
-    final appVersion = cell.appVersion.isEmpty
-        ? l10n.settingsUnknown
-        : cell.appVersion;
-
-    String repeatersText = l10n.settingsNone;
-    if (cell.repeaters.isNotEmpty) {
-      repeatersText = cell.repeaters.entries
-          .map((e) {
-            final rep = e.value as Map<String, dynamic>;
-            final name = rep['name'] ?? e.key;
-            final rssi = rep['rssi'];
-            final snr = rep['snr'];
-            return '$name${rssi != null ? ' (RSSI: $rssi' : ''}${snr != null
-                ? ', SNR: $snr)'
-                : rssi != null
-                ? ')'
-                : ''}';
-          })
-          .join('\n');
-    }
-
-    final parsedLastUpdate = DateTime.tryParse(lastUpdate);
-    final lastUpdateDisplay = parsedLastUpdate == null
-        ? lastUpdate
-        : DateFormat.yMMMd(
-            Localizations.localeOf(context).toString(),
-          ).add_Hm().format(parsedLastUpdate.toLocal());
-
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.settingsCommunityCoverage),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.mapCommunitySuccessRate(successRate),
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            const SizedBox(height: 8),
-            Text('${l10n.mapReceivedLabel}${cell.received.toStringAsFixed(1)}'),
-            Text('${l10n.mapLostLabel}${cell.lost.toStringAsFixed(1)}'),
-            Text(l10n.mapSamplesCount('${cell.samples}')),
-            const SizedBox(height: 8),
-            Text(
-              l10n.mapRepeatersHeader,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Text(repeatersText, style: const TextStyle(fontSize: 12)),
-            const SizedBox(height: 8),
-            Text(
-              l10n.mapLastUpdate(lastUpdateDisplay),
-              style: const TextStyle(fontSize: 11, color: Colors.grey),
-            ),
-            Text(
-              l10n.mapAppVersionLabel(appVersion),
-              style: const TextStyle(fontSize: 11, color: Colors.grey),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.mapClose),
-          ),
-        ],
-      ),
+      builder: (context) => CommunityCellInfoDialog(cell: cell),
     );
   }
 
   Future<UploadEndpoint?> _showEditEndpointDialog(
     UploadEndpoint existing,
   ) async {
-    final nameController = TextEditingController(text: existing.name);
-    final urlController = TextEditingController(text: existing.url);
-
-    return await showDialog<UploadEndpoint>(
+    return showDialog<UploadEndpoint>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context).mapEditUploadSite),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(
-                labelText: AppLocalizations.of(context).mapSiteName,
-              ),
-              autofocus: true,
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: urlController,
-              decoration: InputDecoration(
-                labelText: AppLocalizations.of(context).mapApiUrl,
-              ),
-              keyboardType: TextInputType.url,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context).settingsCancel),
-          ),
-          TextButton(
-            onPressed: () {
-              if (nameController.text.isNotEmpty &&
-                  urlController.text.isNotEmpty) {
-                Navigator.pop(
-                  context,
-                  UploadEndpoint(
-                    name: nameController.text,
-                    url: urlController.text,
-                  ),
-                );
-              }
-            },
-            child: Text(AppLocalizations.of(context).settingsSave),
-          ),
-        ],
-      ),
+      builder: (context) => UploadEndpointDialog(existing: existing),
     );
   }
 
   Future<UploadEndpoint?> _showAddEndpointDialog() async {
-    final nameController = TextEditingController();
-    final urlController = TextEditingController();
-
-    return await showDialog<UploadEndpoint>(
+    return showDialog<UploadEndpoint>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context).mapAddUploadSite),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(
-                labelText: AppLocalizations.of(context).mapSiteName,
-                hintText: AppLocalizations.of(context).mapSiteNameHint,
-              ),
-              autofocus: true,
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: urlController,
-              decoration: InputDecoration(
-                labelText: AppLocalizations.of(context).mapApiUrl,
-                hintText: 'https://your-site.pages.dev/api/samples',
-              ),
-              keyboardType: TextInputType.url,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context).settingsCancel),
-          ),
-          TextButton(
-            onPressed: () {
-              if (nameController.text.isNotEmpty &&
-                  urlController.text.isNotEmpty) {
-                Navigator.pop(
-                  context,
-                  UploadEndpoint(
-                    name: nameController.text,
-                    url: urlController.text,
-                  ),
-                );
-              }
-            },
-            child: Text(AppLocalizations.of(context).mapAdd),
-          ),
-        ],
-      ),
+      builder: (context) => const UploadEndpointDialog(),
     );
   }
 }

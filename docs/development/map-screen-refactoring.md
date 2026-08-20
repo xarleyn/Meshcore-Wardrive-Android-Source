@@ -81,16 +81,19 @@ cohesive 200-400 line file over many tiny single-use wrappers.
 - [x] Add unit tests for repeater matching, filtering, thresholds, and rings.
 - [x] Extract coverage, sample, edge, prediction, route, heatmap, repeater, and
   current-position layers with constructor inputs.
-- [ ] Extract the remaining radio, privacy, marker, and community layers.
+- [x] Extract the remaining radio, privacy, marker, and community layers.
 - [x] Extract the control panel, quick settings, action buttons, and banners.
 - [x] Preserve existing rendering order and callback behavior.
 
 ### Stage 2: typed dialogs and workflows
 
-- [ ] Replace inline entity dialogs with standalone dialog widgets.
-- [ ] Return typed dialog results instead of mutating screen state directly.
-- [ ] Group upload endpoint dialogs and upload progress UI with the upload
-  feature.
+- [x] Extract sample, sample-cluster, coverage, repeater, repeater-list, and
+  community-cell dialogs into standalone widgets.
+- [ ] Extract the remaining marker and workflow dialogs.
+- [x] Return typed results from repeater and endpoint dialogs instead of
+  mutating screen state directly.
+- [x] Group upload endpoint editor dialogs with the upload feature UI.
+- [ ] Extract upload progress UI from the screen workflow.
 - [ ] Separate offline tile and community coverage dialogs from map rendering.
 - [ ] Keep file picker, sharing, permissions, and navigation orchestration at a
   Flutter-facing boundary.
@@ -110,7 +113,7 @@ cohesive 200-400 line file over many tiny single-use wrappers.
 ### Stage 4: lifecycle and runtime bindings
 
 - [ ] Give every stream subscription and timer a clear owner.
-- [ ] Cancel the Carpeater and achievement subscriptions during disposal.
+- [x] Cancel the Carpeater and achievement subscriptions during disposal.
 - [ ] Guard asynchronous initialization against disposal and stale results.
 - [ ] Consolidate compass/heading update scheduling behind one lifecycle owner.
 - [ ] Remove the periodic full refresh where event-driven updates are
