@@ -2755,175 +2755,55 @@ class _MapScreenState extends State<MapScreen> {
     );
     if (!mounted || selectedSites == null || selectedSites.isEmpty) return;
 
-    // Track progress state
-    int currentBatch = 0;
-    int totalBatches = 0;
-    String currentSite = '';
+    // Build repeater names map from discovered repeaters and LoRa service
+    final repeaterNames = <String, String>{};
+    for (final repeater in _repeaters) {
+      if (repeater.name != null) {
+        repeaterNames[repeater.id] = repeater.name!;
+      }
+    }
 
-    // Show loading dialog with progress
-    showDialog(
+    final loraService = _locationService.loraCompanion;
+    for (final contact in loraService.discoveredRepeaters) {
+      if (contact.name != null && !repeaterNames.containsKey(contact.id)) {
+        repeaterNames[contact.id] = contact.name!;
+      }
+    }
+
+    final outcome = await showDialog<UploadProgressOutcome>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const CircularProgressIndicator(),
-                const SizedBox(height: 16),
-                Text(
-                  currentSite.isNotEmpty
-                      ? AppLocalizations.of(context).mapUploadingTo(currentSite)
-                      : AppLocalizations.of(context).mapUploadingSamples,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                if (totalBatches > 1)
-                  Text(
-                    AppLocalizations.of(
-                      context,
-                    ).mapUploadBatch(currentBatch, totalBatches),
-                    style: const TextStyle(fontSize: 12),
-                  ),
-              ],
-            ),
+      builder: (context) => UploadProgressDialog(
+        upload: (onProgress) async {
+          if (selectedSites.isNotEmpty && endpoints.isNotEmpty) {
+            return _uploadService.uploadToSelectedEndpoints(
+              endpointNames: selectedSites,
+              repeaterNames: repeaterNames,
+              onProgress: onProgress,
+            );
+          }
+
+          final result = await _uploadService.uploadAllSamples(
+            repeaterNames: repeaterNames,
+            onProgress: (current, total) => onProgress('', current, total),
           );
+          return {UploadService.defaultEndpointName: result};
         },
       ),
     );
 
-    try {
-      // Build repeater names map from discovered repeaters and LoRa service
-      final repeaterNames = <String, String>{};
-
-      // Add names from discovered repeaters
-      for (final repeater in _repeaters) {
-        if (repeater.name != null) {
-          repeaterNames[repeater.id] = repeater.name!;
-        }
-      }
-
-      // Add names from LoRa service contact cache
-      final loraService = _locationService.loraCompanion;
-      for (final contact in loraService.discoveredRepeaters) {
-        if (contact.name != null && !repeaterNames.containsKey(contact.id)) {
-          repeaterNames[contact.id] = contact.name!;
-        }
-      }
-
-      Map<String, UploadResult> results;
-
-      // Always use multi-site upload path if any endpoints are configured
-      // This ensures custom endpoints work correctly
-      if (selectedSites.isNotEmpty && endpoints.isNotEmpty) {
-        results = await _uploadService.uploadToSelectedEndpoints(
-          endpointNames: selectedSites,
-          repeaterNames: repeaterNames,
-          onProgress: (siteName, current, total) {
-            if (mounted) {
-              currentSite = siteName;
-              currentBatch = current;
-              totalBatches = total;
-            }
-          },
-        );
-      } else {
-        // Fallback for backward compatibility (shouldn't happen)
-        final result = await _uploadService.uploadAllSamples(
-          repeaterNames: repeaterNames,
-          onProgress: (current, total) {
-            if (mounted) {
-              currentBatch = current;
-              totalBatches = total;
-            }
-          },
-        );
-        results = {UploadService.defaultEndpointName: result};
-      }
-
-      if (mounted) {
-        Navigator.pop(context); // Close loading dialog
-
-        // Show results
-        final allSuccess = results.values.every((r) => r.success);
-        final successCount = results.values.where((r) => r.success).length;
-
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text(
-              allSuccess
-                  ? AppLocalizations.of(context).mapUploadComplete
-                  : AppLocalizations.of(context).mapUploadResults,
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (results.length > 1)
-                  Text(
-                    AppLocalizations.of(
-                      context,
-                    ).mapUploadedToSites(successCount, results.length),
-                  ),
-                const SizedBox(height: 8),
-                ...results.entries.map((entry) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Row(
-                      children: [
-                        Icon(
-                          entry.value.success
-                              ? Icons.check_circle
-                              : Icons.error,
-                          color: entry.value.success
-                              ? Colors.green
-                              : Colors.red,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                entry.key,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              if (!entry.value.success)
-                                Text(
-                                  entry.value.message,
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(AppLocalizations.of(context).mapOk),
-              ),
-            ],
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        Navigator.pop(context); // Close loading dialog
-        _showSnackBar(AppLocalizations.of(context).mapUploadError('$e'));
-      }
+    if (outcome == null || !mounted) return;
+    if (outcome.error != null) {
+      _showSnackBar(
+        AppLocalizations.of(context).mapUploadError('${outcome.error}'),
+      );
+      return;
     }
+
+    await showDialog<void>(
+      context: context,
+      builder: (context) => UploadResultsDialog(results: outcome.results!),
+    );
   }
 
   Future<void> _manageUploadSites() async {
@@ -2931,212 +2811,20 @@ class _MapScreenState extends State<MapScreen> {
     final selectedNames = await _uploadService.getSelectedEndpoints();
 
     if (!mounted) return;
-    await showModalBottomSheet(
+    final configuration = await showModalBottomSheet<UploadSitesConfiguration>(
       context: context,
       isScrollControlled: true,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) => SafeArea(
-          child: DraggableScrollableSheet(
-            initialChildSize: 0.6,
-            minChildSize: 0.4,
-            maxChildSize: 0.9,
-            expand: false,
-            builder: (context, scrollController) => Padding(
-              padding: EdgeInsets.only(
-                left: 16,
-                right: 16,
-                top: 16,
-                bottom: 16 + MediaQuery.of(context).viewInsets.bottom,
-              ),
-              child: ListView(
-                controller: scrollController,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        AppLocalizations.of(context).settingsManageUploadSites,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    AppLocalizations.of(context).mapSelectWhichSitesToUpload,
-                    style: const TextStyle(fontSize: 13, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 12),
-                  if (endpoints.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Text(
-                        AppLocalizations.of(context).settingsUploadNoSites,
-                      ),
-                    )
-                  else
-                    ...endpoints.map((endpoint) {
-                      final isSelected = selectedNames.contains(endpoint.name);
-                      return CheckboxListTile(
-                        title: Text(endpoint.name),
-                        subtitle: Text(
-                          endpoint.url,
-                          style: const TextStyle(fontSize: 11),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        value: isSelected,
-                        onChanged: (value) {
-                          setModalState(() {
-                            if (value == true) {
-                              if (!selectedNames.contains(endpoint.name)) {
-                                selectedNames.add(endpoint.name);
-                              }
-                            } else {
-                              selectedNames.remove(endpoint.name);
-                            }
-                          });
-                        },
-                        secondary: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(
-                                Icons.edit,
-                                size: 20,
-                                color: Colors.blue,
-                              ),
-                              onPressed: () async {
-                                final edited = await _showEditEndpointDialog(
-                                  endpoint,
-                                );
-                                if (edited != null) {
-                                  final index = endpoints.indexOf(endpoint);
-                                  if (index != -1) {
-                                    // Update selected names if name changed
-                                    if (selectedNames.contains(endpoint.name)) {
-                                      selectedNames.remove(endpoint.name);
-                                      selectedNames.add(edited.name);
-                                    }
-                                    endpoints[index] = edited;
-                                    await _uploadService.setUploadEndpoints(
-                                      endpoints,
-                                    );
-                                    await _uploadService.setSelectedEndpoints(
-                                      selectedNames,
-                                    );
-                                    setModalState(() {});
-                                  }
-                                }
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.delete,
-                                size: 20,
-                                color: Colors.red,
-                              ),
-                              onPressed: () async {
-                                final confirmed = await showDialog<bool>(
-                                  context: context,
-                                  builder: (ctx) => AlertDialog(
-                                    title: Text(
-                                      AppLocalizations.of(ctx).mapDeleteSite,
-                                    ),
-                                    content: Text(
-                                      AppLocalizations.of(
-                                        ctx,
-                                      ).mapDeleteSiteConfirm(endpoint.name),
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.pop(ctx, false),
-                                        child: Text(
-                                          AppLocalizations.of(
-                                            ctx,
-                                          ).settingsCancel,
-                                        ),
-                                      ),
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.pop(ctx, true),
-                                        style: TextButton.styleFrom(
-                                          foregroundColor: Colors.red,
-                                        ),
-                                        child: Text(
-                                          AppLocalizations.of(ctx).mapDelete,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                                if (confirmed == true) {
-                                  endpoints.remove(endpoint);
-                                  selectedNames.remove(endpoint.name);
-                                  await _uploadService.setUploadEndpoints(
-                                    endpoints,
-                                  );
-                                  await _uploadService.setSelectedEndpoints(
-                                    selectedNames,
-                                  );
-                                  setModalState(() {});
-                                }
-                              },
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      TextButton.icon(
-                        onPressed: () async {
-                          final result = await _showAddEndpointDialog();
-                          if (result != null) {
-                            endpoints.add(result);
-                            selectedNames.add(result.name);
-                            await _uploadService.setUploadEndpoints(endpoints);
-                            await _uploadService.setSelectedEndpoints(
-                              selectedNames,
-                            );
-                            setModalState(() {});
-                          }
-                        },
-                        icon: const Icon(Icons.add),
-                        label: Text(AppLocalizations.of(context).mapAddSite),
-                      ),
-                      const Spacer(),
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text(
-                          AppLocalizations.of(context).settingsCancel,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () async {
-                          final message = AppLocalizations.of(
-                            context,
-                          ).mapUploadSitesUpdated;
-                          Navigator.pop(context);
-                          await _uploadService.setSelectedEndpoints(
-                            selectedNames,
-                          );
-                          if (!mounted) return;
-                          _showSnackBar(message);
-                        },
-                        child: Text(AppLocalizations.of(context).settingsSave),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+      builder: (context) => ManageUploadSitesSheet(
+        initialEndpoints: endpoints,
+        initiallySelectedNames: selectedNames,
       ),
     );
+
+    if (configuration == null) return;
+    await _uploadService.setUploadEndpoints(configuration.endpoints);
+    await _uploadService.setSelectedEndpoints(configuration.selectedNames);
+    if (!mounted) return;
+    _showSnackBar(AppLocalizations.of(context).mapUploadSitesUpdated);
   }
 
   Future<void> _showOfflineTileDownload() async {
@@ -3412,22 +3100,6 @@ class _MapScreenState extends State<MapScreen> {
     showDialog(
       context: context,
       builder: (context) => CommunityCellInfoDialog(cell: cell),
-    );
-  }
-
-  Future<UploadEndpoint?> _showEditEndpointDialog(
-    UploadEndpoint existing,
-  ) async {
-    return showDialog<UploadEndpoint>(
-      context: context,
-      builder: (context) => UploadEndpointDialog(existing: existing),
-    );
-  }
-
-  Future<UploadEndpoint?> _showAddEndpointDialog() async {
-    return showDialog<UploadEndpoint>(
-      context: context,
-      builder: (context) => const UploadEndpointDialog(),
     );
   }
 }

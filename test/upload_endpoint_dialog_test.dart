@@ -78,4 +78,89 @@ void main() {
 
     expect(result, same(endpoint));
   });
+
+  testWidgets('upload progress starts once and returns typed results', (
+    tester,
+  ) async {
+    UploadProgressOutcome? outcome;
+    var starts = 0;
+    await pumpWithL10n(
+      tester,
+      Scaffold(
+        body: Builder(
+          builder: (context) => TextButton(
+            onPressed: () async {
+              outcome = await showDialog<UploadProgressOutcome>(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => UploadProgressDialog(
+                  upload: (onProgress) async {
+                    starts++;
+                    onProgress('Community', 1, 2);
+                    await Future<void>.delayed(Duration.zero);
+                    onProgress('Community', 2, 2);
+                    return {
+                      'Community': UploadResult(
+                        success: true,
+                        message: 'Uploaded',
+                      ),
+                    };
+                  },
+                ),
+              );
+            },
+            child: const Text('Open'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+
+    expect(starts, 1);
+    expect(outcome?.error, isNull);
+    expect(outcome?.results?['Community']?.success, isTrue);
+  });
+
+  testWidgets('upload sites sheet returns edits only when saved', (
+    tester,
+  ) async {
+    UploadSitesConfiguration? configuration;
+    const endpoint = UploadEndpoint(
+      name: 'Community',
+      url: 'https://community.example/api',
+    );
+    final l10n = await pumpWithL10n(
+      tester,
+      Scaffold(
+        body: Builder(
+          builder: (context) => TextButton(
+            onPressed: () async {
+              configuration =
+                  await showModalBottomSheet<UploadSitesConfiguration>(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (context) => const ManageUploadSitesSheet(
+                      initialEndpoints: [endpoint],
+                      initiallySelectedNames: [],
+                    ),
+                  );
+            },
+            child: const Text('Open'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(CheckboxListTile));
+    await tester.pump();
+    await tester.tap(find.text(l10n.settingsSave));
+    await tester.pumpAndSettle();
+
+    expect(configuration?.endpoints, [endpoint]);
+    expect(configuration?.selectedNames, ['Community']);
+  });
 }

@@ -95,14 +95,14 @@ cohesive 200-400 line file over many tiny single-use wrappers.
   typed results.
 - [x] Extract repeater-filter and coverage-gap dialogs with typed results.
 - [x] Extract connection, appearance, update, and screenshot decisions.
-- [ ] Extract the remaining workflow dialogs.
+- [x] Extract the remaining workflow dialogs.
 - [x] Return typed results from repeater and endpoint dialogs instead of
   mutating screen state directly.
 - [x] Group upload endpoint editor dialogs with the upload feature UI.
-- [ ] Extract upload progress UI from the screen workflow.
+- [x] Extract upload progress UI from the screen workflow.
 - [x] Separate offline tile options and progress dialogs from map rendering.
 - [x] Separate community coverage dialogs from map rendering.
-- [ ] Keep file picker, sharing, permissions, and navigation orchestration at a
+- [x] Keep file picker, sharing, permissions, and navigation orchestration at a
   Flutter-facing boundary.
 
 ### Stage 3: map data controller
