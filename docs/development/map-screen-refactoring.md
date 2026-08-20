@@ -75,13 +75,15 @@ cohesive 200-400 line file over many tiny single-use wrappers.
 
 ### Stage 1: pure logic and leaf widgets
 
-- [ ] Move CSV, GPX, and KML serialization into `SampleExport`.
-- [ ] Add deterministic unit tests for all export formats.
-- [ ] Move coverage prediction calculations into a pure typed utility.
-- [ ] Add unit tests for repeater matching, filtering, thresholds, and rings.
-- [ ] Extract map layers that can receive all data through constructor inputs.
-- [ ] Extract the control panel, quick settings, action buttons, and banners.
-- [ ] Preserve existing rendering order and callback behavior.
+- [x] Move CSV, GPX, and KML serialization into `SampleExport`.
+- [x] Add deterministic unit tests for all export formats.
+- [x] Move coverage prediction calculations into a pure typed utility.
+- [x] Add unit tests for repeater matching, filtering, thresholds, and rings.
+- [x] Extract coverage, sample, edge, prediction, route, heatmap, repeater, and
+  current-position layers with constructor inputs.
+- [ ] Extract the remaining radio, privacy, marker, and community layers.
+- [x] Extract the control panel, quick settings, action buttons, and banners.
+- [x] Preserve existing rendering order and callback behavior.
 
 ### Stage 2: typed dialogs and workflows
 
@@ -150,4 +152,3 @@ Map rendering changes should also be checked on a device with `flutter run`.
 Changes touching USB, Bluetooth, foreground location, Android permissions, or a
 physical LoRa radio require manual device validation and must document what
 remains untested.
-

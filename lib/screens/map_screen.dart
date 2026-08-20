@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -23,16 +22,25 @@ import '../utils/initial_map_camera.dart';
 import '../utils/compass_calibration.dart';
 import '../utils/heading_utils.dart';
 import '../utils/discovery_timeout_options.dart';
-import '../utils/ping_distance_options.dart';
 import '../utils/session_map_view.dart';
-import '../utils/color_blind_palette.dart';
 import '../utils/community_coverage.dart';
 import '../utils/bluetooth_scan.dart';
+import '../utils/sample_export.dart';
 import '../widgets/compass_calibration.dart';
-import '../widgets/tracking_play_button.dart';
 import '../widgets/bluetooth_device_picker_dialog.dart';
+import 'map/layers/coverage_prediction_layer.dart';
+import 'map/layers/coverage_layer.dart';
+import 'map/layers/current_position_layer.dart';
+import 'map/layers/edge_layer.dart';
+import 'map/layers/repeater_layer.dart';
+import 'map/layers/route_trail_layer.dart';
+import 'map/layers/sample_cluster_layer.dart';
+import 'map/layers/sample_heatmap_layer.dart';
+import 'map/widgets/delete_mode_banner.dart';
+import 'map/widgets/map_action_buttons.dart';
+import 'map/widgets/map_control_panel.dart';
+import 'map/widgets/map_quick_settings_panel.dart';
 import '../services/widget_service.dart';
-import 'package:geohash_plus/geohash_plus.dart' as geohash;
 import 'package:usb_serial/usb_serial.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:http/http.dart' as http;
@@ -44,7 +52,6 @@ import 'package:saver_gallery/saver_gallery.dart';
 import 'package:flutter_map_cache/flutter_map_cache.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:dio_cache_interceptor_file_store/dio_cache_interceptor_file_store.dart';
-import 'package:flutter_map_heatmap/flutter_map_heatmap.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:typed_data';
@@ -279,6 +286,7 @@ class _MapScreenState extends State<MapScreen> {
   bool _batterySaverActive = false;
   bool _batterySaverEnabled = true;
   StreamSubscription<bool>? _batterySaverSubscription;
+  StreamSubscription<Achievement>? _achievementSubscription;
 
   // Quick settings overlay
   bool _showQuickSettings = false;
@@ -461,7 +469,9 @@ class _MapScreenState extends State<MapScreen> {
     });
 
     // Subscribe to achievement unlocks
-    AchievementService().unlockStream.listen((achievement) {
+    _achievementSubscription = AchievementService().unlockStream.listen((
+      achievement,
+    ) {
       if (mounted) {
         final l10n = AppLocalizations.of(context);
         final copy = achievementCopy(l10n, achievement.id);
@@ -1276,17 +1286,17 @@ class _MapScreenState extends State<MapScreen> {
 
       switch (format) {
         case 'csv':
-          content = _buildCsvExport(samples);
+          content = SampleExport.buildCsv(samples);
           extension = 'csv';
           fileName = 'meshcore_export_$timestamp.csv';
           break;
         case 'gpx':
-          content = _buildGpxExport(samples);
+          content = SampleExport.buildGpx(samples);
           extension = 'gpx';
           fileName = 'meshcore_export_$timestamp.gpx';
           break;
         case 'kml':
-          content = _buildKmlExport(samples);
+          content = SampleExport.buildKml(samples);
           extension = 'kml';
           fileName = 'meshcore_export_$timestamp.kml';
           break;
@@ -1340,94 +1350,6 @@ class _MapScreenState extends State<MapScreen> {
       if (!mounted) return;
       _showSnackBar(AppLocalizations.of(context).mapExportFailed('$e'));
     }
-  }
-
-  String _buildCsvExport(List<Sample> samples) {
-    final buffer = StringBuffer();
-    buffer.writeln('id,lat,lon,timestamp,geohash,rssi,snr,pingSuccess,path');
-    for (final s in samples) {
-      buffer.writeln(
-        '${s.id},${s.position.latitude},${s.position.longitude},'
-        '${s.timestamp.toIso8601String()},${s.geohash},'
-        '${s.rssi ?? ''},${s.snr ?? ''},'
-        '${s.pingSuccess ?? ''},${s.path ?? ''}',
-      );
-    }
-    return buffer.toString();
-  }
-
-  String _buildGpxExport(List<Sample> samples) {
-    final sorted = List<Sample>.from(samples)
-      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
-
-    final buffer = StringBuffer();
-    buffer.writeln('<?xml version="1.0" encoding="UTF-8"?>');
-    buffer.writeln('<gpx version="1.1" creator="MeshCore Wardrive"');
-    buffer.writeln('  xmlns="http://www.topografix.com/GPX/1/1">');
-    buffer.writeln('  <trk>');
-    buffer.writeln(
-      '    <name>MeshCore Wardrive ${DateFormat('yyyy-MM-dd').format(DateTime.now())}</name>',
-    );
-    buffer.writeln('    <trkseg>');
-    for (final s in sorted) {
-      buffer.writeln(
-        '      <trkpt lat="${s.position.latitude}" lon="${s.position.longitude}">',
-      );
-      buffer.writeln(
-        '        <time>${s.timestamp.toUtc().toIso8601String()}</time>',
-      );
-      if (s.rssi != null) {
-        buffer.writeln(
-          '        <desc>RSSI: ${s.rssi} dBm, SNR: ${s.snr} dB</desc>',
-        );
-      }
-      buffer.writeln('      </trkpt>');
-    }
-    buffer.writeln('    </trkseg>');
-    buffer.writeln('  </trk>');
-    buffer.writeln('</gpx>');
-    return buffer.toString();
-  }
-
-  String _buildKmlExport(List<Sample> samples) {
-    final sorted = List<Sample>.from(samples)
-      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
-
-    final coords = sorted
-        .map((s) => '${s.position.longitude},${s.position.latitude},0')
-        .join('\n            ');
-
-    // Build placemarks for ping results
-    final placemarks = StringBuffer();
-    for (final s in sorted.where((s) => s.pingSuccess != null)) {
-      final icon = s.pingSuccess == true ? '#successStyle' : '#failStyle';
-      placemarks.writeln('    <Placemark>');
-      placemarks.writeln('      <styleUrl>$icon</styleUrl>');
-      placemarks.writeln(
-        '      <description>${s.pingSuccess == true ? 'Success' : 'Failed'}${s.rssi != null ? ' RSSI:${s.rssi}' : ''}</description>',
-      );
-      placemarks.writeln(
-        '      <Point><coordinates>${s.position.longitude},${s.position.latitude},0</coordinates></Point>',
-      );
-      placemarks.writeln('    </Placemark>');
-    }
-
-    return '''<?xml version="1.0" encoding="UTF-8"?>
-<kml xmlns="http://www.opengis.net/kml/2.2">
-  <Document>
-    <name>MeshCore Wardrive ${DateFormat('yyyy-MM-dd').format(DateTime.now())}</name>
-    <Style id="successStyle"><IconStyle><color>ff00ff00</color></IconStyle></Style>
-    <Style id="failStyle"><IconStyle><color>ff0000ff</color></IconStyle></Style>
-    <Placemark>
-      <name>Route Trail</name>
-      <LineString>
-        <coordinates>
-            $coords
-        </coordinates>
-      </LineString>
-    </Placemark>
-$placemarks  </Document>
-</kml>''';
   }
 
   Future<void> _importData() async {
@@ -2316,6 +2238,8 @@ $placemarks  </Document>
     _radioPositionSubscription?.cancel();
     _radioPositionExpiryTimer?.cancel();
     _batterySaverSubscription?.cancel();
+    _achievementSubscription?.cancel();
+    _carpeaterStateSubscription?.cancel();
     _heatmapRebuildStream.close();
     _coverageHitNotifier.dispose();
     _sampleHitNotifier.dispose();
@@ -2356,120 +2280,62 @@ $placemarks  </Document>
         child: Stack(
           children: [
             _buildMap(),
-            if (!_hideUIForScreenshot) _buildControlPanel(),
+            if (!_hideUIForScreenshot)
+              MapControlPanel(
+                loraConnected: _loraConnected,
+                isConnecting: _isConnecting,
+                connectionType: _connectionType,
+                batteryPercent: _batteryPercent,
+                sampleCount: _sampleCount,
+                isTracking: _isTracking,
+                totalDistance: _totalDistance,
+                currentSpeed: _currentSpeed,
+                distanceUnit: _distanceUnit,
+                carpeaterEnabled: _carpeaterEnabled,
+                carpeaterState: _carpeaterState,
+                ductingLabel:
+                    _showDucting && _currentDuctingRisk != DuctingRisk.unknown
+                    ? _localizedDuctingRisk(l10n, _currentDuctingRisk)
+                    : null,
+                ductingColor:
+                    _showDucting && _currentDuctingRisk != DuctingRisk.unknown
+                    ? _getDuctingColor(_currentDuctingRisk)
+                    : null,
+                batterySaverActive: _batterySaverActive,
+                onConnect: _showConnectionDialog,
+                onDisconnect: _disconnectLoRa,
+                onManualPing: _manualPing,
+                onCarpeaterRetry: () async {
+                  _showSnackBar(l10n.mapRetryingCarpeater);
+                  final ok = await _locationService.startCarpeater();
+                  if (!mounted) return;
+                  _showSnackBar(
+                    ok
+                        ? l10n.mapCarpeaterReconnected
+                        : l10n.mapCarpeaterRetryFailed,
+                  );
+                },
+              ),
             if (_showQuickSettings)
-              Positioned(
-                bottom: 80,
-                right: 88,
-                child: Card(
-                  elevation: 8,
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              l10n.mapQuickSettings,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            GestureDetector(
-                              onTap: () =>
-                                  setState(() => _showQuickSettings = false),
-                              child: const Icon(
-                                Icons.close,
-                                size: 18,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              l10n.mapPingDist,
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                            PingDistanceDropdown(
-                              value: _pingIntervalMeters,
-                              onChanged: (v) async {
-                                setState(() => _pingIntervalMeters = v);
-                                _locationService.setPingInterval(v);
-                                await _settingsService.setPingInterval(v);
-                              },
-                            ),
-                          ],
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              l10n.mapTimeout,
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                            DiscoveryTimeoutDropdown(
-                              value: _discoveryTimeoutSeconds,
-                              onChanged: (v) async {
-                                setState(() => _discoveryTimeoutSeconds = v);
-                                await _settingsService.setDiscoveryTimeout(v);
-                              },
-                            ),
-                          ],
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              l10n.mapMode,
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                            DropdownButton<String>(
-                              value: _pingMode,
-                              isDense: true,
-                              items: [
-                                DropdownMenuItem(
-                                  value: 'distance',
-                                  child: Text(
-                                    l10n.settingsPingModeDistance,
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'time',
-                                  child: Text(
-                                    l10n.settingsPingModeTime,
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'both',
-                                  child: Text(
-                                    l10n.settingsPingModeBoth,
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                ),
-                              ],
-                              onChanged: (v) async {
-                                setState(() => _pingMode = v!);
-                                await _settingsService.setPingMode(v!);
-                                _locationService.setPingMode(v);
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+              MapQuickSettingsPanel(
+                pingIntervalMeters: _pingIntervalMeters,
+                discoveryTimeoutSeconds: _discoveryTimeoutSeconds,
+                pingMode: _pingMode,
+                onClose: () => setState(() => _showQuickSettings = false),
+                onPingIntervalChanged: (value) async {
+                  setState(() => _pingIntervalMeters = value);
+                  _locationService.setPingInterval(value);
+                  await _settingsService.setPingInterval(value);
+                },
+                onDiscoveryTimeoutChanged: (value) async {
+                  setState(() => _discoveryTimeoutSeconds = value);
+                  await _settingsService.setDiscoveryTimeout(value);
+                },
+                onPingModeChanged: (value) async {
+                  setState(() => _pingMode = value);
+                  await _settingsService.setPingMode(value);
+                  _locationService.setPingMode(value);
+                },
               ),
             if (_showCompassCalibrationBanner && !_hideUIForScreenshot)
               CompassCalibrationMapBanner(
@@ -2480,108 +2346,29 @@ $placemarks  </Document>
                 ),
               ),
             if (_deleteMode)
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  color: Colors.red.withValues(alpha: 0.9),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: SafeArea(
-                    bottom: false,
-                    child: Row(
-                      children: [
-                        const Icon(Icons.delete, color: Colors.white, size: 18),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            l10n.mapDeleteModeBanner,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () => setState(() => _deleteMode = false),
-                          child: Text(
-                            l10n.mapExit,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+              DeleteModeBanner(
+                onExit: () => setState(() => _deleteMode = false),
               ),
           ],
         ),
       ),
       floatingActionButton: _hideUIForScreenshot
           ? null
-          : Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                GestureDetector(
-                  onLongPress: () =>
-                      _openCompassCalibration(snoozeOnDismiss: false),
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      FloatingActionButton(
-                        heroTag: 'compass',
-                        mini: true,
-                        onPressed: _handleCompassButton,
-                        tooltip: _compassInUse && !_lockRotationNorth
-                            ? _followHeading
-                                  ? l10n.mapStopHeadingUp
-                                  : l10n.mapRotateMapWithHeading
-                            : l10n.mapResetToNorth,
-                        backgroundColor: _followHeading ? Colors.blue : null,
-                        child: const Icon(Icons.navigation),
-                      ),
-                      if (_compassInUse &&
-                          _compassAccuracyStatus ==
-                              CompassAccuracyStatus.needsCalibration)
-                        const Positioned(
-                          right: 0,
-                          top: 0,
-                          child: Icon(
-                            Icons.error,
-                            size: 14,
-                            color: Colors.orange,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 8),
-                FloatingActionButton(
-                  heroTag: 'location',
-                  mini: true,
-                  onPressed: _toggleFollowLocation,
-                  backgroundColor: _followLocation ? Colors.blue : null,
-                  child: Icon(
-                    _followLocation ? Icons.gps_fixed : Icons.gps_not_fixed,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TrackingPlayButton(
-                  isTracking: _isTracking,
-                  onToggle: _toggleTracking,
-                  onStartFreshSession: () =>
-                      _toggleTracking(freshSession: true),
-                  onToggleQuickSettings: () =>
-                      setState(() => _showQuickSettings = !_showQuickSettings),
-                ),
-              ],
+          : MapActionButtons(
+              isTracking: _isTracking,
+              compassInUse: _compassInUse,
+              lockRotationNorth: _lockRotationNorth,
+              followHeading: _followHeading,
+              compassAccuracyStatus: _compassAccuracyStatus,
+              followLocation: _followLocation,
+              onCompassPressed: _handleCompassButton,
+              onCompassLongPressed: () =>
+                  _openCompassCalibration(snoozeOnDismiss: false),
+              onLocationPressed: _toggleFollowLocation,
+              onToggleTracking: _toggleTracking,
+              onStartFreshSession: () => _toggleTracking(freshSession: true),
+              onToggleQuickSettings: () =>
+                  setState(() => _showQuickSettings = !_showQuickSettings),
             ),
     );
   }
@@ -2649,181 +2436,55 @@ $placemarks  </Document>
               ? CachedTileProvider(store: _tileCacheStore!)
               : null,
         ),
-        if (_showRouteTrail) _buildRouteTrailLayer(),
-        if (_showHeatmap) _buildHeatmapLayer(),
-        if (_showPredictionRings) _buildPredictionRingsLayer(),
+        if (_showRouteTrail)
+          RouteTrailLayer(samples: _samples, colorBlindMode: _colorBlindMode),
+        if (_showHeatmap)
+          SampleHeatmapLayer(
+            samples: _samples,
+            reset: _heatmapRebuildStream.stream,
+          ),
+        if (_showPredictionRings)
+          CoveragePredictionLayer(
+            samples: _samples,
+            repeaters: _repeaters,
+            includeOnlyRepeaters: _includeOnlyRepeaters,
+          ),
         _buildPrivacyZonesLayer(),
         if (_showCommunityCoverage && _communityCoverage != null)
           _buildCommunityCoverageLayer(),
         if (_showCoverage) ..._buildCoverageLayers(),
         if (_showSamples) _buildSampleLayer(),
         if (_showEdges) _buildEdgeLayer(),
-        if (_showRepeaters) _buildRepeaterLayer(),
+        if (_showRepeaters)
+          RepeaterLayer(
+            repeaters: _repeaters,
+            colorBlindMode: _colorBlindMode,
+            onRepeaterTap: _showRepeaterInfo,
+          ),
         if (_showRadioPosition) ..._buildRadioPositionLayers(),
         _buildPlannedMarkersLayer(),
         if (_currentPosition != null && !_hideUIForScreenshot)
-          _buildCurrentLocationLayer(),
+          CurrentPositionLayer(
+            position: _currentPosition!,
+            style: _currentLocationMarkerStyle,
+            source: _positionSource,
+            heading: _currentHeading,
+            showPingPulse: _showPingPulse,
+          ),
       ],
-    );
-  }
-
-  Widget _buildRouteTrailLayer() {
-    if (_samples.isEmpty) return const SizedBox.shrink();
-
-    // Sort samples by timestamp (oldest first)
-    final sorted = List<Sample>.from(_samples)
-      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
-
-    final polylines = <Polyline>[];
-    const maxGapMinutes = 5; // Break trail if gap > 5 minutes
-
-    var segmentPoints = <LatLng>[];
-    Color segmentColor = Colors.blue;
-
-    for (int i = 0; i < sorted.length; i++) {
-      final sample = sorted[i];
-
-      // Determine color for this point
-      Color pointColor;
-      if (sample.pingSuccess == true) {
-        pointColor = ColorBlindPalette.getSuccessColor(_colorBlindMode);
-      } else if (sample.pingSuccess == false) {
-        pointColor = ColorBlindPalette.getFailureColor(_colorBlindMode);
-      } else {
-        pointColor = Colors.blue;
-      }
-
-      if (i > 0) {
-        final gap = sample.timestamp
-            .difference(sorted[i - 1].timestamp)
-            .inMinutes;
-
-        if (gap > maxGapMinutes) {
-          // Save current segment and start new one
-          if (segmentPoints.length >= 2) {
-            polylines.add(
-              Polyline(
-                points: List.from(segmentPoints),
-                color: segmentColor.withValues(alpha: 0.7),
-                strokeWidth: 3.0,
-              ),
-            );
-          }
-          segmentPoints = [sample.position];
-          segmentColor = pointColor;
-          continue;
-        }
-
-        // If color changes, end current segment and start new one
-        if (pointColor != segmentColor && segmentPoints.length >= 2) {
-          polylines.add(
-            Polyline(
-              points: List.from(segmentPoints),
-              color: segmentColor.withValues(alpha: 0.7),
-              strokeWidth: 3.0,
-            ),
-          );
-          // Start new segment from last point of previous segment for continuity
-          segmentPoints = [segmentPoints.last, sample.position];
-          segmentColor = pointColor;
-          continue;
-        }
-      } else {
-        segmentColor = pointColor;
-      }
-
-      segmentPoints.add(sample.position);
-    }
-
-    // Add final segment
-    if (segmentPoints.length >= 2) {
-      polylines.add(
-        Polyline(
-          points: segmentPoints,
-          color: segmentColor.withValues(alpha: 0.7),
-          strokeWidth: 3.0,
-        ),
-      );
-    }
-
-    return PolylineLayer(polylines: polylines);
-  }
-
-  Widget _buildHeatmapLayer() {
-    if (_samples.isEmpty) return const SizedBox.shrink();
-
-    // Convert samples to weighted points
-    // Higher weight = hotter on the heatmap
-    final data = _samples.map((sample) {
-      double weight;
-      if (sample.pingSuccess == true) {
-        weight = 1.0; // Successful ping = hot
-      } else if (sample.pingSuccess == false) {
-        weight = 0.5; // Failed ping = warm
-      } else {
-        weight = 0.2; // GPS-only = cool
-      }
-      return WeightedLatLng(sample.position, weight);
-    }).toList();
-
-    return HeatMapLayer(
-      heatMapDataSource: InMemoryHeatMapDataSource(data: data),
-      heatMapOptions: HeatMapOptions(
-        gradient: {
-          0.25: Colors.green,
-          0.50: Colors.yellow,
-          0.75: Colors.orange,
-          1.0: Colors.red,
-        },
-        minOpacity: 0.1,
-      ),
-      reset: _heatmapRebuildStream.stream,
     );
   }
 
   List<Widget> _buildCoverageLayers() {
     if (_aggregationResult == null) return [];
     _ensureCoverageLod();
-
-    final coveragePolygons = <Polygon<Coverage>>[];
-
-    for (final coverage in _cachedLodCoverages) {
-      final gh = geohash.GeoHash.decode(coverage.id);
-      final color = Color(
-        AggregationService.getCoverageColor(
-          coverage,
-          _colorMode,
-          colorBlindMode: _colorBlindMode,
-        ),
-      );
-      final opacity = AggregationService.getCoverageOpacity(coverage);
-
-      // Get corners from geohash bounds
-      final sw = gh.bounds.southWest;
-      final ne = gh.bounds.northEast;
-
-      coveragePolygons.add(
-        Polygon<Coverage>(
-          points: [
-            LatLng(sw.latitude, sw.longitude),
-            LatLng(sw.latitude, ne.longitude),
-            LatLng(ne.latitude, ne.longitude),
-            LatLng(ne.latitude, sw.longitude),
-          ],
-          color: color.withValues(alpha: opacity),
-          borderColor: color,
-          borderStrokeWidth: 1,
-          hitValue: coverage,
-        ),
-      );
-    }
-
     return [
-      GestureDetector(
-        onTap: () {
-          final hits = _coverageHitNotifier.value?.hitValues;
-          if (hits == null || hits.isEmpty) return;
-          final coverage = hits.first;
+      CoverageLayer(
+        coverages: _cachedLodCoverages,
+        colorMode: _colorMode,
+        colorBlindMode: _colorBlindMode,
+        hitNotifier: _coverageHitNotifier,
+        onCoverageTap: (coverage) {
           if (_deleteMode && _coverageLodPrecision < _coveragePrecision) {
             _showSnackBar(AppLocalizations.of(context).mapZoomToDeleteCell);
             return;
@@ -2834,10 +2495,6 @@ $placemarks  </Document>
             _showCoverageInfo(coverage);
           }
         },
-        child: PolygonLayer<Coverage>(
-          polygons: coveragePolygons,
-          hitNotifier: _coverageHitNotifier,
-        ),
       ),
     ];
   }
@@ -2845,38 +2502,11 @@ $placemarks  </Document>
   Widget _buildSampleLayer() {
     if (_samples.isEmpty) return const SizedBox.shrink();
     final clusters = _sampleClustersForCurrentLod();
-    final circles = clusters
-        .map((cluster) {
-          final Color color;
-          if (cluster.successfulCount >= cluster.failedCount &&
-              cluster.successfulCount > 0) {
-            color = ColorBlindPalette.getSuccessColor(_colorBlindMode);
-          } else if (cluster.failedCount > 0) {
-            color = ColorBlindPalette.getFailureColor(_colorBlindMode);
-          } else {
-            color = ColorBlindPalette.getGpsOnlyColor(_colorBlindMode);
-          }
-          final radius = math.min(
-            9.0,
-            3.0 + math.log(cluster.sampleCount + 1) / math.ln2,
-          );
-
-          return CircleMarker<SampleCluster>(
-            point: cluster.position,
-            radius: radius,
-            color: color.withValues(alpha: 0.7),
-            borderColor: color.withValues(alpha: 0.95),
-            borderStrokeWidth: 1,
-            hitValue: cluster,
-          );
-        })
-        .toList(growable: false);
-
-    return GestureDetector(
-      onTap: () {
-        final hits = _sampleHitNotifier.value?.hitValues;
-        if (hits == null || hits.isEmpty) return;
-        final cluster = hits.first;
+    return SampleClusterLayer(
+      clusters: clusters,
+      colorBlindMode: _colorBlindMode,
+      hitNotifier: _sampleHitNotifier,
+      onClusterTap: (cluster) {
         if (_deleteMode && cluster.sampleCount == 1) {
           _deleteSample(cluster.newestSample);
         } else if (_deleteMode) {
@@ -2887,66 +2517,17 @@ $placemarks  </Document>
           _showSampleClusterInfo(cluster);
         }
       },
-      child: CircleLayer<SampleCluster>(
-        circles: circles,
-        hitNotifier: _sampleHitNotifier,
-      ),
     );
   }
 
   Widget _buildEdgeLayer() {
     if (_aggregationResult == null) return const SizedBox.shrink();
     _ensureCoverageLod();
-
-    // Filter edges by whitelist if enabled
-    var edges = _cachedLodEdges;
-
-    if (_filterEdgesByWhitelist &&
-        _includeOnlyRepeaters != null &&
-        _includeOnlyRepeaters!.isNotEmpty) {
-      final allowedPrefixes = _includeOnlyRepeaters!
-          .split(',')
-          .map((s) => s.trim().toUpperCase())
-          .toList();
-      edges = edges.where((edge) {
-        final repeaterId = edge.repeater.id.toUpperCase();
-        return allowedPrefixes.any((prefix) => repeaterId.startsWith(prefix));
-      }).toList();
-    }
-
-    final polylines = edges.map((edge) {
-      return Polyline(
-        points: [edge.coverage.position, edge.repeater.position],
-        color: Colors.purple.withValues(
-          alpha: 0.6,
-        ), // Increased from 0.3 to 0.6
-        strokeWidth: 2, // Increased from 1 to 2
-      );
-    }).toList();
-
-    return PolylineLayer(polylines: polylines);
-  }
-
-  Widget _buildRepeaterLayer() {
-    if (_repeaters.isEmpty) return const SizedBox.shrink();
-
-    final markers = _repeaters.map((repeater) {
-      return Marker(
-        point: repeater.position,
-        width: 30,
-        height: 30,
-        child: GestureDetector(
-          onTap: () => _showRepeaterInfo(repeater),
-          child: Icon(
-            Icons.cell_tower,
-            color: ColorBlindPalette.getRepeaterColor(_colorBlindMode),
-            size: 30,
-          ),
-        ),
-      );
-    }).toList();
-
-    return MarkerLayer(markers: markers);
+    return EdgeLayer(
+      edges: _cachedLodEdges,
+      filterByWhitelist: _filterEdgesByWhitelist,
+      includeOnlyRepeaters: _includeOnlyRepeaters,
+    );
   }
 
   RadioPositionEstimate? _calculateRadioPositionEstimate(
@@ -3037,460 +2618,6 @@ $placemarks  </Document>
       final bearing = (360.0 / segments) * i;
       return distance.offset(center, radiusMeters, bearing);
     });
-  }
-
-  Widget _buildPredictionRingsLayer() {
-    if (_repeaters.isEmpty || _samples.isEmpty) return const SizedBox.shrink();
-
-    // Build lookup: repeater ID -> list of distances (meters) from successful samples
-    final Map<String, List<double>> repeaterDistances = {};
-    final Map<String, Repeater> repeaterById = {};
-    const distance = Distance();
-    final allowedPrefixes =
-        _includeOnlyRepeaters != null && _includeOnlyRepeaters!.isNotEmpty
-        ? _includeOnlyRepeaters!
-              .split(',')
-              .map((s) => s.trim().toUpperCase())
-              .toList()
-        : null;
-
-    for (final repeater in _repeaters) {
-      // Skip repeaters at 0,0 (unknown position)
-      if (repeater.position.latitude == 0.0 &&
-          repeater.position.longitude == 0.0) {
-        continue;
-      }
-      if (allowedPrefixes != null) {
-        final repeaterId = repeater.id.toUpperCase();
-        final matches = allowedPrefixes.any(
-          (prefix) => repeaterId.startsWith(prefix),
-        );
-        if (!matches) continue;
-      }
-      repeaterById[AggregationService.repeaterLookupKey(repeater.id)] =
-          repeater;
-    }
-
-    // Match samples to repeaters by path (nodeId)
-    for (final sample in _samples) {
-      if (sample.pingSuccess != true ||
-          sample.path == null ||
-          sample.path!.isEmpty) {
-        continue;
-      }
-      final repeater =
-          repeaterById[AggregationService.repeaterLookupKey(sample.path!)];
-      if (repeater == null) continue;
-
-      final dist = distance.as(
-        LengthUnit.Meter,
-        sample.position,
-        repeater.position,
-      );
-      // Skip impossibly large distances (GPS noise)
-      if (dist > 100000) continue; // 100km sanity cap
-
-      repeaterDistances.putIfAbsent(repeater.id, () => []);
-      repeaterDistances[repeater.id]!.add(dist);
-    }
-
-    final polygons = <Polygon>[];
-
-    for (final entry in repeaterDistances.entries) {
-      final repeater = repeaterById[entry.key]!;
-      final distances = entry.value..sort();
-
-      // Need at least 3 data points for meaningful prediction
-      if (distances.length < 3) continue;
-
-      // Percentile-based rings
-      final p25 = distances[(distances.length * 0.25).floor()];
-      final p75 = distances[(distances.length * 0.75).floor()];
-      final maxDist = distances.last;
-
-      // Skip if rings would be too small to see (<50m)
-      if (maxDist < 50) continue;
-
-      // Edge ring (outer, red) — max observed distance
-      polygons.add(
-        Polygon(
-          points: _circlePoints(repeater.position, maxDist),
-          color: Colors.red.withValues(alpha: 0.05),
-          borderColor: Colors.red.withValues(alpha: 0.35),
-          borderStrokeWidth: 1.5,
-        ),
-      );
-
-      // Moderate ring (middle, yellow)
-      if (p75 > 50 && p75 < maxDist * 0.95) {
-        polygons.add(
-          Polygon(
-            points: _circlePoints(repeater.position, p75),
-            color: Colors.yellow.withValues(alpha: 0.08),
-            borderColor: Colors.yellow.withValues(alpha: 0.5),
-            borderStrokeWidth: 1.5,
-          ),
-        );
-      }
-
-      // Strong ring (inner, green)
-      if (p25 > 50 && p25 < p75 * 0.95) {
-        polygons.add(
-          Polygon(
-            points: _circlePoints(repeater.position, p25),
-            color: Colors.green.withValues(alpha: 0.10),
-            borderColor: Colors.green.withValues(alpha: 0.6),
-            borderStrokeWidth: 1.5,
-          ),
-        );
-      }
-    }
-
-    if (polygons.isEmpty) return const SizedBox.shrink();
-    return PolygonLayer(polygons: polygons);
-  }
-
-  Widget _buildCurrentLocationLayer() {
-    final markers = [
-      Marker(
-        point: _currentPosition!,
-        width: _currentLocationMarkerStyle == CurrentLocationMarkerStyle.arrow
-            ? 34
-            : 20,
-        height: _currentLocationMarkerStyle == CurrentLocationMarkerStyle.arrow
-            ? 34
-            : 20,
-        child: _buildCurrentPositionMarker(),
-      ),
-    ];
-
-    // Add ping pulse animation when auto-pinging
-    if (_showPingPulse) {
-      markers.add(
-        Marker(
-          point: _currentPosition!,
-          width: 60,
-          height: 60,
-          child: TweenAnimationBuilder(
-            tween: Tween<double>(begin: 0.0, end: 1.0),
-            duration: const Duration(milliseconds: 1500),
-            builder: (context, double value, child) {
-              return Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Colors.orange.withValues(alpha: 1.0 - value),
-                    width: 3,
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      );
-    }
-
-    return MarkerLayer(markers: markers);
-  }
-
-  Widget _buildCurrentPositionMarker() {
-    final positionColor = _positionSource == LocationPositionSource.wifi
-        ? Colors.cyan
-        : Colors.blue;
-    final l10n = AppLocalizations.of(context);
-    final positionLabel = _positionSource == LocationPositionSource.wifi
-        ? l10n.mapCurrentWifiLocation
-        : l10n.mapCurrentFusedLocation;
-    if (_currentLocationMarkerStyle == CurrentLocationMarkerStyle.circle) {
-      return Semantics(
-        label: positionLabel,
-        child: Container(
-          decoration: BoxDecoration(
-            color: positionColor,
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 2),
-          ),
-        ),
-      );
-    }
-
-    return Semantics(
-      label: l10n.mapPositionHeadingSemantics(
-        positionLabel,
-        '${_currentHeading.round()}',
-      ),
-      child: Transform.rotate(
-        angle: _currentHeading * math.pi / 180,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            const Icon(Icons.navigation, size: 34, color: Colors.white),
-            Icon(Icons.navigation, size: 27, color: positionColor),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildControlPanel() {
-    final l10n = AppLocalizations.of(context);
-    return Positioned(
-      top: 16,
-      left: 16,
-      right: 16,
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: Row(
-            children: [
-              // Connection Status Icon
-              Icon(
-                _loraConnected
-                    ? Icons.bluetooth_connected
-                    : Icons.bluetooth_disabled,
-                size: 16,
-                color: _loraConnected ? Colors.green : Colors.grey,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                _loraConnected
-                    ? (_connectionType == ConnectionType.usb ? 'USB' : 'BT')
-                    : l10n.mapNoLora,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: _loraConnected ? Colors.green : Colors.grey,
-                ),
-              ),
-              if (_loraConnected && _batteryPercent != null)
-                const SizedBox(width: 4),
-              if (_loraConnected && _batteryPercent != null)
-                Icon(
-                  _getBatteryIcon(_batteryPercent!),
-                  size: 14,
-                  color: _getBatteryColor(_batteryPercent!),
-                ),
-              if (_loraConnected && _batteryPercent != null)
-                const SizedBox(width: 2),
-              if (_loraConnected && _batteryPercent != null)
-                Text(
-                  '$_batteryPercent%',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: _getBatteryColor(_batteryPercent!),
-                  ),
-                ),
-              const SizedBox(width: 12),
-              const Text('•', style: TextStyle(color: Colors.grey)),
-              const SizedBox(width: 12),
-              // Stats
-              Flexible(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      l10n.mapSamplesCount('$_sampleCount'),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    if (_isTracking)
-                      Text(
-                        '${_totalDistance.toStringAsFixed(2)} ${_distanceUnit == 'miles' ? 'mi' : 'km'} • ${_currentSpeed.toStringAsFixed(1)} ${_distanceUnit == 'miles' ? 'mph' : 'km/h'}',
-                        style: const TextStyle(
-                          fontSize: 10,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    if (_carpeaterEnabled &&
-                        _carpeaterState != CarpeaterState.disabled)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2),
-                        child: GestureDetector(
-                          onTap: _carpeaterState == CarpeaterState.error
-                              ? () async {
-                                  _showSnackBar(l10n.mapRetryingCarpeater);
-                                  final ok = await _locationService
-                                      .startCarpeater();
-                                  _showSnackBar(
-                                    ok
-                                        ? l10n.mapCarpeaterReconnected
-                                        : l10n.mapCarpeaterRetryFailed,
-                                  );
-                                }
-                              : null,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 1,
-                            ),
-                            decoration: BoxDecoration(
-                              color:
-                                  (_carpeaterState == CarpeaterState.error
-                                          ? Colors.red
-                                          : _carpeaterState ==
-                                                    CarpeaterState.loggedIn ||
-                                                _carpeaterState ==
-                                                    CarpeaterState
-                                                        .discovering ||
-                                                _carpeaterState ==
-                                                    CarpeaterState
-                                                        .fetchingNeighbours
-                                          ? Colors.green
-                                          : Colors.orange)
-                                      .withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: _carpeaterState == CarpeaterState.error
-                                    ? Colors.red
-                                    : _carpeaterState ==
-                                              CarpeaterState.loggedIn ||
-                                          _carpeaterState ==
-                                              CarpeaterState.discovering ||
-                                          _carpeaterState ==
-                                              CarpeaterState.fetchingNeighbours
-                                    ? Colors.green
-                                    : Colors.orange,
-                                width: 1,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  l10n.mapCarpeaterStatus(
-                                    _carpeaterStateLabel(l10n),
-                                  ),
-                                  style: TextStyle(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                    color:
-                                        _carpeaterState == CarpeaterState.error
-                                        ? Colors.red
-                                        : _carpeaterState ==
-                                                  CarpeaterState.loggedIn ||
-                                              _carpeaterState ==
-                                                  CarpeaterState.discovering ||
-                                              _carpeaterState ==
-                                                  CarpeaterState
-                                                      .fetchingNeighbours
-                                        ? Colors.green
-                                        : Colors.orange,
-                                  ),
-                                ),
-                                if (_carpeaterState ==
-                                    CarpeaterState.error) ...[
-                                  const SizedBox(width: 4),
-                                  Icon(
-                                    Icons.refresh,
-                                    size: 10,
-                                    color: Colors.red,
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    if (_showDucting &&
-                        _currentDuctingRisk != DuctingRisk.unknown)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 1,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _getDuctingColor(
-                              _currentDuctingRisk,
-                            ).withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: _getDuctingColor(_currentDuctingRisk),
-                              width: 1,
-                            ),
-                          ),
-                          child: Text(
-                            l10n.mapDuctingStatus(
-                              _localizedDuctingRisk(l10n, _currentDuctingRisk),
-                            ),
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                              color: _getDuctingColor(_currentDuctingRisk),
-                            ),
-                          ),
-                        ),
-                      ),
-                    if (_batterySaverActive)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 1,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.orange.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.orange, width: 1),
-                          ),
-                          child: Text(
-                            l10n.mapBatterySaverBadge,
-                            style: const TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.orange,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              const Spacer(),
-              // Connect button or Manual Ping
-              if (!_loraConnected)
-                TextButton(
-                  onPressed: _isConnecting ? null : _showConnectionDialog,
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    minimumSize: Size.zero,
-                  ),
-                  child: Text(
-                    _isConnecting ? l10n.mapConnecting : l10n.mapConnect,
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                ),
-              if (_loraConnected) ...[
-                IconButton(
-                  icon: const Icon(Icons.link_off, size: 16),
-                  onPressed: _disconnectLoRa,
-                  tooltip: l10n.mapDisconnect,
-                  color: Colors.red,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-                const SizedBox(width: 4),
-                IconButton(
-                  icon: const Icon(Icons.send, size: 18),
-                  onPressed: _manualPing,
-                  tooltip: l10n.mapManualPing,
-                  color: Colors.blue,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   void _toggleAutoPing(bool? value) {
@@ -3812,40 +2939,6 @@ $placemarks  </Document>
       await _loadSamples();
       if (!mounted) return;
       _showSnackBar(AppLocalizations.of(context).mapLoraDisconnected);
-    }
-  }
-
-  IconData _getBatteryIcon(int percent) {
-    if (percent > 90) return Icons.battery_full;
-    if (percent > 70) return Icons.battery_5_bar;
-    if (percent > 50) return Icons.battery_4_bar;
-    if (percent > 30) return Icons.battery_3_bar;
-    if (percent > 15) return Icons.battery_2_bar;
-    return Icons.battery_1_bar;
-  }
-
-  Color _getBatteryColor(int percent) {
-    if (percent > 30) return Colors.green;
-    if (percent > 15) return Colors.orange;
-    return Colors.red;
-  }
-
-  String _carpeaterStateLabel(AppLocalizations l10n) {
-    switch (_carpeaterState) {
-      case CarpeaterState.disabled:
-        return l10n.mapCarpeaterOff;
-      case CarpeaterState.connecting:
-        return l10n.mapCarpeaterConnecting;
-      case CarpeaterState.loggingIn:
-        return l10n.mapCarpeaterLogin;
-      case CarpeaterState.loggedIn:
-        return l10n.mapCarpeaterReady;
-      case CarpeaterState.discovering:
-        return l10n.mapCarpeaterScanning;
-      case CarpeaterState.fetchingNeighbours:
-        return l10n.mapCarpeaterFetching;
-      case CarpeaterState.error:
-        return l10n.mapCarpeaterError;
     }
   }
 
