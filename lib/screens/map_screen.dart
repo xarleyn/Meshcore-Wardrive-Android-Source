@@ -89,6 +89,7 @@ import '../services/radio_position_estimator.dart';
 import '../services/screen_wake_service.dart';
 import '../services/android_tracking_settings_service.dart';
 import 'settings/settings_screen.dart';
+import 'settings/settings_dialogs.dart';
 import 'settings/sections/about_section.dart';
 import 'settings/sections/app_device_section.dart';
 import 'settings/sections/backup_section.dart';
@@ -103,7 +104,6 @@ import 'settings/sections/map_display_section.dart';
 import 'settings/sections/online_map_section.dart';
 import 'settings/sections/statistics_section.dart';
 
-part 'settings/settings_dialogs.dart';
 part 'settings/settings_page.dart';
 
 class MapScreen extends StatefulWidget {
