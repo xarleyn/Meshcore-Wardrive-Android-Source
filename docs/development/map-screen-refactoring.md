@@ -119,11 +119,11 @@ cohesive 200-400 line file over many tiny single-use wrappers.
 
 ### Stage 4: lifecycle and runtime bindings
 
-- [ ] Give every stream subscription and timer a clear owner.
+- [x] Give every stream subscription and timer a clear owner.
 - [x] Cancel the Carpeater and achievement subscriptions during disposal.
-- [ ] Guard asynchronous initialization against disposal and stale results.
-- [ ] Consolidate compass/heading update scheduling behind one lifecycle owner.
-- [ ] Remove the periodic full refresh where event-driven updates are
+- [x] Guard asynchronous initialization against disposal and stale results.
+- [x] Consolidate compass/heading update scheduling behind one lifecycle owner.
+- [x] Remove the periodic full refresh where event-driven updates are
   sufficient, after measuring behavior.
 
 ### Stage 5: settings decoupling

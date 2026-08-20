@@ -48,6 +48,7 @@ import 'map/dialogs/map_workflow_dialogs.dart';
 import 'map/dialogs/marker_dialogs.dart';
 import 'map/dialogs/offline_tile_dialogs.dart';
 import 'map/dialogs/upload_endpoint_dialog.dart';
+import 'map/map_runtime_bindings.dart';
 import 'map/map_screen_controller.dart';
 import 'map/widgets/delete_mode_banner.dart';
 import 'map/widgets/map_action_buttons.dart';
@@ -126,6 +127,8 @@ class _MapScreenState extends State<MapScreen> {
   final ScreenshotController _screenshotController = ScreenshotController();
   final AndroidTrackingSettingsService _androidTrackingSettings =
       AndroidTrackingSettingsService();
+  final MapRuntimeBindings _runtimeBindings = MapRuntimeBindings();
+  int _initializationGeneration = 0;
 
   bool _isTracking = false;
   bool _isConnecting = false;
@@ -166,18 +169,6 @@ class _MapScreenState extends State<MapScreen> {
   InitialMapCamera? _sampleMapCamera;
   bool _mapReady = false;
   bool _hasAppliedInitialSampleCamera = false;
-  Timer? _updateTimer;
-  StreamSubscription<LatLng>? _positionSubscription;
-  StreamSubscription<LocationPositionSource>? _positionSourceSubscription;
-  StreamSubscription<double>? _courseSubscription;
-  StreamSubscription<CompassEvent>? _compassSubscription;
-  StreamSubscription<void>? _sampleSavedSubscription;
-  StreamSubscription<String>? _pingEventSubscription;
-  StreamSubscription<double>? _distanceSubscription;
-  StreamSubscription<double>? _speedSubscription;
-  StreamSubscription<String>? _newRepeaterSubscription;
-  StreamSubscription<String>? _deadZoneSubscription;
-  StreamSubscription<PingResult>? _radioPositionSubscription;
 
   // Ping visual indicator
   bool _showPingPulse = false;
@@ -185,7 +176,6 @@ class _MapScreenState extends State<MapScreen> {
   // Coarse radio-derived position. This is kept visually separate from GPS.
   PingResult? _latestPingResult;
   RadioPositionEstimate? _radioPositionEstimate;
-  Timer? _radioPositionExpiryTimer;
 
   // Distance tracking
   double _totalDistance = 0.0;
@@ -209,7 +199,6 @@ class _MapScreenState extends State<MapScreen> {
   bool _loraConnected = false;
   ConnectionType _connectionType = ConnectionType.none;
   int? _batteryPercent;
-  StreamSubscription<int?>? _batterySubscription;
 
   // Auto-follow GPS location
   bool _followLocation = false;
@@ -226,7 +215,6 @@ class _MapScreenState extends State<MapScreen> {
   double _currentHeading = 0;
   double? _pendingHeading;
   double _pendingHeadingFactor = 0.3;
-  Timer? _headingUpdateTimer;
   bool _hasCompassHeading = false;
   bool _followHeading = false;
   final CompassAccuracyMonitor _compassAccuracyMonitor =
@@ -285,8 +273,6 @@ class _MapScreenState extends State<MapScreen> {
   // Battery saver mode
   bool _batterySaverActive = false;
   bool _batterySaverEnabled = true;
-  StreamSubscription<bool>? _batterySaverSubscription;
-  StreamSubscription<Achievement>? _achievementSubscription;
 
   // Quick settings overlay
   bool _showQuickSettings = false;
@@ -305,7 +291,6 @@ class _MapScreenState extends State<MapScreen> {
   String? _carpeaterPassword;
   int _carpeaterInterval = 30;
   CarpeaterState _carpeaterState = CarpeaterState.disabled;
-  StreamSubscription<CarpeaterState>? _carpeaterStateSubscription;
 
   @override
   void initState() {
@@ -313,154 +298,197 @@ class _MapScreenState extends State<MapScreen> {
     _mapDataController = MapScreenController(
       store: DatabaseMapDataStore(_databaseService),
     );
-    _initialize();
+    _initialize(++_initializationGeneration);
   }
 
-  Future<void> _initialize() async {
+  Future<void> _initialize(int generation) async {
     // Initialize tile cache store
     final cacheDir = await getApplicationDocumentsDirectory();
+    if (!_isInitializationCurrent(generation)) return;
     _tileCacheStore = FileCacheStore('${cacheDir.path}/tile_cache');
 
     // Initialize home screen widget
     await WidgetService.initialize();
+    if (!_isInitializationCurrent(generation)) return;
 
     // Load saved settings
     await _loadSettings();
+    if (!_isInitializationCurrent(generation)) return;
 
     // Load planned markers and privacy zones
     await _loadMarkers();
+    if (!_isInitializationCurrent(generation)) return;
     await _loadPrivacyZones();
+    if (!_isInitializationCurrent(generation)) return;
     await _loadImpossibleZones();
+    if (!_isInitializationCurrent(generation)) return;
 
     // Subscribe to battery updates
     final loraService = _locationService.loraCompanion;
-    _batterySubscription = loraService.batteryStream.listen((percent) {
-      setState(() {
-        _batteryPercent = percent;
-      });
-    });
-
-    _radioPositionSubscription = loraService.pingResults.listen((result) {
-      if (!mounted) return;
-      _radioPositionExpiryTimer?.cancel();
-      setState(() {
-        _latestPingResult = result.status == PingStatus.success ? result : null;
-        _radioPositionEstimate = _calculateRadioPositionEstimate(_repeaters);
-      });
-      if (result.status == PingStatus.success) {
-        _radioPositionExpiryTimer = Timer(const Duration(minutes: 2), () {
-          if (!mounted) return;
-          setState(() {
-            _latestPingResult = null;
-            _radioPositionEstimate = null;
-          });
+    _runtimeBindings.bind(
+      MapRuntimeSubscription.battery,
+      loraService.batteryStream,
+      (percent) {
+        if (!mounted) return;
+        setState(() {
+          _batteryPercent = percent;
         });
-      }
-    });
+      },
+    );
+
+    _runtimeBindings.bind(
+      MapRuntimeSubscription.radioPosition,
+      loraService.pingResults,
+      (result) {
+        if (!mounted) return;
+        _runtimeBindings.cancelTimer(MapRuntimeTimer.radioPositionExpiry);
+        setState(() {
+          _latestPingResult = result.status == PingStatus.success
+              ? result
+              : null;
+          _radioPositionEstimate = _calculateRadioPositionEstimate(_repeaters);
+        });
+        if (result.status == PingStatus.success) {
+          _runtimeBindings.scheduleTimer(
+            MapRuntimeTimer.radioPositionExpiry,
+            const Duration(minutes: 2),
+            () {
+              if (!mounted) return;
+              setState(() {
+                _latestPingResult = null;
+                _radioPositionEstimate = null;
+              });
+            },
+          );
+        }
+      },
+    );
 
     // Subscribe to Carpeater state changes
-    _carpeaterStateSubscription = _locationService.carpeaterService.stateStream
-        .listen((state) {
-          if (mounted) {
-            setState(() {
-              _carpeaterState = state;
-            });
-          }
+    _runtimeBindings.bind(
+      MapRuntimeSubscription.carpeater,
+      _locationService.carpeaterService.stateStream,
+      (state) {
+        if (!mounted) return;
+        setState(() {
+          _carpeaterState = state;
         });
+      },
+    );
 
     // Subscribe to position updates
-    _positionSubscription = _locationService.currentPositionStream.listen((
-      position,
-    ) {
-      if (!mounted) return;
-      final shouldCenterMap = _currentPosition == null;
-      setState(() {
-        _currentPosition = position;
-      });
-
-      if (shouldCenterMap) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            _mapController.move(position, InitialMapCamera.fallbackZoom);
-          }
+    _runtimeBindings.bind(
+      MapRuntimeSubscription.position,
+      _locationService.currentPositionStream,
+      (position) {
+        if (!mounted) return;
+        final shouldCenterMap = _currentPosition == null;
+        setState(() {
+          _currentPosition = position;
         });
-      }
 
-      // Auto-follow if enabled (throttled to reduce map redraws)
-      if (_followLocation) {
-        final now = DateTime.now();
-        if (now.difference(_lastAutoFollowMove) >= _autoFollowInterval) {
-          _lastAutoFollowMove = now;
-          _mapController.move(position, _mapController.camera.zoom);
+        if (shouldCenterMap) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              _mapController.move(position, InitialMapCamera.fallbackZoom);
+            }
+          });
         }
-      }
-    });
 
-    _positionSourceSubscription = _locationService.positionSourceStream.listen((
-      source,
-    ) {
-      if (mounted) {
+        // Auto-follow if enabled (throttled to reduce map redraws)
+        if (_followLocation) {
+          final now = DateTime.now();
+          if (now.difference(_lastAutoFollowMove) >= _autoFollowInterval) {
+            _lastAutoFollowMove = now;
+            _mapController.move(position, _mapController.camera.zoom);
+          }
+        }
+      },
+    );
+
+    _runtimeBindings.bind(
+      MapRuntimeSubscription.positionSource,
+      _locationService.positionSourceStream,
+      (source) {
+        if (!mounted) return;
         setState(() {
           _positionSource = source;
         });
-      }
-    });
+      },
+    );
 
-    _courseSubscription = _locationService.courseStream.listen((heading) {
-      if (!_hasCompassHeading) {
-        _scheduleHeadingUpdate(heading, factor: 1);
-      }
-    });
+    _runtimeBindings.bind(
+      MapRuntimeSubscription.course,
+      _locationService.courseStream,
+      (heading) {
+        if (!_hasCompassHeading) {
+          _scheduleHeadingUpdate(heading, factor: 1);
+        }
+      },
+    );
 
     _syncCompassSubscription();
 
     // Subscribe to sample saved events - reload map when new samples are saved
-    _sampleSavedSubscription = _locationService.sampleSavedStream.listen((_) {
-      _loadSamples();
-    });
+    _runtimeBindings.bind(
+      MapRuntimeSubscription.sampleSaved,
+      _locationService.sampleSavedStream,
+      (_) => _loadSamples(),
+    );
 
     // Subscribe to ping events for visual feedback
-    _pingEventSubscription = _locationService.pingEventStream.listen((event) {
-      if (event == 'pinging' && mounted) {
+    _runtimeBindings.bind(
+      MapRuntimeSubscription.pingEvent,
+      _locationService.pingEventStream,
+      (event) {
+        if (event != 'pinging' || !mounted) return;
         setState(() {
           _showPingPulse = true;
         });
-        // Hide pulse after 2 seconds
-        Future.delayed(const Duration(seconds: 2), () {
-          if (mounted) {
+        _runtimeBindings.scheduleTimer(
+          MapRuntimeTimer.pingPulse,
+          const Duration(seconds: 2),
+          () {
+            if (!mounted) return;
             setState(() {
               _showPingPulse = false;
             });
-          }
-        });
-      }
-    });
+          },
+        );
+      },
+    );
 
     // Subscribe to new repeater discovery alerts
-    _newRepeaterSubscription = _locationService.loraCompanion.newRepeaterStream
-        .listen((repeaterId) {
-          if (mounted) {
-            SoundService().playPingSuccessGood();
-            _showSnackBar(
-              AppLocalizations.of(context).mapNewRepeaterDiscovered(repeaterId),
-            );
-          }
-        });
+    _runtimeBindings.bind(
+      MapRuntimeSubscription.newRepeater,
+      _locationService.loraCompanion.newRepeaterStream,
+      (repeaterId) {
+        if (!mounted) return;
+        SoundService().playPingSuccessGood();
+        _showSnackBar(
+          AppLocalizations.of(context).mapNewRepeaterDiscovered(repeaterId),
+        );
+      },
+    );
 
     // Subscribe to dead zone alerts
-    _deadZoneSubscription = _locationService.deadZoneStream.listen((cellHash) {
-      if (mounted) {
+    _runtimeBindings.bind(
+      MapRuntimeSubscription.deadZone,
+      _locationService.deadZoneStream,
+      (cellHash) {
+        if (!mounted) return;
         _showSnackBar(
           AppLocalizations.of(context).mapEnteringDeadZone(cellHash),
         );
-      }
-    });
+      },
+    );
 
     // Subscribe to battery saver mode changes
-    _batterySaverSubscription = _locationService.batterySaverStream.listen((
-      active,
-    ) {
-      if (mounted) {
+    _runtimeBindings.bind(
+      MapRuntimeSubscription.batterySaver,
+      _locationService.batterySaverStream,
+      (active) {
+        if (!mounted) return;
         setState(() {
           _batterySaverActive = active;
         });
@@ -468,72 +496,85 @@ class _MapScreenState extends State<MapScreen> {
         _showSnackBar(
           active ? l10n.mapBatterySaverOn : l10n.mapBatterySaverOff,
         );
-      }
-    });
+      },
+    );
 
     // Subscribe to achievement unlocks
-    _achievementSubscription = AchievementService().unlockStream.listen((
-      achievement,
-    ) {
-      if (mounted) {
+    _runtimeBindings.bind(
+      MapRuntimeSubscription.achievement,
+      AchievementService().unlockStream,
+      (achievement) {
+        if (!mounted) return;
         final l10n = AppLocalizations.of(context);
         final copy = achievementCopy(l10n, achievement.id);
         _showSnackBar(
           l10n.achievementsUnlockedSnackbar(achievement.icon, copy.title),
         );
-      }
-    });
+      },
+    );
 
     // Check achievements on startup
     AchievementService().checkAndUnlock();
 
     // Load known repeater IDs from DB so only truly new ones trigger alerts
     final knownIds = await _databaseService.getDistinctRepeaterIds();
+    if (!_isInitializationCurrent(generation)) return;
     await _locationService.loraCompanion.loadKnownRepeaterIds(knownIds);
+    if (!_isInitializationCurrent(generation)) return;
 
     // Load alert toggle settings
     final newRepeaterAlerts = await _settingsService
         .getNewRepeaterAlertsEnabled();
+    if (!_isInitializationCurrent(generation)) return;
     _locationService.loraCompanion.setNewRepeaterAlertsEnabled(
       newRepeaterAlerts,
     );
 
-    // Subscribe to distance updates (no setState — updated in _loadSamples cycle)
-    _distanceSubscription = _locationService.totalDistanceStream.listen((
-      distance,
-    ) {
-      if (mounted) {
-        _totalDistance = _distanceUnit == 'miles'
-            ? _locationService.totalDistanceMiles
-            : _locationService.totalDistanceKm;
-      }
-    });
+    // Update distance immediately instead of waiting for a periodic map refresh.
+    _runtimeBindings.bind(
+      MapRuntimeSubscription.distance,
+      _locationService.totalDistanceStream,
+      (_) {
+        if (!mounted) return;
+        setState(() {
+          _totalDistance = _distanceUnit == 'miles'
+              ? _locationService.totalDistanceMiles
+              : _locationService.totalDistanceKm;
+        });
+      },
+    );
 
-    // Subscribe to speed updates (no setState — updated in _loadSamples cycle)
-    _speedSubscription = _locationService.speedStream.listen((speed) {
-      if (mounted) {
-        _currentSpeed = _distanceUnit == 'miles'
-            ? _locationService.currentSpeedMph
-            : _locationService.currentSpeedKmh;
-      }
-    });
+    // Update speed immediately instead of waiting for a periodic map refresh.
+    _runtimeBindings.bind(
+      MapRuntimeSubscription.speed,
+      _locationService.speedStream,
+      (_) {
+        if (!mounted) return;
+        setState(() {
+          _currentSpeed = _distanceUnit == 'miles'
+              ? _locationService.currentSpeedMph
+              : _locationService.currentSpeedKmh;
+        });
+      },
+    );
 
     await _loadSamples();
+    if (!_isInitializationCurrent(generation)) return;
     await _locationService.startPositionSearch();
+    if (!_isInitializationCurrent(generation)) return;
 
     // Load cached community coverage for offline viewing
     final cached = await _uploadService.loadCachedCoverage();
+    if (!_isInitializationCurrent(generation)) return;
     if (cached != null && cached['coverage'] != null) {
       setState(() {
         _communityCoverage = cached['coverage'] as Map<String, dynamic>;
       });
     }
-
-    // Update periodically
-    _updateTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-      _loadSamples();
-    });
   }
+
+  bool _isInitializationCurrent(int generation) =>
+      mounted && generation == _initializationGeneration;
 
   Future<void> _loadSettings() async {
     final showSamples = await _settingsService.getShowSamples();
@@ -565,6 +606,7 @@ class _MapScreenState extends State<MapScreen> {
     final showDucting = await _settingsService.getShowDucting();
     final mapThemeMode = await _settingsService.getMapThemeMode();
 
+    if (!mounted) return;
     setState(() {
       _showSamples = showSamples;
       _showGpsSamples = showGpsSamples;
@@ -596,6 +638,7 @@ class _MapScreenState extends State<MapScreen> {
     // Load ping mode settings
     final pingMode = await _settingsService.getPingMode();
     final pingTimeInterval = await _settingsService.getPingTimeInterval();
+    if (!mounted) return;
     setState(() {
       _pingMode = pingMode;
       _pingTimeInterval = pingTimeInterval;
@@ -606,6 +649,7 @@ class _MapScreenState extends State<MapScreen> {
     // Load sound & vibration settings
     final soundEnabled = await _settingsService.getSoundEnabled();
     final vibrationEnabled = await _settingsService.getVibrationEnabled();
+    if (!mounted) return;
     setState(() {
       _soundEnabled = soundEnabled;
       _vibrationEnabled = vibrationEnabled;
@@ -621,6 +665,7 @@ class _MapScreenState extends State<MapScreen> {
     final showSuccessfulOnly = await _settingsService.getShowSuccessfulOnly();
     final compassQuietUntil = await _settingsService
         .getCompassCalibrationQuietUntil();
+    if (!mounted) return;
     setState(() {
       _lockRotationNorth = lockRotation;
       _keepScreenOn = keepScreenOn;
@@ -629,12 +674,14 @@ class _MapScreenState extends State<MapScreen> {
       _compassCalibrationQuietUntil = compassQuietUntil;
     });
     await ScreenWakeService.instance.setAlwaysOn(keepScreenOn);
+    if (!mounted) return;
 
     // Load alert toggles
     final deadZoneAlerts = await _settingsService.getDeadZoneAlertsEnabled();
     final newRepeaterAlerts = await _settingsService
         .getNewRepeaterAlertsEnabled();
     final batterySaverEnabled = await _settingsService.getBatterySaverEnabled();
+    if (!mounted) return;
     setState(() {
       _deadZoneAlertsEnabled = deadZoneAlerts;
       _newRepeaterAlertsEnabled = newRepeaterAlerts;
@@ -647,6 +694,7 @@ class _MapScreenState extends State<MapScreen> {
     final carpeaterRepeaterId = await _settingsService.getCarpeaterRepeaterId();
     final carpeaterPassword = await _settingsService.getCarpeaterPassword();
     final carpeaterInterval = await _settingsService.getCarpeaterInterval();
+    if (!mounted) return;
     setState(() {
       _carpeaterEnabled = carpeaterEnabled;
       _carpeaterRepeaterId = carpeaterRepeaterId;
@@ -675,8 +723,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _syncCompassSubscription() {
-    _compassSubscription?.cancel();
-    _compassSubscription = null;
+    _runtimeBindings.cancelSubscription(MapRuntimeSubscription.compass);
     _hasCompassHeading = false;
     _compassAccuracyMonitor.reset();
     if (_compassAccuracyStatus != CompassAccuracyStatus.unknown) {
@@ -687,7 +734,11 @@ class _MapScreenState extends State<MapScreen> {
       return;
     }
 
-    _compassSubscription = FlutterCompass.events?.listen(
+    final compassEvents = FlutterCompass.events;
+    if (compassEvents == null) return;
+    _runtimeBindings.bind(
+      MapRuntimeSubscription.compass,
+      compassEvents,
       (event) {
         final heading = event.heading;
         if (heading != null && heading.isFinite) {
@@ -706,7 +757,7 @@ class _MapScreenState extends State<MapScreen> {
           });
         }
       },
-      onError: (_) {
+      onError: (_, _) {
         _hasCompassHeading = false;
       },
     );
@@ -742,13 +793,15 @@ class _MapScreenState extends State<MapScreen> {
   void _scheduleHeadingUpdate(double heading, {double factor = 0.3}) {
     _pendingHeading = HeadingUtils.normalize(heading);
     _pendingHeadingFactor = factor;
-    if (_headingUpdateTimer?.isActive ?? false) return;
+    if (_runtimeBindings.hasActiveTimer(MapRuntimeTimer.headingUpdate)) return;
 
     _applyPendingHeading();
-    _headingUpdateTimer = Timer(const Duration(milliseconds: 80), () {
-      _headingUpdateTimer = null;
-      _applyPendingHeading();
-    });
+    _runtimeBindings.scheduleTimer(
+      MapRuntimeTimer.headingUpdate,
+      const Duration(milliseconds: 80),
+      _applyPendingHeading,
+      replace: false,
+    );
   }
 
   void _applyPendingHeading() {
@@ -1362,6 +1415,7 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _loadMarkers() async {
     final markers = await _databaseService.getAllMarkers();
+    if (!mounted) return;
     setState(() {
       _plannedMarkers = markers;
     });
@@ -1417,6 +1471,7 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _loadPrivacyZones() async {
     final zones = await _databaseService.getAllPrivacyZones();
+    if (!mounted) return;
     setState(() {
       _privacyZones = zones;
     });
@@ -1730,24 +1785,8 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   void dispose() {
-    _updateTimer?.cancel();
-    _batterySubscription?.cancel();
-    _positionSubscription?.cancel();
-    _positionSourceSubscription?.cancel();
-    _courseSubscription?.cancel();
-    _compassSubscription?.cancel();
-    _headingUpdateTimer?.cancel();
-    _sampleSavedSubscription?.cancel();
-    _pingEventSubscription?.cancel();
-    _distanceSubscription?.cancel();
-    _speedSubscription?.cancel();
-    _newRepeaterSubscription?.cancel();
-    _deadZoneSubscription?.cancel();
-    _radioPositionSubscription?.cancel();
-    _radioPositionExpiryTimer?.cancel();
-    _batterySaverSubscription?.cancel();
-    _achievementSubscription?.cancel();
-    _carpeaterStateSubscription?.cancel();
+    _initializationGeneration++;
+    _runtimeBindings.dispose();
     _heatmapRebuildStream.close();
     _coverageHitNotifier.dispose();
     _sampleHitNotifier.dispose();
