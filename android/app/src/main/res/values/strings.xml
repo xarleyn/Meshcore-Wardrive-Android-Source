@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">MeshCore Wardrive</string>
+    <string name="widget_status_idle">Idle</string>
+    <string name="widget_label_samples">Samples</string>
+    <string name="widget_label_lora">LoRa</string>
+    <string name="widget_label_success">Success</string>
+    <string name="widget_label_distance">Distance</string>
 </resources>
