@@ -121,6 +121,12 @@
   service error.
 
 ### Changed
+- Android builds now follow the Flutter 3.47 toolchain: Gradle 9.3.1, Android
+  Gradle Plugin 9.1.0, and Kotlin 2.4.0. CI and release workflows pin Flutter
+  3.47.1 so the Gradle/AGP/Kotlin warnings no longer appear. Gradle 9 no longer
+  provides `jcenter()`, so the Android build maps leftover plugin calls to
+  Maven Central. Android library plugins are compiled against API 36 so they
+  satisfy AGP 9's compile SDK requirement.
 - Bluetooth device selection no longer waits for the scan timeout. Previously
   used and paired companion radios appear immediately, and newly found devices
   are added to the list while scanning continues.

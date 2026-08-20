@@ -710,8 +710,7 @@ class MeshCoreProtocol {
       return {
         'snr': snr,
         'rssi': rssi,
-        'sender':
-            null, // Not extracting sender from encrypted payload, use repeater instead
+        'sender': null, // Not extracting sender from encrypted payload, use repeater instead
         'repeater': repeater,
         'repeaterKey': repeaterKey,
       };

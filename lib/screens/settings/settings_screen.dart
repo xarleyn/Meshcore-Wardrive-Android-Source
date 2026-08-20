@@ -6,12 +6,11 @@ export 'widgets/settings_section_header.dart';
 export 'widgets/settings_text_input_dialog.dart';
 export 'widgets/upload_endpoint_selection_dialog.dart';
 
-typedef SettingsContentBuilder =
-    Widget Function(
-      BuildContext context,
-      StateSetter setPageState,
-      ScrollController scrollController,
-    );
+typedef SettingsContentBuilder = Widget Function(
+  BuildContext context,
+  StateSetter setPageState,
+  ScrollController scrollController,
+);
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
@@ -166,10 +165,8 @@ class SettingsCategoryTile extends StatelessWidget {
         ),
       ),
       title: Text(title),
-      titleTextStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
-        color: colors.onSurface,
-        fontWeight: FontWeight.w500,
-      ),
+      titleTextStyle: Theme.of(context).textTheme.titleMedium
+          ?.copyWith(color: colors.onSurface, fontWeight: FontWeight.w500),
       trailing: Icon(Icons.chevron_right, color: colors.onSurfaceVariant),
       onTap: onTap,
     );

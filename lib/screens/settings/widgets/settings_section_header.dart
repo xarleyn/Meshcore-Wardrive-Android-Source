@@ -22,10 +22,8 @@ class SettingsSectionHeader extends StatelessWidget {
           const SizedBox(width: 10),
           Text(
             title,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: colors.primary,
-              fontWeight: FontWeight.w700,
-            ),
+            style: Theme.of(context).textTheme.titleSmall
+                ?.copyWith(color: colors.primary, fontWeight: FontWeight.w700),
           ),
         ],
       ),

@@ -2,12 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+
 import '../models/models.dart';
 import '../models/location_quality_settings.dart';
 import '../models/impossible_zone.dart';
@@ -32,6 +34,7 @@ import '../widgets/compass_calibration.dart';
 import '../widgets/tracking_play_button.dart';
 import '../widgets/bluetooth_device_picker_dialog.dart';
 import '../services/widget_service.dart';
+
 import 'package:geohash_plus/geohash_plus.dart' as geohash;
 import 'package:usb_serial/usb_serial.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -47,7 +50,9 @@ import 'package:dio_cache_interceptor_file_store/dio_cache_interceptor_file_stor
 import 'package:flutter_map_heatmap/flutter_map_heatmap.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+
 import 'dart:typed_data';
+
 import 'debug_log_screen.dart';
 import 'debug_diagnostics_screen.dart';
 import 'session_history_screen.dart';
@@ -1309,9 +1314,8 @@ class _MapScreenState extends State<MapScreen> {
           bytes: utf8.encode(content),
         );
         _showSnackBar(
-          AppLocalizations.of(
-            context,
-          ).mapExportedSamples(samples.length, format.toUpperCase()),
+          AppLocalizations.of(context)
+              .mapExportedSamples(samples.length, format.toUpperCase()),
         );
       } else if (choice == 'share') {
         final directory = await getExternalStorageDirectory();
@@ -1663,9 +1667,8 @@ $placemarks  </Document>
             Text(AppLocalizations.of(ctx).mapLon(lon.toStringAsFixed(6))),
             Text(
               AppLocalizations.of(ctx).mapAddedOn(
-                DateFormat.yMMMd(
-                  Localizations.localeOf(ctx).toString(),
-                ).format(createdAt),
+                DateFormat.yMMMd(Localizations.localeOf(ctx).toString())
+                    .format(createdAt),
               ),
               style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
@@ -1857,9 +1860,9 @@ $placemarks  </Document>
                 : sample.pingSuccess == false
                 ? 'fail'
                 : 'gps',
-            DateFormat.MMMd(
-              Localizations.localeOf(ctx).toString(),
-            ).add_Hm().format(sample.timestamp),
+            DateFormat.MMMd(Localizations.localeOf(ctx).toString())
+                .add_Hm()
+                .format(sample.timestamp),
           ),
         ),
         actions: [
@@ -1893,9 +1896,8 @@ $placemarks  </Document>
       builder: (ctx) => AlertDialog(
         title: Text(AppLocalizations.of(ctx).mapDeleteCoverageCell),
         content: Text(
-          AppLocalizations.of(
-            ctx,
-          ).mapDeleteCoverageCellBody(total, coverage.id),
+          AppLocalizations.of(ctx)
+              .mapDeleteCoverageCellBody(total, coverage.id),
         ),
         actions: [
           TextButton(
@@ -2949,9 +2951,8 @@ $placemarks  </Document>
             width: 28,
             height: 28,
             child: Semantics(
-              label: AppLocalizations.of(
-                context,
-              ).mapApproxRadioPositionUncertainty(uncertaintyText),
+              label: AppLocalizations.of(context)
+                  .mapApproxRadioPositionUncertainty(uncertaintyText),
               button: true,
               child: GestureDetector(
                 onTap: () => _showSnackBar(
@@ -3360,9 +3361,8 @@ $placemarks  </Document>
                             vertical: 1,
                           ),
                           decoration: BoxDecoration(
-                            color: _getDuctingColor(
-                              _currentDuctingRisk,
-                            ).withValues(alpha: 0.15),
+                            color: _getDuctingColor(_currentDuctingRisk)
+                                .withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: _getDuctingColor(_currentDuctingRisk),
@@ -3639,9 +3639,8 @@ $placemarks  </Document>
                       AppLocalizations.of(context).mapUsbDeviceFallback,
                 ),
                 subtitle: Text(
-                  AppLocalizations.of(
-                    context,
-                  ).mapVidPid('${device.vid}', '${device.pid}'),
+                  AppLocalizations.of(context)
+                      .mapVidPid('${device.vid}', '${device.pid}'),
                 ),
                 onTap: () => Navigator.pop(context, device),
               );
@@ -3871,9 +3870,9 @@ $placemarks  </Document>
             _applySessionMapView(SessionMapView.session(session));
             _showSnackBar(
               AppLocalizations.of(context).mapShowingSessionFrom(
-                DateFormat.MMMd(
-                  Localizations.localeOf(context).toString(),
-                ).add_Hm().format(session.startTime),
+                DateFormat.MMMd(Localizations.localeOf(context).toString())
+                    .add_Hm()
+                    .format(session.startTime),
               ),
             );
           },
@@ -4214,9 +4213,8 @@ $placemarks  </Document>
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: _getDuctingColor(
-                        sample.ductingRisk!,
-                      ).withValues(alpha: 0.15),
+                      color: _getDuctingColor(sample.ductingRisk!)
+                          .withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
@@ -4303,14 +4301,12 @@ $placemarks  </Document>
             ),
             const SizedBox(height: 8),
             Text(
-              AppLocalizations.of(
-                context,
-              ).mapLat(repeater.position.latitude.toStringAsFixed(6)),
+              AppLocalizations.of(context)
+                  .mapLat(repeater.position.latitude.toStringAsFixed(6)),
             ),
             Text(
-              AppLocalizations.of(
-                context,
-              ).mapLon(repeater.position.longitude.toStringAsFixed(6)),
+              AppLocalizations.of(context)
+                  .mapLon(repeater.position.longitude.toStringAsFixed(6)),
             ),
             if (repeater.rssi != null) const SizedBox(height: 8),
             if (repeater.rssi != null)
@@ -4497,9 +4493,8 @@ $placemarks  </Document>
                 leading: const Icon(Icons.cell_tower, color: Colors.purple),
                 title: Text(
                   repeater.name ??
-                      AppLocalizations.of(
-                        context,
-                      ).mapRepeaterFallback(repeater.id),
+                      AppLocalizations.of(context)
+                          .mapRepeaterFallback(repeater.id),
                 ),
                 subtitle: Text(
                   '${repeater.position.latitude.toStringAsFixed(4)}, '
@@ -4571,9 +4566,8 @@ $placemarks  </Document>
                 ),
                 if (totalBatches > 1)
                   Text(
-                    AppLocalizations.of(
-                      context,
-                    ).mapUploadBatch(currentBatch, totalBatches),
+                    AppLocalizations.of(context)
+                        .mapUploadBatch(currentBatch, totalBatches),
                     style: const TextStyle(fontSize: 12),
                   ),
               ],
@@ -4653,9 +4647,8 @@ $placemarks  </Document>
               children: [
                 if (results.length > 1)
                   Text(
-                    AppLocalizations.of(
-                      context,
-                    ).mapUploadedToSites(successCount, results.length),
+                    AppLocalizations.of(context)
+                        .mapUploadedToSites(successCount, results.length),
                   ),
                 const SizedBox(height: 8),
                 ...results.entries.map((entry) {
@@ -4834,18 +4827,16 @@ $placemarks  </Document>
                                       AppLocalizations.of(ctx).mapDeleteSite,
                                     ),
                                     content: Text(
-                                      AppLocalizations.of(
-                                        ctx,
-                                      ).mapDeleteSiteConfirm(endpoint.name),
+                                      AppLocalizations.of(ctx)
+                                          .mapDeleteSiteConfirm(endpoint.name),
                                     ),
                                     actions: [
                                       TextButton(
                                         onPressed: () =>
                                             Navigator.pop(ctx, false),
                                         child: Text(
-                                          AppLocalizations.of(
-                                            ctx,
-                                          ).settingsCancel,
+                                          AppLocalizations.of(ctx)
+                                              .settingsCancel,
                                         ),
                                       ),
                                       TextButton(
@@ -4995,9 +4986,8 @@ $placemarks  </Document>
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    AppLocalizations.of(
-                      context,
-                    ).mapTilesEstimate(tileCount, estimatedMB),
+                    AppLocalizations.of(context)
+                        .mapTilesEstimate(tileCount, estimatedMB),
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   if (tileCount > 5000)
@@ -5075,9 +5065,8 @@ $placemarks  </Document>
                     if (context.mounted) Navigator.pop(context);
                     if (!downloadCancelled) {
                       _showSnackBar(
-                        AppLocalizations.of(
-                          context,
-                        ).mapDownloadedTiles(succeeded, totalTiles),
+                        AppLocalizations.of(context)
+                            .mapDownloadedTiles(succeeded, totalTiles),
                       );
                     }
                   });
@@ -5093,9 +5082,8 @@ $placemarks  </Document>
                   LinearProgressIndicator(value: progress),
                   const SizedBox(height: 12),
                   Text(
-                    AppLocalizations.of(
-                      context,
-                    ).mapTilesProgress(completed, totalTiles),
+                    AppLocalizations.of(context)
+                        .mapTilesProgress(completed, totalTiles),
                   ),
                 ],
               ),
@@ -5106,9 +5094,8 @@ $placemarks  </Document>
                     downloader.cancel();
                     Navigator.pop(context);
                     _showSnackBar(
-                      AppLocalizations.of(
-                        context,
-                      ).mapDownloadCancelled(completed),
+                      AppLocalizations.of(context)
+                          .mapDownloadCancelled(completed),
                     );
                   },
                   child: Text(AppLocalizations.of(context).settingsCancel),
@@ -5233,9 +5220,8 @@ $placemarks  </Document>
                 ),
                 title: Text(
                   name ??
-                      AppLocalizations.of(
-                        context,
-                      ).mapRepeaterFallback(displayId),
+                      AppLocalizations.of(context)
+                          .mapRepeaterFallback(displayId),
                 ),
                 subtitle: Text(
                   displayId,
@@ -5252,9 +5238,8 @@ $placemarks  </Document>
                   await _settingsService.setIncludeOnlyRepeaters(id);
                   _loadSamples();
                   _showSnackBar(
-                    AppLocalizations.of(
-                      context,
-                    ).mapShowingCoverageFrom(displayId),
+                    AppLocalizations.of(context)
+                        .mapShowingCoverageFrom(displayId),
                   );
                 },
               );
@@ -5412,9 +5397,8 @@ $placemarks  </Document>
         _showCommunityCoverage = true;
       });
       _showSnackBar(
-        AppLocalizations.of(
-          context,
-        ).mapDownloadedCoverageCells(coverage.length),
+        AppLocalizations.of(context)
+            .mapDownloadedCoverageCells(coverage.length),
       );
     } else {
       // Try loading from cache
@@ -5524,9 +5508,9 @@ $placemarks  </Document>
     final parsedLastUpdate = DateTime.tryParse(lastUpdate);
     final lastUpdateDisplay = parsedLastUpdate == null
         ? lastUpdate
-        : DateFormat.yMMMd(
-            Localizations.localeOf(context).toString(),
-          ).add_Hm().format(parsedLastUpdate.toLocal());
+        : DateFormat.yMMMd(Localizations.localeOf(context).toString())
+              .add_Hm()
+              .format(parsedLastUpdate.toLocal());
 
     showDialog(
       context: context,

@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:file_picker/file_picker.dart';
+
 import '../l10n/generated/app_localizations.dart';
 import '../services/debug_log_service.dart';
 
@@ -74,9 +76,8 @@ class _DebugLogScreenState extends State<DebugLogScreen> {
     try {
       final logs = _logService.logs;
       if (logs.isEmpty) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.debugLogNoLogsToExport)));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(l10n.debugLogNoLogsToExport)));
         return;
       }
 

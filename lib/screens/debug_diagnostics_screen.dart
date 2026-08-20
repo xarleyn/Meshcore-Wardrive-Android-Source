@@ -1,9 +1,12 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
+
 import '../l10n/generated/app_localizations.dart';
 import '../services/location_service.dart';
+
 import 'package:path_provider/path_provider.dart';
 
 /// Debug diagnostics screen for troubleshooting Samsung device issues
@@ -105,9 +108,8 @@ class _DebugDiagnosticsScreenState extends State<DebugDiagnosticsScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                AppLocalizations.of(
-                  context,
-                ).debugDiagnosticsErrorDeleting('$e'),
+                AppLocalizations.of(context)
+                    .debugDiagnosticsErrorDeleting('$e'),
               ),
             ),
           );
@@ -348,9 +350,8 @@ class _LogViewerScreen extends StatelessWidget {
             onPressed: () {
               Share.share(
                 content,
-                subject: AppLocalizations.of(
-                  context,
-                ).debugDiagnosticsShareSubjectWithFile(fileName),
+                subject: AppLocalizations.of(context)
+                    .debugDiagnosticsShareSubjectWithFile(fileName),
               );
             },
           ),

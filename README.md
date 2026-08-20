@@ -38,9 +38,9 @@ companion radio over USB or Bluetooth, and displays coverage on a Flutter map.
 
 ### Prerequisites
 
-- Flutter SDK (3.10.0 or higher)
+- Flutter SDK 3.47.1 or compatible (Dart 3.13)
 - Android Studio or VS Code with Flutter extensions
-- Android SDK with API level 21+
+- Android SDK with API level 24+
 - A MeshCore companion radio device (for testing)
 
 ### Installation
@@ -111,8 +111,8 @@ lib/
 
 ## Requirements
 
-- Flutter stable with a Dart SDK compatible with `pubspec.yaml`.
-- Android SDK and an Android device or emulator.
+- Flutter 3.47.1 (Dart 3.13) or a compatible stable SDK.
+- Android SDK (compile/target API 36, min API 24) and an Android device or emulator.
 - A physical MeshCore companion radio for LoRa workflows.
 
 ## Development

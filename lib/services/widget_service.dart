@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:home_widget/home_widget.dart';
+
 import '../l10n/app_locale.dart';
 import '../l10n/generated/app_localizations.dart';
 import 'settings_service.dart';
