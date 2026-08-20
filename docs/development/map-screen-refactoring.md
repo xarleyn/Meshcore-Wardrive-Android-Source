@@ -89,7 +89,9 @@ cohesive 200-400 line file over many tiny single-use wrappers.
 
 - [x] Extract sample, sample-cluster, coverage, repeater, repeater-list, and
   community-cell dialogs into standalone widgets.
-- [ ] Extract the remaining marker and workflow dialogs.
+- [x] Extract planned-marker, privacy-zone, and destructive confirmation
+  dialogs with typed results.
+- [ ] Extract the remaining workflow dialogs.
 - [x] Return typed results from repeater and endpoint dialogs instead of
   mutating screen state directly.
 - [x] Group upload endpoint editor dialogs with the upload feature UI.

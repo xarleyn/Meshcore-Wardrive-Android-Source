@@ -41,6 +41,7 @@ import 'map/layers/route_trail_layer.dart';
 import 'map/layers/sample_cluster_layer.dart';
 import 'map/layers/sample_heatmap_layer.dart';
 import 'map/dialogs/map_entity_dialogs.dart';
+import 'map/dialogs/marker_dialogs.dart';
 import 'map/dialogs/upload_endpoint_dialog.dart';
 import 'map/widgets/delete_mode_banner.dart';
 import 'map/widgets/map_action_buttons.dart';
@@ -1545,40 +1546,9 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _handleMapLongPress(LatLng point) async {
-    final controller = TextEditingController();
     final label = await showDialog<String>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(AppLocalizations.of(ctx).mapAddPlannedRepeater),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${point.latitude.toStringAsFixed(5)}, ${point.longitude.toStringAsFixed(5)}',
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: controller,
-              decoration: InputDecoration(
-                labelText: AppLocalizations.of(ctx).settingsLabelOptional,
-                hintText: AppLocalizations.of(ctx).mapPlannedRepeaterHint,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(AppLocalizations.of(ctx).settingsCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, controller.text),
-            child: Text(AppLocalizations.of(ctx).mapAddMarker),
-          ),
-        ],
-      ),
+      builder: (context) => AddPlannedMarkerDialog(position: point),
     );
 
     if (label != null) {
@@ -1593,7 +1563,7 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  void _showMarkerInfo(Map<String, dynamic> marker) {
+  void _showMarkerInfo(Map<String, dynamic> marker) async {
     final lat = marker['lat'] as double;
     final lon = marker['lon'] as double;
     final label = marker['label'] as String?;
@@ -1602,47 +1572,21 @@ class _MapScreenState extends State<MapScreen> {
       marker['created_at'] as int,
     );
 
-    showDialog(
+    final action = await showDialog<PlannedMarkerAction>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(label ?? AppLocalizations.of(ctx).mapPlannedRepeater),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(AppLocalizations.of(ctx).mapLat(lat.toStringAsFixed(6))),
-            Text(AppLocalizations.of(ctx).mapLon(lon.toStringAsFixed(6))),
-            Text(
-              AppLocalizations.of(ctx).mapAddedOn(
-                DateFormat.yMMMd(
-                  Localizations.localeOf(ctx).toString(),
-                ).format(createdAt),
-              ),
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              await DatabaseService().deleteMarker(id);
-              await _loadMarkers();
-              if (!mounted) return;
-              _showSnackBar(AppLocalizations.of(context).mapMarkerDeleted);
-            },
-            child: Text(
-              AppLocalizations.of(ctx).mapDelete,
-              style: const TextStyle(color: Colors.red),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(AppLocalizations.of(ctx).mapClose),
-          ),
-        ],
+      builder: (context) => PlannedMarkerInfoDialog(
+        latitude: lat,
+        longitude: lon,
+        label: label,
+        createdAt: createdAt,
       ),
     );
+
+    if (action != PlannedMarkerAction.delete) return;
+    await DatabaseService().deleteMarker(id);
+    await _loadMarkers();
+    if (!mounted) return;
+    _showSnackBar(AppLocalizations.of(context).mapMarkerDeleted);
   }
 
   // ============================================================================
@@ -1666,93 +1610,20 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _addPrivacyZone(LatLng center) async {
     final l10n = AppLocalizations.of(context);
-    final radiusOptions = [
-      {'label': l10n.settingsRadius500m, 'meters': 500.0},
-      {'label': l10n.settingsRadius1km, 'meters': 1000.0},
-      {'label': l10n.settingsRadius2km, 'meters': 2000.0},
-      {'label': l10n.settingsRadius5km, 'meters': 5000.0},
-    ];
-    double selectedRadius = 1000.0;
-    final labelController = TextEditingController();
-
-    final confirmed = await showDialog<bool>(
+    final draft = await showDialog<PrivacyZoneDraft>(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          title: Text(l10n.mapAddPrivacyZone),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.settingsAddImpossibleZoneCenter(
-                  center.latitude.toStringAsFixed(5),
-                  center.longitude.toStringAsFixed(5),
-                ),
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                l10n.mapPrivacyZoneBlurb,
-                style: const TextStyle(fontSize: 12),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: labelController,
-                decoration: InputDecoration(
-                  labelText: l10n.settingsLabelOptional,
-                  hintText: l10n.mapPrivacyZoneHint,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                l10n.settingsRadius,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                ),
-              ),
-              RadioGroup<double>(
-                groupValue: selectedRadius,
-                onChanged: (v) {
-                  if (v != null) setDialogState(() => selectedRadius = v);
-                },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    for (final opt in radiusOptions)
-                      RadioListTile<double>(
-                        title: Text(opt['label'] as String),
-                        value: opt['meters'] as double,
-                        dense: true,
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(l10n.settingsCancel),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(l10n.settingsAddZone),
-            ),
-          ],
-        ),
-      ),
+      builder: (context) => AddPrivacyZoneDialog(center: center),
     );
 
-    if (confirmed == true) {
+    if (draft != null) {
       await DatabaseService().addPrivacyZone(
         center.latitude,
         center.longitude,
-        selectedRadius,
-        labelController.text.isEmpty ? null : labelController.text,
+        draft.radiusMeters,
+        draft.label,
       );
       await _loadPrivacyZones();
+      if (!mounted) return;
       _showSnackBar(l10n.mapPrivacyZoneAdded);
     }
   }
@@ -1764,34 +1635,7 @@ class _MapScreenState extends State<MapScreen> {
   void _deleteSample(Sample sample) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(AppLocalizations.of(ctx).mapDeleteSample),
-        content: Text(
-          AppLocalizations.of(ctx).mapDeleteSampleConfirm(
-            sample.pingSuccess == true
-                ? 'success'
-                : sample.pingSuccess == false
-                ? 'fail'
-                : 'gps',
-            DateFormat.MMMd(
-              Localizations.localeOf(ctx).toString(),
-            ).add_Hm().format(sample.timestamp),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(AppLocalizations.of(ctx).settingsCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              AppLocalizations.of(ctx).mapDelete,
-              style: const TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
+      builder: (context) => DeleteSampleConfirmationDialog(sample: sample),
     );
 
     if (confirmed == true) {
@@ -1804,30 +1648,10 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _deleteCoverageCell(Coverage coverage) async {
-    final total = (coverage.received + coverage.lost).round();
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(AppLocalizations.of(ctx).mapDeleteCoverageCell),
-        content: Text(
-          AppLocalizations.of(
-            ctx,
-          ).mapDeleteCoverageCellBody(total, coverage.id),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(AppLocalizations.of(ctx).settingsCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              AppLocalizations.of(ctx).mapDeleteAll,
-              style: const TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
+      builder: (context) =>
+          DeleteCoverageConfirmationDialog(coverage: coverage),
     );
 
     if (confirmed == true) {
