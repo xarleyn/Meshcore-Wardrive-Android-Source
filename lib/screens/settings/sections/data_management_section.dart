@@ -17,7 +17,6 @@ extension _DataManagementSettingsSection on _MapScreenState {
         leading: const Icon(Icons.analytics),
         trailing: const Icon(Icons.arrow_forward),
         onTap: () {
-          Navigator.pop(context);
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -36,7 +35,6 @@ extension _DataManagementSettingsSection on _MapScreenState {
         leading: const Icon(Icons.emoji_events),
         trailing: const Icon(Icons.arrow_forward),
         onTap: () {
-          Navigator.pop(context);
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const AchievementsScreen()),
@@ -49,7 +47,6 @@ extension _DataManagementSettingsSection on _MapScreenState {
         leading: const Icon(Icons.devices),
         trailing: const Icon(Icons.arrow_forward),
         onTap: () {
-          Navigator.pop(context);
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -68,7 +65,6 @@ extension _DataManagementSettingsSection on _MapScreenState {
         leading: const Icon(Icons.cloud_download),
         trailing: const Icon(Icons.arrow_forward),
         onTap: () {
-          Navigator.pop(context);
           _downloadCommunityCoverage();
         },
       ),
@@ -96,7 +92,6 @@ extension _DataManagementSettingsSection on _MapScreenState {
               )
             : const Icon(Icons.arrow_forward),
         onTap: () {
-          Navigator.pop(context);
           _openSessionHistory();
         },
       ),
@@ -106,7 +101,6 @@ extension _DataManagementSettingsSection on _MapScreenState {
         leading: const Icon(Icons.upload),
         trailing: const Icon(Icons.arrow_forward),
         onTap: () {
-          Navigator.pop(context);
           _exportData();
         },
       ),
@@ -116,7 +110,6 @@ extension _DataManagementSettingsSection on _MapScreenState {
         leading: const Icon(Icons.download),
         trailing: const Icon(Icons.arrow_forward),
         onTap: () {
-          Navigator.pop(context);
           _importData();
         },
       ),
@@ -125,7 +118,6 @@ extension _DataManagementSettingsSection on _MapScreenState {
         subtitle: Text(l10n.settingsShareCoverageMapSubtitle),
         leading: const Icon(Icons.share),
         onTap: () {
-          Navigator.pop(context);
           _shareCoverageMap();
         },
       ),
@@ -153,7 +145,6 @@ extension _DataManagementSettingsSection on _MapScreenState {
               )
             : const Icon(Icons.arrow_forward),
         onTap: () {
-          Navigator.pop(context);
           _showRepeaterFilterPicker();
         },
       ),
@@ -231,7 +222,7 @@ extension _DataManagementSettingsSection on _MapScreenState {
         leading: const Icon(Icons.location_searching),
         trailing: const Icon(Icons.arrow_forward),
         onTap: () {
-          Navigator.pop(context);
+          _closeSettingsPages(context);
           _findCoverageGaps();
         },
       ),
@@ -240,7 +231,7 @@ extension _DataManagementSettingsSection on _MapScreenState {
         subtitle: Text(l10n.settingsDeleteModeSubtitle),
         leading: const Icon(Icons.delete_sweep, color: Colors.orange),
         onTap: () {
-          Navigator.pop(context);
+          _closeSettingsPages(context);
           _updateMapState(() {
             _deleteMode = true;
           });
@@ -298,7 +289,6 @@ extension _DataManagementSettingsSection on _MapScreenState {
         leading: const Icon(Icons.shield, color: Colors.blueGrey),
         trailing: const Icon(Icons.arrow_forward),
         onTap: () async {
-          Navigator.pop(context);
           // Use current position or map center
           final center = _currentPosition ?? _mapController.camera.center;
           await _addPrivacyZone(center);
@@ -347,7 +337,6 @@ extension _DataManagementSettingsSection on _MapScreenState {
         subtitle: Text(l10n.settingsClearMapSubtitle),
         leading: const Icon(Icons.delete, color: Colors.red),
         onTap: () {
-          Navigator.pop(context);
           _clearData();
         },
       ),
@@ -356,7 +345,6 @@ extension _DataManagementSettingsSection on _MapScreenState {
         subtitle: Text(l10n.settingsDownloadOfflineTilesSubtitle),
         leading: const Icon(Icons.download_for_offline),
         onTap: () {
-          Navigator.pop(context);
           _showOfflineTileDownload();
         },
       ),

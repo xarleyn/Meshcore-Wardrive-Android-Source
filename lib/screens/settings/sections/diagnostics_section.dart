@@ -14,7 +14,6 @@ extension _DiagnosticsSettingsSection on _MapScreenState {
         leading: const Icon(Icons.health_and_safety),
         trailing: const Icon(Icons.arrow_forward),
         onTap: () {
-          Navigator.pop(context);
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -29,7 +28,6 @@ extension _DiagnosticsSettingsSection on _MapScreenState {
         leading: const Icon(Icons.show_chart),
         trailing: const Icon(Icons.arrow_forward),
         onTap: () {
-          Navigator.pop(context);
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -44,7 +42,6 @@ extension _DiagnosticsSettingsSection on _MapScreenState {
         leading: const Icon(Icons.bug_report),
         trailing: const Icon(Icons.arrow_forward),
         onTap: () {
-          Navigator.pop(context);
           _openDebugDiagnostics();
         },
       ),

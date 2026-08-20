@@ -123,7 +123,6 @@ extension _AppDeviceSettingsSection on _MapScreenState {
         leading: const Icon(Icons.explore),
         trailing: const Icon(Icons.chevron_right),
         onTap: () {
-          Navigator.pop(context);
           _openCompassCalibration(snoozeOnDismiss: false);
         },
       ),
@@ -132,7 +131,6 @@ extension _AppDeviceSettingsSection on _MapScreenState {
         subtitle: Text(_getInterfaceThemeModeText()),
         trailing: const Icon(Icons.brightness_6),
         onTap: () {
-          Navigator.pop(context);
           _showInterfaceThemeSelector();
         },
       ),
@@ -141,7 +139,6 @@ extension _AppDeviceSettingsSection on _MapScreenState {
         subtitle: Text(_getMapThemeModeText()),
         trailing: const Icon(Icons.map_outlined),
         onTap: () {
-          Navigator.pop(context);
           _showMapThemeSelector();
         },
       ),
@@ -150,7 +147,6 @@ extension _AppDeviceSettingsSection on _MapScreenState {
         subtitle: Text(_getAppLocalePreferenceText()),
         trailing: const Icon(Icons.language),
         onTap: () {
-          Navigator.pop(context);
           _showLanguageSelector();
         },
       ),
@@ -165,7 +161,6 @@ extension _AppDeviceSettingsSection on _MapScreenState {
           leading: const Icon(Icons.cell_tower),
           trailing: const Icon(Icons.search),
           onTap: () {
-            Navigator.pop(context);
             _scanForRepeaters();
           },
         ),
@@ -175,7 +170,6 @@ extension _AppDeviceSettingsSection on _MapScreenState {
           subtitle: Text(l10n.settingsRefreshContactListSubtitle),
           leading: const Icon(Icons.refresh),
           onTap: () {
-            Navigator.pop(context);
             _refreshContacts();
           },
         ),

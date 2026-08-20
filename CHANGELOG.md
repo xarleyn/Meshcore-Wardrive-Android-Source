@@ -69,6 +69,8 @@
   in map settings without disabling its calculation.
 
 ### Fixed
+- Dialogs, bottom sheets, file pickers, and nested screens opened from a
+  Settings category now return to that category instead of the overview.
 - Community coverage tiles now use exact geohash bounds and the same LOD
   precision as local coverage, so they line up with the user's grid. They stay
   visible regardless of the session filter and are hidden only by their own

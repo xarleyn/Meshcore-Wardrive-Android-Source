@@ -14,7 +14,6 @@ extension _AboutSettingsSection on _MapScreenState {
         leading: const Icon(Icons.system_update),
         trailing: const Icon(Icons.arrow_forward),
         onTap: () {
-          Navigator.pop(context);
           _checkForUpdates();
         },
       ),
@@ -24,7 +23,6 @@ extension _AboutSettingsSection on _MapScreenState {
         leading: const Icon(Icons.code),
         trailing: const Icon(Icons.open_in_new),
         onTap: () {
-          Navigator.pop(context);
           _openGitHub();
         },
       ),

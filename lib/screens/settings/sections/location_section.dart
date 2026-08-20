@@ -53,7 +53,6 @@ extension _LocationSettingsSection on _MapScreenState {
         leading: const Icon(Icons.cloud),
         trailing: const Icon(Icons.arrow_forward),
         onTap: () {
-          Navigator.pop(context);
           Navigator.push(
             context,
             MaterialPageRoute(

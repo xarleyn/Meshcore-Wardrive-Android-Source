@@ -13,7 +13,6 @@ extension _OnlineMapSettingsSection on _MapScreenState {
         subtitle: Text(l10n.settingsUploadDataSubtitle),
         leading: const Icon(Icons.cloud_upload),
         onTap: () {
-          Navigator.pop(context);
           _uploadSamples();
         },
       ),
@@ -23,7 +22,6 @@ extension _OnlineMapSettingsSection on _MapScreenState {
         leading: const Icon(Icons.dns),
         trailing: const Icon(Icons.arrow_forward),
         onTap: () {
-          Navigator.pop(context);
           _manageUploadSites();
         },
       ),

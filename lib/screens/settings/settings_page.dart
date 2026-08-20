@@ -15,6 +15,12 @@ class _SettingsCategory {
   final _SettingsCategoryBuilder builder;
 }
 
+void _closeSettingsPages(BuildContext context) {
+  final navigator = Navigator.of(context);
+  navigator.pop();
+  navigator.pop();
+}
+
 extension _SettingsPageNavigation on _MapScreenState {
   void _showSettings() {
     Navigator.of(context).push(

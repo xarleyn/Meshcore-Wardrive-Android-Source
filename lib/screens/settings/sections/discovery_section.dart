@@ -52,7 +52,6 @@ extension _DiscoverySettingsSection on _MapScreenState {
         ),
         trailing: const Icon(Icons.edit),
         onTap: () {
-          Navigator.pop(context);
           _setIgnoredRepeater();
         },
       ),
@@ -65,7 +64,6 @@ extension _DiscoverySettingsSection on _MapScreenState {
         ),
         trailing: const Icon(Icons.edit),
         onTap: () {
-          Navigator.pop(context);
           _setIncludeOnlyRepeaters();
         },
       ),
@@ -115,7 +113,6 @@ extension _DiscoverySettingsSection on _MapScreenState {
           subtitle: Text(_getPingIntervalDescription()),
           trailing: const Icon(Icons.tune),
           onTap: () {
-            Navigator.pop(context);
             _setPingInterval();
           },
         ),
@@ -151,7 +148,6 @@ extension _DiscoverySettingsSection on _MapScreenState {
         subtitle: Text(_getCoverageResolutionDescription()),
         trailing: const Icon(Icons.grid_on),
         onTap: () {
-          Navigator.pop(context);
           _setCoverageResolution();
         },
       ),

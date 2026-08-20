@@ -13,7 +13,6 @@ extension _BackupSettingsSection on _MapScreenState {
         subtitle: Text(l10n.settingsExportSettingsSubtitle),
         leading: const Icon(Icons.upload_file),
         onTap: () {
-          Navigator.pop(context);
           _exportSettings();
         },
       ),
@@ -22,7 +21,6 @@ extension _BackupSettingsSection on _MapScreenState {
         subtitle: Text(l10n.settingsImportSettingsSubtitle),
         leading: const Icon(Icons.download),
         onTap: () {
-          Navigator.pop(context);
           _importSettings();
         },
       ),

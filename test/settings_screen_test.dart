@@ -136,10 +136,31 @@ void main() {
                                   ListView(
                                     controller: scrollController,
                                     padding: const EdgeInsets.all(16),
-                                    children: const [
+                                    children: [
                                       SettingsContentCard(
                                         children: [
-                                          ListTile(title: Text('Show cells')),
+                                          ListTile(
+                                            title: const Text('Show cells'),
+                                            onTap: () {
+                                              showModalBottomSheet<void>(
+                                                context: context,
+                                                builder: (context) => SafeArea(
+                                                  child: ListTile(
+                                                    title: const Text(
+                                                      'Display options',
+                                                    ),
+                                                    trailing: TextButton(
+                                                      onPressed: () =>
+                                                          Navigator.pop(
+                                                            context,
+                                                          ),
+                                                      child: const Text('Done'),
+                                                    ),
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          ),
                                         ],
                                       ),
                                     ],
@@ -160,6 +181,16 @@ void main() {
     expect(find.text('Map display'), findsOneWidget);
 
     await tester.tap(find.text('Map display'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SettingsContentCard), findsOneWidget);
+    expect(find.text('Show cells'), findsOneWidget);
+
+    await tester.tap(find.text('Show cells'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Display options'), findsOneWidget);
+    await tester.tap(find.text('Done'));
     await tester.pumpAndSettle();
 
     expect(find.byType(SettingsContentCard), findsOneWidget);
