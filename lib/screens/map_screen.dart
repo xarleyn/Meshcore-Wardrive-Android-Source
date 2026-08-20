@@ -43,6 +43,7 @@ import 'map/layers/sample_heatmap_layer.dart';
 import 'map/dialogs/map_entity_dialogs.dart';
 import 'map/dialogs/map_workflow_dialogs.dart';
 import 'map/dialogs/marker_dialogs.dart';
+import 'map/dialogs/offline_tile_dialogs.dart';
 import 'map/dialogs/upload_endpoint_dialog.dart';
 import 'map/widgets/delete_mode_banner.dart';
 import 'map/widgets/map_action_buttons.dart';
@@ -3322,99 +3323,13 @@ class _MapScreenState extends State<MapScreen> {
     final currentZoom = _mapController.camera.zoom.floor();
     final isDarkMode = _usesDarkMapTiles(context);
 
-    int minZoom = currentZoom;
-    int maxZoom = (currentZoom + 3).clamp(0, 18);
-
-    final result = await showDialog<Map<String, int>>(
+    final options = await showDialog<OfflineTileDownloadOptions>(
       context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            final tileCount = TileDownloadService.estimateTileCount(
-              bounds.southWest,
-              bounds.northEast,
-              minZoom,
-              maxZoom,
-            );
-            final estimatedMB = (tileCount * 15 / 1024).toStringAsFixed(
-              1,
-            ); // ~15KB per tile
-
-            return AlertDialog(
-              title: Text(
-                AppLocalizations.of(context).settingsDownloadOfflineTiles,
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(AppLocalizations.of(context).mapDownloadTilesBlurb),
-                  const SizedBox(height: 16),
-                  Text(AppLocalizations.of(context).mapMinZoom('$minZoom')),
-                  Slider(
-                    value: minZoom.toDouble(),
-                    min: 3,
-                    max: 18,
-                    divisions: 15,
-                    label: '$minZoom',
-                    onChanged: (v) {
-                      setDialogState(() {
-                        minZoom = v.round();
-                        if (maxZoom < minZoom) maxZoom = minZoom;
-                      });
-                    },
-                  ),
-                  Text(AppLocalizations.of(context).mapMaxZoom('$maxZoom')),
-                  Slider(
-                    value: maxZoom.toDouble(),
-                    min: 3,
-                    max: 18,
-                    divisions: 15,
-                    label: '$maxZoom',
-                    onChanged: (v) {
-                      setDialogState(() {
-                        maxZoom = v.round();
-                        if (minZoom > maxZoom) minZoom = maxZoom;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    AppLocalizations.of(
-                      context,
-                    ).mapTilesEstimate(tileCount, estimatedMB),
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  if (tileCount > 5000)
-                    Text(
-                      AppLocalizations.of(context).mapLargeDownloadWarning,
-                      style: const TextStyle(
-                        color: Colors.orange,
-                        fontSize: 12,
-                      ),
-                    ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(AppLocalizations.of(context).settingsCancel),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.pop(context, {
-                    'minZoom': minZoom,
-                    'maxZoom': maxZoom,
-                  }),
-                  child: Text(AppLocalizations.of(context).mapDownload),
-                ),
-              ],
-            );
-          },
-        );
-      },
+      builder: (context) =>
+          OfflineTileDownloadDialog(bounds: bounds, initialZoom: currentZoom),
     );
 
-    if (result == null || !mounted) return;
+    if (options == null || !mounted) return;
 
     final urlTemplate = isDarkMode
         ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
@@ -3426,86 +3341,35 @@ class _MapScreenState extends State<MapScreen> {
     final totalTiles = TileDownloadService.estimateTileCount(
       bounds.southWest,
       bounds.northEast,
-      result['minZoom']!,
-      result['maxZoom']!,
+      options.minZoom,
+      options.maxZoom,
     );
 
-    // Show progress dialog
-    bool downloadCancelled = false;
     if (!mounted) return;
-    showDialog(
+    final outcome = await showDialog<OfflineTileDownloadOutcome>(
       context: context,
       barrierDismissible: false,
-      builder: (context) {
-        int completed = 0;
-        return StatefulBuilder(
-          builder: (context, setProgressState) {
-            // Start download on first build
-            if (completed == 0) {
-              downloader
-                  .downloadTiles(
-                    sw: bounds.southWest,
-                    ne: bounds.northEast,
-                    minZoom: result['minZoom']!,
-                    maxZoom: result['maxZoom']!,
-                    urlTemplate: urlTemplate,
-                    onProgress: (done, total) {
-                      if (context.mounted) {
-                        setProgressState(() {
-                          completed = done;
-                        });
-                      }
-                    },
-                  )
-                  .then((succeeded) {
-                    if (context.mounted) Navigator.pop(context);
-                    if (!downloadCancelled) {
-                      if (!mounted) return;
-                      _showSnackBar(
-                        AppLocalizations.of(
-                          this.context,
-                        ).mapDownloadedTiles(succeeded, totalTiles),
-                      );
-                    }
-                  });
-            }
-
-            final progress = totalTiles > 0 ? completed / totalTiles : 0.0;
-
-            return AlertDialog(
-              title: Text(AppLocalizations.of(context).mapDownloadingTiles),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  LinearProgressIndicator(value: progress),
-                  const SizedBox(height: 12),
-                  Text(
-                    AppLocalizations.of(
-                      context,
-                    ).mapTilesProgress(completed, totalTiles),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    downloadCancelled = true;
-                    downloader.cancel();
-                    Navigator.pop(context);
-                    _showSnackBar(
-                      AppLocalizations.of(
-                        context,
-                      ).mapDownloadCancelled(completed),
-                    );
-                  },
-                  child: Text(AppLocalizations.of(context).settingsCancel),
-                ),
-              ],
-            );
-          },
-        );
-      },
+      builder: (context) => OfflineTileDownloadProgressDialog(
+        totalTiles: totalTiles,
+        download: (onProgress) => downloader.downloadTiles(
+          sw: bounds.southWest,
+          ne: bounds.northEast,
+          minZoom: options.minZoom,
+          maxZoom: options.maxZoom,
+          urlTemplate: urlTemplate,
+          onProgress: onProgress,
+        ),
+        onCancel: downloader.cancel,
+      ),
     );
+
+    if (outcome == null || !mounted) return;
+    final l10n = AppLocalizations.of(context);
+    if (outcome.cancelled) {
+      _showSnackBar(l10n.mapDownloadCancelled(outcome.completed));
+    } else {
+      _showSnackBar(l10n.mapDownloadedTiles(outcome.succeeded, totalTiles));
+    }
   }
 
   Future<void> _shareCoverageMap() async {
