@@ -41,6 +41,7 @@ import 'map/layers/route_trail_layer.dart';
 import 'map/layers/sample_cluster_layer.dart';
 import 'map/layers/sample_heatmap_layer.dart';
 import 'map/dialogs/map_entity_dialogs.dart';
+import 'map/dialogs/map_workflow_dialogs.dart';
 import 'map/dialogs/marker_dialogs.dart';
 import 'map/dialogs/upload_endpoint_dialog.dart';
 import 'map/widgets/delete_mode_banner.dart';
@@ -902,24 +903,10 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<bool?> _confirmSaveEmptySession() {
-    final l10n = AppLocalizations.of(context);
     return showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.mapSessionEmptyTitle),
-        content: Text(l10n.mapSessionEmptyBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.mapDontSave),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.settingsSave),
-          ),
-        ],
-      ),
+      builder: (context) => const SaveEmptySessionDialog(),
     );
   }
 
@@ -1138,20 +1125,8 @@ class _MapScreenState extends State<MapScreen> {
     if (!mounted) return false;
     return await showDialog<bool>(
           context: context,
-          builder: (context) => AlertDialog(
-            title: Text(title),
-            content: Text(message),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text(AppLocalizations.of(context).mapNotNow),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: Text(AppLocalizations.of(context).mapContinue),
-              ),
-            ],
-          ),
+          builder: (context) =>
+              ContinueRequestDialog(title: title, message: message),
         ) ??
         false;
   }
@@ -1165,19 +1140,10 @@ class _MapScreenState extends State<MapScreen> {
     if (!mounted) return false;
     final shouldOpen = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(AppLocalizations.of(context).mapNotNow),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(actionLabel),
-          ),
-        ],
+      builder: (context) => OpenSettingsDialog(
+        title: title,
+        message: message,
+        actionLabel: actionLabel,
       ),
     );
     if (shouldOpen != true) return false;
@@ -1188,24 +1154,7 @@ class _MapScreenState extends State<MapScreen> {
     final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.mapClearMapHistoryTitle),
-        content: Text(
-          l10n.mapClearMapHistoryBody(_sampleCount),
-          style: const TextStyle(fontSize: 14),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.settingsCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(l10n.mapDeleteAll),
-          ),
-        ],
-      ),
+      builder: (context) => ClearMapHistoryDialog(sampleCount: _sampleCount),
     );
 
     if (confirmed == true) {
@@ -1217,68 +1166,19 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _exportData() async {
     // Ask user for export format
-    final format = await showDialog<String>(
+    final format = await showDialog<SampleExportFormat>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context).mapExportFormat),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.code),
-              title: const Text('JSON'),
-              subtitle: Text(
-                AppLocalizations.of(context).mapExportJsonSubtitle,
-              ),
-              onTap: () => Navigator.pop(context, 'json'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.table_chart),
-              title: const Text('CSV'),
-              subtitle: Text(AppLocalizations.of(context).mapExportCsvSubtitle),
-              onTap: () => Navigator.pop(context, 'csv'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.route),
-              title: const Text('GPX'),
-              subtitle: Text(AppLocalizations.of(context).mapExportGpxSubtitle),
-              onTap: () => Navigator.pop(context, 'gpx'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.map),
-              title: const Text('KML'),
-              subtitle: Text(AppLocalizations.of(context).mapExportKmlSubtitle),
-              onTap: () => Navigator.pop(context, 'kml'),
-            ),
-          ],
-        ),
-      ),
+      builder: (context) => const SampleExportFormatDialog(),
     );
 
     if (format == null) return;
 
     // Ask save or share
     if (!mounted) return;
-    final choice = await showDialog<String>(
+    final choice = await showDialog<ExportDestination>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          AppLocalizations.of(context).mapExportAs(format.toUpperCase()),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, 'save'),
-            child: Text(AppLocalizations.of(context).mapSaveToFolder),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, 'share'),
-            child: Text(AppLocalizations.of(context).mapShare),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context).settingsCancel),
-          ),
-        ],
+      builder: (context) => ExportDestinationDialog(
+        title: AppLocalizations.of(context).mapExportAs(format.displayName),
       ),
     );
 
@@ -1292,22 +1192,22 @@ class _MapScreenState extends State<MapScreen> {
       String extension;
 
       switch (format) {
-        case 'csv':
+        case SampleExportFormat.csv:
           content = SampleExport.buildCsv(samples);
           extension = 'csv';
           fileName = 'meshcore_export_$timestamp.csv';
           break;
-        case 'gpx':
+        case SampleExportFormat.gpx:
           content = SampleExport.buildGpx(samples);
           extension = 'gpx';
           fileName = 'meshcore_export_$timestamp.gpx';
           break;
-        case 'kml':
+        case SampleExportFormat.kml:
           content = SampleExport.buildKml(samples);
           extension = 'kml';
           fileName = 'meshcore_export_$timestamp.kml';
           break;
-        default:
+        case SampleExportFormat.json:
           // Include discovered repeater contacts in the export
           final repeaterJsonList = _repeaters
               .where(
@@ -1324,7 +1224,7 @@ class _MapScreenState extends State<MapScreen> {
           fileName = 'meshcore_export_$timestamp.json';
       }
 
-      if (choice == 'save') {
+      if (choice == ExportDestination.save) {
         if (!mounted) return;
         await FilePicker.platform.saveFile(
           dialogTitle: AppLocalizations.of(context).mapSaveExport,
@@ -1337,9 +1237,9 @@ class _MapScreenState extends State<MapScreen> {
         _showSnackBar(
           AppLocalizations.of(
             context,
-          ).mapExportedSamples(samples.length, format.toUpperCase()),
+          ).mapExportedSamples(samples.length, format.displayName),
         );
-      } else if (choice == 'share') {
+      } else if (choice == ExportDestination.share) {
         final directory = await getExternalStorageDirectory();
         final file = File('${directory!.path}/$fileName');
         await file.writeAsString(content);
@@ -1429,30 +1329,16 @@ class _MapScreenState extends State<MapScreen> {
 
       // Ask save or share
       if (!mounted) return;
-      final choice = await showDialog<String>(
+      final choice = await showDialog<ExportDestination>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: Text(AppLocalizations.of(context).settingsExportSettings),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, 'save'),
-              child: Text(AppLocalizations.of(context).mapSaveToFolder),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, 'share'),
-              child: Text(AppLocalizations.of(context).mapShare),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(AppLocalizations.of(context).settingsCancel),
-            ),
-          ],
+        builder: (context) => ExportDestinationDialog(
+          title: AppLocalizations.of(context).settingsExportSettings,
         ),
       );
 
       if (choice == null) return;
 
-      if (choice == 'save') {
+      if (choice == ExportDestination.save) {
         if (!mounted) return;
         await FilePicker.platform.saveFile(
           dialogTitle: AppLocalizations.of(context).mapSaveSettings,
@@ -1463,7 +1349,7 @@ class _MapScreenState extends State<MapScreen> {
         );
         if (!mounted) return;
         _showSnackBar(AppLocalizations.of(context).mapSettingsExported);
-      } else if (choice == 'share') {
+      } else if (choice == ExportDestination.share) {
         final dir = await getApplicationDocumentsDirectory();
         final file = File('${dir.path}/$fileName');
         await file.writeAsString(jsonString);
@@ -1494,20 +1380,7 @@ class _MapScreenState extends State<MapScreen> {
       if (!mounted) return;
       final confirmed = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: Text(AppLocalizations.of(context).settingsImportSettings),
-          content: Text(AppLocalizations.of(context).mapImportSettingsConfirm),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text(AppLocalizations.of(context).settingsCancel),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text(AppLocalizations.of(context).mapImport),
-            ),
-          ],
-        ),
+        builder: (context) => const ImportSettingsConfirmationDialog(),
       );
 
       if (confirmed != true) return;

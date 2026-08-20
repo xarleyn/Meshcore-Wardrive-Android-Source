@@ -91,6 +91,8 @@ cohesive 200-400 line file over many tiny single-use wrappers.
   community-cell dialogs into standalone widgets.
 - [x] Extract planned-marker, privacy-zone, and destructive confirmation
   dialogs with typed results.
+- [x] Extract permission, session, export, and settings-import decisions with
+  typed results.
 - [ ] Extract the remaining workflow dialogs.
 - [x] Return typed results from repeater and endpoint dialogs instead of
   mutating screen state directly.
