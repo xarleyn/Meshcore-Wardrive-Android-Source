@@ -137,7 +137,7 @@ extension _SettingsDialogs on _MapScreenState {
       });
       await _settingsService.setCoveragePrecision(precision);
       // Force reaggregation with new precision
-      _lastAggregatedSampleCount = -1;
+      _mapDataController.invalidate();
       await _loadSamples();
       _showSnackBar(
         l10n.settingsCoverageResolutionSet(_getCoverageResolutionDescription()),

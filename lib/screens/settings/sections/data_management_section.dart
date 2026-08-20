@@ -84,7 +84,7 @@ extension _DataManagementSettingsSection on _MapScreenState {
                     _sessionMapView = const SessionMapView.all();
                   });
                   setModalState(() {});
-                  _lastAggregatedSampleCount = -1; // Force reaggregation
+                  _mapDataController.invalidate();
                   _loadSamples();
                   _showSnackBar(l10n.settingsSessionFilterCleared);
                 },
@@ -164,14 +164,14 @@ extension _DataManagementSettingsSection on _MapScreenState {
                     _activeSourceFilter = null;
                   });
                   setModalState(() {});
-                  _lastAggregatedSampleCount = -1;
+                  _mapDataController.invalidate();
                   _loadSamples();
                   _showSnackBar(l10n.settingsSourceFilterCleared);
                 },
               )
             : const Icon(Icons.arrow_forward),
         onTap: () async {
-          final sources = await DatabaseService().getDistinctSources();
+          final sources = await _databaseService.getDistinctSources();
           if (sources.isEmpty) {
             _showSnackBar(l10n.settingsNoSourceTaggedData);
             return;
@@ -206,7 +206,7 @@ extension _DataManagementSettingsSection on _MapScreenState {
               _activeSourceFilter = picked;
             });
             setModalState(() {});
-            _lastAggregatedSampleCount = -1;
+            _mapDataController.invalidate();
             _loadSamples();
             if (picked != null) {
               _showSnackBar(l10n.settingsShowingDataFrom(picked));
@@ -273,7 +273,7 @@ extension _DataManagementSettingsSection on _MapScreenState {
                   );
                   if (confirmed == true) {
                     for (final m in _plannedMarkers) {
-                      await DatabaseService().deleteMarker(m['id'] as int);
+                      await _databaseService.deleteMarker(m['id'] as int);
                     }
                     await _loadMarkers();
                     setModalState(() {});
@@ -325,7 +325,7 @@ extension _DataManagementSettingsSection on _MapScreenState {
             );
             if (confirmed == true) {
               for (final z in _privacyZones) {
-                await DatabaseService().deletePrivacyZone(z['id'] as int);
+                await _databaseService.deletePrivacyZone(z['id'] as int);
               }
               await _loadPrivacyZones();
               _showSnackBar(l10n.settingsPrivacyZonesCleared);

@@ -48,6 +48,7 @@ import 'map/dialogs/map_workflow_dialogs.dart';
 import 'map/dialogs/marker_dialogs.dart';
 import 'map/dialogs/offline_tile_dialogs.dart';
 import 'map/dialogs/upload_endpoint_dialog.dart';
+import 'map/map_screen_controller.dart';
 import 'map/widgets/delete_mode_banner.dart';
 import 'map/widgets/map_action_buttons.dart';
 import 'map/widgets/map_control_panel.dart';
@@ -118,6 +119,7 @@ class _MapScreenState extends State<MapScreen> {
   // App version is imported from constants/app_version.dart
 
   final LocationService _locationService = LocationService();
+  final DatabaseService _databaseService = DatabaseService();
   final MapController _mapController = MapController();
   final UploadService _uploadService = UploadService();
   final SettingsService _settingsService = SettingsService();
@@ -127,24 +129,23 @@ class _MapScreenState extends State<MapScreen> {
 
   bool _isTracking = false;
   bool _isConnecting = false;
-  int _sampleCount = 0;
-  List<Sample> _samples = [];
-  AggregationResult? _aggregationResult;
+  late final MapScreenController _mapDataController;
+  int get _sampleCount => _mapDataController.sampleCount;
+  List<Sample> get _samples => _mapDataController.samples;
+  AggregationResult? get _aggregationResult => _mapDataController.aggregation;
+  List<Repeater> get _repeaters => _mapDataController.repeaters;
+  SessionMapView get _sessionMapView => _mapDataController.sessionView;
+  set _sessionMapView(SessionMapView view) =>
+      _mapDataController.setSessionView(view);
+  String? get _activeSourceFilter => _mapDataController.sourceFilter;
+  set _activeSourceFilter(String? source) =>
+      _mapDataController.setSourceFilter(source);
+
   double _mapLodZoom = 13;
   final LayerHitNotifier<Coverage> _coverageHitNotifier = ValueNotifier(null);
   final LayerHitNotifier<SampleCluster> _sampleHitNotifier = ValueNotifier(
     null,
   );
-  AggregationResult? _cachedLodAggregation;
-  int? _cachedCoverageLodPrecision;
-  bool? _cachedCoverageLodEnabled;
-  List<Coverage> _cachedLodCoverages = const [];
-  List<Edge> _cachedLodEdges = const [];
-  List<Sample>? _cachedSampleLodSource;
-  int? _cachedSampleLodPrecision;
-  String? _cachedSampleLodFilter;
-  List<SampleCluster> _cachedSampleClusters = const [];
-
   String _colorMode = 'quality';
   bool _showSamples = false;
   bool _showGpsSamples = true; // Show GPS-only samples (null pingSuccess)
@@ -160,9 +161,6 @@ class _MapScreenState extends State<MapScreen> {
   bool _filterEdgesByWhitelist = false; // Whether to apply whitelist to edges
   double _pingIntervalMeters = 805.0; // Default 0.5 miles
   int _coveragePrecision = 7; // Default precision 7 (~150m squares)
-
-  // Repeaters
-  List<Repeater> _repeaters = [];
 
   LatLng? _currentPosition;
   InitialMapCamera? _sampleMapCamera;
@@ -239,9 +237,6 @@ class _MapScreenState extends State<MapScreen> {
   // Route trail
   bool _showRouteTrail = false;
 
-  // Session filter
-  SessionMapView _sessionMapView = const SessionMapView.all();
-
   // Offline tile cache
   CacheStore? _tileCacheStore;
 
@@ -252,13 +247,6 @@ class _MapScreenState extends State<MapScreen> {
   bool _showHeatmap = false;
   final StreamController<void> _heatmapRebuildStream =
       StreamController.broadcast();
-
-  // Aggregation cache - skip recomputation when nothing changed
-  int _lastAggregatedSampleCount = -1;
-  int _lastAggregatedRepeaterCount = -1;
-
-  // Source filter for multi-device wardrive
-  String? _activeSourceFilter;
 
   // Auto-follow throttle
   DateTime _lastAutoFollowMove = DateTime.now();
@@ -322,6 +310,9 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
+    _mapDataController = MapScreenController(
+      store: DatabaseMapDataStore(_databaseService),
+    );
     _initialize();
   }
 
@@ -497,7 +488,7 @@ class _MapScreenState extends State<MapScreen> {
     AchievementService().checkAndUnlock();
 
     // Load known repeater IDs from DB so only truly new ones trigger alerts
-    final knownIds = await DatabaseService().getDistinctRepeaterIds();
+    final knownIds = await _databaseService.getDistinctRepeaterIds();
     await _locationService.loraCompanion.loadKnownRepeaterIds(knownIds);
 
     // Load alert toggle settings
@@ -782,74 +773,30 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> _loadSamples() async {
-    final count = await _locationService.getSampleCount();
     final loraService = _locationService.loraCompanion;
     final discoveredRepeaters = loraService.discoveredRepeaters;
     final isConnected = loraService.isDeviceConnected;
     final connType = loraService.connectionType;
+    final dataChanged = await _mapDataController.refresh(
+      discoveredRepeaters: discoveredRepeaters,
+      coveragePrecision: _coveragePrecision,
+    );
+    if (!mounted) return;
 
-    // Skip expensive aggregation if sample count and repeater count haven't changed
-    final needsReaggregation =
-        count != _lastAggregatedSampleCount ||
-        discoveredRepeaters.length != _lastAggregatedRepeaterCount;
-
-    if (needsReaggregation) {
-      var samples = _sessionMapView.visibleSamples(
-        await _locationService.getAllSamples(),
-      );
-
-      // Apply source filter if active
-      if (_activeSourceFilter != null) {
-        samples = samples
-            .where((s) => s.source == _activeSourceFilter)
-            .toList();
-      }
-
-      // Aggregate data with user's chosen coverage precision and repeaters
-      final result = AggregationService.buildIndexes(
-        samples,
-        discoveredRepeaters,
-        coveragePrecision: _coveragePrecision,
-      );
-
-      // Combine repeaters from both LoRa service (live) and aggregation result (historical)
-      final Map<String, Repeater> repeaterMap = {};
-      for (final repeater in result.repeaters) {
-        repeaterMap[repeater.id] = repeater;
-      }
-      for (final repeater in discoveredRepeaters) {
-        repeaterMap[repeater.id] = repeater;
-      }
-
-      _lastAggregatedSampleCount = count;
-      _lastAggregatedRepeaterCount = discoveredRepeaters.length;
-
+    final newAutoPing = _locationService.isAutoPingEnabled;
+    final connectionChanged =
+        _loraConnected != isConnected ||
+        _connectionType != connType ||
+        _autoPingEnabled != newAutoPing;
+    if (dataChanged || connectionChanged) {
       setState(() {
-        _samples = samples;
-        _sampleCount = count;
-        _aggregationResult = result;
         _loraConnected = isConnected;
         _connectionType = connType;
-        _autoPingEnabled = _locationService.isAutoPingEnabled;
-        _repeaters = repeaterMap.values.toList();
-        _radioPositionEstimate = _calculateRadioPositionEstimate(
-          repeaterMap.values,
-        );
+        _autoPingEnabled = newAutoPing;
+        if (dataChanged) {
+          _radioPositionEstimate = _calculateRadioPositionEstimate(_repeaters);
+        }
       });
-    } else {
-      // Just update connection status and auto-ping state if changed
-      final newAutoPing = _locationService.isAutoPingEnabled;
-      if (_loraConnected != isConnected ||
-          _connectionType != connType ||
-          _autoPingEnabled != newAutoPing ||
-          _sampleCount != count) {
-        setState(() {
-          _sampleCount = count;
-          _loraConnected = isConnected;
-          _connectionType = connType;
-          _autoPingEnabled = newAutoPing;
-        });
-      }
     }
 
     // Update ducting badge if enabled
@@ -875,7 +822,7 @@ class _MapScreenState extends State<MapScreen> {
         ? '${_totalDistance.toStringAsFixed(1)} ${_distanceUnit == "miles" ? "mi" : "km"}'
         : '--';
     WidgetService.update(
-      sampleCount: count,
+      sampleCount: _sampleCount,
       isTracking: _isTracking,
       connectionLabel: connLabel,
       successRate: rate,
@@ -901,8 +848,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _applySessionMapView(SessionMapView view) {
-    _sessionMapView = view;
-    _lastAggregatedSampleCount = -1;
+    _mapDataController.setSessionView(view);
     _loadSamples();
   }
 
@@ -917,8 +863,7 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _handleStoppedSession(int? sessionId) async {
     if (sessionId == null || !mounted) return;
 
-    final db = DatabaseService();
-    final sessions = await db.getAllSessions();
+    final sessions = await _mapDataController.getSessions();
     if (!mounted) return;
     WSession? finalized;
     for (final session in sessions) {
@@ -943,8 +888,8 @@ class _MapScreenState extends State<MapScreen> {
       return;
     }
 
-    await db.deleteSession(sessionId);
-    final remaining = await db.getAllSessions();
+    await _mapDataController.deleteSession(sessionId);
+    final remaining = await _mapDataController.getSessions();
     if (!mounted) return;
     if (_sessionMapView.scope != SessionMapScope.session) return;
 
@@ -1220,7 +1165,7 @@ class _MapScreenState extends State<MapScreen> {
               )
               .map((r) => r.toJson())
               .toList();
-          final data = await DatabaseService().exportAllData(
+          final data = await _databaseService.exportAllData(
             repeaters: repeaterJsonList,
           );
           content = jsonEncode(data);
@@ -1285,7 +1230,7 @@ class _MapScreenState extends State<MapScreen> {
         final dynamic jsonData = jsonDecode(jsonString);
 
         // Use unified import that handles both old (array) and new (object) formats
-        final counts = await DatabaseService().importAllData(jsonData);
+        final counts = await _databaseService.importAllData(jsonData);
         totalSamplesImported += counts['samples'] ?? 0;
         totalSessionsImported += counts['sessions'] ?? 0;
 
@@ -1305,7 +1250,7 @@ class _MapScreenState extends State<MapScreen> {
       }
 
       // Reload map
-      _lastAggregatedSampleCount = -1;
+      _mapDataController.invalidate();
       await _loadSamples();
 
       if (!mounted) return;
@@ -1393,7 +1338,7 @@ class _MapScreenState extends State<MapScreen> {
 
       // Reload settings to apply changes
       await _loadSettings();
-      _lastAggregatedSampleCount = -1; // Force reaggregation
+      _mapDataController.invalidate();
       await _loadSamples();
 
       if (!mounted) return;
@@ -1416,7 +1361,7 @@ class _MapScreenState extends State<MapScreen> {
   // ============================================================================
 
   Future<void> _loadMarkers() async {
-    final markers = await DatabaseService().getAllMarkers();
+    final markers = await _databaseService.getAllMarkers();
     setState(() {
       _plannedMarkers = markers;
     });
@@ -1429,7 +1374,7 @@ class _MapScreenState extends State<MapScreen> {
     );
 
     if (label != null) {
-      await DatabaseService().addMarker(
+      await _databaseService.addMarker(
         point.latitude,
         point.longitude,
         label.isEmpty ? null : label,
@@ -1460,7 +1405,7 @@ class _MapScreenState extends State<MapScreen> {
     );
 
     if (action != PlannedMarkerAction.delete) return;
-    await DatabaseService().deleteMarker(id);
+    await _databaseService.deleteMarker(id);
     await _loadMarkers();
     if (!mounted) return;
     _showSnackBar(AppLocalizations.of(context).mapMarkerDeleted);
@@ -1471,14 +1416,14 @@ class _MapScreenState extends State<MapScreen> {
   // ============================================================================
 
   Future<void> _loadPrivacyZones() async {
-    final zones = await DatabaseService().getAllPrivacyZones();
+    final zones = await _databaseService.getAllPrivacyZones();
     setState(() {
       _privacyZones = zones;
     });
   }
 
   Future<void> _loadImpossibleZones() async {
-    final zones = await DatabaseService().getAllImpossibleZones();
+    final zones = await _databaseService.getAllImpossibleZones();
     if (!mounted) return;
     setState(() {
       _impossibleZones = zones;
@@ -1493,7 +1438,7 @@ class _MapScreenState extends State<MapScreen> {
     );
 
     if (draft != null) {
-      await DatabaseService().addPrivacyZone(
+      await _databaseService.addPrivacyZone(
         center.latitude,
         center.longitude,
         draft.radiusMeters,
@@ -1516,8 +1461,7 @@ class _MapScreenState extends State<MapScreen> {
     );
 
     if (confirmed == true) {
-      await DatabaseService().deleteSample(sample.id);
-      _lastAggregatedSampleCount = -1;
+      await _mapDataController.deleteSample(sample.id);
       await _loadSamples();
       if (!mounted) return;
       _showSnackBar(AppLocalizations.of(context).mapSampleDeleted);
@@ -1532,10 +1476,7 @@ class _MapScreenState extends State<MapScreen> {
     );
 
     if (confirmed == true) {
-      final deleted = await DatabaseService().deleteSamplesByGeohash(
-        coverage.id,
-      );
-      _lastAggregatedSampleCount = -1;
+      final deleted = await _mapDataController.deleteCoverage(coverage.id);
       await _loadSamples();
       if (!mounted) return;
       _showSnackBar(
@@ -1557,16 +1498,18 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   int get _coverageLodPrecision {
-    if (!_mapLodEnabled) return _coveragePrecision;
-    return MapLodService.precisionForZoom(
-      _mapLodZoom,
+    return _mapDataController.coverageLodPrecision(
+      zoom: _mapLodZoom,
+      enabled: _mapLodEnabled,
       maxPrecision: _coveragePrecision,
     );
   }
 
   int get _sampleLodPrecision {
-    if (!_mapLodEnabled) return 8;
-    return MapLodService.precisionForZoom(_mapLodZoom, maxPrecision: 8);
+    return _mapDataController.sampleLodPrecision(
+      zoom: _mapLodZoom,
+      enabled: _mapLodEnabled,
+    );
   }
 
   void _updateMapLodZoom(double zoom) {
@@ -1577,13 +1520,14 @@ class _MapScreenState extends State<MapScreen> {
 
     final oldCoveragePrecision = _coverageLodPrecision;
     final oldSamplePrecision = _sampleLodPrecision;
-    final newCoveragePrecision = MapLodService.precisionForZoom(
-      zoom,
+    final newCoveragePrecision = _mapDataController.coverageLodPrecision(
+      zoom: zoom,
+      enabled: true,
       maxPrecision: _coveragePrecision,
     );
-    final newSamplePrecision = MapLodService.precisionForZoom(
-      zoom,
-      maxPrecision: 8,
+    final newSamplePrecision = _mapDataController.sampleLodPrecision(
+      zoom: zoom,
+      enabled: true,
     );
 
     if (oldCoveragePrecision == newCoveragePrecision &&
@@ -1597,78 +1541,14 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-  void _ensureCoverageLod() {
-    final aggregation = _aggregationResult;
-    final precision = _coverageLodPrecision;
-    if (aggregation == null) {
-      _cachedLodAggregation = null;
-      _cachedLodCoverages = const [];
-      _cachedLodEdges = const [];
-      _cachedCoverageLodPrecision = null;
-      _cachedCoverageLodEnabled = null;
-      return;
-    }
-    if (identical(_cachedLodAggregation, aggregation) &&
-        _cachedCoverageLodPrecision == precision &&
-        _cachedCoverageLodEnabled == _mapLodEnabled) {
-      return;
-    }
-
-    final coverages = _mapLodEnabled
-        ? MapLodService.aggregateCoverages(
-            aggregation.coverages,
-            precision: precision,
-          )
-        : aggregation.coverages;
-    _cachedLodAggregation = aggregation;
-    _cachedCoverageLodPrecision = precision;
-    _cachedCoverageLodEnabled = _mapLodEnabled;
-    _cachedLodCoverages = coverages;
-    _cachedLodEdges = _mapLodEnabled
-        ? MapLodService.aggregateEdges(
-            aggregation.edges,
-            coverages,
-            precision: precision,
-          )
-        : aggregation.edges;
-  }
-
   List<SampleCluster> _sampleClustersForCurrentLod() {
-    final filterKey = [
-      _showGpsSamples,
-      _showSuccessfulOnly,
-      _includeOnlyRepeaters ?? '',
-      _mapLodEnabled,
-    ].join('|');
-    final precision = _sampleLodPrecision;
-    if (identical(_cachedSampleLodSource, _samples) &&
-        _cachedSampleLodPrecision == precision &&
-        _cachedSampleLodFilter == filterKey) {
-      return _cachedSampleClusters;
-    }
-
-    final allowedPrefixes = _includeOnlyRepeaters
-        ?.split(',')
-        .map((value) => value.trim().toUpperCase())
-        .where((value) => value.isNotEmpty)
-        .toList(growable: false);
-    final filteredSamples = _samples.where((sample) {
-      if (!_showGpsSamples && sample.pingSuccess == null) return false;
-      if (_showSuccessfulOnly && sample.pingSuccess != true) return false;
-      if (allowedPrefixes != null && allowedPrefixes.isNotEmpty) {
-        final sampleNodeId = sample.path?.toUpperCase() ?? '';
-        if (!allowedPrefixes.any(sampleNodeId.startsWith)) return false;
-      }
-      return true;
-    });
-
-    _cachedSampleLodSource = _samples;
-    _cachedSampleLodPrecision = precision;
-    _cachedSampleLodFilter = filterKey;
-    _cachedSampleClusters = _mapLodEnabled
-        ? MapLodService.aggregateSamples(filteredSamples, precision: precision)
-        : MapLodService.individualSamples(filteredSamples);
-    return _cachedSampleClusters;
+    return _mapDataController.sampleClusters(
+      zoom: _mapLodZoom,
+      lodEnabled: _mapLodEnabled,
+      showGpsSamples: _showGpsSamples,
+      showSuccessfulOnly: _showSuccessfulOnly,
+      includeOnlyRepeaters: _includeOnlyRepeaters,
+    );
   }
 
   Future<void> _checkForUpdates() async {
@@ -2116,10 +1996,14 @@ class _MapScreenState extends State<MapScreen> {
 
   List<Widget> _buildCoverageLayers() {
     if (_aggregationResult == null) return [];
-    _ensureCoverageLod();
+    final lod = _mapDataController.coverageLod(
+      zoom: _mapLodZoom,
+      enabled: _mapLodEnabled,
+      maxPrecision: _coveragePrecision,
+    );
     return [
       CoverageLayer(
-        coverages: _cachedLodCoverages,
+        coverages: lod.coverages,
         colorMode: _colorMode,
         colorBlindMode: _colorBlindMode,
         hitNotifier: _coverageHitNotifier,
@@ -2161,9 +2045,13 @@ class _MapScreenState extends State<MapScreen> {
 
   Widget _buildEdgeLayer() {
     if (_aggregationResult == null) return const SizedBox.shrink();
-    _ensureCoverageLod();
+    final lod = _mapDataController.coverageLod(
+      zoom: _mapLodZoom,
+      enabled: _mapLodEnabled,
+      maxPrecision: _coveragePrecision,
+    );
     return EdgeLayer(
-      edges: _cachedLodEdges,
+      edges: lod.edges,
       filterByWhitelist: _filterEdgesByWhitelist,
       includeOnlyRepeaters: _includeOnlyRepeaters,
     );
@@ -2250,7 +2138,7 @@ class _MapScreenState extends State<MapScreen> {
           responseTimeMs: response.responseTimeMs,
           deviceId: _locationService.loraCompanion.connectedDeviceId,
         );
-        await DatabaseService().insertSample(sample);
+        await _databaseService.insertSample(sample);
       }
     } else {
       final sample = Sample(
@@ -2262,7 +2150,7 @@ class _MapScreenState extends State<MapScreen> {
         responseTimeMs: result.responseTimeMs,
         deviceId: _locationService.loraCompanion.connectedDeviceId,
       );
-      await DatabaseService().insertSample(sample);
+      await _databaseService.insertSample(sample);
     }
 
     // Reload samples to update map
@@ -2351,7 +2239,7 @@ class _MapScreenState extends State<MapScreen> {
     try {
       final recent = await _settingsService.getRecentBluetoothDevices();
       final tracked = [
-        for (final row in await DatabaseService().getAllDevices())
+        for (final row in await _databaseService.getAllDevices())
           if (row['connection_type'] == 'bluetooth')
             KnownBluetoothDevice(
               remoteId:
@@ -2484,9 +2372,7 @@ class _MapScreenState extends State<MapScreen> {
 
     final repeaters = await _locationService.loraCompanion.scanForRepeaters();
 
-    setState(() {
-      _repeaters = repeaters;
-    });
+    setState(() => _mapDataController.replaceRepeaters(repeaters));
 
     if (repeaters.isEmpty) {
       if (!mounted) return;

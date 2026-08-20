@@ -107,15 +107,15 @@ cohesive 200-400 line file over many tiny single-use wrappers.
 
 ### Stage 3: map data controller
 
-- [ ] Introduce a screen-specific controller for samples, repeaters,
+- [x] Introduce a screen-specific controller for samples, repeaters,
   aggregation, LOD caches, and session filtering.
-- [ ] Inject existing service dependencies instead of constructing
+- [x] Inject existing service dependencies instead of constructing
   `DatabaseService` repeatedly in UI handlers.
-- [ ] Expose explicit commands for refresh, delete, filtering, and session view
+- [x] Expose explicit commands for refresh, delete, filtering, and session view
   changes.
-- [ ] Keep `BuildContext`, dialogs, navigation, and widget creation out of the
+- [x] Keep `BuildContext`, dialogs, navigation, and widget creation out of the
   controller.
-- [ ] Add controller tests with fake device and persistence boundaries.
+- [x] Add controller tests with fake device and persistence boundaries.
 
 ### Stage 4: lifecycle and runtime bindings
 

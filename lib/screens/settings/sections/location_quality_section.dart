@@ -154,7 +154,7 @@ extension _LocationQualitySettingsSection on _MapScreenState {
             onPressed: () async {
               final id = zone.id;
               if (id == null) return;
-              await DatabaseService().deleteImpossibleZone(id);
+              await _databaseService.deleteImpossibleZone(id);
               await _loadImpossibleZones();
               setPageState(() {});
             },
@@ -194,7 +194,7 @@ extension _LocationQualitySettingsSection on _MapScreenState {
               for (final zone in _impossibleZones) {
                 final id = zone.id;
                 if (id != null) {
-                  await DatabaseService().deleteImpossibleZone(id);
+                  await _databaseService.deleteImpossibleZone(id);
                 }
               }
               await _loadImpossibleZones();
@@ -290,7 +290,7 @@ extension _LocationQualitySettingsSection on _MapScreenState {
     );
 
     if (confirmed == true) {
-      await DatabaseService().addImpossibleZone(
+      await _databaseService.addImpossibleZone(
         center.latitude,
         center.longitude,
         selectedRadius,
