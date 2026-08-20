@@ -29,6 +29,7 @@ import '../utils/color_blind_palette.dart';
 import '../utils/community_coverage.dart';
 import '../utils/bluetooth_scan.dart';
 import '../widgets/compass_calibration.dart';
+import '../widgets/tracking_play_button.dart';
 import '../widgets/bluetooth_device_picker_dialog.dart';
 import '../services/widget_service.dart';
 import 'package:geohash_plus/geohash_plus.dart' as geohash;
@@ -2485,21 +2486,13 @@ $placemarks  </Document>
                   ),
                 ),
                 const SizedBox(height: 8),
-                GestureDetector(
-                  onDoubleTap: () =>
+                TrackingPlayButton(
+                  isTracking: _isTracking,
+                  onToggle: _toggleTracking,
+                  onStartFreshSession: () =>
+                      _toggleTracking(freshSession: true),
+                  onToggleQuickSettings: () =>
                       setState(() => _showQuickSettings = !_showQuickSettings),
-                  onLongPress: _isTracking
-                      ? null
-                      : () => _toggleTracking(freshSession: true),
-                  child: FloatingActionButton(
-                    heroTag: 'tracking',
-                    onPressed: _toggleTracking,
-                    tooltip: _isTracking
-                        ? 'Stop tracking'
-                        : 'Start tracking. Long-press for a blank-map session.',
-                    backgroundColor: _isTracking ? Colors.red : Colors.green,
-                    child: Icon(_isTracking ? Icons.stop : Icons.play_arrow),
-                  ),
                 ),
               ],
             ),

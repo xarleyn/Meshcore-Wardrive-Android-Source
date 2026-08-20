@@ -71,6 +71,10 @@
   precision as local coverage, so they line up with the user's grid. They stay
   visible regardless of the session filter and are hidden only by their own
   map-display toggle. Tap details use the same aggregated cells as the overlay.
+- Long-pressing Play starts a blank-map session. The Play button no longer uses
+  a Material tooltip, which was swallowing the long-press gesture.
+- Session History "Tap to view on map" uses the theme primary color so it stays
+  readable on dark cards.
 - Quick Settings no longer crashes when Discovery Timeout is 5s or 25s, or when
   ping distance is Frequent (50 m) or another value missing from the compact
   menus. Those lists now match Settings and still accept unknown saved values.

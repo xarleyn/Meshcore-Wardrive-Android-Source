@@ -4,6 +4,14 @@ import '../models/models.dart';
 import '../services/database_service.dart';
 import '../services/settings_service.dart';
 
+TextStyle sessionMapHintStyle(BuildContext context) {
+  return TextStyle(
+    color: Theme.of(context).colorScheme.primary,
+    fontSize: 12,
+    fontWeight: FontWeight.w600,
+  );
+}
+
 class SessionHistoryScreen extends StatefulWidget {
   /// Optional callback when a session is selected (for map filtering)
   final void Function(WSession session)? onSessionSelected;
@@ -299,13 +307,7 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
               // Tap hint when callback is provided
               if (widget.onSessionSelected != null) ...[
                 const SizedBox(height: 4),
-                Text(
-                  'Tap to view on map',
-                  style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontSize: 12,
-                  ),
-                ),
+                Text('Tap to view on map', style: sessionMapHintStyle(context)),
               ],
             ],
           ),
