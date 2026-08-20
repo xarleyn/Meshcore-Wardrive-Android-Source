@@ -50,6 +50,7 @@ import 'map/dialogs/offline_tile_dialogs.dart';
 import 'map/dialogs/upload_endpoint_dialog.dart';
 import 'map/map_runtime_bindings.dart';
 import 'map/map_screen_controller.dart';
+import 'map/map_settings_controller.dart';
 import 'map/widgets/delete_mode_banner.dart';
 import 'map/widgets/map_action_buttons.dart';
 import 'map/widgets/map_control_panel.dart';
@@ -128,6 +129,7 @@ class _MapScreenState extends State<MapScreen> {
   final AndroidTrackingSettingsService _androidTrackingSettings =
       AndroidTrackingSettingsService();
   final MapRuntimeBindings _runtimeBindings = MapRuntimeBindings();
+  late final MapSettingsController _mapSettingsController;
   int _initializationGeneration = 0;
 
   bool _isTracking = false;
@@ -297,6 +299,10 @@ class _MapScreenState extends State<MapScreen> {
     super.initState();
     _mapDataController = MapScreenController(
       store: DatabaseMapDataStore(_databaseService),
+    );
+    _mapSettingsController = MapSettingsController(
+      settingsService: _settingsService,
+      runtime: DefaultMapSettingsRuntime(locationService: _locationService),
     );
     _initialize(++_initializationGeneration);
   }
@@ -577,137 +583,51 @@ class _MapScreenState extends State<MapScreen> {
       mounted && generation == _initializationGeneration;
 
   Future<void> _loadSettings() async {
-    final showSamples = await _settingsService.getShowSamples();
-    final showGpsSamples = await _settingsService.getShowGpsSamples();
-    final showCoverage = await _settingsService.getShowCoverage();
-    final mapLodEnabled = await _settingsService.getMapLodEnabled();
-    final showEdges = await _settingsService.getShowEdges();
-    final showRepeaters = await _settingsService.getShowRepeaters();
-    final colorMode = await _settingsService.getColorMode();
-    final pingInterval = await _settingsService.getPingInterval();
-    final coveragePrecision = await _settingsService.getCoveragePrecision();
-    final ignoredPrefix = await _settingsService.getIgnoredRepeaterPrefix();
-    final includeOnly = await _settingsService.getIncludeOnlyRepeaters();
-    final filterEdges = await _settingsService.getFilterEdgesByWhitelist();
-    final distanceUnit = await _settingsService.getDistanceUnit();
-    final colorBlindMode = await _settingsService.getColorBlindMode();
-    final discoveryTimeout = await _settingsService.getDiscoveryTimeout();
-    final thoroughResponseCollection = await _settingsService
-        .getThoroughResponseCollection();
-    final fuelUnit = await _settingsService.getFuelUnit();
-    final showRouteTrail = await _settingsService.getShowRouteTrail();
-    final showHeatmap = await _settingsService.getShowHeatmap();
-    final showPredictionRings = await _settingsService.getShowPredictionRings();
-    final showRadioPosition = await _settingsService.getShowRadioPosition();
-    final beaconDbWifiPositioning = await _settingsService
-        .getBeaconDbWifiPositioning();
-    final locationQualitySettings = await _settingsService
-        .getLocationQualitySettings();
-    final showDucting = await _settingsService.getShowDucting();
-    final mapThemeMode = await _settingsService.getMapThemeMode();
-
+    final settings = await _mapSettingsController.loadAndApply();
     if (!mounted) return;
     setState(() {
-      _showSamples = showSamples;
-      _showGpsSamples = showGpsSamples;
-      _showCoverage = showCoverage;
-      _mapLodEnabled = mapLodEnabled;
-      _showEdges = showEdges;
-      _showRepeaters = showRepeaters;
-      _colorMode = colorMode;
-      _pingIntervalMeters = pingInterval;
-      _coveragePrecision = coveragePrecision;
-      _ignoredRepeaterPrefix = ignoredPrefix;
-      _includeOnlyRepeaters = includeOnly;
-      _filterEdgesByWhitelist = filterEdges;
-      _distanceUnit = distanceUnit;
-      _colorBlindMode = colorBlindMode;
-      _discoveryTimeoutSeconds = discoveryTimeout;
-      _thoroughResponseCollection = thoroughResponseCollection;
-      _fuelUnit = fuelUnit;
-      _showRouteTrail = showRouteTrail;
-      _showHeatmap = showHeatmap;
-      _showPredictionRings = showPredictionRings;
-      _showRadioPosition = showRadioPosition;
-      _beaconDbWifiPositioning = beaconDbWifiPositioning;
-      _locationQualitySettings = locationQualitySettings;
-      _showDucting = showDucting;
-      _mapThemeMode = mapThemeMode;
+      _showSamples = settings.showSamples;
+      _showGpsSamples = settings.showGpsSamples;
+      _showCoverage = settings.showCoverage;
+      _mapLodEnabled = settings.mapLodEnabled;
+      _showEdges = settings.showEdges;
+      _showRepeaters = settings.showRepeaters;
+      _colorMode = settings.colorMode;
+      _pingIntervalMeters = settings.pingIntervalMeters;
+      _coveragePrecision = settings.coveragePrecision;
+      _ignoredRepeaterPrefix = settings.ignoredRepeaterPrefix;
+      _includeOnlyRepeaters = settings.includeOnlyRepeaters;
+      _filterEdgesByWhitelist = settings.filterEdgesByWhitelist;
+      _distanceUnit = settings.distanceUnit;
+      _colorBlindMode = settings.colorBlindMode;
+      _discoveryTimeoutSeconds = settings.discoveryTimeoutSeconds;
+      _thoroughResponseCollection = settings.thoroughResponseCollection;
+      _fuelUnit = settings.fuelUnit;
+      _showRouteTrail = settings.showRouteTrail;
+      _showHeatmap = settings.showHeatmap;
+      _showPredictionRings = settings.showPredictionRings;
+      _showRadioPosition = settings.showRadioPosition;
+      _beaconDbWifiPositioning = settings.beaconDbWifiPositioning;
+      _locationQualitySettings = settings.locationQualitySettings;
+      _showDucting = settings.showDucting;
+      _mapThemeMode = settings.mapThemeMode;
+      _pingMode = settings.pingMode;
+      _pingTimeInterval = settings.pingTimeInterval;
+      _soundEnabled = settings.soundEnabled;
+      _vibrationEnabled = settings.vibrationEnabled;
+      _lockRotationNorth = settings.lockRotationNorth;
+      _keepScreenOn = settings.keepScreenOn;
+      _currentLocationMarkerStyle = settings.currentLocationMarkerStyle;
+      _showSuccessfulOnly = settings.showSuccessfulOnly;
+      _compassCalibrationQuietUntil = settings.compassCalibrationQuietUntil;
+      _deadZoneAlertsEnabled = settings.deadZoneAlertsEnabled;
+      _newRepeaterAlertsEnabled = settings.newRepeaterAlertsEnabled;
+      _batterySaverEnabled = settings.batterySaverEnabled;
+      _carpeaterEnabled = settings.carpeaterEnabled;
+      _carpeaterRepeaterId = settings.carpeaterRepeaterId;
+      _carpeaterPassword = settings.carpeaterPassword;
+      _carpeaterInterval = settings.carpeaterInterval;
     });
-
-    // Load ping mode settings
-    final pingMode = await _settingsService.getPingMode();
-    final pingTimeInterval = await _settingsService.getPingTimeInterval();
-    if (!mounted) return;
-    setState(() {
-      _pingMode = pingMode;
-      _pingTimeInterval = pingTimeInterval;
-    });
-    _locationService.setPingMode(pingMode);
-    _locationService.setPingTimeInterval(pingTimeInterval);
-
-    // Load sound & vibration settings
-    final soundEnabled = await _settingsService.getSoundEnabled();
-    final vibrationEnabled = await _settingsService.getVibrationEnabled();
-    if (!mounted) return;
-    setState(() {
-      _soundEnabled = soundEnabled;
-      _vibrationEnabled = vibrationEnabled;
-    });
-    SoundService().setEnabled(soundEnabled);
-    SoundService().setVibrationEnabled(vibrationEnabled);
-
-    // Load lock rotation and successful-only filter
-    final lockRotation = await _settingsService.getLockRotationNorth();
-    final keepScreenOn = await _settingsService.getKeepScreenOn();
-    final currentLocationMarkerStyle = await _settingsService
-        .getCurrentLocationMarkerStyle();
-    final showSuccessfulOnly = await _settingsService.getShowSuccessfulOnly();
-    final compassQuietUntil = await _settingsService
-        .getCompassCalibrationQuietUntil();
-    if (!mounted) return;
-    setState(() {
-      _lockRotationNorth = lockRotation;
-      _keepScreenOn = keepScreenOn;
-      _currentLocationMarkerStyle = currentLocationMarkerStyle;
-      _showSuccessfulOnly = showSuccessfulOnly;
-      _compassCalibrationQuietUntil = compassQuietUntil;
-    });
-    await ScreenWakeService.instance.setAlwaysOn(keepScreenOn);
-    if (!mounted) return;
-
-    // Load alert toggles
-    final deadZoneAlerts = await _settingsService.getDeadZoneAlertsEnabled();
-    final newRepeaterAlerts = await _settingsService
-        .getNewRepeaterAlertsEnabled();
-    final batterySaverEnabled = await _settingsService.getBatterySaverEnabled();
-    if (!mounted) return;
-    setState(() {
-      _deadZoneAlertsEnabled = deadZoneAlerts;
-      _newRepeaterAlertsEnabled = newRepeaterAlerts;
-      _batterySaverEnabled = batterySaverEnabled;
-    });
-    _locationService.setBatterySaverEnabled(batterySaverEnabled);
-
-    // Load Carpeater settings
-    final carpeaterEnabled = await _settingsService.getCarpeaterEnabled();
-    final carpeaterRepeaterId = await _settingsService.getCarpeaterRepeaterId();
-    final carpeaterPassword = await _settingsService.getCarpeaterPassword();
-    final carpeaterInterval = await _settingsService.getCarpeaterInterval();
-    if (!mounted) return;
-    setState(() {
-      _carpeaterEnabled = carpeaterEnabled;
-      _carpeaterRepeaterId = carpeaterRepeaterId;
-      _carpeaterPassword = carpeaterPassword;
-      _carpeaterInterval = carpeaterInterval;
-    });
-    _locationService.setCarpeaterMode(carpeaterEnabled);
-
-    // Apply to services
-    _locationService.setPingInterval(pingInterval);
-    _locationService.setWifiPositioningEnabled(beaconDbWifiPositioning);
-    _locationService.setLocationQualitySettings(locationQualitySettings);
-    _locationService.loraCompanion.setIgnoredRepeaterPrefix(ignoredPrefix);
   }
 
   bool get _compassInUse =>

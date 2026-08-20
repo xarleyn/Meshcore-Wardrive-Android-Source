@@ -130,8 +130,8 @@ cohesive 200-400 line file over many tiny single-use wrappers.
 
 - [ ] Replace settings extensions on `_MapScreenState` with explicit inputs,
   outputs, or a settings controller.
-- [ ] Load map-related preferences as a typed snapshot.
-- [ ] Apply service-side settings through explicit commands.
+- [x] Load map-related preferences as a typed snapshot.
+- [x] Apply service-side settings through explicit commands.
 - [ ] Remove `part` dependencies between the settings feature and map screen.
 
 ## Extraction rules
