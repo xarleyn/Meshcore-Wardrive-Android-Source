@@ -122,8 +122,51 @@ extension _SettingsPageNavigation on _MapScreenState {
       _SettingsCategory(
         title: l10n.settingsSectionDiscovery,
         icon: Icons.radar_outlined,
-        builder: (context, setPageState) =>
-            _buildDiscoverySettings(context, setPageState),
+        builder: (context, setPageState) => buildDiscoverySettings(
+          context,
+          values: DiscoverySettingsValues(
+            timeoutSeconds: _discoveryTimeoutSeconds,
+            thoroughResponseCollection: _thoroughResponseCollection,
+            ignoredRepeaterPrefix: _ignoredRepeaterPrefix,
+            includeOnlyRepeaters: _includeOnlyRepeaters,
+            filterEdgesByWhitelist: _filterEdgesByWhitelist,
+            pingMode: _pingMode,
+            pingTimeInterval: _pingTimeInterval,
+            pingIntervalDescription: _getPingIntervalDescription(),
+            coverageResolutionDescription: _getCoverageResolutionDescription(),
+          ),
+          onTimeoutChanged: (value) async {
+            _updateMapState(() => _discoveryTimeoutSeconds = value);
+            setPageState(() {});
+            await _settingsService.setDiscoveryTimeout(value);
+          },
+          onThoroughChanged: (value) async {
+            _updateMapState(() => _thoroughResponseCollection = value);
+            setPageState(() {});
+            await _settingsService.setThoroughResponseCollection(value);
+          },
+          onEditIgnoredRepeaters: _setIgnoredRepeater,
+          onEditIncludedRepeaters: _setIncludeOnlyRepeaters,
+          onFilterEdgesChanged: (value) async {
+            _updateMapState(() => _filterEdgesByWhitelist = value);
+            setPageState(() {});
+            await _settingsService.setFilterEdgesByWhitelist(value);
+          },
+          onPingModeChanged: (value) async {
+            _updateMapState(() => _pingMode = value);
+            setPageState(() {});
+            await _settingsService.setPingMode(value);
+            _locationService.setPingMode(value);
+          },
+          onEditPingInterval: _setPingInterval,
+          onPingTimeIntervalChanged: (value) async {
+            _updateMapState(() => _pingTimeInterval = value);
+            setPageState(() {});
+            await _settingsService.setPingTimeInterval(value);
+            _locationService.setPingTimeInterval(value);
+          },
+          onEditCoverageResolution: _setCoverageResolution,
+        ),
       ),
       _SettingsCategory(
         title: l10n.settingsSectionFeedback,
@@ -216,8 +259,25 @@ extension _SettingsPageNavigation on _MapScreenState {
       _SettingsCategory(
         title: l10n.settingsSectionStatistics,
         icon: Icons.query_stats,
-        builder: (context, setPageState) =>
-            _buildStatisticsSettings(context, setPageState),
+        builder: (context, setPageState) => buildStatisticsSettings(
+          context,
+          values: _loadDrivingStatistics(),
+          sessionMeters: _isTracking ? _locationService.totalDistanceMeters : 0,
+          distanceUnit: _distanceUnit,
+          fuelUnit: _fuelUnit,
+          onResetDistance: () async {
+            await _settingsService.resetTotalDistanceDriven();
+            setPageState(() {});
+          },
+          onVehicleMpgChanged: (value) async {
+            await _settingsService.setVehicleMpg(value);
+            setPageState(() {});
+          },
+          onGasPriceChanged: (value) async {
+            await _settingsService.setGasPrice(value);
+            setPageState(() {});
+          },
+        ),
       ),
       _SettingsCategory(
         title: l10n.settingsSectionDataManagement,
@@ -340,6 +400,14 @@ extension _SettingsPageNavigation on _MapScreenState {
     if (!mounted) return;
     _showSnackBar(
       AppLocalizations.of(context).settingsCommunityCoverageCleared,
+    );
+  }
+
+  Future<DrivingStatisticsValues> _loadDrivingStatistics() async {
+    return DrivingStatisticsValues(
+      totalMeters: await _settingsService.getTotalDistanceDriven(),
+      vehicleMpg: await _settingsService.getVehicleMpg(),
+      gasPricePerGallon: await _settingsService.getGasPrice(),
     );
   }
 

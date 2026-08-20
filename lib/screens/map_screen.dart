@@ -21,7 +21,6 @@ import '../utils/geohash_utils.dart';
 import '../utils/initial_map_camera.dart';
 import '../utils/compass_calibration.dart';
 import '../utils/heading_utils.dart';
-import '../utils/discovery_timeout_options.dart';
 import '../utils/session_map_view.dart';
 import '../utils/community_coverage.dart';
 import '../utils/bluetooth_scan.dart';
@@ -94,18 +93,18 @@ import 'settings/sections/about_section.dart';
 import 'settings/sections/backup_section.dart';
 import 'settings/sections/carpeater_section.dart';
 import 'settings/sections/diagnostics_section.dart';
+import 'settings/sections/discovery_section.dart';
 import 'settings/sections/feedback_section.dart';
 import 'settings/sections/location_section.dart';
 import 'settings/sections/map_display_section.dart';
 import 'settings/sections/online_map_section.dart';
+import 'settings/sections/statistics_section.dart';
 
 part 'settings/settings_dialogs.dart';
 part 'settings/settings_page.dart';
 part 'settings/sections/app_device_section.dart';
 part 'settings/sections/data_management_section.dart';
-part 'settings/sections/discovery_section.dart';
 part 'settings/sections/location_quality_section.dart';
-part 'settings/sections/statistics_section.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
