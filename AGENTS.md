@@ -101,6 +101,16 @@ or a physical LoRa device, describe any manual device testing that remains.
   hardware. Isolate device and network boundaries so they can be faked.
 - Avoid editing generated files unless the corresponding generator or Android
   configuration requires it.
+- `lib/l10n/generated/app_localizations*.dart` are tracked, reproducible
+  `gen_l10n` outputs. If they disappear during an agent or tool run, first use
+  `git status`, `git diff --cached`, and `git log -- <paths>` to verify that
+  `HEAD` still tracks them and that their deletion is neither committed nor an
+  intentional user change. In that case, treat the deletion as tooling fallout,
+  restore the files from `HEAD` with `git restore --worktree -- <paths>` or
+  regenerate them with `flutter gen-l10n`, and do not stage the transient
+  deletion. Do not restore them when deletion is committed, explicitly
+  requested, or accompanied by intentional ARB, `l10n.yaml`, or `pubspec.yaml`
+  changes that alter the generated output.
 
 ## Documentation and repository hygiene
 
