@@ -1,86 +1,75 @@
-part of '../../map_screen.dart';
+import 'dart:async';
 
-extension _LocationSettingsSection on _MapScreenState {
-  List<Widget> _buildLocationSettings(
-    BuildContext context,
-    StateSetter setModalState,
-  ) {
-    final l10n = AppLocalizations.of(context);
-    return [
-      SettingsSectionHeader(
-        title: l10n.settingsSectionLocation,
-        icon: Icons.my_location,
-      ),
-      SwitchListTile(
-        title: Text(l10n.settingsBeaconDbWifi),
-        subtitle: Text(l10n.settingsBeaconDbWifiSubtitle),
-        value: _beaconDbWifiPositioning,
-        onChanged: (value) async {
-          _updateMapState(() {
-            _beaconDbWifiPositioning = value;
-          });
-          setModalState(() {});
-          await _settingsService.setBeaconDbWifiPositioning(value);
-          _locationService.setWifiPositioningEnabled(value);
-          if (value) {
-            _showSnackBar(l10n.settingsBeaconDbEnabledSnack);
-            await _requestWifiScanThrottlingDisabled();
-          }
-        },
-      ),
-      ListTile(
-        leading: const Icon(Icons.gps_fixed),
-        title: Text(l10n.settingsLocationQualityFilters),
-        subtitle: Text(l10n.settingsLocationQualityFiltersSubtitle),
-        trailing: const Icon(Icons.arrow_forward),
-        onTap: () => _openLocationQualitySettings(context),
-      ),
-      SwitchListTile(
-        title: Text(l10n.settingsShowApproximatePosition),
-        subtitle: Text(l10n.settingsShowApproximatePositionSubtitle),
-        value: _showRadioPosition,
-        onChanged: (value) async {
-          _updateMapState(() {
-            _showRadioPosition = value;
-          });
-          setModalState(() {});
-          await _settingsService.setShowRadioPosition(value);
-        },
-      ),
-      ListTile(
-        title: Text(l10n.settingsDuctingForecast),
-        subtitle: Text(l10n.settingsDuctingForecastSubtitle),
-        leading: const Icon(Icons.cloud),
-        trailing: const Icon(Icons.arrow_forward),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const DuctingForecastScreen(),
-            ),
-          );
-        },
-      ),
-      SwitchListTile(
-        title: Text(l10n.settingsAtmosphericDucting),
-        subtitle: Text(l10n.settingsAtmosphericDuctingSubtitle),
-        value: _showDucting,
-        onChanged: (value) async {
-          _updateMapState(() {
-            _showDucting = value;
-          });
-          setModalState(() {});
-          await _settingsService.setShowDucting(value);
-          _locationService.setDuctingEnabled(value);
-          if (value) {
-            // Fetch immediately and update badge
-            final risk = await _locationService.ductingService.getLatestRisk();
-            _updateMapState(() {
-              _currentDuctingRisk = risk;
-            });
-          }
-        },
-      ),
-    ];
-  }
+import 'package:flutter/material.dart';
+
+import '../../../l10n/generated/app_localizations.dart';
+import '../../ducting_forecast_screen.dart';
+import '../widgets/settings_section_header.dart';
+
+class LocationSettingsValues {
+  const LocationSettingsValues({
+    required this.beaconDbWifiPositioning,
+    required this.showRadioPosition,
+    required this.showDucting,
+  });
+
+  final bool beaconDbWifiPositioning;
+  final bool showRadioPosition;
+  final bool showDucting;
+}
+
+List<Widget> buildLocationSettings(
+  BuildContext context, {
+  required LocationSettingsValues values,
+  required FutureOr<void> Function(bool value) onBeaconDbChanged,
+  required VoidCallback onOpenLocationQuality,
+  required FutureOr<void> Function(bool value) onRadioPositionChanged,
+  required FutureOr<void> Function(bool value) onDuctingChanged,
+}) {
+  final l10n = AppLocalizations.of(context);
+  return [
+    SettingsSectionHeader(
+      title: l10n.settingsSectionLocation,
+      icon: Icons.my_location,
+    ),
+    SwitchListTile(
+      title: Text(l10n.settingsBeaconDbWifi),
+      subtitle: Text(l10n.settingsBeaconDbWifiSubtitle),
+      value: values.beaconDbWifiPositioning,
+      onChanged: onBeaconDbChanged,
+    ),
+    ListTile(
+      leading: const Icon(Icons.gps_fixed),
+      title: Text(l10n.settingsLocationQualityFilters),
+      subtitle: Text(l10n.settingsLocationQualityFiltersSubtitle),
+      trailing: const Icon(Icons.arrow_forward),
+      onTap: onOpenLocationQuality,
+    ),
+    SwitchListTile(
+      title: Text(l10n.settingsShowApproximatePosition),
+      subtitle: Text(l10n.settingsShowApproximatePositionSubtitle),
+      value: values.showRadioPosition,
+      onChanged: onRadioPositionChanged,
+    ),
+    ListTile(
+      title: Text(l10n.settingsDuctingForecast),
+      subtitle: Text(l10n.settingsDuctingForecastSubtitle),
+      leading: const Icon(Icons.cloud),
+      trailing: const Icon(Icons.arrow_forward),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute<void>(
+            builder: (context) => const DuctingForecastScreen(),
+          ),
+        );
+      },
+    ),
+    SwitchListTile(
+      title: Text(l10n.settingsAtmosphericDucting),
+      subtitle: Text(l10n.settingsAtmosphericDuctingSubtitle),
+      value: values.showDucting,
+      onChanged: onDuctingChanged,
+    ),
+  ];
 }
