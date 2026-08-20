@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/generated/app_localizations.dart';
 import '../services/internet_connectivity_service.dart';
 
 /// Adds a compact, app-wide offline banner above the navigator.
@@ -20,6 +21,7 @@ class OfflineAppFrame extends StatelessWidget {
       builder: (context, _) {
         if (!connectivity.isOffline) return child;
 
+        final l10n = AppLocalizations.of(context);
         final colors = Theme.of(context).colorScheme;
         return Column(
           children: [
@@ -30,7 +32,7 @@ class OfflineAppFrame extends StatelessWidget {
                 child: Semantics(
                   container: true,
                   liveRegion: true,
-                  label: 'You are offline. Local tracking continues.',
+                  label: l10n.offlineBannerSemantics,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
@@ -47,7 +49,7 @@ class OfflineAppFrame extends StatelessWidget {
                         const SizedBox(width: 8),
                         Flexible(
                           child: Text(
-                            "You're offline - local tracking continues",
+                            l10n.offlineBannerMessage,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: colors.onErrorContainer,

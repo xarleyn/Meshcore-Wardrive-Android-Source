@@ -1,0 +1,4491 @@
+{
+  "@@locale": "en",
+  "language": "Language",
+  "@language": {
+    "description": "Settings tile title for in-app language"
+  },
+  "languageSystem": "System default",
+  "@languageSystem": {
+    "description": "Language choice that follows the device locale"
+  },
+  "languageEnglish": "English",
+  "@languageEnglish": {
+    "description": "English endonym; do not translate in other ARBs"
+  },
+  "languageRussian": "Русский",
+  "@languageRussian": {
+    "description": "Russian endonym; do not translate in other ARBs"
+  },
+  "languagePickerTitle": "Choose language",
+  "@languagePickerTitle": {
+    "description": "Dialog title for the language picker"
+  },
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "Settings screen AppBar title"
+  },
+  "settingsScrollToTop": "Scroll to top",
+  "@settingsScrollToTop": {
+    "description": "Tooltip for scrolling settings to the top"
+  },
+  "settingsScrollToBottom": "Scroll to bottom",
+  "@settingsScrollToBottom": {
+    "description": "Tooltip for scrolling settings to the bottom"
+  },
+  "settingsCancel": "Cancel",
+  "@settingsCancel": {
+    "description": "Cancel button on settings dialogs"
+  },
+  "settingsSave": "Save",
+  "@settingsSave": {
+    "description": "Save button on settings dialogs"
+  },
+  "settingsClear": "Clear",
+  "@settingsClear": {
+    "description": "Clear button that empties a value"
+  },
+  "settingsUpload": "Upload",
+  "@settingsUpload": {
+    "description": "Confirm upload in endpoint selection dialog"
+  },
+  "settingsReset": "Reset",
+  "@settingsReset": {
+    "description": "Confirm reset action"
+  },
+  "settingsNotSet": "Not set",
+  "@settingsNotSet": {
+    "description": "Placeholder when an optional setting has no value"
+  },
+  "settingsNone": "None",
+  "@settingsNone": {
+    "description": "Dropdown option meaning no interval"
+  },
+  "settingsUnknown": "Unknown",
+  "@settingsUnknown": {
+    "description": "Fallback when a coverage precision is unrecognized"
+  },
+  "settingsEnterNumberGreaterThanZero": "Enter a number greater than zero",
+  "@settingsEnterNumberGreaterThanZero": {
+    "description": "Validation error for positive numeric settings"
+  },
+  "settingsSectionMapDisplay": "Map display",
+  "@settingsSectionMapDisplay": {
+    "description": "Settings section header"
+  },
+  "settingsSectionLocation": "Location & positioning",
+  "@settingsSectionLocation": {
+    "description": "Settings section header"
+  },
+  "settingsSectionFeedback": "Feedback & alerts",
+  "@settingsSectionFeedback": {
+    "description": "Settings section header"
+  },
+  "settingsSectionCarpeater": "Carpeater mode (Beta)",
+  "@settingsSectionCarpeater": {
+    "description": "Settings section header for Carpeater beta mode"
+  },
+  "settingsSectionAppDevice": "App & device",
+  "@settingsSectionAppDevice": {
+    "description": "Settings section header"
+  },
+  "settingsSectionDiscovery": "Discovery & sampling",
+  "@settingsSectionDiscovery": {
+    "description": "Settings section header"
+  },
+  "settingsSectionStatistics": "Statistics",
+  "@settingsSectionStatistics": {
+    "description": "Settings section header"
+  },
+  "settingsSectionDataManagement": "Data management",
+  "@settingsSectionDataManagement": {
+    "description": "Settings section header"
+  },
+  "settingsSectionBackup": "Settings backup",
+  "@settingsSectionBackup": {
+    "description": "Settings section header"
+  },
+  "settingsSectionDiagnostics": "Diagnostics",
+  "@settingsSectionDiagnostics": {
+    "description": "Settings section header"
+  },
+  "settingsSectionOnlineMap": "Online map",
+  "@settingsSectionOnlineMap": {
+    "description": "Settings section header"
+  },
+  "settingsSectionAbout": "About",
+  "@settingsSectionAbout": {
+    "description": "Settings section header"
+  },
+  "settingsSectionThresholds": "Thresholds",
+  "@settingsSectionThresholds": {
+    "description": "Location quality subsection header"
+  },
+  "settingsSectionImpossibleZones": "Impossible Zones",
+  "@settingsSectionImpossibleZones": {
+    "description": "Location quality subsection header"
+  },
+  "settingsShowCoverageBoxes": "Show Coverage Boxes",
+  "@settingsShowCoverageBoxes": {
+    "description": "Toggle to show coverage squares on the map"
+  },
+  "settingsSimplifyMapAtLowZoom": "Simplify map at low zoom",
+  "@settingsSimplifyMapAtLowZoom": {
+    "description": "Toggle title for map level-of-detail simplification"
+  },
+  "settingsSimplifyMapAtLowZoomSubtitle": "Group coverage and samples by geohash while zoomed out",
+  "@settingsSimplifyMapAtLowZoomSubtitle": {
+    "description": "Subtitle for map simplification toggle"
+  },
+  "settingsShowSamples": "Show Samples",
+  "@settingsShowSamples": {
+    "description": "Toggle to show sample markers"
+  },
+  "settingsShowEdges": "Show Edges",
+  "@settingsShowEdges": {
+    "description": "Toggle to show coverage edges"
+  },
+  "settingsShowRepeaters": "Show Repeaters",
+  "@settingsShowRepeaters": {
+    "description": "Toggle to show repeater markers"
+  },
+  "settingsShowGpsSamples": "Show GPS Samples",
+  "@settingsShowGpsSamples": {
+    "description": "Toggle to show GPS-only sample markers"
+  },
+  "settingsShowGpsSamplesSubtitle": "Show blue GPS-only markers",
+  "@settingsShowGpsSamplesSubtitle": {
+    "description": "Subtitle for GPS sample toggle"
+  },
+  "settingsShowSuccessfulPingsOnly": "Show Successful Pings Only",
+  "@settingsShowSuccessfulPingsOnly": {
+    "description": "Toggle to hide failed pings"
+  },
+  "settingsShowSuccessfulPingsOnlySubtitle": "Hide failed pings and GPS-only samples",
+  "@settingsShowSuccessfulPingsOnlySubtitle": {
+    "description": "Subtitle for successful-pings-only toggle"
+  },
+  "settingsShowRouteTrail": "Show Route Trail",
+  "@settingsShowRouteTrail": {
+    "description": "Toggle to draw the driven path"
+  },
+  "settingsShowRouteTrailSubtitle": "Draw driven path on map",
+  "@settingsShowRouteTrailSubtitle": {
+    "description": "Subtitle for route trail toggle"
+  },
+  "settingsCommunityCoverage": "Community Coverage",
+  "@settingsCommunityCoverage": {
+    "description": "Toggle for downloaded community coverage overlay"
+  },
+  "settingsCommunityCoverageDownloaded": "Show downloaded coverage from web map",
+  "@settingsCommunityCoverageDownloaded": {
+    "description": "Subtitle when community coverage is cached"
+  },
+  "settingsCommunityCoverageNeedDownload": "Download first from Data Management",
+  "@settingsCommunityCoverageNeedDownload": {
+    "description": "Subtitle when community coverage has not been downloaded"
+  },
+  "settingsClearDownloadedCoverageTooltip": "Clear downloaded coverage",
+  "@settingsClearDownloadedCoverageTooltip": {
+    "description": "Tooltip to delete cached community coverage"
+  },
+  "settingsCommunityCoverageCleared": "Community coverage cleared",
+  "@settingsCommunityCoverageCleared": {
+    "description": "Snackbar after clearing community coverage"
+  },
+  "settingsShowHeatmap": "Show Heatmap",
+  "@settingsShowHeatmap": {
+    "description": "Toggle for ping heatmap overlay"
+  },
+  "settingsShowHeatmapSubtitle": "Heat gradient overlay of ping activity",
+  "@settingsShowHeatmapSubtitle": {
+    "description": "Subtitle for heatmap toggle"
+  },
+  "settingsShowPredictionRings": "Show Prediction Rings",
+  "@settingsShowPredictionRings": {
+    "description": "Toggle for estimated repeater coverage rings"
+  },
+  "settingsShowPredictionRingsSubtitle": "Estimated repeater coverage radius",
+  "@settingsShowPredictionRingsSubtitle": {
+    "description": "Subtitle for prediction rings toggle"
+  },
+  "settingsBeaconDbWifi": "beaconDB Wi-Fi Positioning",
+  "@settingsBeaconDbWifi": {
+    "description": "Toggle title for beaconDB Wi-Fi positioning"
+  },
+  "settingsBeaconDbWifiSubtitle": "Prefer Wi-Fi location; sends nearby BSSIDs and signal levels to beaconDB. Cyan marker means Wi-Fi is active.",
+  "@settingsBeaconDbWifiSubtitle": {
+    "description": "Subtitle explaining beaconDB Wi-Fi positioning"
+  },
+  "settingsBeaconDbEnabledSnack": "beaconDB enabled: nearby BSSIDs will be shared",
+  "@settingsBeaconDbEnabledSnack": {
+    "description": "Snackbar when beaconDB Wi-Fi positioning is turned on"
+  },
+  "settingsLocationQualityFilters": "Location Quality Filters",
+  "@settingsLocationQualityFilters": {
+    "description": "Tile and category page title for location quality filters"
+  },
+  "settingsLocationQualityFiltersSubtitle": "Accuracy, implausible movement, and impossible locations",
+  "@settingsLocationQualityFiltersSubtitle": {
+    "description": "Subtitle for location quality filters tile"
+  },
+  "settingsShowApproximatePosition": "Show Approximate Position",
+  "@settingsShowApproximatePosition": {
+    "description": "Toggle for radio-estimated position marker"
+  },
+  "settingsShowApproximatePositionSubtitle": "Display the grey radio-position estimate",
+  "@settingsShowApproximatePositionSubtitle": {
+    "description": "Subtitle for approximate position toggle"
+  },
+  "settingsDuctingForecast": "Ducting Forecast",
+  "@settingsDuctingForecast": {
+    "description": "Tile title for tropospheric ducting forecast"
+  },
+  "settingsDuctingForecastSubtitle": "6-day tropospheric ducting maps",
+  "@settingsDuctingForecastSubtitle": {
+    "description": "Subtitle for ducting forecast tile"
+  },
+  "settingsAtmosphericDucting": "Atmospheric Ducting",
+  "@settingsAtmosphericDucting": {
+    "description": "Toggle for atmospheric ducting monitoring"
+  },
+  "settingsAtmosphericDuctingSubtitle": "Monitor ducting conditions (needs internet)",
+  "@settingsAtmosphericDuctingSubtitle": {
+    "description": "Subtitle for atmospheric ducting toggle"
+  },
+  "settingsSoundFeedback": "Sound Feedback",
+  "@settingsSoundFeedback": {
+    "description": "Toggle for ping sound feedback"
+  },
+  "settingsSoundFeedbackSubtitle": "Play tones on ping results",
+  "@settingsSoundFeedbackSubtitle": {
+    "description": "Subtitle for sound feedback toggle"
+  },
+  "settingsVibrationFeedback": "Vibration Feedback",
+  "@settingsVibrationFeedback": {
+    "description": "Toggle for haptic ping feedback"
+  },
+  "settingsVibrationFeedbackSubtitle": "Haptic feedback on ping results",
+  "@settingsVibrationFeedbackSubtitle": {
+    "description": "Subtitle for vibration feedback toggle"
+  },
+  "settingsDeadZoneAlerts": "Dead Zone Alerts",
+  "@settingsDeadZoneAlerts": {
+    "description": "Toggle for dead zone notifications"
+  },
+  "settingsDeadZoneAlertsSubtitle": "Notify when entering a known dead zone",
+  "@settingsDeadZoneAlertsSubtitle": {
+    "description": "Subtitle for dead zone alerts"
+  },
+  "settingsNewRepeaterAlerts": "New Repeater Alerts",
+  "@settingsNewRepeaterAlerts": {
+    "description": "Toggle for new repeater discovery alerts"
+  },
+  "settingsNewRepeaterAlertsSubtitle": "Notify when a never-before-seen repeater is discovered",
+  "@settingsNewRepeaterAlertsSubtitle": {
+    "description": "Subtitle for new repeater alerts"
+  },
+  "settingsEnableCarpeaterMode": "Enable Carpeater Mode",
+  "@settingsEnableCarpeaterMode": {
+    "description": "Toggle to enable Carpeater discovery mode"
+  },
+  "settingsCarpeaterEnabledSubtitle": "Using repeater for discovery",
+  "@settingsCarpeaterEnabledSubtitle": {
+    "description": "Subtitle when Carpeater mode is on"
+  },
+  "settingsCarpeaterDisabledSubtitle": "Use a repeater to discover neighbors\nRequires v1.14+ firmware on all repeaters",
+  "@settingsCarpeaterDisabledSubtitle": {
+    "description": "Subtitle when Carpeater mode is off"
+  },
+  "settingsTargetRepeater": "Target Repeater",
+  "@settingsTargetRepeater": {
+    "description": "Carpeater target repeater tile and dialog title"
+  },
+  "settingsRepeaterIdPrefix": "Repeater ID Prefix",
+  "@settingsRepeaterIdPrefix": {
+    "description": "Label for Carpeater repeater ID field"
+  },
+  "settingsRepeaterIdHint": "e.g., BAD5DC49",
+  "@settingsRepeaterIdHint": {
+    "description": "Hint for repeater ID prefix field"
+  },
+  "settingsAdminPassword": "Admin Password",
+  "@settingsAdminPassword": {
+    "description": "Carpeater admin password tile and dialog title"
+  },
+  "settingsPassword": "Password",
+  "@settingsPassword": {
+    "description": "Password field label"
+  },
+  "settingsRepeaterAdminPasswordHint": "Repeater admin password",
+  "@settingsRepeaterAdminPasswordHint": {
+    "description": "Hint for repeater admin password field"
+  },
+  "settingsCycleInterval": "Cycle Interval",
+  "@settingsCycleInterval": {
+    "description": "Carpeater discovery cycle interval"
+  },
+  "settingsCycleIntervalSubtitle": "Time between discovery cycles",
+  "@settingsCycleIntervalSubtitle": {
+    "description": "Subtitle for cycle interval"
+  },
+  "settingsDeviceName": "Device Name",
+  "@settingsDeviceName": {
+    "description": "Device name tile and dialog title"
+  },
+  "settingsDeviceNameNotSet": "Not set — used for multi-device wardrive",
+  "@settingsDeviceNameNotSet": {
+    "description": "Subtitle when no device name is configured"
+  },
+  "settingsDeviceNameLabel": "Name",
+  "@settingsDeviceNameLabel": {
+    "description": "Label for device name text field"
+  },
+  "settingsDeviceNameHint": "e.g., Chuck-Pixel",
+  "@settingsDeviceNameHint": {
+    "description": "Hint for device name field"
+  },
+  "settingsKeepScreenOn": "Keep Screen On",
+  "@settingsKeepScreenOn": {
+    "description": "Settings toggle title; keeps the display awake"
+  },
+  "settingsKeepScreenOnSubtitle": "Prevent the screen from sleeping while the app is open",
+  "@settingsKeepScreenOnSubtitle": {
+    "description": "Settings toggle subtitle for keep-screen-on"
+  },
+  "settingsBatterySaver": "Battery Saver",
+  "@settingsBatterySaver": {
+    "description": "Battery saver toggle title"
+  },
+  "settingsBatterySaverSubtitle": "Auto-double ping interval when battery ≤20%",
+  "@settingsBatterySaverSubtitle": {
+    "description": "Battery saver toggle subtitle"
+  },
+  "settingsLockMapRotation": "Lock Map Rotation",
+  "@settingsLockMapRotation": {
+    "description": "Toggle to lock map rotation to north"
+  },
+  "settingsLockMapRotationSubtitle": "Prevent map rotation",
+  "@settingsLockMapRotationSubtitle": {
+    "description": "Subtitle for lock rotation toggle"
+  },
+  "settingsCurrentLocationMarker": "Current Location Marker",
+  "@settingsCurrentLocationMarker": {
+    "description": "Title for current location marker style"
+  },
+  "settingsCurrentLocationMarkerSubtitle": "The direction arrow follows the phone compass",
+  "@settingsCurrentLocationMarkerSubtitle": {
+    "description": "Subtitle for current location marker style"
+  },
+  "settingsMarkerCircle": "Circle",
+  "@settingsMarkerCircle": {
+    "description": "Circle location marker style"
+  },
+  "settingsMarkerDirectionArrow": "Direction arrow",
+  "@settingsMarkerDirectionArrow": {
+    "description": "Compass arrow location marker style"
+  },
+  "settingsCalibrateCompass": "Calibrate Compass",
+  "@settingsCalibrateCompass": {
+    "description": "Tile to open compass calibration"
+  },
+  "settingsCalibrateCompassSubtitle": "Draw a figure-8 in the air if the heading looks wrong",
+  "@settingsCalibrateCompassSubtitle": {
+    "description": "Subtitle for compass calibration"
+  },
+  "settingsInterfaceTheme": "Interface Theme",
+  "@settingsInterfaceTheme": {
+    "description": "Tile to choose app interface theme"
+  },
+  "settingsMapTheme": "Map Theme",
+  "@settingsMapTheme": {
+    "description": "Tile to choose map theme"
+  },
+  "settingsScanForRepeaters": "Scan for Repeaters",
+  "@settingsScanForRepeaters": {
+    "description": "Tile to scan for nearby LoRa repeaters"
+  },
+  "settingsScanFindNearby": "Find nearby LoRa nodes",
+  "@settingsScanFindNearby": {
+    "description": "Subtitle when no repeaters have been found yet"
+  },
+  "settingsRepeatersFound": "{count, plural, one{{count} repeater found} other{{count} repeaters found}}",
+  "@settingsRepeatersFound": {
+    "description": "Subtitle showing how many repeaters were found",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsRefreshContactList": "Refresh Contact List",
+  "@settingsRefreshContactList": {
+    "description": "Tile to refresh repeater names from the device"
+  },
+  "settingsRefreshContactListSubtitle": "Update repeater names from device",
+  "@settingsRefreshContactListSubtitle": {
+    "description": "Subtitle for refresh contact list"
+  },
+  "settingsColorMode": "Color Mode",
+  "@settingsColorMode": {
+    "description": "Coverage color mode setting"
+  },
+  "settingsColorModeQuality": "Quality",
+  "@settingsColorModeQuality": {
+    "description": "Color coverage by signal quality"
+  },
+  "settingsColorModeAge": "Age",
+  "@settingsColorModeAge": {
+    "description": "Color coverage by sample age"
+  },
+  "settingsColorModeRedundancy": "Redundancy",
+  "@settingsColorModeRedundancy": {
+    "description": "Color coverage by sample redundancy"
+  },
+  "settingsDistanceUnit": "Distance Unit",
+  "@settingsDistanceUnit": {
+    "description": "Distance unit preference"
+  },
+  "settingsMiles": "Miles",
+  "@settingsMiles": {
+    "description": "Miles distance unit option"
+  },
+  "settingsKilometers": "Kilometers",
+  "@settingsKilometers": {
+    "description": "Kilometers distance unit option"
+  },
+  "settingsFuelUnit": "Fuel Unit",
+  "@settingsFuelUnit": {
+    "description": "Fuel unit preference"
+  },
+  "settingsFuelUnitImperial": "MPG / Gallons",
+  "@settingsFuelUnitImperial": {
+    "description": "Imperial fuel unit option"
+  },
+  "settingsFuelUnitMetric": "L/100km / Litres",
+  "@settingsFuelUnitMetric": {
+    "description": "Metric fuel unit option"
+  },
+  "settingsColorBlindMode": "Color Blind Mode",
+  "@settingsColorBlindMode": {
+    "description": "Color vision accessibility mode"
+  },
+  "settingsColorBlindNormal": "Normal",
+  "@settingsColorBlindNormal": {
+    "description": "Default color vision option"
+  },
+  "settingsColorBlindDeuteranopia": "Deuteranopia",
+  "@settingsColorBlindDeuteranopia": {
+    "description": "Deuteranopia color-blind mode; keep medical term"
+  },
+  "settingsColorBlindProtanopia": "Protanopia",
+  "@settingsColorBlindProtanopia": {
+    "description": "Protanopia color-blind mode; keep medical term"
+  },
+  "settingsColorBlindTritanopia": "Tritanopia",
+  "@settingsColorBlindTritanopia": {
+    "description": "Tritanopia color-blind mode; keep medical term"
+  },
+  "settingsDiscoveryTimeout": "Discovery Timeout",
+  "@settingsDiscoveryTimeout": {
+    "description": "How long to wait for repeater responses"
+  },
+  "settingsDiscoveryTimeoutSubtitle": "How long to wait for repeater responses",
+  "@settingsDiscoveryTimeoutSubtitle": {
+    "description": "Subtitle for discovery timeout"
+  },
+  "settingsThoroughResponseCollection": "Thorough Response Collection",
+  "@settingsThoroughResponseCollection": {
+    "description": "Toggle for waiting until discovery timeout"
+  },
+  "settingsThoroughOn": "Thorough: collect responses until the discovery timeout",
+  "@settingsThoroughOn": {
+    "description": "Subtitle when thorough collection is enabled"
+  },
+  "settingsThoroughOff": "Fast: finish 3 seconds after the first response",
+  "@settingsThoroughOff": {
+    "description": "Subtitle when thorough collection is disabled"
+  },
+  "settingsIgnoreRepeaters": "Ignore Repeaters",
+  "@settingsIgnoreRepeaters": {
+    "description": "Tile and dialog to ignore repeater prefixes"
+  },
+  "settingsIgnoringPrefix": "Ignoring: {prefix}",
+  "@settingsIgnoringPrefix": {
+    "description": "Subtitle listing ignored repeater prefixes",
+    "placeholders": {
+      "prefix": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsNotFiltering": "Not filtering",
+  "@settingsNotFiltering": {
+    "description": "Subtitle when no ignore filter is set"
+  },
+  "settingsIncludeOnlyRepeaters": "Include Only Repeaters",
+  "@settingsIncludeOnlyRepeaters": {
+    "description": "Tile and dialog for repeater whitelist"
+  },
+  "settingsWhitelistPrefix": "Whitelist: {prefixes}",
+  "@settingsWhitelistPrefix": {
+    "description": "Subtitle listing whitelisted repeater prefixes",
+    "placeholders": {
+      "prefixes": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsShowAllRepeaters": "Show all repeaters",
+  "@settingsShowAllRepeaters": {
+    "description": "Subtitle when no repeater whitelist is set"
+  },
+  "settingsApplyWhitelistToEdges": "Apply Whitelist to Edges",
+  "@settingsApplyWhitelistToEdges": {
+    "description": "Toggle to filter map edges by whitelist"
+  },
+  "settingsApplyWhitelistToEdgesSubtitle": "Only show edges for whitelisted repeaters",
+  "@settingsApplyWhitelistToEdgesSubtitle": {
+    "description": "Subtitle for whitelist-on-edges toggle"
+  },
+  "settingsPingMode": "Ping Mode",
+  "@settingsPingMode": {
+    "description": "How automatic pings are triggered"
+  },
+  "settingsPingModeDistance": "Distance",
+  "@settingsPingModeDistance": {
+    "description": "Ping when distance threshold is reached"
+  },
+  "settingsPingModeTime": "Time",
+  "@settingsPingModeTime": {
+    "description": "Ping on a time interval"
+  },
+  "settingsPingModeBoth": "Both",
+  "@settingsPingModeBoth": {
+    "description": "Ping on both distance and time"
+  },
+  "settingsPingDistance": "Ping Distance",
+  "@settingsPingDistance": {
+    "description": "Tile for ping distance interval"
+  },
+  "settingsPingTimeInterval": "Ping Time Interval",
+  "@settingsPingTimeInterval": {
+    "description": "Tile for ping time interval"
+  },
+  "settingsCoverageResolution": "Coverage Resolution",
+  "@settingsCoverageResolution": {
+    "description": "Coverage square size setting and dialog title"
+  },
+  "settingsPingInterval": "Ping Interval",
+  "@settingsPingInterval": {
+    "description": "Dialog title for choosing ping distance"
+  },
+  "settingsPingIntervalPrompt": "How often should pings be sent?",
+  "@settingsPingIntervalPrompt": {
+    "description": "Prompt in ping interval dialog"
+  },
+  "settingsPingFrequent": "Frequent",
+  "@settingsPingFrequent": {
+    "description": "Frequent ping interval option"
+  },
+  "settingsPingFrequentSubtitle": "Every 50 meters",
+  "@settingsPingFrequentSubtitle": {
+    "description": "Frequent ping interval description"
+  },
+  "settingsPingNormal": "Normal",
+  "@settingsPingNormal": {
+    "description": "Normal ping interval option"
+  },
+  "settingsPingNormalSubtitle": "Every 200 meters (~0.12 miles)",
+  "@settingsPingNormalSubtitle": {
+    "description": "Normal ping interval description"
+  },
+  "settingsPingSparse": "Sparse",
+  "@settingsPingSparse": {
+    "description": "Sparse ping interval option"
+  },
+  "settingsPingSparseSubtitle": "Every 0.5 miles (805 meters)",
+  "@settingsPingSparseSubtitle": {
+    "description": "Sparse ping interval description"
+  },
+  "settingsPingVerySparse": "Very Sparse",
+  "@settingsPingVerySparse": {
+    "description": "Very sparse ping interval option"
+  },
+  "settingsPingVerySparseSubtitle": "Every 1 mile (1609 meters)",
+  "@settingsPingVerySparseSubtitle": {
+    "description": "Very sparse ping interval description"
+  },
+  "settingsPingIntervalSet": "Ping interval: {description}",
+  "@settingsPingIntervalSet": {
+    "description": "Snackbar after changing ping interval",
+    "placeholders": {
+      "description": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsPingIntervalMetersFrequent": "{meters} meters (frequent)",
+  "@settingsPingIntervalMetersFrequent": {
+    "description": "Ping interval description under 100 meters",
+    "placeholders": {
+      "meters": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsPingIntervalMeters": "{meters} meters",
+  "@settingsPingIntervalMeters": {
+    "description": "Ping interval description in meters",
+    "placeholders": {
+      "meters": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsPingIntervalMiles": "{miles} miles ({meters}m)",
+  "@settingsPingIntervalMiles": {
+    "description": "Ping interval description in miles with meters",
+    "placeholders": {
+      "miles": {
+        "type": "String"
+      },
+      "meters": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsCoverageResolutionPrompt": "Choose the size of coverage squares:",
+  "@settingsCoverageResolutionPrompt": {
+    "description": "Prompt in coverage resolution dialog"
+  },
+  "settingsCoverageRegional": "Regional",
+  "@settingsCoverageRegional": {
+    "description": "Regional coverage resolution option"
+  },
+  "settingsCoverageRegionalSubtitle": "~20km squares (precision 4)",
+  "@settingsCoverageRegionalSubtitle": {
+    "description": "Regional coverage option subtitle"
+  },
+  "settingsCoverageCity": "City-level",
+  "@settingsCoverageCity": {
+    "description": "City-level coverage resolution option"
+  },
+  "settingsCoverageCitySubtitle": "~5km squares (precision 5)",
+  "@settingsCoverageCitySubtitle": {
+    "description": "City-level coverage option subtitle"
+  },
+  "settingsCoverageNeighborhood": "Neighborhood",
+  "@settingsCoverageNeighborhood": {
+    "description": "Neighborhood coverage resolution option"
+  },
+  "settingsCoverageNeighborhoodSubtitle": "~1.2km squares (precision 6, default)",
+  "@settingsCoverageNeighborhoodSubtitle": {
+    "description": "Neighborhood coverage option subtitle"
+  },
+  "settingsCoverageStreet": "Street-level",
+  "@settingsCoverageStreet": {
+    "description": "Street-level coverage resolution option"
+  },
+  "settingsCoverageStreetSubtitle": "~153m squares (precision 7)",
+  "@settingsCoverageStreetSubtitle": {
+    "description": "Street-level coverage option subtitle"
+  },
+  "settingsCoverageBuilding": "Building-level",
+  "@settingsCoverageBuilding": {
+    "description": "Building-level coverage resolution option"
+  },
+  "settingsCoverageBuildingSubtitle": "~38m squares (precision 8, detailed)",
+  "@settingsCoverageBuildingSubtitle": {
+    "description": "Building-level coverage option subtitle"
+  },
+  "settingsCoverageRegionalDesc": "Regional (~20km squares)",
+  "@settingsCoverageRegionalDesc": {
+    "description": "Regional coverage summary for tile and snackbar"
+  },
+  "settingsCoverageCityDesc": "City-level (~5km squares)",
+  "@settingsCoverageCityDesc": {
+    "description": "City-level coverage summary"
+  },
+  "settingsCoverageNeighborhoodDesc": "Neighborhood (~1.2km squares)",
+  "@settingsCoverageNeighborhoodDesc": {
+    "description": "Neighborhood coverage summary"
+  },
+  "settingsCoverageStreetDesc": "Street-level (~153m squares)",
+  "@settingsCoverageStreetDesc": {
+    "description": "Street-level coverage summary"
+  },
+  "settingsCoverageBuildingDesc": "Building-level (~38m squares)",
+  "@settingsCoverageBuildingDesc": {
+    "description": "Building-level coverage summary"
+  },
+  "settingsCoverageResolutionSet": "Coverage resolution: {description}",
+  "@settingsCoverageResolutionSet": {
+    "description": "Snackbar after changing coverage resolution",
+    "placeholders": {
+      "description": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsRepeaterPrefixes": "Repeater Prefixes",
+  "@settingsRepeaterPrefixes": {
+    "description": "Label for comma-separated repeater prefixes"
+  },
+  "settingsIgnoreRepeaterHint": "e.g., 7E, A4F, BAD5",
+  "@settingsIgnoreRepeaterHint": {
+    "description": "Hint for ignore-repeaters field"
+  },
+  "settingsIgnoreRepeaterDescription": "Filter out responses from your mobile repeater(s) to avoid false coverage. Enter repeater prefixes separated by commas:",
+  "@settingsIgnoreRepeaterDescription": {
+    "description": "Description in ignore-repeaters dialog"
+  },
+  "settingsRepeaterPrefixUpdated": "Repeater prefix updated",
+  "@settingsRepeaterPrefixUpdated": {
+    "description": "Snackbar after saving ignored prefixes"
+  },
+  "settingsIncludeOnlyHint": "e.g., 7E3A, A4F2, 8B",
+  "@settingsIncludeOnlyHint": {
+    "description": "Hint for include-only repeaters field"
+  },
+  "settingsIncludeOnlyDescription": "Show only samples from specific repeaters (whitelist). Enter repeater prefixes separated by commas:",
+  "@settingsIncludeOnlyDescription": {
+    "description": "Description in include-only repeaters dialog"
+  },
+  "settingsRepeaterWhitelistUpdated": "Repeater whitelist updated",
+  "@settingsRepeaterWhitelistUpdated": {
+    "description": "Snackbar after saving repeater whitelist"
+  },
+  "settingsLocationQualityResetSnack": "Location quality filters reset",
+  "@settingsLocationQualityResetSnack": {
+    "description": "Snackbar after restoring location quality defaults"
+  },
+  "settingsMaxHorizontalError": "Maximum Horizontal Error",
+  "@settingsMaxHorizontalError": {
+    "description": "Location quality threshold title"
+  },
+  "settingsMaxHorizontalErrorSubtitle": "Reject positions with worse reported accuracy",
+  "@settingsMaxHorizontalErrorSubtitle": {
+    "description": "Subtitle for maximum horizontal error"
+  },
+  "settingsMaxHorizontalErrorDescription": "Positions whose reported horizontal error is larger than this value are ignored.",
+  "@settingsMaxHorizontalErrorDescription": {
+    "description": "Dialog description for maximum horizontal error"
+  },
+  "settingsAirborneAltitude": "Airborne Altitude",
+  "@settingsAirborneAltitude": {
+    "description": "Airborne altitude threshold title"
+  },
+  "settingsAirborneAltitudeSubtitle": "Altitude used together with airborne speed",
+  "@settingsAirborneAltitudeSubtitle": {
+    "description": "Subtitle for airborne altitude"
+  },
+  "settingsAirborneAltitudeDescription": "At or above this altitude, a position is ignored only when it also exceeds the airborne speed.",
+  "@settingsAirborneAltitudeDescription": {
+    "description": "Dialog description for airborne altitude"
+  },
+  "settingsAirborneSpeed": "Airborne Speed",
+  "@settingsAirborneSpeed": {
+    "description": "Airborne speed threshold title"
+  },
+  "settingsAirborneSpeedSubtitle": "Speed used together with airborne altitude",
+  "@settingsAirborneSpeedSubtitle": {
+    "description": "Subtitle for airborne speed"
+  },
+  "settingsAirborneSpeedDescription": "At or above this speed, a high-altitude position is treated as a probable flight.",
+  "@settingsAirborneSpeedDescription": {
+    "description": "Dialog description for airborne speed"
+  },
+  "settingsMaxWardriveSpeed": "Maximum Wardrive Speed",
+  "@settingsMaxWardriveSpeed": {
+    "description": "Maximum plausible wardrive speed title"
+  },
+  "settingsMaxWardriveSpeedSubtitle": "Reject positions moving faster than this",
+  "@settingsMaxWardriveSpeedSubtitle": {
+    "description": "Subtitle for maximum wardrive speed"
+  },
+  "settingsMaxWardriveSpeedDescription": "Positions moving at or above this speed are ignored as implausible wardrive data.",
+  "@settingsMaxWardriveSpeedDescription": {
+    "description": "Dialog description for maximum wardrive speed"
+  },
+  "settingsRestoreDefaults": "Restore Defaults",
+  "@settingsRestoreDefaults": {
+    "description": "Button to restore location quality defaults"
+  },
+  "settingsImpossibleZonesBlurb": "Places you cannot physically be. GPS inside a zone is discarded and the last valid position is kept. Zones are not shown on the map.",
+  "@settingsImpossibleZonesBlurb": {
+    "description": "Explanation of impossible zones"
+  },
+  "settingsAddImpossibleZone": "Add Impossible Zone",
+  "@settingsAddImpossibleZone": {
+    "description": "Tile and dialog title to add an impossible zone"
+  },
+  "settingsImpossibleZoneEmptySubtitle": "Uses current position or map center",
+  "@settingsImpossibleZoneEmptySubtitle": {
+    "description": "Subtitle when no impossible zones exist"
+  },
+  "settingsImpossibleZoneCount": "{count, plural, one{{count} zone} other{{count} zones}}",
+  "@settingsImpossibleZoneCount": {
+    "description": "Count of configured impossible zones",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsUnnamedZone": "Unnamed zone",
+  "@settingsUnnamedZone": {
+    "description": "Fallback label for a zone without a name"
+  },
+  "settingsDeleteZoneTooltip": "Delete zone",
+  "@settingsDeleteZoneTooltip": {
+    "description": "Tooltip to delete one impossible zone"
+  },
+  "settingsClearImpossibleZones": "Clear Impossible Zones",
+  "@settingsClearImpossibleZones": {
+    "description": "Tile and dialog title to remove all impossible zones"
+  },
+  "settingsRemoveAllZones": "{count, plural, one{Remove all {count} zone} other{Remove all {count} zones}}",
+  "@settingsRemoveAllZones": {
+    "description": "Subtitle to remove every configured zone",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsClearImpossibleZonesConfirm": "Remove all impossible zones? GPS inside those areas will no longer be discarded.",
+  "@settingsClearImpossibleZonesConfirm": {
+    "description": "Confirmation body for clearing impossible zones"
+  },
+  "settingsAddImpossibleZoneCenter": "Center: {lat}, {lon}",
+  "@settingsAddImpossibleZoneCenter": {
+    "description": "Shows the chosen zone center coordinates",
+    "placeholders": {
+      "lat": {
+        "type": "String"
+      },
+      "lon": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsAddImpossibleZoneBlurb": "GPS inside this area is treated as invalid and discarded.",
+  "@settingsAddImpossibleZoneBlurb": {
+    "description": "Explanation in add-impossible-zone dialog"
+  },
+  "settingsLabelOptional": "Label (optional)",
+  "@settingsLabelOptional": {
+    "description": "Optional zone label field"
+  },
+  "settingsLabelHintAirport": "e.g., Airport",
+  "@settingsLabelHintAirport": {
+    "description": "Hint for optional zone label"
+  },
+  "settingsRadius": "Radius:",
+  "@settingsRadius": {
+    "description": "Radius picker label"
+  },
+  "settingsRadius500m": "500m (~0.3 mi)",
+  "@settingsRadius500m": {
+    "description": "500 meter zone radius option"
+  },
+  "settingsRadius1km": "1 km (~0.6 mi)",
+  "@settingsRadius1km": {
+    "description": "1 kilometer zone radius option"
+  },
+  "settingsRadius2km": "2 km (~1.2 mi)",
+  "@settingsRadius2km": {
+    "description": "2 kilometer zone radius option"
+  },
+  "settingsRadius5km": "5 km (~3 mi)",
+  "@settingsRadius5km": {
+    "description": "5 kilometer zone radius option"
+  },
+  "settingsAddZone": "Add Zone",
+  "@settingsAddZone": {
+    "description": "Confirm adding an impossible zone"
+  },
+  "settingsImpossibleZoneAdded": "Impossible zone added",
+  "@settingsImpossibleZoneAdded": {
+    "description": "Snackbar after adding an impossible zone"
+  },
+  "settingsTotalDistanceDriven": "Total Distance Driven",
+  "@settingsTotalDistanceDriven": {
+    "description": "Lifetime distance statistic"
+  },
+  "settingsResetTooltip": "Reset",
+  "@settingsResetTooltip": {
+    "description": "Tooltip to reset total distance"
+  },
+  "settingsResetDistance": "Reset Distance",
+  "@settingsResetDistance": {
+    "description": "Dialog title to reset driven distance"
+  },
+  "settingsResetDistanceConfirm": "Reset total distance driven to zero?",
+  "@settingsResetDistanceConfirm": {
+    "description": "Confirmation body for resetting distance"
+  },
+  "settingsEstimatedFuelUsed": "Estimated Fuel Used",
+  "@settingsEstimatedFuelUsed": {
+    "description": "Estimated fuel usage statistic"
+  },
+  "settingsVehicleFuelEconomy": "Vehicle Fuel Economy",
+  "@settingsVehicleFuelEconomy": {
+    "description": "Vehicle fuel economy setting"
+  },
+  "settingsLitresPer100km": "Litres per 100km (L/100km)",
+  "@settingsLitresPer100km": {
+    "description": "Metric fuel economy field label"
+  },
+  "settingsMilesPerGallon": "Miles Per Gallon (MPG)",
+  "@settingsMilesPerGallon": {
+    "description": "Imperial fuel economy field label"
+  },
+  "settingsHintMetricEconomy": "e.g., 9.4",
+  "@settingsHintMetricEconomy": {
+    "description": "Hint for metric fuel economy"
+  },
+  "settingsHintImperialEconomy": "e.g., 25.0",
+  "@settingsHintImperialEconomy": {
+    "description": "Hint for imperial fuel economy"
+  },
+  "settingsFuelEconomyMetric": "{value} L/100km",
+  "@settingsFuelEconomyMetric": {
+    "description": "Displayed metric fuel economy",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsFuelEconomyImperial": "{value} MPG",
+  "@settingsFuelEconomyImperial": {
+    "description": "Displayed imperial fuel economy",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsFuelUsedLitres": "{amount} L (~${cost} @ ${price}/L)",
+  "@settingsFuelUsedLitres": {
+    "description": "Estimated litres used with cost",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "cost": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsFuelUsedGallons": "{amount} gal (~${cost} @ ${price}/gal)",
+  "@settingsFuelUsedGallons": {
+    "description": "Estimated gallons used with cost",
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "cost": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsFuelPrice": "Fuel Price",
+  "@settingsFuelPrice": {
+    "description": "Metric fuel price setting"
+  },
+  "settingsGasPrice": "Gas Price",
+  "@settingsGasPrice": {
+    "description": "Imperial gas price setting"
+  },
+  "settingsPricePerLitre": "Price per Litre",
+  "@settingsPricePerLitre": {
+    "description": "Metric fuel price field label"
+  },
+  "settingsPricePerGallon": "Price per Gallon",
+  "@settingsPricePerGallon": {
+    "description": "Imperial gas price field label"
+  },
+  "settingsHintFuelPrice": "e.g., 1.85",
+  "@settingsHintFuelPrice": {
+    "description": "Hint for metric fuel price"
+  },
+  "settingsHintGasPrice": "e.g., 3.50",
+  "@settingsHintGasPrice": {
+    "description": "Hint for imperial gas price"
+  },
+  "settingsFuelPriceDisplay": "${price}/L",
+  "@settingsFuelPriceDisplay": {
+    "description": "Displayed metric fuel price",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsGasPriceDisplay": "${price}/gal",
+  "@settingsGasPriceDisplay": {
+    "description": "Displayed imperial gas price",
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsAnalytics": "Analytics",
+  "@settingsAnalytics": {
+    "description": "Tile to open analytics"
+  },
+  "settingsAnalyticsSubtitle": "Time, goals, comparison & repeater stats",
+  "@settingsAnalyticsSubtitle": {
+    "description": "Subtitle for analytics tile"
+  },
+  "settingsAchievements": "Achievements",
+  "@settingsAchievements": {
+    "description": "Tile to open achievements"
+  },
+  "settingsAchievementsSubtitle": "Wardrive milestone badges",
+  "@settingsAchievementsSubtitle": {
+    "description": "Subtitle for achievements tile"
+  },
+  "settingsDeviceComparison": "Device Comparison",
+  "@settingsDeviceComparison": {
+    "description": "Tile to compare companion devices"
+  },
+  "settingsDeviceComparisonSubtitle": "Compare LoRa companion performance",
+  "@settingsDeviceComparisonSubtitle": {
+    "description": "Subtitle for device comparison"
+  },
+  "settingsDownloadCommunityCoverage": "Download Community Coverage",
+  "@settingsDownloadCommunityCoverage": {
+    "description": "Tile to download community coverage"
+  },
+  "settingsCommunityCoverageCached": "Cached — toggle in map layers",
+  "@settingsCommunityCoverageCached": {
+    "description": "Subtitle when community coverage is cached"
+  },
+  "settingsPullCoverageFromWeb": "Pull coverage data from web map",
+  "@settingsPullCoverageFromWeb": {
+    "description": "Subtitle when community coverage is not cached"
+  },
+  "settingsSessionHistory": "Session History",
+  "@settingsSessionHistory": {
+    "description": "Tile to open session history"
+  },
+  "settingsFilteringBySession": "Filtering by session",
+  "@settingsFilteringBySession": {
+    "description": "Subtitle when a session filter is active"
+  },
+  "settingsViewPastSessions": "View past wardrive sessions",
+  "@settingsViewPastSessions": {
+    "description": "Subtitle when no session filter is active"
+  },
+  "settingsClearFilterTooltip": "Clear filter",
+  "@settingsClearFilterTooltip": {
+    "description": "Tooltip to clear session filter"
+  },
+  "settingsSessionFilterCleared": "Session filter cleared",
+  "@settingsSessionFilterCleared": {
+    "description": "Snackbar after clearing session filter"
+  },
+  "settingsExportData": "Export Data",
+  "@settingsExportData": {
+    "description": "Tile to export samples"
+  },
+  "settingsExportDataSubtitle": "JSON, CSV, GPX, or KML",
+  "@settingsExportDataSubtitle": {
+    "description": "Subtitle listing export formats"
+  },
+  "settingsImportData": "Import Data",
+  "@settingsImportData": {
+    "description": "Tile to import samples"
+  },
+  "settingsImportDataSubtitle": "Load samples from file",
+  "@settingsImportDataSubtitle": {
+    "description": "Subtitle for import data"
+  },
+  "settingsShareCoverageMap": "Share Coverage Map",
+  "@settingsShareCoverageMap": {
+    "description": "Tile to screenshot and share the map"
+  },
+  "settingsShareCoverageMapSubtitle": "Screenshot + share in one tap",
+  "@settingsShareCoverageMapSubtitle": {
+    "description": "Subtitle for share coverage map"
+  },
+  "settingsFilterByRepeater": "Filter by Repeater",
+  "@settingsFilterByRepeater": {
+    "description": "Tile to filter coverage by repeater"
+  },
+  "settingsFilteringRepeater": "Filtering: {prefixes}",
+  "@settingsFilteringRepeater": {
+    "description": "Subtitle when a repeater filter is active",
+    "placeholders": {
+      "prefixes": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsShowCoverageFromRepeater": "Show coverage from a specific repeater",
+  "@settingsShowCoverageFromRepeater": {
+    "description": "Subtitle when no repeater filter is active"
+  },
+  "settingsRepeaterFilterCleared": "Repeater filter cleared",
+  "@settingsRepeaterFilterCleared": {
+    "description": "Snackbar after clearing repeater filter"
+  },
+  "settingsFilterBySource": "Filter by Source",
+  "@settingsFilterBySource": {
+    "description": "Tile and dialog to filter by device/operator"
+  },
+  "settingsShowingSource": "Showing: {source}",
+  "@settingsShowingSource": {
+    "description": "Subtitle when a source filter is active",
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsFilterByDeviceOperator": "Filter by device/operator",
+  "@settingsFilterByDeviceOperator": {
+    "description": "Subtitle when no source filter is active"
+  },
+  "settingsSourceFilterCleared": "Source filter cleared",
+  "@settingsSourceFilterCleared": {
+    "description": "Snackbar after clearing source filter"
+  },
+  "settingsNoSourceTaggedData": "No source-tagged data yet",
+  "@settingsNoSourceTaggedData": {
+    "description": "Snackbar when no sources exist to filter"
+  },
+  "settingsShowAll": "Show All",
+  "@settingsShowAll": {
+    "description": "Dialog option to clear source filter"
+  },
+  "settingsShowingDataFrom": "Showing data from: {source}",
+  "@settingsShowingDataFrom": {
+    "description": "Snackbar after choosing a source filter",
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsFindCoverageGaps": "Find Coverage Gaps",
+  "@settingsFindCoverageGaps": {
+    "description": "Tile to find poor-signal areas"
+  },
+  "settingsFindCoverageGapsSubtitle": "Locate areas with poor signal",
+  "@settingsFindCoverageGapsSubtitle": {
+    "description": "Subtitle for find coverage gaps"
+  },
+  "settingsDeleteMode": "Delete Mode",
+  "@settingsDeleteMode": {
+    "description": "Tile to enable sample/cell delete mode"
+  },
+  "settingsDeleteModeSubtitle": "Tap to delete individual samples or cells",
+  "@settingsDeleteModeSubtitle": {
+    "description": "Subtitle for delete mode"
+  },
+  "settingsDeleteModeOn": "Delete mode ON — tap a coverage square or sample to delete",
+  "@settingsDeleteModeOn": {
+    "description": "Snackbar after enabling delete mode"
+  },
+  "settingsPlannedRepeaters": "Planned Repeaters",
+  "@settingsPlannedRepeaters": {
+    "description": "Tile for planned repeater markers"
+  },
+  "settingsPlannedMarkersSubtitle": "{count, plural, one{{count} marker — long-press map to add} other{{count} markers — long-press map to add}}",
+  "@settingsPlannedMarkersSubtitle": {
+    "description": "Count of planned repeater markers",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsClearAllMarkers": "Clear All Markers",
+  "@settingsClearAllMarkers": {
+    "description": "Dialog title to remove planned markers"
+  },
+  "settingsClearAllMarkersConfirm": "Remove all planned repeater markers?",
+  "@settingsClearAllMarkersConfirm": {
+    "description": "Confirmation body for clearing planned markers"
+  },
+  "settingsAllMarkersCleared": "All markers cleared",
+  "@settingsAllMarkersCleared": {
+    "description": "Snackbar after clearing planned markers"
+  },
+  "settingsPrivacyZones": "Privacy Zones",
+  "@settingsPrivacyZones": {
+    "description": "Tile for privacy zones"
+  },
+  "settingsPrivacyZonesSubtitle": "{count, plural, one{{count} zone — excludes data from uploads} other{{count} zones — excludes data from uploads}}",
+  "@settingsPrivacyZonesSubtitle": {
+    "description": "Count of privacy zones",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsClearPrivacyZones": "Clear Privacy Zones",
+  "@settingsClearPrivacyZones": {
+    "description": "Tile and dialog title to remove privacy zones"
+  },
+  "settingsClearPrivacyZonesConfirm": "Remove all privacy zones? Data will no longer be filtered from uploads.",
+  "@settingsClearPrivacyZonesConfirm": {
+    "description": "Confirmation body for clearing privacy zones"
+  },
+  "settingsPrivacyZonesCleared": "Privacy zones cleared",
+  "@settingsPrivacyZonesCleared": {
+    "description": "Snackbar after clearing privacy zones"
+  },
+  "settingsClearMap": "Clear Map",
+  "@settingsClearMap": {
+    "description": "Tile to delete all samples and coverage"
+  },
+  "settingsClearMapSubtitle": "Delete all samples and coverage",
+  "@settingsClearMapSubtitle": {
+    "description": "Subtitle for clear map"
+  },
+  "settingsDownloadOfflineTiles": "Download Offline Tiles",
+  "@settingsDownloadOfflineTiles": {
+    "description": "Tile to cache map tiles"
+  },
+  "settingsDownloadOfflineTilesSubtitle": "Cache map tiles for current view",
+  "@settingsDownloadOfflineTilesSubtitle": {
+    "description": "Subtitle for offline tile download"
+  },
+  "settingsClearTileCache": "Clear Tile Cache",
+  "@settingsClearTileCache": {
+    "description": "Tile to remove cached map tiles"
+  },
+  "settingsClearTileCacheSubtitle": "Remove cached offline map tiles",
+  "@settingsClearTileCacheSubtitle": {
+    "description": "Subtitle for clear tile cache"
+  },
+  "settingsTileCacheCleared": "Tile cache cleared",
+  "@settingsTileCacheCleared": {
+    "description": "Snackbar after clearing tile cache"
+  },
+  "settingsExportSettings": "Export Settings",
+  "@settingsExportSettings": {
+    "description": "Tile to export app settings"
+  },
+  "settingsExportSettingsSubtitle": "Save all app settings to file",
+  "@settingsExportSettingsSubtitle": {
+    "description": "Subtitle for export settings"
+  },
+  "settingsImportSettings": "Import Settings",
+  "@settingsImportSettings": {
+    "description": "Tile to import app settings"
+  },
+  "settingsImportSettingsSubtitle": "Load settings from file",
+  "@settingsImportSettingsSubtitle": {
+    "description": "Subtitle for import settings"
+  },
+  "settingsRepeaterHealth": "Repeater Health",
+  "@settingsRepeaterHealth": {
+    "description": "Tile to open repeater health"
+  },
+  "settingsRepeaterHealthSubtitle": "Per-repeater stats, trends & alerts",
+  "@settingsRepeaterHealthSubtitle": {
+    "description": "Subtitle for repeater health"
+  },
+  "settingsSignalTrends": "Signal Trends",
+  "@settingsSignalTrends": {
+    "description": "Tile to open signal trend charts"
+  },
+  "settingsSignalTrendsSubtitle": "RSSI, SNR & response time charts",
+  "@settingsSignalTrendsSubtitle": {
+    "description": "Subtitle for signal trends"
+  },
+  "settingsDebugDiagnostics": "Debug Diagnostics",
+  "@settingsDebugDiagnostics": {
+    "description": "Tile to open debug logs"
+  },
+  "settingsDebugDiagnosticsSubtitle": "View debug logs for troubleshooting",
+  "@settingsDebugDiagnosticsSubtitle": {
+    "description": "Subtitle for debug diagnostics"
+  },
+  "settingsUploadData": "Upload Data",
+  "@settingsUploadData": {
+    "description": "Upload samples tile and dialog title"
+  },
+  "settingsUploadDataSubtitle": "Upload samples to web map",
+  "@settingsUploadDataSubtitle": {
+    "description": "Subtitle for upload data"
+  },
+  "settingsManageUploadSites": "Manage Upload Sites",
+  "@settingsManageUploadSites": {
+    "description": "Tile to edit upload endpoints"
+  },
+  "settingsManageUploadSitesSubtitle": "Add/edit upload endpoints",
+  "@settingsManageUploadSitesSubtitle": {
+    "description": "Subtitle for manage upload sites"
+  },
+  "settingsUploadNoSites": "No upload sites configured",
+  "@settingsUploadNoSites": {
+    "description": "Empty state in upload site picker"
+  },
+  "settingsUploadSelectSites": "Select sites to upload to:",
+  "@settingsUploadSelectSites": {
+    "description": "Prompt in upload site picker"
+  },
+  "settingsCheckForUpdates": "Check for Updates",
+  "@settingsCheckForUpdates": {
+    "description": "Tile to check for app updates"
+  },
+  "settingsAboutCurrentVersion": "Current version: v{version}",
+  "@settingsAboutCurrentVersion": {
+    "description": "Shows the installed app version",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsViewOnGitHub": "View on GitHub",
+  "@settingsViewOnGitHub": {
+    "description": "Tile to open the GitHub repository"
+  },
+  "settingsViewOnGitHubSubtitle": "Source code and releases",
+  "@settingsViewOnGitHubSubtitle": {
+    "description": "Subtitle for GitHub tile"
+  },
+  "offlineBannerMessage": "You''re offline - local tracking continues",
+  "@offlineBannerMessage": {
+    "description": "Visible text on the app-wide offline banner"
+  },
+  "offlineBannerSemantics": "You are offline. Local tracking continues.",
+  "@offlineBannerSemantics": {
+    "description": "Accessibility label for the app-wide offline banner"
+  },
+  "compassNeedsCalibration": "Compass needs calibration",
+  "@compassNeedsCalibration": {
+    "description": "Title on the map compass calibration banner"
+  },
+  "compassBannerHint": "Move the phone in a figure-8 if heading looks wrong.",
+  "@compassBannerHint": {
+    "description": "Hint on the map compass calibration banner"
+  },
+  "compassLater": "Later",
+  "@compassLater": {
+    "description": "Dismiss the compass calibration banner for now"
+  },
+  "compassCalibrate": "Calibrate",
+  "@compassCalibrate": {
+    "description": "Open the compass calibration sheet"
+  },
+  "compassSensorAccuracyGood": "Sensor accuracy looks good",
+  "@compassSensorAccuracyGood": {
+    "description": "Status when compass sensor accuracy is already reliable"
+  },
+  "compassKeepDrawing": "Keep drawing a figure-8",
+  "@compassKeepDrawing": {
+    "description": "Status while the user is still moving the phone"
+  },
+  "compassCalibrationComplete": "Calibration complete",
+  "@compassCalibrationComplete": {
+    "description": "Status shown just before the calibration sheet closes"
+  },
+  "compassSheetTitle": "Calibrate compass",
+  "@compassSheetTitle": {
+    "description": "Title of the compass calibration bottom sheet"
+  },
+  "compassSheetInstructions": "Hold the phone and draw a figure-8 in the air until the bar fills.",
+  "@compassSheetInstructions": {
+    "description": "Instructions on the compass calibration bottom sheet"
+  },
+  "compassMoveThroughFigureEight": "Move the phone through a figure-8",
+  "@compassMoveThroughFigureEight": {
+    "description": "Default status before the user starts moving the phone"
+  },
+  "compassSkip": "Skip",
+  "@compassSkip": {
+    "description": "Skip compass calibration without completing it"
+  },
+  "compassFigureEightSemantics": "Figure-8 calibration motion",
+  "@compassFigureEightSemantics": {
+    "description": "Accessibility label for the animated figure-8 graphic"
+  },
+  "bluetoothSelectDevice": "Select Bluetooth Device",
+  "@bluetoothSelectDevice": {
+    "description": "Title of the Bluetooth companion device picker"
+  },
+  "bluetoothPreviouslyUsed": "Previously used",
+  "@bluetoothPreviouslyUsed": {
+    "description": "Subtitle for a remembered Bluetooth device"
+  },
+  "bluetoothNearby": "Nearby",
+  "@bluetoothNearby": {
+    "description": "Subtitle for a currently visible Bluetooth device"
+  },
+  "bluetoothCancel": "Cancel",
+  "@bluetoothCancel": {
+    "description": "Cancel button on the Bluetooth device picker"
+  },
+  "bluetoothError": "Bluetooth error: {error}",
+  "@bluetoothError": {
+    "description": "Empty-state message when Bluetooth scan fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "bluetoothSearching": "Searching for LoRa devices...",
+  "@bluetoothSearching": {
+    "description": "Empty-state message while scanning for LoRa devices"
+  },
+  "bluetoothNoDevices": "No LoRa devices found via Bluetooth",
+  "@bluetoothNoDevices": {
+    "description": "Empty-state message when no LoRa devices were found"
+  },
+  "settingsThemeLight": "Light",
+  "@settingsThemeLight": {
+    "description": "Light theme option in interface/map theme pickers"
+  },
+  "settingsThemeDark": "Dark",
+  "@settingsThemeDark": {
+    "description": "Dark theme option in interface/map theme pickers"
+  },
+  "settingsThemeSystemDefault": "System Default",
+  "@settingsThemeSystemDefault": {
+    "description": "Follow-system theme option in interface/map theme pickers"
+  },
+  "settingsChooseInterfaceTheme": "Choose Interface Theme",
+  "@settingsChooseInterfaceTheme": {
+    "description": "Dialog title for choosing the app interface theme"
+  },
+  "settingsChooseMapTheme": "Choose Map Theme",
+  "@settingsChooseMapTheme": {
+    "description": "Dialog title for choosing the map tile theme"
+  },
+  "mapClose": "Close",
+  "@mapClose": {
+    "description": "Close button on map dialogs"
+  },
+  "mapDelete": "Delete",
+  "@mapDelete": {
+    "description": "Delete button on map dialogs"
+  },
+  "mapOk": "OK",
+  "@mapOk": {
+    "description": "OK button on map dialogs"
+  },
+  "mapNotNow": "Not now",
+  "@mapNotNow": {
+    "description": "Dismiss permission/request dialogs without continuing"
+  },
+  "mapContinue": "Continue",
+  "@mapContinue": {
+    "description": "Confirm permission/request dialogs"
+  },
+  "mapShare": "Share",
+  "@mapShare": {
+    "description": "Share export or screenshot"
+  },
+  "mapImport": "Import",
+  "@mapImport": {
+    "description": "Confirm importing settings"
+  },
+  "mapAdd": "Add",
+  "@mapAdd": {
+    "description": "Confirm adding an upload site"
+  },
+  "mapDownload": "Download",
+  "@mapDownload": {
+    "description": "Confirm downloading an update or tiles"
+  },
+  "mapYes": "Yes",
+  "@mapYes": {
+    "description": "Confirm sharing a screenshot"
+  },
+  "mapNo": "No",
+  "@mapNo": {
+    "description": "Decline sharing a screenshot"
+  },
+  "mapExit": "EXIT",
+  "@mapExit": {
+    "description": "Exit map delete mode"
+  },
+  "mapConnect": "Connect",
+  "@mapConnect": {
+    "description": "Connect to a LoRa companion"
+  },
+  "mapConnecting": "Connecting...",
+  "@mapConnecting": {
+    "description": "LoRa connection in progress"
+  },
+  "mapDontSave": "Don''t save",
+  "@mapDontSave": {
+    "description": "Discard an empty tracking session"
+  },
+  "mapNewRepeaterDiscovered": "🆕 New repeater discovered: {repeaterId}",
+  "@mapNewRepeaterDiscovered": {
+    "description": "Snackbar when a never-before-seen repeater is found",
+    "placeholders": {
+      "repeaterId": {
+        "type": "String"
+      }
+    }
+  },
+  "mapEnteringDeadZone": "⚠️ Entering known dead zone ({cellHash})",
+  "@mapEnteringDeadZone": {
+    "description": "Snackbar when entering a known dead zone cell",
+    "placeholders": {
+      "cellHash": {
+        "type": "String"
+      }
+    }
+  },
+  "mapBatterySaverOn": "🔋 Battery saver ON — ping interval doubled",
+  "@mapBatterySaverOn": {
+    "description": "Snackbar when battery saver activates"
+  },
+  "mapBatterySaverOff": "🔋 Battery saver OFF — normal ping interval restored",
+  "@mapBatterySaverOff": {
+    "description": "Snackbar when battery saver deactivates"
+  },
+  "mapCompassCalibrated": "Compass calibrated",
+  "@mapCompassCalibrated": {
+    "description": "Snackbar after compass calibration completes"
+  },
+  "mapSessionEmptyTitle": "Session is empty",
+  "@mapSessionEmptyTitle": {
+    "description": "Title when stopping a session with no GPS points"
+  },
+  "mapSessionEmptyBody": "No GPS points were recorded. Save this session anyway?",
+  "@mapSessionEmptyBody": {
+    "description": "Body when stopping a session with no GPS points"
+  },
+  "mapSessionDiscarded": "Session discarded",
+  "@mapSessionDiscarded": {
+    "description": "Snackbar after discarding an empty session with no history"
+  },
+  "mapSessionDiscardedShowingLast": "Session discarded — showing last saved session",
+  "@mapSessionDiscardedShowingLast": {
+    "description": "Snackbar after discarding an empty session when older sessions exist"
+  },
+  "mapLocationTrackingStarted": "Location tracking started",
+  "@mapLocationTrackingStarted": {
+    "description": "Snackbar when GPS tracking starts without auto-ping"
+  },
+  "mapCarpeaterModeStarted": "Carpeater mode started",
+  "@mapCarpeaterModeStarted": {
+    "description": "Snackbar when Carpeater starts with tracking"
+  },
+  "mapCarpeaterFailedCheckSettings": "Carpeater failed — check settings",
+  "@mapCarpeaterFailedCheckSettings": {
+    "description": "Snackbar when Carpeater fails to start"
+  },
+  "mapLocationTrackingAndAutoPingStarted": "Location tracking and auto-ping started",
+  "@mapLocationTrackingAndAutoPingStarted": {
+    "description": "Snackbar when tracking starts with auto-ping"
+  },
+  "mapFailedToStartTracking": "Failed to start location tracking. Check Android settings.",
+  "@mapFailedToStartTracking": {
+    "description": "Fallback snackbar when tracking fails to start"
+  },
+  "mapNewSessionShowingTrip": "New session — showing this trip only",
+  "@mapNewSessionShowingTrip": {
+    "description": "Snackbar when starting a blank-map session"
+  },
+  "mapShowingSessionFrom": "Showing session from {timestamp}",
+  "@mapShowingSessionFrom": {
+    "description": "Snackbar after loading a saved session on the map",
+    "placeholders": {
+      "timestamp": {
+        "type": "String"
+      }
+    }
+  },
+  "mapPreciseLocationRequiredTitle": "Precise location required",
+  "@mapPreciseLocationRequiredTitle": {
+    "description": "Title of the precise-location permission dialog"
+  },
+  "mapPreciseLocationRequiredBody": "Wardriving needs precise location. In Android app permissions, enable “Use precise location”, then tap Start again.",
+  "@mapPreciseLocationRequiredBody": {
+    "description": "Body of the precise-location permission dialog"
+  },
+  "mapOpenAppSettings": "Open app settings",
+  "@mapOpenAppSettings": {
+    "description": "Action to open Android app settings from a permission dialog"
+  },
+  "mapAllowLocationAllTheTimeTitle": "Allow location all the time",
+  "@mapAllowLocationAllTheTimeTitle": {
+    "description": "Title asking for background location"
+  },
+  "mapAllowLocationAllTheTimeBody": "MeshCore Wardrive records while the screen is off or another app is open. Android needs location access set to “Allow all the time”.",
+  "@mapAllowLocationAllTheTimeBody": {
+    "description": "Body asking for background location"
+  },
+  "mapBackgroundLocationRequiredTitle": "Background location required",
+  "@mapBackgroundLocationRequiredTitle": {
+    "description": "Title when background location was denied"
+  },
+  "mapBackgroundLocationRequiredBody": "Select Permissions → Location → Allow all the time, then return and tap Start again.",
+  "@mapBackgroundLocationRequiredBody": {
+    "description": "Body when background location was denied"
+  },
+  "mapUnrestrictedBatteryTitle": "Unrestricted battery use",
+  "@mapUnrestrictedBatteryTitle": {
+    "description": "Title asking to ignore battery optimizations"
+  },
+  "mapUnrestrictedBatteryBody": "Allow MeshCore Wardrive to ignore battery optimizations so Android does not pause GPS, radio communication, or Wi-Fi scans during a drive.",
+  "@mapUnrestrictedBatteryBody": {
+    "description": "Body asking to ignore battery optimizations"
+  },
+  "mapDisableWifiThrottlingTitle": "Disable Wi-Fi scan throttling",
+  "@mapDisableWifiThrottlingTitle": {
+    "description": "Title asking to disable Wi-Fi scan throttling"
+  },
+  "mapDisableWifiThrottlingBody": "Android does not let apps change this setting automatically. In Developer options, turn off “Wi-Fi scan throttling” for timely beaconDB position updates.",
+  "@mapDisableWifiThrottlingBody": {
+    "description": "Body asking to disable Wi-Fi scan throttling"
+  },
+  "mapDeveloperOptions": "Developer options",
+  "@mapDeveloperOptions": {
+    "description": "Action to open Android developer options"
+  },
+  "mapClearMapHistoryTitle": "Clear Map History?",
+  "@mapClearMapHistoryTitle": {
+    "description": "Title of the clear-map confirmation dialog"
+  },
+  "mapClearMapHistoryBody": "This will permanently delete all {count} samples and coverage data from the map.\n\nThis action cannot be undone.",
+  "@mapClearMapHistoryBody": {
+    "description": "Body of the clear-map confirmation dialog",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapDeleteAll": "Delete All",
+  "@mapDeleteAll": {
+    "description": "Confirm deleting all samples or a coverage cell"
+  },
+  "mapDeletedSamples": "{count, plural, one{Deleted {count} sample} other{Deleted {count} samples}}",
+  "@mapDeletedSamples": {
+    "description": "Snackbar after clearing map history",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapExportFormat": "Export Format",
+  "@mapExportFormat": {
+    "description": "Title of the export format picker"
+  },
+  "mapExportJsonSubtitle": "Full data with all fields",
+  "@mapExportJsonSubtitle": {
+    "description": "JSON export format description"
+  },
+  "mapExportCsvSubtitle": "Spreadsheet-compatible",
+  "@mapExportCsvSubtitle": {
+    "description": "CSV export format description"
+  },
+  "mapExportGpxSubtitle": "GPS track for mapping apps",
+  "@mapExportGpxSubtitle": {
+    "description": "GPX export format description"
+  },
+  "mapExportKmlSubtitle": "Google Earth format",
+  "@mapExportKmlSubtitle": {
+    "description": "KML export format description"
+  },
+  "mapExportAs": "Export as {format}",
+  "@mapExportAs": {
+    "description": "Title of save-or-share export dialog",
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "mapSaveToFolder": "Save to Folder",
+  "@mapSaveToFolder": {
+    "description": "Save an export to a folder"
+  },
+  "mapSaveExport": "Save Export",
+  "@mapSaveExport": {
+    "description": "File-picker title when saving a data export"
+  },
+  "mapExportedSamples": "Exported {count} samples as {format}",
+  "@mapExportedSamples": {
+    "description": "Snackbar after saving a data export",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "mapExportShareSubject": "MeshCore Wardrive Export",
+  "@mapExportShareSubject": {
+    "description": "Share-sheet subject for a data export; brand untranslated"
+  },
+  "mapExportShareText": "Exported {count} samples from MeshCore Wardrive",
+  "@mapExportShareText": {
+    "description": "Share-sheet body for a data export",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapExportShared": "Export shared",
+  "@mapExportShared": {
+    "description": "Snackbar after sharing an export"
+  },
+  "mapExportFailed": "Export failed: {error}",
+  "@mapExportFailed": {
+    "description": "Snackbar when export fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "mapImportedSamples": "{count, plural, one{Imported {count} sample} other{Imported {count} samples}}",
+  "@mapImportedSamples": {
+    "description": "Snackbar prefix after importing samples",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapImportedSessionsSuffix": "{count, plural, one{, {count} session} other{, {count} sessions}}",
+  "@mapImportedSessionsSuffix": {
+    "description": "Optional session count suffix after importing data",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapImportedFromSources": " from {sources}",
+  "@mapImportedFromSources": {
+    "description": "Optional source suffix after importing data",
+    "placeholders": {
+      "sources": {
+        "type": "String"
+      }
+    }
+  },
+  "mapImportFailed": "Import failed: {error}",
+  "@mapImportFailed": {
+    "description": "Snackbar when import fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "mapSaveSettings": "Save Settings",
+  "@mapSaveSettings": {
+    "description": "File-picker title when saving a settings export"
+  },
+  "mapSettingsExported": "Settings exported",
+  "@mapSettingsExported": {
+    "description": "Snackbar after saving settings"
+  },
+  "mapSettingsShareText": "MeshCore Wardrive Settings",
+  "@mapSettingsShareText": {
+    "description": "Share-sheet text for exported settings"
+  },
+  "mapImportSettingsConfirm": "This will overwrite your current app settings (display options, ping settings, upload servers, carpeater config, etc).\n\nYour wardrive data will NOT be affected.\n\nContinue?",
+  "@mapImportSettingsConfirm": {
+    "description": "Confirmation body before importing settings"
+  },
+  "mapImportedSettingsCount": "Imported {count} settings",
+  "@mapImportedSettingsCount": {
+    "description": "Snackbar after importing settings",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapInvalidSettingsFile": "Invalid settings file: {error}",
+  "@mapInvalidSettingsFile": {
+    "description": "Snackbar when a settings file cannot be parsed",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "mapAddPlannedRepeater": "Add Planned Repeater",
+  "@mapAddPlannedRepeater": {
+    "description": "Title when dropping a planned repeater marker"
+  },
+  "mapPlannedRepeaterHint": "e.g., Hilltop near Tracyton",
+  "@mapPlannedRepeaterHint": {
+    "description": "Hint for an optional planned-repeater label"
+  },
+  "mapAddMarker": "Add Marker",
+  "@mapAddMarker": {
+    "description": "Confirm adding a planned repeater marker"
+  },
+  "mapPlannedRepeaterMarkerAdded": "Planned repeater marker added",
+  "@mapPlannedRepeaterMarkerAdded": {
+    "description": "Snackbar after adding a planned repeater"
+  },
+  "mapPlannedRepeater": "Planned Repeater",
+  "@mapPlannedRepeater": {
+    "description": "Fallback title for an unlabeled planned repeater"
+  },
+  "mapLat": "Lat: {value}",
+  "@mapLat": {
+    "description": "Latitude row in map info dialogs",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "mapLon": "Lon: {value}",
+  "@mapLon": {
+    "description": "Longitude row in map info dialogs",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "mapAddedOn": "Added: {date}",
+  "@mapAddedOn": {
+    "description": "When a planned repeater marker was created",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "mapMarkerDeleted": "Marker deleted",
+  "@mapMarkerDeleted": {
+    "description": "Snackbar after deleting a planned repeater marker"
+  },
+  "mapAddPrivacyZone": "Add Privacy Zone",
+  "@mapAddPrivacyZone": {
+    "description": "Title of the add-privacy-zone dialog"
+  },
+  "mapPrivacyZoneBlurb": "Data inside this zone will be excluded from uploads and exports.",
+  "@mapPrivacyZoneBlurb": {
+    "description": "Explanation in the add-privacy-zone dialog"
+  },
+  "mapPrivacyZoneHint": "e.g., Home",
+  "@mapPrivacyZoneHint": {
+    "description": "Hint for an optional privacy-zone label"
+  },
+  "mapPrivacyZoneAdded": "Privacy zone added",
+  "@mapPrivacyZoneAdded": {
+    "description": "Snackbar after adding a privacy zone"
+  },
+  "mapDeleteSample": "Delete Sample",
+  "@mapDeleteSample": {
+    "description": "Title of the delete-sample dialog"
+  },
+  "mapDeleteSampleConfirm": "{kind, select, success{Delete this successful sample from {timestamp}?} fail{Delete this failed sample from {timestamp}?} other{Delete this GPS-only sample from {timestamp}?}}",
+  "@mapDeleteSampleConfirm": {
+    "description": "Confirm deleting one sample; kind is success, fail, or gps",
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "timestamp": {
+        "type": "String"
+      }
+    }
+  },
+  "mapSampleDeleted": "Sample deleted",
+  "@mapSampleDeleted": {
+    "description": "Snackbar after deleting a sample"
+  },
+  "mapDeleteCoverageCell": "Delete Coverage Cell",
+  "@mapDeleteCoverageCell": {
+    "description": "Title of the delete-coverage-cell dialog"
+  },
+  "mapDeleteCoverageCellBody": "Delete all {count} samples in this coverage area?\n\nCell: {cellId}\nThis cannot be undone.",
+  "@mapDeleteCoverageCellBody": {
+    "description": "Body of the delete-coverage-cell dialog",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "cellId": {
+        "type": "String"
+      }
+    }
+  },
+  "mapDeletedSamplesFromCell": "Deleted {count} samples from cell",
+  "@mapDeletedSamplesFromCell": {
+    "description": "Snackbar after deleting a coverage cell",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapZoomToDeleteCell": "Zoom in to delete an individual coverage cell",
+  "@mapZoomToDeleteCell": {
+    "description": "Snackbar when delete-mode tap is too zoomed out"
+  },
+  "mapZoomedPointsGrouped": "Zoomed points are grouped; delete from coverage view",
+  "@mapZoomedPointsGrouped": {
+    "description": "Snackbar when a clustered sample cannot be deleted"
+  },
+  "mapDeleteModeBanner": "DELETE MODE: Tap a coverage square or sample to delete",
+  "@mapDeleteModeBanner": {
+    "description": "Banner shown while map delete mode is active"
+  },
+  "mapUpdateAvailable": "Update Available",
+  "@mapUpdateAvailable": {
+    "description": "Title when a newer app version exists"
+  },
+  "mapUpdateAvailableBody": "New version {latestVersion} is available!\n\nCurrent version: {currentVersion}\n\nWould you like to download it?",
+  "@mapUpdateAvailableBody": {
+    "description": "Body of the update-available dialog",
+    "placeholders": {
+      "latestVersion": {
+        "type": "String"
+      },
+      "currentVersion": {
+        "type": "String"
+      }
+    }
+  },
+  "mapOnLatestVersion": "You''re on the latest version!",
+  "@mapOnLatestVersion": {
+    "description": "Snackbar when the installed app is current"
+  },
+  "mapCouldNotCheckUpdates": "Could not check for updates",
+  "@mapCouldNotCheckUpdates": {
+    "description": "Snackbar when update check fails"
+  },
+  "mapNoInternetTryAgain": "No internet connection. Try again when you are online.",
+  "@mapNoInternetTryAgain": {
+    "description": "Snackbar when update check is offline"
+  },
+  "mapUpdateCheckTimedOut": "Update check timed out. Try again later.",
+  "@mapUpdateCheckTimedOut": {
+    "description": "Snackbar when update check times out"
+  },
+  "mapCouldNotOpenGitHub": "Could not open GitHub",
+  "@mapCouldNotOpenGitHub": {
+    "description": "Snackbar when the GitHub URL cannot be launched"
+  },
+  "mapAutoFollowEnabled": "Auto-follow enabled",
+  "@mapAutoFollowEnabled": {
+    "description": "Snackbar when map follow-location is enabled"
+  },
+  "mapAutoFollowDisabled": "Auto-follow disabled",
+  "@mapAutoFollowDisabled": {
+    "description": "Snackbar when map follow-location is disabled"
+  },
+  "mapMapResetToNorth": "Map reset to north",
+  "@mapMapResetToNorth": {
+    "description": "Snackbar after resetting map rotation"
+  },
+  "mapHeadingUpEnabled": "Heading-up enabled",
+  "@mapHeadingUpEnabled": {
+    "description": "Snackbar when heading-up rotation is enabled"
+  },
+  "mapHeadingUpDisabled": "Heading-up disabled — map reset to north",
+  "@mapHeadingUpDisabled": {
+    "description": "Snackbar when heading-up rotation is disabled"
+  },
+  "mapFailedToCaptureScreenshot": "Failed to capture screenshot",
+  "@mapFailedToCaptureScreenshot": {
+    "description": "Snackbar when screenshot capture returns no image"
+  },
+  "mapScreenshotSavedToGallery": "Screenshot saved to gallery!",
+  "@mapScreenshotSavedToGallery": {
+    "description": "Snackbar after saving a screenshot"
+  },
+  "mapScreenshotSavedTitle": "Screenshot Saved",
+  "@mapScreenshotSavedTitle": {
+    "description": "Title after saving a screenshot"
+  },
+  "mapShareScreenshotPrompt": "Would you like to share the screenshot?",
+  "@mapShareScreenshotPrompt": {
+    "description": "Prompt after saving a screenshot"
+  },
+  "mapScreenshotShareText": "MeshCore Wardrive Coverage Map",
+  "@mapScreenshotShareText": {
+    "description": "Share-sheet text for a coverage screenshot"
+  },
+  "mapFailedToSaveScreenshot": "Failed to save screenshot",
+  "@mapFailedToSaveScreenshot": {
+    "description": "Snackbar when gallery save fails"
+  },
+  "mapErrorCapturingScreenshot": "Error capturing screenshot: {error}",
+  "@mapErrorCapturingScreenshot": {
+    "description": "Snackbar when screenshot capture throws",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "mapDebugTerminal": "Debug Terminal",
+  "@mapDebugTerminal": {
+    "description": "AppBar tooltip for the debug log"
+  },
+  "mapScreenshotTooltip": "Screenshot",
+  "@mapScreenshotTooltip": {
+    "description": "AppBar tooltip for capturing a screenshot"
+  },
+  "mapQuickSettings": "Quick Settings",
+  "@mapQuickSettings": {
+    "description": "Title of the map quick-settings card"
+  },
+  "mapPingDist": "Ping Dist: ",
+  "@mapPingDist": {
+    "description": "Quick-settings label for ping distance"
+  },
+  "mapTimeout": "Timeout: ",
+  "@mapTimeout": {
+    "description": "Quick-settings label for discovery timeout"
+  },
+  "mapMode": "Mode: ",
+  "@mapMode": {
+    "description": "Quick-settings label for ping mode"
+  },
+  "mapStopHeadingUp": "Stop heading-up and reset north",
+  "@mapStopHeadingUp": {
+    "description": "Compass FAB tooltip while heading-up is on"
+  },
+  "mapRotateMapWithHeading": "Rotate map with heading. Long-press to calibrate.",
+  "@mapRotateMapWithHeading": {
+    "description": "Compass FAB tooltip while heading-up is off"
+  },
+  "mapResetToNorth": "Reset to North",
+  "@mapResetToNorth": {
+    "description": "Compass FAB tooltip when rotation is locked north"
+  },
+  "mapStopTracking": "Stop tracking",
+  "@mapStopTracking": {
+    "description": "Tracking FAB tooltip while a session is running"
+  },
+  "mapStartTracking": "Start tracking. Long-press for a blank-map session.",
+  "@mapStartTracking": {
+    "description": "Tracking FAB tooltip while idle"
+  },
+  "mapNoLora": "No LoRa",
+  "@mapNoLora": {
+    "description": "Status when no LoRa companion is connected"
+  },
+  "mapSamplesCount": "Samples: {count}",
+  "@mapSamplesCount": {
+    "description": "Live sample count on the map status card",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "mapRetryingCarpeater": "Retrying Carpeater...",
+  "@mapRetryingCarpeater": {
+    "description": "Snackbar when retrying Carpeater from the status chip"
+  },
+  "mapCarpeaterReconnected": "Carpeater reconnected",
+  "@mapCarpeaterReconnected": {
+    "description": "Snackbar when Carpeater retry succeeds"
+  },
+  "mapCarpeaterRetryFailed": "Carpeater retry failed",
+  "@mapCarpeaterRetryFailed": {
+    "description": "Snackbar when Carpeater retry fails"
+  },
+  "mapCarpeaterStatus": "CP: {state}",
+  "@mapCarpeaterStatus": {
+    "description": "Carpeater status chip; CP abbreviation kept",
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "mapCarpeaterOff": "Off",
+  "@mapCarpeaterOff": {
+    "description": "Carpeater state: disabled"
+  },
+  "mapCarpeaterConnecting": "Connecting",
+  "@mapCarpeaterConnecting": {
+    "description": "Carpeater state: connecting"
+  },
+  "mapCarpeaterLogin": "Login...",
+  "@mapCarpeaterLogin": {
+    "description": "Carpeater state: logging in"
+  },
+  "mapCarpeaterReady": "Ready",
+  "@mapCarpeaterReady": {
+    "description": "Carpeater state: logged in"
+  },
+  "mapCarpeaterScanning": "Scanning",
+  "@mapCarpeaterScanning": {
+    "description": "Carpeater state: discovering"
+  },
+  "mapCarpeaterFetching": "Fetching",
+  "@mapCarpeaterFetching": {
+    "description": "Carpeater state: fetching neighbours"
+  },
+  "mapCarpeaterError": "Error",
+  "@mapCarpeaterError": {
+    "description": "Carpeater state: error"
+  },
+  "mapDuctingStatus": "Ducting: {risk}",
+  "@mapDuctingStatus": {
+    "description": "Atmospheric ducting status chip",
+    "placeholders": {
+      "risk": {
+        "type": "String"
+      }
+    }
+  },
+  "mapDuctingPossible": "Possible",
+  "@mapDuctingPossible": {
+    "description": "Ducting risk: possible"
+  },
+  "mapDuctingLikely": "Likely",
+  "@mapDuctingLikely": {
+    "description": "Ducting risk: likely"
+  },
+  "mapBatterySaverBadge": "🔋 Saver",
+  "@mapBatterySaverBadge": {
+    "description": "Compact battery-saver badge on the status card"
+  },
+  "mapDisconnect": "Disconnect",
+  "@mapDisconnect": {
+    "description": "Tooltip to disconnect the LoRa device"
+  },
+  "mapManualPing": "Manual Ping",
+  "@mapManualPing": {
+    "description": "Tooltip to send a manual ping"
+  },
+  "mapConnectLoraFirst": "Connect LoRa device first",
+  "@mapConnectLoraFirst": {
+    "description": "Snackbar when an action needs a connected radio"
+  },
+  "mapWaitingForGps": "Waiting for GPS location...",
+  "@mapWaitingForGps": {
+    "description": "Snackbar when a ping is blocked on GPS"
+  },
+  "mapPingAlreadyInProgress": "A ping is already in progress",
+  "@mapPingAlreadyInProgress": {
+    "description": "Snackbar when a second ping is requested"
+  },
+  "mapSendingPing": "Sending ping...",
+  "@mapSendingPing": {
+    "description": "Snackbar when a manual ping is sent"
+  },
+  "mapPingHeardBy": "✅ Ping heard by {nodeId}",
+  "@mapPingHeardBy": {
+    "description": "Snackbar when one repeater answers a ping",
+    "placeholders": {
+      "nodeId": {
+        "type": "String"
+      }
+    }
+  },
+  "mapDiscoveryComplete": "{count, plural, one{✅ Discovery complete: found {count} repeater} other{✅ Discovery complete: found {count} repeaters}}",
+  "@mapDiscoveryComplete": {
+    "description": "Snackbar when a ping discovers multiple repeaters",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapNoResponseDeadZone": "❌ No response - dead zone",
+  "@mapNoResponseDeadZone": {
+    "description": "Snackbar when a ping times out"
+  },
+  "mapPingFailed": "❌ Ping failed: {error}",
+  "@mapPingFailed": {
+    "description": "Snackbar when a ping fails with an error",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "mapConnectLoraDevice": "Connect LoRa Device",
+  "@mapConnectLoraDevice": {
+    "description": "Title of the connection-method dialog"
+  },
+  "mapChooseConnectionMethod": "Choose connection method:",
+  "@mapChooseConnectionMethod": {
+    "description": "Prompt in the connection-method dialog"
+  },
+  "mapScanUsbDevices": "Scan USB Devices",
+  "@mapScanUsbDevices": {
+    "description": "Button to scan for USB companions"
+  },
+  "mapScanBluetooth": "Scan Bluetooth",
+  "@mapScanBluetooth": {
+    "description": "Button to scan for Bluetooth companions"
+  },
+  "mapNoUsbDevices": "No USB devices found",
+  "@mapNoUsbDevices": {
+    "description": "Snackbar when USB scan finds nothing"
+  },
+  "mapSelectUsbDevice": "Select USB Device",
+  "@mapSelectUsbDevice": {
+    "description": "Title of the USB device picker"
+  },
+  "mapUsbDeviceFallback": "USB Device",
+  "@mapUsbDeviceFallback": {
+    "description": "Fallback name when a USB device has no product name"
+  },
+  "mapVidPid": "VID: {vid}, PID: {pid}",
+  "@mapVidPid": {
+    "description": "USB vendor and product IDs; VID/PID untranslated",
+    "placeholders": {
+      "vid": {
+        "type": "String"
+      },
+      "pid": {
+        "type": "String"
+      }
+    }
+  },
+  "mapConnectedViaUsb": "Connected via USB",
+  "@mapConnectedViaUsb": {
+    "description": "Snackbar after a USB connection succeeds"
+  },
+  "mapFailedConnectUsb": "Failed to connect USB device",
+  "@mapFailedConnectUsb": {
+    "description": "Snackbar when USB connect fails"
+  },
+  "mapUsbError": "USB error: {error}",
+  "@mapUsbError": {
+    "description": "Snackbar when USB connect throws",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "mapConnectingTo": "Connecting to {name}...",
+  "@mapConnectingTo": {
+    "description": "Snackbar while connecting to a named Bluetooth device",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "mapConnectedViaBluetooth": "Connected via Bluetooth!",
+  "@mapConnectedViaBluetooth": {
+    "description": "Snackbar after a Bluetooth connection succeeds"
+  },
+  "mapFailedConnectBluetooth": "Failed to connect Bluetooth device",
+  "@mapFailedConnectBluetooth": {
+    "description": "Snackbar when Bluetooth connect fails"
+  },
+  "mapDisconnectLoraDevice": "Disconnect LoRa Device",
+  "@mapDisconnectLoraDevice": {
+    "description": "Title of the disconnect confirmation"
+  },
+  "mapDisconnectConfirm": "Disconnect from your LoRa companion device?",
+  "@mapDisconnectConfirm": {
+    "description": "Body of the disconnect confirmation"
+  },
+  "mapLoraDisconnected": "LoRa device disconnected",
+  "@mapLoraDisconnected": {
+    "description": "Snackbar after disconnecting LoRa"
+  },
+  "mapRefreshingContactList": "Refreshing contact list...",
+  "@mapRefreshingContactList": {
+    "description": "Snackbar while refreshing radio contacts"
+  },
+  "mapContactListUpdated": "Contact list updated",
+  "@mapContactListUpdated": {
+    "description": "Snackbar after contact list refresh"
+  },
+  "mapScanningForRepeaters": "Scanning for repeaters...",
+  "@mapScanningForRepeaters": {
+    "description": "Snackbar while scanning for repeaters"
+  },
+  "mapNoRepeatersFound": "No repeaters found",
+  "@mapNoRepeatersFound": {
+    "description": "Snackbar when a repeater scan finds none"
+  },
+  "mapRepeatersFound": "{count, plural, one{Found {count} repeater} other{Found {count} repeaters}}",
+  "@mapRepeatersFound": {
+    "description": "Snackbar after a repeater scan finds nodes",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapSampleInfo": "Sample Info",
+  "@mapSampleInfo": {
+    "description": "Title of the sample details dialog"
+  },
+  "mapStatusLabel": "Status: ",
+  "@mapStatusLabel": {
+    "description": "Label before ping success/fail/GPS-only"
+  },
+  "mapStatusSuccess": "✅ Success",
+  "@mapStatusSuccess": {
+    "description": "Sample ping status: success"
+  },
+  "mapStatusFailed": "❌ Failed",
+  "@mapStatusFailed": {
+    "description": "Sample ping status: failed"
+  },
+  "mapStatusGpsOnly": "📍 GPS Only",
+  "@mapStatusGpsOnly": {
+    "description": "Sample ping status: GPS-only"
+  },
+  "mapTimeLabel": "Time: {timestamp}",
+  "@mapTimeLabel": {
+    "description": "Sample timestamp row",
+    "placeholders": {
+      "timestamp": {
+        "type": "String"
+      }
+    }
+  },
+  "mapRepeaterLabel": "Repeater: ",
+  "@mapRepeaterLabel": {
+    "description": "Label before the repeater name/id on a sample"
+  },
+  "mapRssiLabel": "RSSI: ",
+  "@mapRssiLabel": {
+    "description": "Label before RSSI; RSSI untranslated"
+  },
+  "mapSnrLabel": "SNR: ",
+  "@mapSnrLabel": {
+    "description": "Label before SNR; SNR untranslated"
+  },
+  "mapResponseLabel": "Response: ",
+  "@mapResponseLabel": {
+    "description": "Label before ping response time"
+  },
+  "mapDuctingLabel": "Ducting: ",
+  "@mapDuctingLabel": {
+    "description": "Label before ducting risk on sample info"
+  },
+  "mapRssiValue": "RSSI: {value} dBm",
+  "@mapRssiValue": {
+    "description": "RSSI value with dBm unit symbol",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "mapSnrValue": "SNR: {value} dB",
+  "@mapSnrValue": {
+    "description": "SNR value with dB unit symbol",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "mapGroupedSamples": "{count, plural, one{{count} grouped sample} other{{count} grouped samples}}",
+  "@mapGroupedSamples": {
+    "description": "Title of the clustered-samples dialog",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapSuccessfulCount": "Successful: {count}",
+  "@mapSuccessfulCount": {
+    "description": "Successful ping count in a sample cluster",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapFailedCount": "Failed: {count}",
+  "@mapFailedCount": {
+    "description": "Failed ping count in a sample cluster",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapGpsOnlyCount": "GPS only: {count}",
+  "@mapGpsOnlyCount": {
+    "description": "GPS-only count in a sample cluster",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapNewest": "Newest: {timestamp}",
+  "@mapNewest": {
+    "description": "Newest sample time in a cluster",
+    "placeholders": {
+      "timestamp": {
+        "type": "String"
+      }
+    }
+  },
+  "mapZoomForBreakdown": "Zoom in for a more detailed breakdown.",
+  "@mapZoomForBreakdown": {
+    "description": "Hint in the clustered-samples dialog"
+  },
+  "mapRepeaterFallback": "Repeater {id}",
+  "@mapRepeaterFallback": {
+    "description": "Fallback repeater title when the radio has no name",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "mapIdLabel": "ID: {id}",
+  "@mapIdLabel": {
+    "description": "Repeater ID row; ID untranslated",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "mapFilteringBy": "Filtering by {id}",
+  "@mapFilteringBy": {
+    "description": "Snackbar after filtering coverage to one repeater",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "mapFilterByThis": "Filter by This",
+  "@mapFilterByThis": {
+    "description": "Button to filter the map to this repeater"
+  },
+  "mapShowOnMap": "Show on Map",
+  "@mapShowOnMap": {
+    "description": "Button to pan the map to a repeater"
+  },
+  "mapCoverageSquareInfo": "Coverage Square Info",
+  "@mapCoverageSquareInfo": {
+    "description": "Title of a coverage-cell details dialog"
+  },
+  "mapSamplesLabel": "Samples: ",
+  "@mapSamplesLabel": {
+    "description": "Label before coverage sample count"
+  },
+  "mapSuccessRateLabel": "Success Rate: ",
+  "@mapSuccessRateLabel": {
+    "description": "Label before coverage success rate"
+  },
+  "mapReceivedLabel": "Received: ",
+  "@mapReceivedLabel": {
+    "description": "Label before received ping count"
+  },
+  "mapLostLabel": "Lost: ",
+  "@mapLostLabel": {
+    "description": "Label before lost ping count"
+  },
+  "mapRepeatersHeard": "Repeaters Heard: ",
+  "@mapRepeatersHeard": {
+    "description": "Label before count of heard repeaters"
+  },
+  "mapRepeaterIds": "Repeater IDs: ",
+  "@mapRepeaterIds": {
+    "description": "Label before repeater ID list"
+  },
+  "mapNoPingData": "No ping data",
+  "@mapNoPingData": {
+    "description": "Coverage success rate when there are no pings"
+  },
+  "mapNotAvailable": "N/A",
+  "@mapNotAvailable": {
+    "description": "Placeholder when a percentage cannot be computed"
+  },
+  "mapNearbyRepeaters": "Nearby Repeaters ({count})",
+  "@mapNearbyRepeaters": {
+    "description": "Title of the nearby-repeaters list",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapUploadingTo": "Uploading to {site}...",
+  "@mapUploadingTo": {
+    "description": "Progress text while uploading to a named site",
+    "placeholders": {
+      "site": {
+        "type": "String"
+      }
+    }
+  },
+  "mapUploadingSamples": "Uploading samples...",
+  "@mapUploadingSamples": {
+    "description": "Progress text while uploading samples"
+  },
+  "mapUploadBatch": "Batch {current} of {total}",
+  "@mapUploadBatch": {
+    "description": "Upload batch progress",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "mapUploadComplete": "Upload Complete",
+  "@mapUploadComplete": {
+    "description": "Title when every upload site succeeded"
+  },
+  "mapUploadResults": "Upload Results",
+  "@mapUploadResults": {
+    "description": "Title when some upload sites failed"
+  },
+  "mapUploadedToSites": "Uploaded to {successCount} of {total} sites",
+  "@mapUploadedToSites": {
+    "description": "Summary of multi-site upload results",
+    "placeholders": {
+      "successCount": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "mapUploadFallbackName": "Upload",
+  "@mapUploadFallbackName": {
+    "description": "Fallback site name for the legacy single-endpoint upload path"
+  },
+  "mapUploadError": "Upload error: {error}",
+  "@mapUploadError": {
+    "description": "Snackbar when upload throws",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "mapSelectWhichSitesToUpload": "Select which sites to upload to:",
+  "@mapSelectWhichSitesToUpload": {
+    "description": "Prompt in the manage-upload-sites sheet"
+  },
+  "mapDeleteSite": "Delete Site",
+  "@mapDeleteSite": {
+    "description": "Title of delete-upload-site confirmation"
+  },
+  "mapDeleteSiteConfirm": "Delete \"{name}\"?",
+  "@mapDeleteSiteConfirm": {
+    "description": "Confirm deleting a named upload site",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "mapAddSite": "Add Site",
+  "@mapAddSite": {
+    "description": "Button to add an upload endpoint"
+  },
+  "mapUploadSitesUpdated": "Upload sites updated",
+  "@mapUploadSitesUpdated": {
+    "description": "Snackbar after saving upload site selection"
+  },
+  "mapEditUploadSite": "Edit Upload Site",
+  "@mapEditUploadSite": {
+    "description": "Title of the edit-endpoint dialog"
+  },
+  "mapSiteName": "Site Name",
+  "@mapSiteName": {
+    "description": "Upload endpoint name field"
+  },
+  "mapApiUrl": "API URL",
+  "@mapApiUrl": {
+    "description": "Upload endpoint URL field; API untranslated"
+  },
+  "mapAddUploadSite": "Add Upload Site",
+  "@mapAddUploadSite": {
+    "description": "Title of the add-endpoint dialog"
+  },
+  "mapSiteNameHint": "e.g., My Personal Map",
+  "@mapSiteNameHint": {
+    "description": "Hint for a new upload site name"
+  },
+  "mapTileCacheNotInitialized": "Tile cache not initialized",
+  "@mapTileCacheNotInitialized": {
+    "description": "Snackbar when offline tile download is unavailable"
+  },
+  "mapDownloadTilesBlurb": "Download map tiles for the current view area.",
+  "@mapDownloadTilesBlurb": {
+    "description": "Explanation in the offline-tile download dialog"
+  },
+  "mapMinZoom": "Min Zoom: {zoom}",
+  "@mapMinZoom": {
+    "description": "Minimum zoom slider label",
+    "placeholders": {
+      "zoom": {
+        "type": "String"
+      }
+    }
+  },
+  "mapMaxZoom": "Max Zoom: {zoom}",
+  "@mapMaxZoom": {
+    "description": "Maximum zoom slider label",
+    "placeholders": {
+      "zoom": {
+        "type": "String"
+      }
+    }
+  },
+  "mapTilesEstimate": "{count} tiles (~{megabytes} MB)",
+  "@mapTilesEstimate": {
+    "description": "Estimated tile download size",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "megabytes": {
+        "type": "String"
+      }
+    }
+  },
+  "mapLargeDownloadWarning": "Large download — consider a smaller area or zoom range",
+  "@mapLargeDownloadWarning": {
+    "description": "Warning when tile estimate is very large"
+  },
+  "mapDownloadingTiles": "Downloading Tiles",
+  "@mapDownloadingTiles": {
+    "description": "Title of the tile download progress dialog"
+  },
+  "mapTilesProgress": "{completed} / {total} tiles",
+  "@mapTilesProgress": {
+    "description": "Tile download progress counts",
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "mapDownloadedTiles": "Downloaded {succeeded}/{total} tiles",
+  "@mapDownloadedTiles": {
+    "description": "Snackbar after tile download finishes",
+    "placeholders": {
+      "succeeded": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "mapDownloadCancelled": "Download cancelled ({count} tiles cached)",
+  "@mapDownloadCancelled": {
+    "description": "Snackbar after cancelling tile download",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapShareFailed": "Share failed: {error}",
+  "@mapShareFailed": {
+    "description": "Snackbar when sharing a coverage image fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "mapCoverageShareSubject": "MeshCore Wardrive Coverage",
+  "@mapCoverageShareSubject": {
+    "description": "Share-sheet subject for the coverage map image"
+  },
+  "mapCoverageShareText": "MeshCore Wardrive Coverage Map\n📍 {sampleCount} samples • {coverageCount} coverage areas\n✅ {successCount} success • ❌ {failCount} failed • {successRate}% rate\n🔁 {repeaterCount} repeaters discovered",
+  "@mapCoverageShareText": {
+    "description": "Share-sheet body summarizing coverage stats",
+    "placeholders": {
+      "sampleCount": {
+        "type": "String"
+      },
+      "coverageCount": {
+        "type": "String"
+      },
+      "successCount": {
+        "type": "String"
+      },
+      "failCount": {
+        "type": "String"
+      },
+      "successRate": {
+        "type": "String"
+      },
+      "repeaterCount": {
+        "type": "String"
+      }
+    }
+  },
+  "mapNoRepeatersYet": "No repeaters found yet - do some wardriving first!",
+  "@mapNoRepeatersYet": {
+    "description": "Snackbar when repeater filter has no IDs"
+  },
+  "mapFilterByRepeater": "Filter by Repeater",
+  "@mapFilterByRepeater": {
+    "description": "Title of the repeater filter picker"
+  },
+  "mapShowingCoverageFrom": "Showing coverage from {id}",
+  "@mapShowingCoverageFrom": {
+    "description": "Snackbar after applying a repeater filter",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "mapRepeaterFilterCleared": "Repeater filter cleared",
+  "@mapRepeaterFilterCleared": {
+    "description": "Snackbar after clearing the repeater filter"
+  },
+  "mapClearFilter": "Clear Filter",
+  "@mapClearFilter": {
+    "description": "Button to clear the repeater filter"
+  },
+  "mapNoCoverageYet": "No coverage data yet - do some wardriving first!",
+  "@mapNoCoverageYet": {
+    "description": "Snackbar when coverage-gap search has no data"
+  },
+  "mapNoCoverageGaps": "No coverage gaps found! All areas have >30% success rate.",
+  "@mapNoCoverageGaps": {
+    "description": "Snackbar when no low-success coverage cells exist"
+  },
+  "mapCoverageGaps": "Coverage Gaps ({count})",
+  "@mapCoverageGaps": {
+    "description": "Title of the coverage-gaps list",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapGapSuccessRate": "{rate}% success rate",
+  "@mapGapSuccessRate": {
+    "description": "Title row for a coverage gap",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "mapGapSubtitle": "{coords}\n{received} received / {lost} lost",
+  "@mapGapSubtitle": {
+    "description": "Subtitle for a coverage gap",
+    "placeholders": {
+      "coords": {
+        "type": "String"
+      },
+      "received": {
+        "type": "String"
+      },
+      "lost": {
+        "type": "String"
+      }
+    }
+  },
+  "mapDownloadFrom": "Download from",
+  "@mapDownloadFrom": {
+    "description": "Title when choosing a community-coverage source"
+  },
+  "mapDownloadingCoverage": "Downloading coverage data...",
+  "@mapDownloadingCoverage": {
+    "description": "Snackbar while downloading community coverage"
+  },
+  "mapDownloadedCoverageCells": "Downloaded {count} coverage cells",
+  "@mapDownloadedCoverageCells": {
+    "description": "Snackbar after community coverage download",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapLoadedCachedCoverage": "Loaded cached coverage (offline)",
+  "@mapLoadedCachedCoverage": {
+    "description": "Snackbar when using cached community coverage"
+  },
+  "mapDownloadFailed": "Download failed: {error}",
+  "@mapDownloadFailed": {
+    "description": "Snackbar when community coverage download fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "mapUnknownError": "unknown error",
+  "@mapUnknownError": {
+    "description": "Fallback error when no download error string is available"
+  },
+  "mapCommunitySuccessRate": "Success Rate: {rate}%",
+  "@mapCommunitySuccessRate": {
+    "description": "Community coverage cell success rate",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "mapRepeatersHeader": "Repeaters:",
+  "@mapRepeatersHeader": {
+    "description": "Header above community-coverage repeater list"
+  },
+  "mapLastUpdate": "Last Update: {timestamp}",
+  "@mapLastUpdate": {
+    "description": "Community coverage last-update row",
+    "placeholders": {
+      "timestamp": {
+        "type": "String"
+      }
+    }
+  },
+  "mapAppVersionLabel": "App Version: {version}",
+  "@mapAppVersionLabel": {
+    "description": "Community coverage app-version row",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "mapApproxRadioPositionUncertainty": "Approximate radio position, uncertainty {uncertainty}",
+  "@mapApproxRadioPositionUncertainty": {
+    "description": "Semantics label for the radio-position marker",
+    "placeholders": {
+      "uncertainty": {
+        "type": "String"
+      }
+    }
+  },
+  "mapApproxRadioPositionSnack": "Approximate radio position · {count} repeaters · ±{uncertainty}",
+  "@mapApproxRadioPositionSnack": {
+    "description": "Snackbar when tapping the radio-position marker",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "uncertainty": {
+        "type": "String"
+      }
+    }
+  },
+  "mapCurrentWifiLocation": "Current Wi-Fi location from beaconDB",
+  "@mapCurrentWifiLocation": {
+    "description": "Semantics for the current-position marker on Wi-Fi"
+  },
+  "mapCurrentFusedLocation": "Current fused Android location",
+  "@mapCurrentFusedLocation": {
+    "description": "Semantics for the current-position marker on fused GPS"
+  },
+  "mapPositionHeadingSemantics": "{positionLabel}, heading {degrees} degrees",
+  "@mapPositionHeadingSemantics": {
+    "description": "Semantics for the heading-up location marker",
+    "placeholders": {
+      "positionLabel": {
+        "type": "String"
+      },
+      "degrees": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsTabScore": "Score",
+  "@analyticsTabScore": {
+    "description": "Analytics bottom tab label"
+  },
+  "analyticsTabTime": "Time",
+  "@analyticsTabTime": {
+    "description": "Analytics bottom tab label"
+  },
+  "analyticsTabGoals": "Goals",
+  "@analyticsTabGoals": {
+    "description": "Analytics bottom tab label"
+  },
+  "analyticsTabCompare": "Compare",
+  "@analyticsTabCompare": {
+    "description": "Analytics bottom tab and compare button"
+  },
+  "analyticsTabRepeaters": "Repeaters",
+  "@analyticsTabRepeaters": {
+    "description": "Analytics bottom tab label"
+  },
+  "analyticsNoPingData": "No ping data yet.\nDo some wardriving first!",
+  "@analyticsNoPingData": {
+    "description": "Empty state when analytics has no ping samples"
+  },
+  "analyticsNoRepeaterData": "No repeater data yet.\nDo some wardriving first!",
+  "@analyticsNoRepeaterData": {
+    "description": "Empty state when analytics has no repeater samples"
+  },
+  "analyticsCoverageScore": "Coverage Score",
+  "@analyticsCoverageScore": {
+    "description": "Coverage score card subtitle"
+  },
+  "analyticsStatCells": "Cells",
+  "@analyticsStatCells": {
+    "description": "Coverage score statistic label"
+  },
+  "analyticsStatSuccess": "Success",
+  "@analyticsStatSuccess": {
+    "description": "Coverage score statistic label"
+  },
+  "analyticsStatFresh": "Fresh",
+  "@analyticsStatFresh": {
+    "description": "Coverage score statistic label"
+  },
+  "analyticsStatRepeaters": "Repeaters",
+  "@analyticsStatRepeaters": {
+    "description": "Coverage score statistic label"
+  },
+  "analyticsHowCalculated": "How it''s calculated",
+  "@analyticsHowCalculated": {
+    "description": "Score formula card title"
+  },
+  "analyticsScoreFormula": "Score = Unique Cells × Success Rate × Freshness",
+  "@analyticsScoreFormula": {
+    "description": "Coverage score formula"
+  },
+  "analyticsScoreBreakdown": "• {cells} cells × {rate} × {freshness} = {score}",
+  "@analyticsScoreBreakdown": {
+    "description": "Numeric breakdown of the coverage score",
+    "placeholders": {
+      "cells": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "freshness": {
+        "type": "String"
+      },
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsFreshnessLegend": "• Freshness: <1d=100%, <7d=80%, <30d=50%, older=20%",
+  "@analyticsFreshnessLegend": {
+    "description": "Freshness weighting legend"
+  },
+  "analyticsShareScore": "Share Score",
+  "@analyticsShareScore": {
+    "description": "Button to share coverage score"
+  },
+  "analyticsShareText": "MeshCore Wardrive Score: {score} ({grade})\nCells: {cells} • Success: {success}% • Freshness: {freshness}%\nRepeaters: {repeaters} • Pings: {pings}",
+  "@analyticsShareText": {
+    "description": "Share-sheet body for coverage score",
+    "placeholders": {
+      "score": {
+        "type": "String"
+      },
+      "grade": {
+        "type": "String"
+      },
+      "cells": {
+        "type": "String"
+      },
+      "success": {
+        "type": "String"
+      },
+      "freshness": {
+        "type": "String"
+      },
+      "repeaters": {
+        "type": "String"
+      },
+      "pings": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsSuccessRateByHour": "Success Rate by Hour",
+  "@analyticsSuccessRateByHour": {
+    "description": "Time-of-day chart title"
+  },
+  "analyticsPingsAnalyzed": "{count, plural, one{{count} ping analyzed} other{{count} pings analyzed}}",
+  "@analyticsPingsAnalyzed": {
+    "description": "Count of pings used in the hourly chart",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsPingsCount": "{count, plural, one{{count} ping} other{{count} pings}}",
+  "@analyticsPingsCount": {
+    "description": "Short ping count for tooltips and session pickers",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsHourTooltip": "{time}\n{rate}% ({pings})",
+  "@analyticsHourTooltip": {
+    "description": "Hourly bar chart tooltip",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "pings": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsSummary": "Summary",
+  "@analyticsSummary": {
+    "description": "Best/worst hour section title"
+  },
+  "analyticsBestHour": "Best hour",
+  "@analyticsBestHour": {
+    "description": "Best hour row label"
+  },
+  "analyticsWorstHour": "Worst hour",
+  "@analyticsWorstHour": {
+    "description": "Worst hour row label"
+  },
+  "analyticsHourValue": "{hour}:00 — {rate}%",
+  "@analyticsHourValue": {
+    "description": "Hour and success-rate value",
+    "placeholders": {
+      "hour": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsByPeriod": "By Period",
+  "@analyticsByPeriod": {
+    "description": "Time-of-day period section title"
+  },
+  "analyticsPeriodNight": "Night (0-6)",
+  "@analyticsPeriodNight": {
+    "description": "Night period label"
+  },
+  "analyticsPeriodMorning": "Morning (6-12)",
+  "@analyticsPeriodMorning": {
+    "description": "Morning period label"
+  },
+  "analyticsPeriodAfternoon": "Afternoon (12-18)",
+  "@analyticsPeriodAfternoon": {
+    "description": "Afternoon period label"
+  },
+  "analyticsPeriodEvening": "Evening (18-24)",
+  "@analyticsPeriodEvening": {
+    "description": "Evening period label"
+  },
+  "analyticsNoData": "No data",
+  "@analyticsNoData": {
+    "description": "Placeholder when a period has no samples"
+  },
+  "analyticsNoCoverageGoal": "No coverage goal set",
+  "@analyticsNoCoverageGoal": {
+    "description": "Empty coverage-goal title"
+  },
+  "analyticsSetGoalHint": "Set a target area to track your wardriving progress.",
+  "@analyticsSetGoalHint": {
+    "description": "Empty coverage-goal hint"
+  },
+  "analyticsSetGoalArea": "Set Goal Area",
+  "@analyticsSetGoalArea": {
+    "description": "Button to create a coverage goal"
+  },
+  "analyticsCoverageGoal": "Coverage Goal",
+  "@analyticsCoverageGoal": {
+    "description": "Coverage goal section title"
+  },
+  "analyticsEdit": "Edit",
+  "@analyticsEdit": {
+    "description": "Edit coverage goal button"
+  },
+  "analyticsGoalCenterRadius": "Center: {lat}, {lon}\nRadius: {radius}",
+  "@analyticsGoalCenterRadius": {
+    "description": "Coverage goal center and radius summary",
+    "placeholders": {
+      "lat": {
+        "type": "String"
+      },
+      "lon": {
+        "type": "String"
+      },
+      "radius": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsCovered": "covered",
+  "@analyticsCovered": {
+    "description": "Label under the coverage-goal percent"
+  },
+  "analyticsTotalCellsInArea": "Total cells in area",
+  "@analyticsTotalCellsInArea": {
+    "description": "Goal statistic label"
+  },
+  "analyticsCoveredAboveZero": "Covered (>0% success)",
+  "@analyticsCoveredAboveZero": {
+    "description": "Goal statistic for covered cells"
+  },
+  "analyticsPartialBelow30": "Partial (<30% success)",
+  "@analyticsPartialBelow30": {
+    "description": "Goal statistic for partial cells"
+  },
+  "analyticsUncovered": "Uncovered",
+  "@analyticsUncovered": {
+    "description": "Goal statistic for uncovered cells"
+  },
+  "analyticsPingsInArea": "Pings in area",
+  "@analyticsPingsInArea": {
+    "description": "Goal statistic for pings in the goal area"
+  },
+  "analyticsRadiusMiles": "{miles} miles",
+  "@analyticsRadiusMiles": {
+    "description": "Goal radius in miles",
+    "placeholders": {
+      "miles": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsRadiusMeters": "{meters} m",
+  "@analyticsRadiusMeters": {
+    "description": "Goal radius in meters",
+    "placeholders": {
+      "meters": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsMile1": "1 mile",
+  "@analyticsMile1": {
+    "description": "Coverage goal radius option"
+  },
+  "analyticsMiles5": "5 miles",
+  "@analyticsMiles5": {
+    "description": "Coverage goal radius option"
+  },
+  "analyticsMiles10": "10 miles",
+  "@analyticsMiles10": {
+    "description": "Coverage goal radius option"
+  },
+  "analyticsMiles25": "25 miles",
+  "@analyticsMiles25": {
+    "description": "Coverage goal radius option"
+  },
+  "analyticsSetCoverageGoal": "Set Coverage Goal",
+  "@analyticsSetCoverageGoal": {
+    "description": "Set-goal dialog title"
+  },
+  "analyticsCenterCurrentGps": "Center: Your current GPS location",
+  "@analyticsCenterCurrentGps": {
+    "description": "Goal dialog when centering on GPS"
+  },
+  "analyticsCenterCoords": "Center: {lat}, {lon}",
+  "@analyticsCenterCoords": {
+    "description": "Goal dialog center coordinates",
+    "placeholders": {
+      "lat": {
+        "type": "String"
+      },
+      "lon": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsRadiusLabel": "Radius:",
+  "@analyticsRadiusLabel": {
+    "description": "Goal dialog radius heading"
+  },
+  "analyticsSetGoal": "Set Goal",
+  "@analyticsSetGoal": {
+    "description": "Confirm coverage goal button"
+  },
+  "analyticsNeedTwoSessions": "Need at least 2 completed sessions\nwith ping data to compare.",
+  "@analyticsNeedTwoSessions": {
+    "description": "Empty state when fewer than two sessions exist"
+  },
+  "analyticsCompareSessions": "Compare Sessions",
+  "@analyticsCompareSessions": {
+    "description": "Session comparison heading"
+  },
+  "analyticsSessionABaseline": "Session A (baseline)",
+  "@analyticsSessionABaseline": {
+    "description": "Baseline session picker label"
+  },
+  "analyticsSessionBCompare": "Session B (compare)",
+  "@analyticsSessionBCompare": {
+    "description": "Compare session picker label"
+  },
+  "analyticsSamples": "Samples",
+  "@analyticsSamples": {
+    "description": "Comparison row label"
+  },
+  "analyticsSuccessRate": "Success Rate",
+  "@analyticsSuccessRate": {
+    "description": "Comparison row label"
+  },
+  "analyticsDistance": "Distance",
+  "@analyticsDistance": {
+    "description": "Comparison row label"
+  },
+  "analyticsDistanceMiles": "{miles} mi",
+  "@analyticsDistanceMiles": {
+    "description": "Session distance in miles",
+    "placeholders": {
+      "miles": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsCoverageChanges": "Coverage Changes",
+  "@analyticsCoverageChanges": {
+    "description": "Comparison changes heading"
+  },
+  "analyticsNewCoverage": "New coverage",
+  "@analyticsNewCoverage": {
+    "description": "Comparison change row"
+  },
+  "analyticsLostCoverage": "Lost coverage",
+  "@analyticsLostCoverage": {
+    "description": "Comparison change row"
+  },
+  "analyticsImproved": "Improved (>10%)",
+  "@analyticsImproved": {
+    "description": "Comparison change row"
+  },
+  "analyticsDegraded": "Degraded (>10%)",
+  "@analyticsDegraded": {
+    "description": "Comparison change row"
+  },
+  "analyticsUnchanged": "Unchanged",
+  "@analyticsUnchanged": {
+    "description": "Comparison change row"
+  },
+  "analyticsSessionOption": "{date} — {pings}, {rate}%",
+  "@analyticsSessionOption": {
+    "description": "Session picker dialog option",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "pings": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsSessionSelected": "{date} — {pings}",
+  "@analyticsSessionSelected": {
+    "description": "Selected session summary",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "pings": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsRepeaterCount": "{count, plural, one{{count} repeater} other{{count} repeaters}}",
+  "@analyticsRepeaterCount": {
+    "description": "Repeater reliability list count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "analyticsSort": "Sort: ",
+  "@analyticsSort": {
+    "description": "Sort dropdown prefix"
+  },
+  "analyticsSortReliability": "Reliability",
+  "@analyticsSortReliability": {
+    "description": "Repeater sort option"
+  },
+  "analyticsSortResponseTime": "Response Time",
+  "@analyticsSortResponseTime": {
+    "description": "Repeater sort option"
+  },
+  "analyticsSortPingCount": "Ping Count",
+  "@analyticsSortPingCount": {
+    "description": "Repeater sort option"
+  },
+  "analyticsMiniPings": "Pings",
+  "@analyticsMiniPings": {
+    "description": "Repeater card mini-stat label"
+  },
+  "analyticsMiniAvgResponse": "Avg Response",
+  "@analyticsMiniAvgResponse": {
+    "description": "Repeater card mini-stat label"
+  },
+  "analyticsMiniConsistency": "Consistency",
+  "@analyticsMiniConsistency": {
+    "description": "Repeater card mini-stat label"
+  },
+  "analyticsMiniTrend": "Trend",
+  "@analyticsMiniTrend": {
+    "description": "Repeater card mini-stat label"
+  },
+  "analyticsAvgResponseMs": "{ms} ms",
+  "@analyticsAvgResponseMs": {
+    "description": "Average response time value",
+    "placeholders": {
+      "ms": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsTrend": "{trend, select, improving{improving} degrading{degrading} other{stable}}",
+  "@analyticsTrend": {
+    "description": "Repeater reliability trend label",
+    "placeholders": {
+      "trend": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsFirstLastSeen": "First seen: {first} • Last: {last}",
+  "@analyticsFirstLastSeen": {
+    "description": "Repeater first/last seen line",
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "last": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionDeleteTitle": "Delete Session?",
+  "@sessionDeleteTitle": {
+    "description": "Delete session dialog title"
+  },
+  "sessionDeleteBody": "This will remove the session record. Sample data is not affected.",
+  "@sessionDeleteBody": {
+    "description": "Delete session dialog body"
+  },
+  "sessionNotesTitle": "Session Notes",
+  "@sessionNotesTitle": {
+    "description": "Edit notes dialog title"
+  },
+  "sessionNotesHint": "Add notes about this session...",
+  "@sessionNotesHint": {
+    "description": "Session notes field hint"
+  },
+  "sessionEmpty": "No sessions yet.\n\nStart tracking to record your first session!",
+  "@sessionEmpty": {
+    "description": "Empty session history body"
+  },
+  "sessionEditNotes": "Edit Notes",
+  "@sessionEditNotes": {
+    "description": "Tooltip to edit session notes"
+  },
+  "sessionTimeInProgress": "{start} – In progress",
+  "@sessionTimeInProgress": {
+    "description": "Time range for an active session",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionTimeRange": "{start} – {end}",
+  "@sessionTimeRange": {
+    "description": "Completed session time range",
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionDurationHoursMinutes": "{hours}h {minutes}m",
+  "@sessionDurationHoursMinutes": {
+    "description": "Session duration in hours and minutes",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionDurationMinutesSeconds": "{minutes}m {seconds}s",
+  "@sessionDurationMinutesSeconds": {
+    "description": "Session duration in minutes and seconds",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      },
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionDurationSeconds": "{seconds}s",
+  "@sessionDurationSeconds": {
+    "description": "Session duration in seconds",
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionDistanceKm": "{km} km",
+  "@sessionDistanceKm": {
+    "description": "Session distance in kilometers",
+    "placeholders": {
+      "km": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionDistanceMi": "{mi} mi",
+  "@sessionDistanceMi": {
+    "description": "Session distance in miles",
+    "placeholders": {
+      "mi": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionPoints": "{count} pts",
+  "@sessionPoints": {
+    "description": "Session GPS point count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionHeard": "{count} heard",
+  "@sessionHeard": {
+    "description": "Successful ping count on a session card",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionTapToViewOnMap": "Tap to view on map",
+  "@sessionTapToViewOnMap": {
+    "description": "Hint when a session can open the map"
+  },
+  "repeaterHealthEmpty": "No repeater data yet.\nDo some wardriving first!",
+  "@repeaterHealthEmpty": {
+    "description": "Empty repeater health body"
+  },
+  "repeaterHealthOfflineCount": "{count, plural, one{{count} offline} other{{count} offline}}",
+  "@repeaterHealthOfflineCount": {
+    "description": "AppBar chip for offline repeaters",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "repeaterHealthDegradingCount": "{count, plural, one{{count} degrading} other{{count} degrading}}",
+  "@repeaterHealthDegradingCount": {
+    "description": "AppBar chip for degrading repeaters",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "repeaterHealthRepeaterCount": "{count, plural, one{{count} repeater} other{{count} repeaters}}",
+  "@repeaterHealthRepeaterCount": {
+    "description": "Repeater health list count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "repeaterHealthSort": "Sort: ",
+  "@repeaterHealthSort": {
+    "description": "Sort dropdown prefix"
+  },
+  "repeaterHealthSortReliability": "Reliability",
+  "@repeaterHealthSortReliability": {
+    "description": "Repeater health sort option"
+  },
+  "repeaterHealthSortResponseTime": "Response Time",
+  "@repeaterHealthSortResponseTime": {
+    "description": "Repeater health sort option"
+  },
+  "repeaterHealthSortPingCount": "Ping Count",
+  "@repeaterHealthSortPingCount": {
+    "description": "Repeater health sort option"
+  },
+  "repeaterHealthSortAlertsFirst": "Alerts First",
+  "@repeaterHealthSortAlertsFirst": {
+    "description": "Repeater health sort option"
+  },
+  "repeaterHealthMiniPings": "Pings",
+  "@repeaterHealthMiniPings": {
+    "description": "Repeater card mini-stat label"
+  },
+  "repeaterHealthMiniAvgResp": "Avg Resp",
+  "@repeaterHealthMiniAvgResp": {
+    "description": "Repeater card mini-stat label"
+  },
+  "repeaterHealthMiniCells": "Cells",
+  "@repeaterHealthMiniCells": {
+    "description": "Repeater card mini-stat label"
+  },
+  "repeaterHealthMiniTrend": "Trend",
+  "@repeaterHealthMiniTrend": {
+    "description": "Repeater card mini-stat label"
+  },
+  "repeaterHealthAvgRespMs": "{ms}ms",
+  "@repeaterHealthAvgRespMs": {
+    "description": "Average response time on a repeater card",
+    "placeholders": {
+      "ms": {
+        "type": "String"
+      }
+    }
+  },
+  "repeaterHealthTrendUp": "▲ Up",
+  "@repeaterHealthTrendUp": {
+    "description": "Improving trend label"
+  },
+  "repeaterHealthTrendDown": "▼ Down",
+  "@repeaterHealthTrendDown": {
+    "description": "Degrading trend label"
+  },
+  "repeaterHealthTrendStable": "— Stable",
+  "@repeaterHealthTrendStable": {
+    "description": "Stable trend label"
+  },
+  "repeaterHealthFirstLast": "First: {first} • Last: {last}",
+  "@repeaterHealthFirstLast": {
+    "description": "Repeater first/last seen line",
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "last": {
+        "type": "String"
+      }
+    }
+  },
+  "repeaterHealthFirstLastOffline": "First: {first} • Last: {last} • ⚠️ Offline {days}d",
+  "@repeaterHealthFirstLastOffline": {
+    "description": "Repeater first/last seen line when offline",
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "last": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "repeaterHealthDetailTitle": "Repeater {id}",
+  "@repeaterHealthDetailTitle": {
+    "description": "Repeater detail AppBar title",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "repeaterHealthSnrOverTime": "SNR Over Time",
+  "@repeaterHealthSnrOverTime": {
+    "description": "SNR chart title"
+  },
+  "repeaterHealthWeeklySuccessRate": "Weekly Success Rate",
+  "@repeaterHealthWeeklySuccessRate": {
+    "description": "Weekly chart title"
+  },
+  "repeaterHealthBestTimeOfDay": "Best Time of Day",
+  "@repeaterHealthBestTimeOfDay": {
+    "description": "Time-of-day section title"
+  },
+  "repeaterHealthRecentPings": "Recent Pings",
+  "@repeaterHealthRecentPings": {
+    "description": "Recent pings section title"
+  },
+  "repeaterHealthSuccessRate": "Success Rate",
+  "@repeaterHealthSuccessRate": {
+    "description": "Detail summary label"
+  },
+  "repeaterHealthTotalPings": "Total Pings",
+  "@repeaterHealthTotalPings": {
+    "description": "Detail summary label"
+  },
+  "repeaterHealthHeard": "Heard",
+  "@repeaterHealthHeard": {
+    "description": "Detail summary label"
+  },
+  "repeaterHealthCoverage": "Coverage",
+  "@repeaterHealthCoverage": {
+    "description": "Detail summary label"
+  },
+  "repeaterHealthCellCount": "{count, plural, one{{count} cell} other{{count} cells}}",
+  "@repeaterHealthCellCount": {
+    "description": "Coverage cell count on the detail card",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "repeaterHealthDegradingAlert": "7-day rate ({rate7}) dropped vs 30-day ({rate30})",
+  "@repeaterHealthDegradingAlert": {
+    "description": "Degrading-rate warning on the detail card",
+    "placeholders": {
+      "rate7": {
+        "type": "String"
+      },
+      "rate30": {
+        "type": "String"
+      }
+    }
+  },
+  "repeaterHealthAvgResponse": "Avg response: {value}",
+  "@repeaterHealthAvgResponse": {
+    "description": "Average response footer on the detail card",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "repeaterHealthAvgResponseNa": "N/A",
+  "@repeaterHealthAvgResponseNa": {
+    "description": "Fallback when average response is missing"
+  },
+  "repeaterHealthNoSnrData": "No SNR data",
+  "@repeaterHealthNoSnrData": {
+    "description": "Empty SNR chart"
+  },
+  "repeaterHealthNoData": "No data",
+  "@repeaterHealthNoData": {
+    "description": "Empty weekly chart"
+  },
+  "repeaterHealthNoWeeklyData": "No weekly data",
+  "@repeaterHealthNoWeeklyData": {
+    "description": "Empty weekly chart after grouping"
+  },
+  "repeaterHealthPeriodNight": "Night (0-6)",
+  "@repeaterHealthPeriodNight": {
+    "description": "Detail time-of-day period"
+  },
+  "repeaterHealthPeriodMorning": "Morning (6-12)",
+  "@repeaterHealthPeriodMorning": {
+    "description": "Detail time-of-day period"
+  },
+  "repeaterHealthPeriodAfternoon": "Afternoon (12-18)",
+  "@repeaterHealthPeriodAfternoon": {
+    "description": "Detail time-of-day period"
+  },
+  "repeaterHealthPeriodEvening": "Evening (18-24)",
+  "@repeaterHealthPeriodEvening": {
+    "description": "Detail time-of-day period"
+  },
+  "repeaterHealthPeriodRate": "{rate}% ({pings})",
+  "@repeaterHealthPeriodRate": {
+    "description": "Period success rate with ping count",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "pings": {
+        "type": "String"
+      }
+    }
+  },
+  "repeaterHealthWeekTooltip": "{week}\n{rate}% ({pings})",
+  "@repeaterHealthWeekTooltip": {
+    "description": "Weekly bar tooltip",
+    "placeholders": {
+      "week": {
+        "type": "String"
+      },
+      "rate": {
+        "type": "String"
+      },
+      "pings": {
+        "type": "String"
+      }
+    }
+  },
+  "repeaterHealthNoPingsRecorded": "No pings recorded",
+  "@repeaterHealthNoPingsRecorded": {
+    "description": "Empty recent-pings list"
+  },
+  "deviceComparisonEmpty": "No devices tracked yet.\n\nConnect a LoRa device and start wardriving — the app will automatically log which device you use.",
+  "@deviceComparisonEmpty": {
+    "description": "Empty device comparison body"
+  },
+  "deviceComparisonTracked": "{count, plural, one{{count} device tracked} other{{count} devices tracked}}",
+  "@deviceComparisonTracked": {
+    "description": "Tracked device count heading",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "deviceComparisonCompareDevices": "Compare Devices",
+  "@deviceComparisonCompareDevices": {
+    "description": "Device comparison section title"
+  },
+  "deviceComparisonDeviceA": "Device A",
+  "@deviceComparisonDeviceA": {
+    "description": "First device dropdown hint"
+  },
+  "deviceComparisonDeviceB": "Device B",
+  "@deviceComparisonDeviceB": {
+    "description": "Second device dropdown hint"
+  },
+  "deviceComparisonVs": "vs",
+  "@deviceComparisonVs": {
+    "description": "Between the two device dropdowns"
+  },
+  "deviceComparisonMiniPings": "Pings",
+  "@deviceComparisonMiniPings": {
+    "description": "Device card mini-stat label"
+  },
+  "deviceComparisonMiniCells": "Cells",
+  "@deviceComparisonMiniCells": {
+    "description": "Device card mini-stat label"
+  },
+  "deviceComparisonMiniAvgResp": "Avg Resp",
+  "@deviceComparisonMiniAvgResp": {
+    "description": "Device card mini-stat label"
+  },
+  "deviceComparisonMiniAvgSnr": "Avg SNR",
+  "@deviceComparisonMiniAvgSnr": {
+    "description": "Device card mini-stat label"
+  },
+  "deviceComparisonAvgRespMs": "{ms}ms",
+  "@deviceComparisonAvgRespMs": {
+    "description": "Average response on a device card",
+    "placeholders": {
+      "ms": {
+        "type": "String"
+      }
+    }
+  },
+  "deviceComparisonFirstLast": "First: {first} • Last: {last}",
+  "@deviceComparisonFirstLast": {
+    "description": "Device first/last used line",
+    "placeholders": {
+      "first": {
+        "type": "String"
+      },
+      "last": {
+        "type": "String"
+      }
+    }
+  },
+  "deviceComparisonStat": "Stat",
+  "@deviceComparisonStat": {
+    "description": "Comparison table header"
+  },
+  "deviceComparisonWinner": "Winner",
+  "@deviceComparisonWinner": {
+    "description": "Comparison table header"
+  },
+  "deviceComparisonTotalPings": "Total Pings",
+  "@deviceComparisonTotalPings": {
+    "description": "Comparison row label"
+  },
+  "deviceComparisonSuccessRate": "Success Rate",
+  "@deviceComparisonSuccessRate": {
+    "description": "Comparison row label"
+  },
+  "deviceComparisonFailures": "Failures",
+  "@deviceComparisonFailures": {
+    "description": "Comparison row label"
+  },
+  "deviceComparisonUniqueCells": "Unique Cells",
+  "@deviceComparisonUniqueCells": {
+    "description": "Comparison row label"
+  },
+  "deviceComparisonAvgResponse": "Avg Response",
+  "@deviceComparisonAvgResponse": {
+    "description": "Comparison row label"
+  },
+  "deviceComparisonAvgSnr": "Avg SNR",
+  "@deviceComparisonAvgSnr": {
+    "description": "Comparison row label"
+  },
+  "deviceComparisonAvgRssi": "Avg RSSI",
+  "@deviceComparisonAvgRssi": {
+    "description": "Comparison row label"
+  },
+  "deviceComparisonTie": "Tie",
+  "@deviceComparisonTie": {
+    "description": "Comparison winner when values are equal"
+  },
+  "signalTrendRssi": "RSSI",
+  "@signalTrendRssi": {
+    "description": "Signal trend metric segment; keep RSSI"
+  },
+  "signalTrendSnr": "SNR",
+  "@signalTrendSnr": {
+    "description": "Signal trend metric segment; keep SNR"
+  },
+  "signalTrendResponse": "Response",
+  "@signalTrendResponse": {
+    "description": "Signal trend metric segment"
+  },
+  "signalTrendEmpty": "No signal data yet.\nDo some wardriving with pings enabled.",
+  "@signalTrendEmpty": {
+    "description": "Empty signal trend body"
+  },
+  "signalTrendNoMetricData": "No {label} data available.",
+  "@signalTrendNoMetricData": {
+    "description": "Empty chart for the selected metric",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "signalTrendResponseTimeLabel": "response time",
+  "@signalTrendResponseTimeLabel": {
+    "description": "Metric name used in the empty-chart message"
+  },
+  "signalTrendMin": "Min",
+  "@signalTrendMin": {
+    "description": "Signal stats card label"
+  },
+  "signalTrendAvg": "Avg",
+  "@signalTrendAvg": {
+    "description": "Signal stats card label"
+  },
+  "signalTrendMax": "Max",
+  "@signalTrendMax": {
+    "description": "Signal stats card label"
+  },
+  "signalTrendPts": "Pts",
+  "@signalTrendPts": {
+    "description": "Signal stats card label"
+  },
+  "ductingTitle": "Tropo Ducting Forecast",
+  "@ductingTitle": {
+    "description": "Ducting forecast AppBar title"
+  },
+  "ductingOpenInBrowser": "Open in browser",
+  "@ductingOpenInBrowser": {
+    "description": "Tooltip to open the forecast website"
+  },
+  "ductingRegion": "Region",
+  "@ductingRegion": {
+    "description": "Forecast region dropdown label"
+  },
+  "ductingFailedToLoad": "Failed to load forecast image.\nCheck internet connection.",
+  "@ductingFailedToLoad": {
+    "description": "Forecast image error"
+  },
+  "ductingTimeHours": "+{hours}h",
+  "@ductingTimeHours": {
+    "description": "Forecast offset in hours",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "ductingTimeDays": "+{days}d",
+  "@ductingTimeDays": {
+    "description": "Forecast offset in whole days",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "ductingTimeDaysHours": "+{days}d {hours}h",
+  "@ductingTimeDaysHours": {
+    "description": "Forecast offset in days and leftover hours",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "ductingFrameIndex": "{current} / {total}",
+  "@ductingFrameIndex": {
+    "description": "Current forecast frame index",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "ductingLegendNone": "None",
+  "@ductingLegendNone": {
+    "description": "Ducting intensity legend"
+  },
+  "ductingLegendMarginal": "Marginal",
+  "@ductingLegendMarginal": {
+    "description": "Ducting intensity legend"
+  },
+  "ductingLegendModerate": "Moderate",
+  "@ductingLegendModerate": {
+    "description": "Ducting intensity legend"
+  },
+  "ductingLegendHigh": "High",
+  "@ductingLegendHigh": {
+    "description": "Ducting intensity legend"
+  },
+  "ductingLegendExtreme": "Extreme",
+  "@ductingLegendExtreme": {
+    "description": "Ducting intensity legend"
+  },
+  "ductingAttribution": "Forecast © William R. Hepburn — dxinfocentre.com",
+  "@ductingAttribution": {
+    "description": "Forecast map attribution"
+  },
+  "ductingRegionWam": "Western North America",
+  "@ductingRegionWam": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionEam": "Eastern North America",
+  "@ductingRegionEam": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionEnp": "Eastern North Pacific",
+  "@ductingRegionEnp": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionEsp": "Eastern South Pacific",
+  "@ductingRegionEsp": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionCar": "Gulf-Caribbean",
+  "@ductingRegionCar": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionNsa": "Northern South America",
+  "@ductingRegionNsa": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionSam": "Central South America",
+  "@ductingRegionSam": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionSat": "South Atlantic",
+  "@ductingRegionSat": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionNat": "North Atlantic",
+  "@ductingRegionNat": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionEnt": "Eastern North Atlantic",
+  "@ductingRegionEnt": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionNwe": "Northwestern Europe",
+  "@ductingRegionNwe": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionEur": "Europe",
+  "@ductingRegionEur": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionEeu": "Eastern Europe",
+  "@ductingRegionEeu": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionAfi": "South Africa",
+  "@ductingRegionAfi": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionMid": "Middle East",
+  "@ductingRegionMid": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionNca": "North Central Asia",
+  "@ductingRegionNca": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionIno": "Indian Ocean",
+  "@ductingRegionIno": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionSea": "Southeast Asia",
+  "@ductingRegionSea": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionEas": "Far East",
+  "@ductingRegionEas": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionNea": "Eastern Siberia",
+  "@ductingRegionNea": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionAus": "Australia & New Zealand",
+  "@ductingRegionAus": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionOce": "Oceania",
+  "@ductingRegionOce": {
+    "description": "Ducting forecast region"
+  },
+  "ductingRegionWnp": "Western North Pacific",
+  "@ductingRegionWnp": {
+    "description": "Ducting forecast region"
+  },
+  "debugLogNoLogsToExport": "No logs to export",
+  "@debugLogNoLogsToExport": {
+    "description": "Snackbar when export has no logs"
+  },
+  "debugLogChooseSaveLocation": "Choose save location",
+  "@debugLogChooseSaveLocation": {
+    "description": "File picker title when exporting logs"
+  },
+  "debugLogSavedTo": "Logs saved to:\n{fileName}",
+  "@debugLogSavedTo": {
+    "description": "Snackbar after exporting logs",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "debugLogAutoScrollOn": "Auto-scroll ON",
+  "@debugLogAutoScrollOn": {
+    "description": "Tooltip when auto-scroll is enabled"
+  },
+  "debugLogAutoScrollOff": "Auto-scroll OFF",
+  "@debugLogAutoScrollOff": {
+    "description": "Tooltip when auto-scroll is disabled"
+  },
+  "debugLogExportLogs": "Export logs",
+  "@debugLogExportLogs": {
+    "description": "Tooltip to export debug logs"
+  },
+  "debugLogClearLogs": "Clear logs",
+  "@debugLogClearLogs": {
+    "description": "Tooltip to clear debug logs"
+  },
+  "debugLogEmpty": "No logs yet.\n\nConnect your LoRa device and start pinging!",
+  "@debugLogEmpty": {
+    "description": "Empty debug terminal body"
+  },
+  "debugDiagnosticsShareSubject": "MeshCore Wardrive Debug Log",
+  "@debugDiagnosticsShareSubject": {
+    "description": "Share-sheet subject for a debug log file"
+  },
+  "debugDiagnosticsShareText": "Debug log for troubleshooting GPS and auto-ping issues",
+  "@debugDiagnosticsShareText": {
+    "description": "Share-sheet body for a debug log file"
+  },
+  "debugDiagnosticsErrorSharing": "Error sharing file: {error}",
+  "@debugDiagnosticsErrorSharing": {
+    "description": "Snackbar when sharing a log file fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "debugDiagnosticsDeleteTitle": "Delete Log",
+  "@debugDiagnosticsDeleteTitle": {
+    "description": "Delete log dialog title"
+  },
+  "debugDiagnosticsDeleteBody": "Are you sure you want to delete this log file?",
+  "@debugDiagnosticsDeleteBody": {
+    "description": "Delete log dialog body"
+  },
+  "debugDiagnosticsLogDeleted": "Log file deleted",
+  "@debugDiagnosticsLogDeleted": {
+    "description": "Snackbar after deleting a log file"
+  },
+  "debugDiagnosticsErrorDeleting": "Error deleting file: {error}",
+  "@debugDiagnosticsErrorDeleting": {
+    "description": "Snackbar when deleting a log file fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "debugDiagnosticsErrorReading": "Error reading file: {error}",
+  "@debugDiagnosticsErrorReading": {
+    "description": "Snackbar when reading a log file fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "debugDiagnosticsRefresh": "Refresh",
+  "@debugDiagnosticsRefresh": {
+    "description": "Tooltip to reload log files"
+  },
+  "debugDiagnosticsSamsungTitle": "Troubleshooting Samsung Devices",
+  "@debugDiagnosticsSamsungTitle": {
+    "description": "Diagnostics intro heading"
+  },
+  "debugDiagnosticsSamsungBody": "This screen shows detailed debug logs for tracking GPS, auto-ping, and service events. If you''re experiencing issues with auto-ping or GPS tracking, share the latest log file with the developer.",
+  "@debugDiagnosticsSamsungBody": {
+    "description": "Diagnostics intro body"
+  },
+  "debugDiagnosticsCurrentSession": "Current session: {name}",
+  "@debugDiagnosticsCurrentSession": {
+    "description": "Current debug-log session filename",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "debugDiagnosticsNotStarted": "Not started",
+  "@debugDiagnosticsNotStarted": {
+    "description": "Fallback when no debug session file exists"
+  },
+  "debugDiagnosticsEmpty": "No debug logs found.\nStart tracking to generate logs.",
+  "@debugDiagnosticsEmpty": {
+    "description": "Empty diagnostics log list"
+  },
+  "debugDiagnosticsView": "View",
+  "@debugDiagnosticsView": {
+    "description": "Log file menu action"
+  },
+  "debugDiagnosticsShareSubjectWithFile": "MeshCore Wardrive Debug Log: {fileName}",
+  "@debugDiagnosticsShareSubjectWithFile": {
+    "description": "Share-sheet subject when viewing a log file",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "debugDiagnosticsSizeBytes": "{bytes} B",
+  "@debugDiagnosticsSizeBytes": {
+    "description": "Log file size in bytes",
+    "placeholders": {
+      "bytes": {
+        "type": "int"
+      }
+    }
+  },
+  "debugDiagnosticsSizeKb": "{kb} KB",
+  "@debugDiagnosticsSizeKb": {
+    "description": "Log file size in kilobytes",
+    "placeholders": {
+      "kb": {
+        "type": "String"
+      }
+    }
+  },
+  "debugDiagnosticsSizeMb": "{mb} MB",
+  "@debugDiagnosticsSizeMb": {
+    "description": "Log file size in megabytes",
+    "placeholders": {
+      "mb": {
+        "type": "String"
+      }
+    }
+  },
+  "achievementsAllUnlocked": "All achievements unlocked!",
+  "@achievementsAllUnlocked": {
+    "description": "Progress text when every achievement is unlocked"
+  },
+  "achievementsRemaining": "{count, plural, one{{count} remaining} other{{count} remaining}}",
+  "@achievementsRemaining": {
+    "description": "Progress text for remaining achievements",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "achievementsUnlockedOn": "Unlocked {date}",
+  "@achievementsUnlockedOn": {
+    "description": "Unlock date line under an achievement",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "achievementsUnlockedSnackbar": "🏆 Achievement unlocked: {icon} {title}",
+  "@achievementsUnlockedSnackbar": {
+    "description": "Map snackbar when an achievement unlocks",
+    "placeholders": {
+      "icon": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "achievementFirstPingTitle": "First Ping",
+  "@achievementFirstPingTitle": {
+    "description": "Title for the first_ping achievement"
+  },
+  "achievementFirstPingDescription": "Send your first ping",
+  "@achievementFirstPingDescription": {
+    "description": "Description for the first_ping achievement"
+  },
+  "achievementPings100Title": "Century",
+  "@achievementPings100Title": {
+    "description": "Title for the pings_100 achievement"
+  },
+  "achievementPings100Description": "Send 100 pings",
+  "@achievementPings100Description": {
+    "description": "Description for the pings_100 achievement"
+  },
+  "achievementPings1000Title": "Kilopinger",
+  "@achievementPings1000Title": {
+    "description": "Title for the pings_1000 achievement"
+  },
+  "achievementPings1000Description": "Send 1,000 pings",
+  "@achievementPings1000Description": {
+    "description": "Description for the pings_1000 achievement"
+  },
+  "achievementPings10000Title": "Ping Lord",
+  "@achievementPings10000Title": {
+    "description": "Title for the pings_10000 achievement"
+  },
+  "achievementPings10000Description": "Send 10,000 pings",
+  "@achievementPings10000Description": {
+    "description": "Description for the pings_10000 achievement"
+  },
+  "achievementFirstRepeaterTitle": "First Contact",
+  "@achievementFirstRepeaterTitle": {
+    "description": "Title for the first_repeater achievement"
+  },
+  "achievementFirstRepeaterDescription": "Discover your first repeater",
+  "@achievementFirstRepeaterDescription": {
+    "description": "Description for the first_repeater achievement"
+  },
+  "achievementRepeaters10Title": "Network Explorer",
+  "@achievementRepeaters10Title": {
+    "description": "Title for the repeaters_10 achievement"
+  },
+  "achievementRepeaters10Description": "Discover 10 repeaters",
+  "@achievementRepeaters10Description": {
+    "description": "Description for the repeaters_10 achievement"
+  },
+  "achievementRepeaters50Title": "Mesh Master",
+  "@achievementRepeaters50Title": {
+    "description": "Title for the repeaters_50 achievement"
+  },
+  "achievementRepeaters50Description": "Discover 50 repeaters",
+  "@achievementRepeaters50Description": {
+    "description": "Description for the repeaters_50 achievement"
+  },
+  "achievementMiles10Title": "Road Warrior",
+  "@achievementMiles10Title": {
+    "description": "Title for the miles_10 achievement"
+  },
+  "achievementMiles10Description": "Drive 10 miles wardriving",
+  "@achievementMiles10Description": {
+    "description": "Description for the miles_10 achievement"
+  },
+  "achievementMiles100Title": "Highway Hero",
+  "@achievementMiles100Title": {
+    "description": "Title for the miles_100 achievement"
+  },
+  "achievementMiles100Description": "Drive 100 miles wardriving",
+  "@achievementMiles100Description": {
+    "description": "Description for the miles_100 achievement"
+  },
+  "achievementMiles500Title": "Cross Country",
+  "@achievementMiles500Title": {
+    "description": "Title for the miles_500 achievement"
+  },
+  "achievementMiles500Description": "Drive 500 miles wardriving",
+  "@achievementMiles500Description": {
+    "description": "Description for the miles_500 achievement"
+  },
+  "achievementCells50Title": "Area Scout",
+  "@achievementCells50Title": {
+    "description": "Title for the cells_50 achievement"
+  },
+  "achievementCells50Description": "Cover 50 unique cells",
+  "@achievementCells50Description": {
+    "description": "Description for the cells_50 achievement"
+  },
+  "achievementCells500Title": "Territory King",
+  "@achievementCells500Title": {
+    "description": "Title for the cells_500 achievement"
+  },
+  "achievementCells500Description": "Cover 500 unique cells",
+  "@achievementCells500Description": {
+    "description": "Description for the cells_500 achievement"
+  },
+  "achievementFirstSessionTitle": "Getting Started",
+  "@achievementFirstSessionTitle": {
+    "description": "Title for the first_session achievement"
+  },
+  "achievementFirstSessionDescription": "Complete your first session",
+  "@achievementFirstSessionDescription": {
+    "description": "Description for the first_session achievement"
+  },
+  "achievementSessions50Title": "Dedicated Driver",
+  "@achievementSessions50Title": {
+    "description": "Title for the sessions_50 achievement"
+  },
+  "achievementSessions50Description": "Complete 50 sessions",
+  "@achievementSessions50Description": {
+    "description": "Description for the sessions_50 achievement"
+  },
+  "notificationBrandTitle": "MeshCore Wardrive",
+  "@notificationBrandTitle": {
+    "description": "Foreground notification title; keep identical across locales"
+  },
+  "notificationChannelName": "MeshCore Wardrive Location Tracking",
+  "@notificationChannelName": {
+    "description": "Android notification channel name for location tracking"
+  },
+  "notificationChannelDescription": "This notification appears when location tracking is active",
+  "@notificationChannelDescription": {
+    "description": "Android notification channel description for location tracking"
+  },
+  "notificationTrackingActive": "Location tracking active",
+  "@notificationTrackingActive": {
+    "description": "Foreground notification text when tracking starts"
+  },
+  "notificationPinging": "Pinging...",
+  "@notificationPinging": {
+    "description": "Foreground notification text while a ping is in flight"
+  },
+  "notificationHeardBy": "✅ Heard by {id}",
+  "@notificationHeardBy": {
+    "description": "Foreground notification text when a ping is heard",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationRepeaterFallback": "repeater",
+  "@notificationRepeaterFallback": {
+    "description": "Fallback node label in the heard-by notification"
+  },
+  "notificationNoResponse": "❌ No response",
+  "@notificationNoResponse": {
+    "description": "Foreground notification text when a ping times out"
+  },
+  "notificationLiveStats": "✅ {rate}% | 📍 {count} pings | 🛣️ {distance}mi",
+  "@notificationLiveStats": {
+    "description": "Foreground notification live session stats",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationCarpeaterNoNeighbours": "Carpeater: No neighbours",
+  "@notificationCarpeaterNoNeighbours": {
+    "description": "Foreground notification when Carpeater finds no neighbours"
+  },
+  "notificationCarpeaterNeighboursFound": "Carpeater: {count} neighbours found",
+  "@notificationCarpeaterNeighboursFound": {
+    "description": "Foreground notification when Carpeater finds neighbours",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationCarpeaterActive": "Carpeater mode active",
+  "@notificationCarpeaterActive": {
+    "description": "Steady foreground notification text in Carpeater mode"
+  },
+  "notificationStopTracking": "Stop Tracking",
+  "@notificationStopTracking": {
+    "description": "Foreground notification action button that stops location tracking"
+  },
+  "locationPermissionDenied": "Location permission was denied.",
+  "@locationPermissionDenied": {
+    "description": "User-visible error when location permission is denied"
+  },
+  "locationPermissionPermanentlyDenied": "Location permission is permanently denied. Enable it in Android settings.",
+  "@locationPermissionPermanentlyDenied": {
+    "description": "User-visible error when location permission is denied forever"
+  },
+  "locationServicesDisabled": "Android location services are disabled.",
+  "@locationServicesDisabled": {
+    "description": "User-visible error when Android location services are off"
+  },
+  "locationTrackingStartFailed": "Could not start Android location tracking: {error}",
+  "@locationTrackingStartFailed": {
+    "description": "User-visible error when tracking fails to start",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "widgetStatusTracking": "Tracking",
+  "@widgetStatusTracking": {
+    "description": "Home widget status while a session is recording"
+  },
+  "widgetStatusIdle": "Idle",
+  "@widgetStatusIdle": {
+    "description": "Home widget status while not recording"
+  }
+}

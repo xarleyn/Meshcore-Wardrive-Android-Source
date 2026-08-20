@@ -5,25 +5,26 @@ import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meshcore_wardrive/widgets/compass_calibration.dart';
 
+import 'helpers/l10n_harness.dart';
+
 void main() {
   testWidgets('shows calibrate and later actions', (tester) async {
     var calibrate = 0;
     var later = 0;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: CompassCalibrationBanner(
-            onCalibrate: () => calibrate++,
-            onLater: () => later++,
-          ),
+    final l10n = await pumpWithL10n(
+      tester,
+      Scaffold(
+        body: CompassCalibrationBanner(
+          onCalibrate: () => calibrate++,
+          onLater: () => later++,
         ),
       ),
     );
 
-    expect(find.text('Compass needs calibration'), findsOneWidget);
-    await tester.tap(find.text('Calibrate'));
-    await tester.tap(find.text('Later'));
+    expect(find.text(l10n.compassNeedsCalibration), findsOneWidget);
+    await tester.tap(find.text(l10n.compassCalibrate));
+    await tester.tap(find.text(l10n.compassLater));
 
     expect(calibrate, 1);
     expect(later, 1);
@@ -39,20 +40,19 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(
-            size: viewSize,
-            viewPadding: EdgeInsets.only(bottom: navBarHeight),
-            padding: EdgeInsets.only(bottom: navBarHeight),
-          ),
-          child: Scaffold(
-            body: Stack(
-              children: [
-                CompassCalibrationMapBanner(onCalibrate: () {}, onLater: () {}),
-              ],
-            ),
+    await pumpWithL10n(
+      tester,
+      MediaQuery(
+        data: const MediaQueryData(
+          size: viewSize,
+          viewPadding: EdgeInsets.only(bottom: navBarHeight),
+          padding: EdgeInsets.only(bottom: navBarHeight),
+        ),
+        child: Scaffold(
+          body: Stack(
+            children: [
+              CompassCalibrationMapBanner(onCalibrate: () {}, onLater: () {}),
+            ],
           ),
         ),
       ),
@@ -72,19 +72,18 @@ void main() {
     addTearDown(events.close);
     bool? result;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Builder(
-            builder: (context) => TextButton(
-              onPressed: () async {
-                result = await showCompassCalibrationSheet(
-                  context,
-                  events: events.stream,
-                );
-              },
-              child: const Text('Open'),
-            ),
+    final l10n = await pumpWithL10n(
+      tester,
+      Scaffold(
+        body: Builder(
+          builder: (context) => TextButton(
+            onPressed: () async {
+              result = await showCompassCalibrationSheet(
+                context,
+                events: events.stream,
+              );
+            },
+            child: const Text('Open'),
           ),
         ),
       ),
@@ -94,7 +93,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.text('Calibrate compass'), findsOneWidget);
+    expect(find.text(l10n.compassSheetTitle), findsOneWidget);
     expect(find.byType(CompassFigureEight), findsOneWidget);
 
     for (var heading = 0; heading < 360; heading += 15) {
@@ -102,12 +101,12 @@ void main() {
       await tester.pump();
     }
 
-    expect(find.text('Calibration complete'), findsOneWidget);
+    expect(find.text(l10n.compassCalibrationComplete), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 700));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    expect(find.text('Calibrate compass'), findsNothing);
+    expect(find.text(l10n.compassSheetTitle), findsNothing);
     expect(result, isTrue);
   });
 
@@ -116,19 +115,18 @@ void main() {
     addTearDown(events.close);
     bool? result;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Builder(
-            builder: (context) => TextButton(
-              onPressed: () async {
-                result = await showCompassCalibrationSheet(
-                  context,
-                  events: events.stream,
-                );
-              },
-              child: const Text('Open'),
-            ),
+    final l10n = await pumpWithL10n(
+      tester,
+      Scaffold(
+        body: Builder(
+          builder: (context) => TextButton(
+            onPressed: () async {
+              result = await showCompassCalibrationSheet(
+                context,
+                events: events.stream,
+              );
+            },
+            child: const Text('Open'),
           ),
         ),
       ),
@@ -137,7 +135,7 @@ void main() {
     await tester.tap(find.text('Open'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
-    await tester.tap(find.text('Skip'));
+    await tester.tap(find.text(l10n.compassSkip));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 

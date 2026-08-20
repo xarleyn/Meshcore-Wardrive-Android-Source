@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
+
 Future<String?> showSettingsTextInputDialog({
   required BuildContext context,
   required String title,
@@ -99,6 +101,8 @@ class _SettingsTextInputDialogState extends State<_SettingsTextInputDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return AlertDialog(
       title: Text(widget.title),
       content: Column(
@@ -133,14 +137,14 @@ class _SettingsTextInputDialogState extends State<_SettingsTextInputDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l10n.settingsCancel),
         ),
         if (widget.allowClear)
           TextButton(
             onPressed: () => Navigator.pop(context, ''),
-            child: const Text('Clear'),
+            child: Text(l10n.settingsClear),
           ),
-        TextButton(onPressed: _save, child: const Text('Save')),
+        TextButton(onPressed: _save, child: Text(l10n.settingsSave)),
       ],
     );
   }

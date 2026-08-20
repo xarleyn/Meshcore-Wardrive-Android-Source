@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../services/database_service.dart';
 
 class DeviceComparisonScreen extends StatefulWidget {
@@ -41,19 +42,19 @@ class _DeviceComparisonScreenState extends State<DeviceComparisonScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Device Comparison')),
+      appBar: AppBar(title: Text(l10n.settingsDeviceComparison)),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _devices.isEmpty
-          ? const Center(
+          ? Center(
               child: Padding(
-                padding: EdgeInsets.all(32),
+                padding: const EdgeInsets.all(32),
                 child: Text(
-                  'No devices tracked yet.\n\nConnect a LoRa device and start wardriving — '
-                  'the app will automatically log which device you use.',
+                  l10n.deviceComparisonEmpty,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey),
+                  style: const TextStyle(color: Colors.grey),
                 ),
               ),
             )
@@ -64,7 +65,7 @@ class _DeviceComparisonScreenState extends State<DeviceComparisonScreen> {
                 children: [
                   // Device list
                   Text(
-                    '${_devices.length} device(s) tracked',
+                    l10n.deviceComparisonTracked(_devices.length),
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -78,9 +79,9 @@ class _DeviceComparisonScreenState extends State<DeviceComparisonScreen> {
                     const SizedBox(height: 24),
                     const Divider(),
                     const SizedBox(height: 8),
-                    const Text(
-                      'Compare Devices',
-                      style: TextStyle(
+                    Text(
+                      l10n.deviceComparisonCompareDevices,
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
@@ -91,9 +92,9 @@ class _DeviceComparisonScreenState extends State<DeviceComparisonScreen> {
                         Expanded(
                           child: DropdownButton<String>(
                             value: _compareA,
-                            hint: const Text(
-                              'Device A',
-                              style: TextStyle(fontSize: 13),
+                            hint: Text(
+                              l10n.deviceComparisonDeviceA,
+                              style: const TextStyle(fontSize: 13),
                             ),
                             isExpanded: true,
                             items: _devices.map((d) {
@@ -109,19 +110,19 @@ class _DeviceComparisonScreenState extends State<DeviceComparisonScreen> {
                             onChanged: (v) => setState(() => _compareA = v),
                           ),
                         ),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
                           child: Text(
-                            'vs',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            l10n.deviceComparisonVs,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
                         Expanded(
                           child: DropdownButton<String>(
                             value: _compareB,
-                            hint: const Text(
-                              'Device B',
-                              style: TextStyle(fontSize: 13),
+                            hint: Text(
+                              l10n.deviceComparisonDeviceB,
+                              style: const TextStyle(fontSize: 13),
                             ),
                             isExpanded: true,
                             items: _devices.map((d) {
@@ -152,7 +153,9 @@ class _DeviceComparisonScreenState extends State<DeviceComparisonScreen> {
 
   Widget _buildDeviceCard(Map<String, dynamic> device) {
     final key = device['public_key'] as String;
-    final name = device['name'] as String? ?? 'Unknown';
+    final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
+    final name = device['name'] as String? ?? l10n.settingsUnknown;
     final connType = device['connection_type'] as String? ?? '?';
     final firstUsed = DateTime.fromMillisecondsSinceEpoch(
       device['first_used'] as int,
@@ -210,16 +213,18 @@ class _DeviceComparisonScreenState extends State<DeviceComparisonScreen> {
             const SizedBox(height: 8),
             Row(
               children: [
-                _miniStat('Pings', '$totalPings'),
-                _miniStat('Cells', '$cells'),
+                _miniStat(l10n.deviceComparisonMiniPings, '$totalPings'),
+                _miniStat(l10n.deviceComparisonMiniCells, '$cells'),
                 _miniStat(
-                  'Avg Resp',
+                  l10n.deviceComparisonMiniAvgResp,
                   stats?['avgResponseMs'] != null
-                      ? '${stats!['avgResponseMs'].toStringAsFixed(0)}ms'
+                      ? l10n.deviceComparisonAvgRespMs(
+                          stats!['avgResponseMs'].toStringAsFixed(0),
+                        )
                       : '—',
                 ),
                 _miniStat(
-                  'Avg SNR',
+                  l10n.deviceComparisonMiniAvgSnr,
                   stats?['avgSnr'] != null
                       ? '${stats!['avgSnr'].toStringAsFixed(1)}'
                       : '—',
@@ -228,7 +233,10 @@ class _DeviceComparisonScreenState extends State<DeviceComparisonScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              'First: ${DateFormat('MMM d').format(firstUsed)} • Last: ${DateFormat('MMM d').format(lastUsed)}',
+              l10n.deviceComparisonFirstLast(
+                DateFormat.MMMd(locale).format(firstUsed),
+                DateFormat.MMMd(locale).format(lastUsed),
+              ),
               style: const TextStyle(fontSize: 10, color: Colors.grey),
             ),
           ],
@@ -238,6 +246,7 @@ class _DeviceComparisonScreenState extends State<DeviceComparisonScreen> {
   }
 
   Widget _buildComparisonTable() {
+    final l10n = AppLocalizations.of(context);
     final a = _deviceStats[_compareA!] ?? {};
     final b = _deviceStats[_compareB!] ?? {};
     final nameA =
@@ -258,11 +267,14 @@ class _DeviceComparisonScreenState extends State<DeviceComparisonScreen> {
             // Header
             Row(
               children: [
-                const Expanded(
+                Expanded(
                   flex: 2,
                   child: Text(
-                    'Stat',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                    l10n.deviceComparisonStat,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
                 Expanded(
@@ -285,10 +297,13 @@ class _DeviceComparisonScreenState extends State<DeviceComparisonScreen> {
                     textAlign: TextAlign.center,
                   ),
                 ),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Winner',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                    l10n.deviceComparisonWinner,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 11,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -296,46 +311,46 @@ class _DeviceComparisonScreenState extends State<DeviceComparisonScreen> {
             ),
             const Divider(),
             _compRow(
-              'Total Pings',
+              l10n.deviceComparisonTotalPings,
               a['totalPings'] ?? 0,
               b['totalPings'] ?? 0,
               higher: true,
             ),
             _compRow(
-              'Success Rate',
+              l10n.deviceComparisonSuccessRate,
               a['successRate'] ?? 0.0,
               b['successRate'] ?? 0.0,
               higher: true,
               pct: true,
             ),
             _compRow(
-              'Failures',
+              l10n.deviceComparisonFailures,
               a['failures'] ?? 0,
               b['failures'] ?? 0,
               higher: false,
             ),
             _compRow(
-              'Unique Cells',
+              l10n.deviceComparisonUniqueCells,
               a['uniqueCells'] ?? 0,
               b['uniqueCells'] ?? 0,
               higher: true,
             ),
             _compRow(
-              'Avg Response',
+              l10n.deviceComparisonAvgResponse,
               a['avgResponseMs'],
               b['avgResponseMs'],
               higher: false,
               suffix: 'ms',
             ),
             _compRow(
-              'Avg SNR',
+              l10n.deviceComparisonAvgSnr,
               a['avgSnr'],
               b['avgSnr'],
               higher: true,
               suffix: 'dB',
             ),
             _compRow(
-              'Avg RSSI',
+              l10n.deviceComparisonAvgRssi,
               a['avgRssi'],
               b['avgRssi'],
               higher: true,
@@ -364,6 +379,7 @@ class _DeviceComparisonScreenState extends State<DeviceComparisonScreen> {
 
     String winner = '—';
     Color winColor = Colors.grey;
+    final l10n = AppLocalizations.of(context);
     if (valA != null && valB != null) {
       final a = (valA is int) ? valA.toDouble() : (valA as double);
       final b = (valB is int) ? valB.toDouble() : (valB as double);
@@ -372,15 +388,15 @@ class _DeviceComparisonScreenState extends State<DeviceComparisonScreen> {
         final nameA =
             _devices.firstWhere((d) => d['public_key'] == _compareA)['name']
                 as String? ??
-            'A';
+            l10n.deviceComparisonDeviceA;
         final nameB =
             _devices.firstWhere((d) => d['public_key'] == _compareB)['name']
                 as String? ??
-            'B';
+            l10n.deviceComparisonDeviceB;
         winner = aWins ? nameA : nameB;
         winColor = Colors.green;
       } else {
-        winner = 'Tie';
+        winner = l10n.deviceComparisonTie;
       }
     }
 

@@ -4,86 +4,84 @@ extension _LocationSettingsSection on _MapScreenState {
   List<Widget> _buildLocationSettings(
     BuildContext context,
     StateSetter setModalState,
-  ) => [
-    const SettingsSectionHeader(
-      title: 'Location & positioning',
-      icon: Icons.my_location,
-    ),
-    SwitchListTile(
-      title: const Text('beaconDB Wi-Fi Positioning'),
-      subtitle: const Text(
-        'Prefer Wi-Fi location; sends nearby BSSIDs and signal '
-        'levels to beaconDB. Cyan marker means Wi-Fi is active.',
+  ) {
+    final l10n = AppLocalizations.of(context);
+    return [
+      SettingsSectionHeader(
+        title: l10n.settingsSectionLocation,
+        icon: Icons.my_location,
       ),
-      value: _beaconDbWifiPositioning,
-      onChanged: (value) async {
-        _updateMapState(() {
-          _beaconDbWifiPositioning = value;
-        });
-        setModalState(() {});
-        await _settingsService.setBeaconDbWifiPositioning(value);
-        _locationService.setWifiPositioningEnabled(value);
-        if (value) {
-          _showSnackBar('beaconDB enabled: nearby BSSIDs will be shared');
-          await _requestWifiScanThrottlingDisabled();
-        }
-      },
-    ),
-    ListTile(
-      leading: const Icon(Icons.gps_fixed),
-      title: const Text('Location Quality Filters'),
-      subtitle: const Text(
-        'Accuracy, implausible movement, and impossible locations',
-      ),
-      trailing: const Icon(Icons.arrow_forward),
-      onTap: () => _openLocationQualitySettings(context),
-    ),
-    SwitchListTile(
-      title: const Text('Show Approximate Position'),
-      subtitle: const Text('Display the grey radio-position estimate'),
-      value: _showRadioPosition,
-      onChanged: (value) async {
-        _updateMapState(() {
-          _showRadioPosition = value;
-        });
-        setModalState(() {});
-        await _settingsService.setShowRadioPosition(value);
-      },
-    ),
-    ListTile(
-      title: const Text('Ducting Forecast'),
-      subtitle: const Text('6-day tropospheric ducting maps'),
-      leading: const Icon(Icons.cloud),
-      trailing: const Icon(Icons.arrow_forward),
-      onTap: () {
-        Navigator.pop(context);
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const DuctingForecastScreen(),
-          ),
-        );
-      },
-    ),
-    SwitchListTile(
-      title: const Text('Atmospheric Ducting'),
-      subtitle: const Text('Monitor ducting conditions (needs internet)'),
-      value: _showDucting,
-      onChanged: (value) async {
-        _updateMapState(() {
-          _showDucting = value;
-        });
-        setModalState(() {});
-        await _settingsService.setShowDucting(value);
-        _locationService.setDuctingEnabled(value);
-        if (value) {
-          // Fetch immediately and update badge
-          final risk = await _locationService.ductingService.getLatestRisk();
+      SwitchListTile(
+        title: Text(l10n.settingsBeaconDbWifi),
+        subtitle: Text(l10n.settingsBeaconDbWifiSubtitle),
+        value: _beaconDbWifiPositioning,
+        onChanged: (value) async {
           _updateMapState(() {
-            _currentDuctingRisk = risk;
+            _beaconDbWifiPositioning = value;
           });
-        }
-      },
-    ),
-  ];
+          setModalState(() {});
+          await _settingsService.setBeaconDbWifiPositioning(value);
+          _locationService.setWifiPositioningEnabled(value);
+          if (value) {
+            _showSnackBar(l10n.settingsBeaconDbEnabledSnack);
+            await _requestWifiScanThrottlingDisabled();
+          }
+        },
+      ),
+      ListTile(
+        leading: const Icon(Icons.gps_fixed),
+        title: Text(l10n.settingsLocationQualityFilters),
+        subtitle: Text(l10n.settingsLocationQualityFiltersSubtitle),
+        trailing: const Icon(Icons.arrow_forward),
+        onTap: () => _openLocationQualitySettings(context),
+      ),
+      SwitchListTile(
+        title: Text(l10n.settingsShowApproximatePosition),
+        subtitle: Text(l10n.settingsShowApproximatePositionSubtitle),
+        value: _showRadioPosition,
+        onChanged: (value) async {
+          _updateMapState(() {
+            _showRadioPosition = value;
+          });
+          setModalState(() {});
+          await _settingsService.setShowRadioPosition(value);
+        },
+      ),
+      ListTile(
+        title: Text(l10n.settingsDuctingForecast),
+        subtitle: Text(l10n.settingsDuctingForecastSubtitle),
+        leading: const Icon(Icons.cloud),
+        trailing: const Icon(Icons.arrow_forward),
+        onTap: () {
+          Navigator.pop(context);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const DuctingForecastScreen(),
+            ),
+          );
+        },
+      ),
+      SwitchListTile(
+        title: Text(l10n.settingsAtmosphericDucting),
+        subtitle: Text(l10n.settingsAtmosphericDuctingSubtitle),
+        value: _showDucting,
+        onChanged: (value) async {
+          _updateMapState(() {
+            _showDucting = value;
+          });
+          setModalState(() {});
+          await _settingsService.setShowDucting(value);
+          _locationService.setDuctingEnabled(value);
+          if (value) {
+            // Fetch immediately and update badge
+            final risk = await _locationService.ductingService.getLatestRisk();
+            _updateMapState(() {
+              _currentDuctingRisk = risk;
+            });
+          }
+        },
+      ),
+    ];
+  }
 }

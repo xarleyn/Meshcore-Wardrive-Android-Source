@@ -5,16 +5,12 @@ import 'settings_service.dart';
 
 class Achievement {
   final String id;
-  final String title;
-  final String description;
   final String icon;
   final bool unlocked;
   final DateTime? unlockedAt;
 
   Achievement({
     required this.id,
-    required this.title,
-    required this.description,
     required this.icon,
     this.unlocked = false,
     this.unlockedAt,
@@ -31,92 +27,22 @@ class AchievementService {
 
   static const _prefix = 'achievement_';
 
-  // Achievement definitions
+  // Achievement definitions. Titles and descriptions live in ARB / l10n.
   static final List<Map<String, String>> _definitions = [
-    {
-      'id': 'first_ping',
-      'title': 'First Ping',
-      'desc': 'Send your first ping',
-      'icon': '📡',
-    },
-    {
-      'id': 'pings_100',
-      'title': 'Century',
-      'desc': 'Send 100 pings',
-      'icon': '💯',
-    },
-    {
-      'id': 'pings_1000',
-      'title': 'Kilopinger',
-      'desc': 'Send 1,000 pings',
-      'icon': '🔥',
-    },
-    {
-      'id': 'pings_10000',
-      'title': 'Ping Lord',
-      'desc': 'Send 10,000 pings',
-      'icon': '👑',
-    },
-    {
-      'id': 'first_repeater',
-      'title': 'First Contact',
-      'desc': 'Discover your first repeater',
-      'icon': '📻',
-    },
-    {
-      'id': 'repeaters_10',
-      'title': 'Network Explorer',
-      'desc': 'Discover 10 repeaters',
-      'icon': '🗺️',
-    },
-    {
-      'id': 'repeaters_50',
-      'title': 'Mesh Master',
-      'desc': 'Discover 50 repeaters',
-      'icon': '🌐',
-    },
-    {
-      'id': 'miles_10',
-      'title': 'Road Warrior',
-      'desc': 'Drive 10 miles wardriving',
-      'icon': '🚗',
-    },
-    {
-      'id': 'miles_100',
-      'title': 'Highway Hero',
-      'desc': 'Drive 100 miles wardriving',
-      'icon': '🛣️',
-    },
-    {
-      'id': 'miles_500',
-      'title': 'Cross Country',
-      'desc': 'Drive 500 miles wardriving',
-      'icon': '✈️',
-    },
-    {
-      'id': 'cells_50',
-      'title': 'Area Scout',
-      'desc': 'Cover 50 unique cells',
-      'icon': '🏘️',
-    },
-    {
-      'id': 'cells_500',
-      'title': 'Territory King',
-      'desc': 'Cover 500 unique cells',
-      'icon': '🏰',
-    },
-    {
-      'id': 'first_session',
-      'title': 'Getting Started',
-      'desc': 'Complete your first session',
-      'icon': '🎬',
-    },
-    {
-      'id': 'sessions_50',
-      'title': 'Dedicated Driver',
-      'desc': 'Complete 50 sessions',
-      'icon': '🏆',
-    },
+    {'id': 'first_ping', 'icon': '📡'},
+    {'id': 'pings_100', 'icon': '💯'},
+    {'id': 'pings_1000', 'icon': '🔥'},
+    {'id': 'pings_10000', 'icon': '👑'},
+    {'id': 'first_repeater', 'icon': '📻'},
+    {'id': 'repeaters_10', 'icon': '🗺️'},
+    {'id': 'repeaters_50', 'icon': '🌐'},
+    {'id': 'miles_10', 'icon': '🚗'},
+    {'id': 'miles_100', 'icon': '🛣️'},
+    {'id': 'miles_500', 'icon': '✈️'},
+    {'id': 'cells_50', 'icon': '🏘️'},
+    {'id': 'cells_500', 'icon': '🏰'},
+    {'id': 'first_session', 'icon': '🎬'},
+    {'id': 'sessions_50', 'icon': '🏆'},
   ];
 
   /// Get all achievements with their unlock status
@@ -127,8 +53,6 @@ class AchievementService {
       final unlockedMs = prefs.getInt(key);
       return Achievement(
         id: d['id']!,
-        title: d['title']!,
-        description: d['desc']!,
         icon: d['icon']!,
         unlocked: unlockedMs != null,
         unlockedAt: unlockedMs != null
@@ -194,8 +118,6 @@ class AchievementService {
         final def = _definitions.firstWhere((d) => d['id'] == entry.key);
         final achievement = Achievement(
           id: entry.key,
-          title: def['title']!,
-          description: def['desc']!,
           icon: def['icon']!,
           unlocked: true,
           unlockedAt: now,

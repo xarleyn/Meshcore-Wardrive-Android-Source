@@ -2,49 +2,56 @@ part of '../map_screen.dart';
 
 extension _SettingsDialogs on _MapScreenState {
   String _getPingIntervalDescription() {
+    final l10n = AppLocalizations.of(context);
     if (_pingIntervalMeters < 100) {
-      return '${_pingIntervalMeters.toInt()} meters (frequent)';
+      return l10n.settingsPingIntervalMetersFrequent(
+        _pingIntervalMeters.toInt(),
+      );
     } else if (_pingIntervalMeters < 1000) {
-      return '${_pingIntervalMeters.toInt()} meters';
+      return l10n.settingsPingIntervalMeters(_pingIntervalMeters.toInt());
     } else {
       final miles = (_pingIntervalMeters / 1609.34).toStringAsFixed(1);
-      return '$miles miles (${_pingIntervalMeters.toInt()}m)';
+      return l10n.settingsPingIntervalMiles(miles, _pingIntervalMeters.toInt());
     }
   }
 
   Future<void> _setPingInterval() async {
+    final l10n = AppLocalizations.of(context);
     String? selected = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Ping Interval'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('How often should pings be sent?'),
-            const SizedBox(height: 16),
-            ListTile(
-              title: const Text('Frequent'),
-              subtitle: const Text('Every 50 meters'),
-              onTap: () => Navigator.pop(context, '50'),
-            ),
-            ListTile(
-              title: const Text('Normal'),
-              subtitle: const Text('Every 200 meters (~0.12 miles)'),
-              onTap: () => Navigator.pop(context, '200'),
-            ),
-            ListTile(
-              title: const Text('Sparse'),
-              subtitle: const Text('Every 0.5 miles (805 meters)'),
-              onTap: () => Navigator.pop(context, '805'),
-            ),
-            ListTile(
-              title: const Text('Very Sparse'),
-              subtitle: const Text('Every 1 mile (1609 meters)'),
-              onTap: () => Navigator.pop(context, '1609'),
-            ),
-          ],
-        ),
-      ),
+      builder: (context) {
+        final l10n = AppLocalizations.of(context);
+        return AlertDialog(
+          title: Text(l10n.settingsPingInterval),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(l10n.settingsPingIntervalPrompt),
+              const SizedBox(height: 16),
+              ListTile(
+                title: Text(l10n.settingsPingFrequent),
+                subtitle: Text(l10n.settingsPingFrequentSubtitle),
+                onTap: () => Navigator.pop(context, '50'),
+              ),
+              ListTile(
+                title: Text(l10n.settingsPingNormal),
+                subtitle: Text(l10n.settingsPingNormalSubtitle),
+                onTap: () => Navigator.pop(context, '200'),
+              ),
+              ListTile(
+                title: Text(l10n.settingsPingSparse),
+                subtitle: Text(l10n.settingsPingSparseSubtitle),
+                onTap: () => Navigator.pop(context, '805'),
+              ),
+              ListTile(
+                title: Text(l10n.settingsPingVerySparse),
+                subtitle: Text(l10n.settingsPingVerySparseSubtitle),
+                onTap: () => Navigator.pop(context, '1609'),
+              ),
+            ],
+          ),
+        );
+      },
     );
 
     if (selected != null) {
@@ -55,65 +62,72 @@ extension _SettingsDialogs on _MapScreenState {
       // Update location service ping interval
       _locationService.setPingInterval(_pingIntervalMeters);
       await _settingsService.setPingInterval(interval);
-      _showSnackBar('Ping interval: ${_getPingIntervalDescription()}');
+      _showSnackBar(
+        l10n.settingsPingIntervalSet(_getPingIntervalDescription()),
+      );
     }
   }
 
   String _getCoverageResolutionDescription() {
+    final l10n = AppLocalizations.of(context);
     switch (_coveragePrecision) {
       case 4:
-        return 'Regional (~20km squares)';
+        return l10n.settingsCoverageRegionalDesc;
       case 5:
-        return 'City-level (~5km squares)';
+        return l10n.settingsCoverageCityDesc;
       case 6:
-        return 'Neighborhood (~1.2km squares)';
+        return l10n.settingsCoverageNeighborhoodDesc;
       case 7:
-        return 'Street-level (~153m squares)';
+        return l10n.settingsCoverageStreetDesc;
       case 8:
-        return 'Building-level (~38m squares)';
+        return l10n.settingsCoverageBuildingDesc;
       default:
-        return 'Unknown';
+        return l10n.settingsUnknown;
     }
   }
 
   Future<void> _setCoverageResolution() async {
+    final l10n = AppLocalizations.of(context);
     String? selected = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Coverage Resolution'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Choose the size of coverage squares:'),
-            const SizedBox(height: 16),
-            ListTile(
-              title: const Text('Regional'),
-              subtitle: const Text('~20km squares (precision 4)'),
-              onTap: () => Navigator.pop(context, '4'),
-            ),
-            ListTile(
-              title: const Text('City-level'),
-              subtitle: const Text('~5km squares (precision 5)'),
-              onTap: () => Navigator.pop(context, '5'),
-            ),
-            ListTile(
-              title: const Text('Neighborhood'),
-              subtitle: const Text('~1.2km squares (precision 6, default)'),
-              onTap: () => Navigator.pop(context, '6'),
-            ),
-            ListTile(
-              title: const Text('Street-level'),
-              subtitle: const Text('~153m squares (precision 7)'),
-              onTap: () => Navigator.pop(context, '7'),
-            ),
-            ListTile(
-              title: const Text('Building-level'),
-              subtitle: const Text('~38m squares (precision 8, detailed)'),
-              onTap: () => Navigator.pop(context, '8'),
-            ),
-          ],
-        ),
-      ),
+      builder: (context) {
+        final l10n = AppLocalizations.of(context);
+        return AlertDialog(
+          title: Text(l10n.settingsCoverageResolution),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(l10n.settingsCoverageResolutionPrompt),
+              const SizedBox(height: 16),
+              ListTile(
+                title: Text(l10n.settingsCoverageRegional),
+                subtitle: Text(l10n.settingsCoverageRegionalSubtitle),
+                onTap: () => Navigator.pop(context, '4'),
+              ),
+              ListTile(
+                title: Text(l10n.settingsCoverageCity),
+                subtitle: Text(l10n.settingsCoverageCitySubtitle),
+                onTap: () => Navigator.pop(context, '5'),
+              ),
+              ListTile(
+                title: Text(l10n.settingsCoverageNeighborhood),
+                subtitle: Text(l10n.settingsCoverageNeighborhoodSubtitle),
+                onTap: () => Navigator.pop(context, '6'),
+              ),
+              ListTile(
+                title: Text(l10n.settingsCoverageStreet),
+                subtitle: Text(l10n.settingsCoverageStreetSubtitle),
+                onTap: () => Navigator.pop(context, '7'),
+              ),
+              ListTile(
+                title: Text(l10n.settingsCoverageBuilding),
+                subtitle: Text(l10n.settingsCoverageBuildingSubtitle),
+                onTap: () => Navigator.pop(context, '8'),
+              ),
+            ],
+          ),
+        );
+      },
     );
 
     if (selected != null) {
@@ -126,21 +140,20 @@ extension _SettingsDialogs on _MapScreenState {
       _lastAggregatedSampleCount = -1;
       await _loadSamples();
       _showSnackBar(
-        'Coverage resolution: ${_getCoverageResolutionDescription()}',
+        l10n.settingsCoverageResolutionSet(_getCoverageResolutionDescription()),
       );
     }
   }
 
   Future<void> _setIgnoredRepeater() async {
+    final l10n = AppLocalizations.of(context);
     final input = await showSettingsTextInputDialog(
       context: context,
-      title: 'Ignore Repeaters',
+      title: l10n.settingsIgnoreRepeaters,
       initialValue: _ignoredRepeaterPrefix ?? '',
-      labelText: 'Repeater Prefixes',
-      hintText: 'e.g., 7E, A4F, BAD5',
-      description:
-          'Filter out responses from your mobile repeater(s) to avoid false '
-          'coverage. Enter repeater prefixes separated by commas:',
+      labelText: l10n.settingsRepeaterPrefixes,
+      hintText: l10n.settingsIgnoreRepeaterHint,
+      description: l10n.settingsIgnoreRepeaterDescription,
       textCapitalization: TextCapitalization.characters,
       maxLines: 2,
     );
@@ -154,20 +167,19 @@ extension _SettingsDialogs on _MapScreenState {
         _ignoredRepeaterPrefix,
       );
       await _settingsService.setIgnoredRepeaterPrefix(prefix);
-      _showSnackBar('Repeater prefix updated');
+      _showSnackBar(l10n.settingsRepeaterPrefixUpdated);
     }
   }
 
   Future<void> _setIncludeOnlyRepeaters() async {
+    final l10n = AppLocalizations.of(context);
     final input = await showSettingsTextInputDialog(
       context: context,
-      title: 'Include Only Repeaters',
+      title: l10n.settingsIncludeOnlyRepeaters,
       initialValue: _includeOnlyRepeaters ?? '',
-      labelText: 'Repeater Prefixes',
-      hintText: 'e.g., 7E3A, A4F2, 8B',
-      description:
-          'Show only samples from specific repeaters (whitelist). Enter '
-          'repeater prefixes separated by commas:',
+      labelText: l10n.settingsRepeaterPrefixes,
+      hintText: l10n.settingsIncludeOnlyHint,
+      description: l10n.settingsIncludeOnlyDescription,
       textCapitalization: TextCapitalization.characters,
       maxLines: 2,
     );
@@ -178,7 +190,7 @@ extension _SettingsDialogs on _MapScreenState {
         _includeOnlyRepeaters = prefixes;
       });
       await _settingsService.setIncludeOnlyRepeaters(prefixes);
-      _showSnackBar('Repeater whitelist updated');
+      _showSnackBar(l10n.settingsRepeaterWhitelistUpdated);
     }
   }
 
@@ -196,6 +208,7 @@ extension _SettingsDialogs on _MapScreenState {
     required LocationQualitySettings Function(double value) update,
     required StateSetter setModalState,
   }) async {
+    final l10n = AppLocalizations.of(context);
     final input = await showSettingsTextInputDialog(
       context: context,
       title: title,
@@ -209,7 +222,7 @@ extension _SettingsDialogs on _MapScreenState {
           (text ?? '').trim().replaceAll(',', '.'),
         );
         if (parsed == null || !parsed.isFinite || parsed <= 0) {
-          return 'Enter a number greater than zero';
+          return l10n.settingsEnterNumberGreaterThanZero;
         }
         return null;
       },
@@ -232,6 +245,8 @@ extension _SettingsDialogs on _MapScreenState {
     _updateMapState(() => _locationQualitySettings = settings);
     _locationService.setLocationQualitySettings(settings);
     setModalState(() {});
-    _showSnackBar('Location quality filters reset');
+    _showSnackBar(
+      AppLocalizations.of(context).settingsLocationQualityResetSnack,
+    );
   }
 }

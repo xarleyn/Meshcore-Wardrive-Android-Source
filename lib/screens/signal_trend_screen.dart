@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../models/models.dart';
 
 class SignalTrendScreen extends StatefulWidget {
@@ -17,23 +18,27 @@ class _SignalTrendScreenState extends State<SignalTrendScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     // Filter to samples that have signal data, sorted by time
     final signalSamples =
         widget.samples.where((s) => s.pingSuccess != null).toList()
           ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Signal Trends')),
+      appBar: AppBar(title: Text(l10n.settingsSignalTrends)),
       body: Column(
         children: [
           // Metric selector
           Padding(
             padding: const EdgeInsets.all(12),
             child: SegmentedButton<String>(
-              segments: const [
-                ButtonSegment(value: 'rssi', label: Text('RSSI')),
-                ButtonSegment(value: 'snr', label: Text('SNR')),
-                ButtonSegment(value: 'responseTime', label: Text('Response')),
+              segments: [
+                ButtonSegment(value: 'rssi', label: Text(l10n.signalTrendRssi)),
+                ButtonSegment(value: 'snr', label: Text(l10n.signalTrendSnr)),
+                ButtonSegment(
+                  value: 'responseTime',
+                  label: Text(l10n.signalTrendResponse),
+                ),
               ],
               selected: {_metric},
               onSelectionChanged: (v) => setState(() => _metric = v.first),
@@ -42,9 +47,9 @@ class _SignalTrendScreenState extends State<SignalTrendScreen> {
           // Chart
           Expanded(
             child: signalSamples.isEmpty
-                ? const Center(
+                ? Center(
                     child: Text(
-                      'No signal data yet.\nDo some wardriving with pings enabled.',
+                      l10n.signalTrendEmpty,
                       textAlign: TextAlign.center,
                     ),
                   )
@@ -61,6 +66,8 @@ class _SignalTrendScreenState extends State<SignalTrendScreen> {
   }
 
   Widget _buildChart(List<Sample> samples) {
+    final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
     final spots = <FlSpot>[];
     final timestamps = <double, DateTime>{};
 
@@ -82,9 +89,9 @@ class _SignalTrendScreenState extends State<SignalTrendScreen> {
 
     if (spots.isEmpty) {
       final label = _metric == 'responseTime'
-          ? 'response time'
+          ? l10n.signalTrendResponseTimeLabel
           : _metric.toUpperCase();
-      return Center(child: Text('No $label data available.'));
+      return Center(child: Text(l10n.signalTrendNoMetricData(label)));
     }
 
     final minY = spots.map((s) => s.y).reduce((a, b) => a < b ? a : b);
@@ -143,7 +150,7 @@ class _SignalTrendScreenState extends State<SignalTrendScreen> {
                 return Padding(
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
-                    DateFormat('HH:mm').format(ts),
+                    DateFormat.Hm(locale).format(ts),
                     style: const TextStyle(fontSize: 9),
                   ),
                 );
@@ -178,7 +185,7 @@ class _SignalTrendScreenState extends State<SignalTrendScreen> {
               return touchedSpots.map((spot) {
                 final ts = timestamps[spot.x];
                 final timeStr = ts != null
-                    ? DateFormat('MMM d HH:mm').format(ts)
+                    ? DateFormat.MMMd(locale).add_Hm().format(ts)
                     : '';
                 return LineTooltipItem(
                   '${spot.y.toStringAsFixed(_metric == 'responseTime' ? 0 : 1)} $yLabel\n$timeStr',
@@ -193,6 +200,7 @@ class _SignalTrendScreenState extends State<SignalTrendScreen> {
   }
 
   Widget _buildStats(List<Sample> samples) {
+    final l10n = AppLocalizations.of(context);
     List<double> values;
     String unit;
     if (_metric == 'rssi') {
@@ -226,10 +234,22 @@ class _SignalTrendScreenState extends State<SignalTrendScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _statCard('Min', '${min.toStringAsFixed(0)} $unit', Colors.red),
-          _statCard('Avg', '${avg.toStringAsFixed(0)} $unit', Colors.blue),
-          _statCard('Max', '${max.toStringAsFixed(0)} $unit', Colors.green),
-          _statCard('Pts', '${values.length}', Colors.grey),
+          _statCard(
+            l10n.signalTrendMin,
+            '${min.toStringAsFixed(0)} $unit',
+            Colors.red,
+          ),
+          _statCard(
+            l10n.signalTrendAvg,
+            '${avg.toStringAsFixed(0)} $unit',
+            Colors.blue,
+          ),
+          _statCard(
+            l10n.signalTrendMax,
+            '${max.toStringAsFixed(0)} $unit',
+            Colors.green,
+          ),
+          _statCard(l10n.signalTrendPts, '${values.length}', Colors.grey),
         ],
       ),
     );

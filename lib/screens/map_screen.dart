@@ -53,6 +53,9 @@ import 'debug_diagnostics_screen.dart';
 import 'session_history_screen.dart';
 import 'signal_trend_screen.dart';
 import '../main.dart';
+import '../l10n/achievement_l10n.dart';
+import '../l10n/app_locale.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../constants/app_version.dart';
 import '../services/ducting_service.dart';
 import '../services/carpeater_service.dart';
@@ -427,14 +430,18 @@ class _MapScreenState extends State<MapScreen> {
         .listen((repeaterId) {
           if (mounted) {
             SoundService().playPingSuccessGood();
-            _showSnackBar('🆕 New repeater discovered: $repeaterId');
+            _showSnackBar(
+              AppLocalizations.of(context).mapNewRepeaterDiscovered(repeaterId),
+            );
           }
         });
 
     // Subscribe to dead zone alerts
     _deadZoneSubscription = _locationService.deadZoneStream.listen((cellHash) {
       if (mounted) {
-        _showSnackBar('⚠️ Entering known dead zone ($cellHash)');
+        _showSnackBar(
+          AppLocalizations.of(context).mapEnteringDeadZone(cellHash),
+        );
       }
     });
 
@@ -446,10 +453,9 @@ class _MapScreenState extends State<MapScreen> {
         setState(() {
           _batterySaverActive = active;
         });
+        final l10n = AppLocalizations.of(context);
         _showSnackBar(
-          active
-              ? '🔋 Battery saver ON — ping interval doubled'
-              : '🔋 Battery saver OFF — normal ping interval restored',
+          active ? l10n.mapBatterySaverOn : l10n.mapBatterySaverOff,
         );
       }
     });
@@ -457,8 +463,10 @@ class _MapScreenState extends State<MapScreen> {
     // Subscribe to achievement unlocks
     AchievementService().unlockStream.listen((achievement) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        final copy = achievementCopy(l10n, achievement.id);
         _showSnackBar(
-          '🏆 Achievement unlocked: ${achievement.icon} ${achievement.title}',
+          l10n.achievementsUnlockedSnackbar(achievement.icon, copy.title),
         );
       }
     });
@@ -709,7 +717,7 @@ class _MapScreenState extends State<MapScreen> {
         CompassCalibrationPolicy.postSuccessQuietDuration,
       );
       if (mounted) {
-        _showSnackBar('Compass calibrated');
+        _showSnackBar(AppLocalizations.of(context).mapCompassCalibrated);
       }
       return;
     }
@@ -877,22 +885,21 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<bool?> _confirmSaveEmptySession() {
+    final l10n = AppLocalizations.of(context);
     return showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('Session is empty'),
-        content: const Text(
-          'No GPS points were recorded. Save this session anyway?',
-        ),
+        title: Text(l10n.mapSessionEmptyTitle),
+        content: Text(l10n.mapSessionEmptyBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text("Don't save"),
+            child: Text(l10n.mapDontSave),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Save'),
+            child: Text(l10n.settingsSave),
           ),
         ],
       ),
@@ -934,10 +941,11 @@ class _MapScreenState extends State<MapScreen> {
     if (_sessionMapView.scope != SessionMapScope.session) return;
 
     _applySessionMapView(_sessionMapView.afterDiscardingEmpty(remaining));
+    final l10n = AppLocalizations.of(context);
     if (remaining.isEmpty) {
-      _showSnackBar('Session discarded');
+      _showSnackBar(l10n.mapSessionDiscarded);
     } else {
-      _showSnackBar('Session discarded — showing last saved session');
+      _showSnackBar(l10n.mapSessionDiscardedShowingLast);
     }
   }
 
@@ -965,7 +973,8 @@ class _MapScreenState extends State<MapScreen> {
       // Start tracking
       final started = await _locationService.startTracking();
       if (started) {
-        String startMessage = 'Location tracking started';
+        final l10n = AppLocalizations.of(context);
+        String startMessage = l10n.mapLocationTrackingStarted;
         // Auto-enable ping or Carpeater if LoRa is connected
         if (_loraConnected && _carpeaterEnabled) {
           _locationService.setCarpeaterMode(true);
@@ -975,15 +984,15 @@ class _MapScreenState extends State<MapScreen> {
             _autoPingEnabled = false;
           });
           startMessage = carpeaterStarted
-              ? 'Carpeater mode started'
-              : 'Carpeater failed — check settings';
+              ? l10n.mapCarpeaterModeStarted
+              : l10n.mapCarpeaterFailedCheckSettings;
         } else if (_loraConnected) {
           _locationService.enableAutoPing();
           setState(() {
             _isTracking = true;
             _autoPingEnabled = true;
           });
-          startMessage = 'Location tracking and auto-ping started';
+          startMessage = l10n.mapLocationTrackingAndAutoPingStarted;
         } else {
           setState(() {
             _isTracking = true;
@@ -996,7 +1005,7 @@ class _MapScreenState extends State<MapScreen> {
       } else {
         _showSnackBar(
           _locationService.lastStartError ??
-              'Failed to start location tracking. Check Android settings.',
+              AppLocalizations.of(context).mapFailedToStartTracking,
         );
       }
     }
@@ -1015,7 +1024,7 @@ class _MapScreenState extends State<MapScreen> {
             WSession(id: sessionId, startTime: startTime),
           ),
         );
-        _showSnackBar('New session — showing this trip only');
+        _showSnackBar(AppLocalizations.of(context).mapNewSessionShowingTrip);
         return;
       }
     }
@@ -1031,12 +1040,11 @@ class _MapScreenState extends State<MapScreen> {
 
     final accuracy = await Geolocator.getLocationAccuracy();
     if (accuracy != LocationAccuracyStatus.precise) {
+      final l10n = AppLocalizations.of(context);
       await _showSettingsDialog(
-        title: 'Precise location required',
-        message:
-            'Wardriving needs precise location. In Android app permissions, '
-            'enable “Use precise location”, then tap Start again.',
-        actionLabel: 'Open app settings',
+        title: l10n.mapPreciseLocationRequiredTitle,
+        message: l10n.mapPreciseLocationRequiredBody,
+        actionLabel: l10n.mapOpenAppSettings,
         onOpen: openAppSettings,
       );
       return false;
@@ -1044,22 +1052,20 @@ class _MapScreenState extends State<MapScreen> {
 
     var backgroundStatus = await Permission.locationAlways.status;
     if (!backgroundStatus.isGranted) {
+      final l10n = AppLocalizations.of(context);
       final shouldRequest = await _showRequestDialog(
-        title: 'Allow location all the time',
-        message:
-            'MeshCore Wardrive records while the screen is off or another app '
-            'is open. Android needs location access set to “Allow all the time”.',
+        title: l10n.mapAllowLocationAllTheTimeTitle,
+        message: l10n.mapAllowLocationAllTheTimeBody,
       );
       if (!shouldRequest) return false;
 
       backgroundStatus = await Permission.locationAlways.request();
       if (!backgroundStatus.isGranted) {
+        final l10n = AppLocalizations.of(context);
         await _showSettingsDialog(
-          title: 'Background location required',
-          message:
-              'Select Permissions → Location → Allow all the time, then return '
-              'and tap Start again.',
-          actionLabel: 'Open app settings',
+          title: l10n.mapBackgroundLocationRequiredTitle,
+          message: l10n.mapBackgroundLocationRequiredBody,
+          actionLabel: l10n.mapOpenAppSettings,
           onOpen: openAppSettings,
         );
         return false;
@@ -1068,11 +1074,10 @@ class _MapScreenState extends State<MapScreen> {
 
     final batteryStatus = await Permission.ignoreBatteryOptimizations.status;
     if (!batteryStatus.isGranted) {
+      final l10n = AppLocalizations.of(context);
       final shouldRequest = await _showRequestDialog(
-        title: 'Unrestricted battery use',
-        message:
-            'Allow MeshCore Wardrive to ignore battery optimizations so Android '
-            'does not pause GPS, radio communication, or Wi-Fi scans during a drive.',
+        title: l10n.mapUnrestrictedBatteryTitle,
+        message: l10n.mapUnrestrictedBatteryBody,
       );
       if (shouldRequest) {
         await Permission.ignoreBatteryOptimizations.request();
@@ -1093,13 +1098,11 @@ class _MapScreenState extends State<MapScreen> {
         .isWifiScanThrottlingEnabled();
     if (throttlingEnabled == false || !mounted) return true;
 
+    final l10n = AppLocalizations.of(context);
     final openedSettings = await _showSettingsDialog(
-      title: 'Disable Wi-Fi scan throttling',
-      message:
-          'Android does not let apps change this setting automatically. In '
-          'Developer options, turn off “Wi-Fi scan throttling” for timely '
-          'beaconDB position updates.',
-      actionLabel: 'Developer options',
+      title: l10n.mapDisableWifiThrottlingTitle,
+      message: l10n.mapDisableWifiThrottlingBody,
+      actionLabel: l10n.mapDeveloperOptions,
       onOpen: _androidTrackingSettings.openWifiScanThrottlingSettings,
     );
     return !openedSettings;
@@ -1118,11 +1121,11 @@ class _MapScreenState extends State<MapScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Not now'),
+                child: Text(AppLocalizations.of(context).mapNotNow),
               ),
               FilledButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('Continue'),
+                child: Text(AppLocalizations.of(context).mapContinue),
               ),
             ],
           ),
@@ -1145,7 +1148,7 @@ class _MapScreenState extends State<MapScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Not now'),
+            child: Text(AppLocalizations.of(context).mapNotNow),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
@@ -1159,23 +1162,24 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> _clearData() async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Clear Map History?'),
+        title: Text(l10n.mapClearMapHistoryTitle),
         content: Text(
-          'This will permanently delete all $_sampleCount samples and coverage data from the map.\n\nThis action cannot be undone.',
+          l10n.mapClearMapHistoryBody(_sampleCount),
           style: const TextStyle(fontSize: 14),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.settingsCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete All'),
+            child: Text(l10n.mapDeleteAll),
           ),
         ],
       ),
@@ -1184,7 +1188,7 @@ class _MapScreenState extends State<MapScreen> {
     if (confirmed == true) {
       await _locationService.clearAllSamples();
       await _loadSamples();
-      _showSnackBar('Deleted $_sampleCount samples');
+      _showSnackBar(l10n.mapDeletedSamples(_sampleCount));
     }
   }
 
@@ -1193,32 +1197,34 @@ class _MapScreenState extends State<MapScreen> {
     final format = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Export Format'),
+        title: Text(AppLocalizations.of(context).mapExportFormat),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
               leading: const Icon(Icons.code),
               title: const Text('JSON'),
-              subtitle: const Text('Full data with all fields'),
+              subtitle: Text(
+                AppLocalizations.of(context).mapExportJsonSubtitle,
+              ),
               onTap: () => Navigator.pop(context, 'json'),
             ),
             ListTile(
               leading: const Icon(Icons.table_chart),
               title: const Text('CSV'),
-              subtitle: const Text('Spreadsheet-compatible'),
+              subtitle: Text(AppLocalizations.of(context).mapExportCsvSubtitle),
               onTap: () => Navigator.pop(context, 'csv'),
             ),
             ListTile(
               leading: const Icon(Icons.route),
               title: const Text('GPX'),
-              subtitle: const Text('GPS track for mapping apps'),
+              subtitle: Text(AppLocalizations.of(context).mapExportGpxSubtitle),
               onTap: () => Navigator.pop(context, 'gpx'),
             ),
             ListTile(
               leading: const Icon(Icons.map),
               title: const Text('KML'),
-              subtitle: const Text('Google Earth format'),
+              subtitle: Text(AppLocalizations.of(context).mapExportKmlSubtitle),
               onTap: () => Navigator.pop(context, 'kml'),
             ),
           ],
@@ -1232,19 +1238,21 @@ class _MapScreenState extends State<MapScreen> {
     final choice = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Export as ${format.toUpperCase()}'),
+        title: Text(
+          AppLocalizations.of(context).mapExportAs(format.toUpperCase()),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, 'save'),
-            child: const Text('Save to Folder'),
+            child: Text(AppLocalizations.of(context).mapSaveToFolder),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, 'share'),
-            child: const Text('Share'),
+            child: Text(AppLocalizations.of(context).mapShare),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context).settingsCancel),
           ),
         ],
       ),
@@ -1294,14 +1302,16 @@ class _MapScreenState extends State<MapScreen> {
 
       if (choice == 'save') {
         await FilePicker.platform.saveFile(
-          dialogTitle: 'Save Export',
+          dialogTitle: AppLocalizations.of(context).mapSaveExport,
           fileName: fileName,
           type: FileType.custom,
           allowedExtensions: [extension],
           bytes: utf8.encode(content),
         );
         _showSnackBar(
-          'Exported ${samples.length} samples as ${format.toUpperCase()}',
+          AppLocalizations.of(
+            context,
+          ).mapExportedSamples(samples.length, format.toUpperCase()),
         );
       } else if (choice == 'share') {
         final directory = await getExternalStorageDirectory();
@@ -1310,13 +1320,13 @@ class _MapScreenState extends State<MapScreen> {
 
         await Share.shareXFiles(
           [XFile(file.path)],
-          subject: 'MeshCore Wardrive Export',
-          text: 'Exported ${samples.length} samples from MeshCore Wardrive',
+          subject: AppLocalizations.of(context).mapExportShareSubject,
+          text: AppLocalizations.of(context).mapExportShareText(samples.length),
         );
-        _showSnackBar('Export shared');
+        _showSnackBar(AppLocalizations.of(context).mapExportShared);
       }
     } catch (e) {
-      _showSnackBar('Export failed: $e');
+      _showSnackBar(AppLocalizations.of(context).mapExportFailed('$e'));
     }
   }
 
@@ -1453,17 +1463,18 @@ $placemarks  </Document>
       _lastAggregatedSampleCount = -1;
       await _loadSamples();
 
-      final sourceLabel = sources.isNotEmpty
-          ? ' from ${sources.join(', ')}'
-          : '';
+      final l10n = AppLocalizations.of(context);
       final sessionLabel = totalSessionsImported > 0
-          ? ', $totalSessionsImported sessions'
+          ? l10n.mapImportedSessionsSuffix(totalSessionsImported)
+          : '';
+      final sourceLabel = sources.isNotEmpty
+          ? l10n.mapImportedFromSources(sources.join(', '))
           : '';
       _showSnackBar(
-        'Imported $totalSamplesImported samples$sessionLabel$sourceLabel',
+        '${l10n.mapImportedSamples(totalSamplesImported)}$sessionLabel$sourceLabel',
       );
     } catch (e) {
-      _showSnackBar('Import failed: $e');
+      _showSnackBar(AppLocalizations.of(context).mapImportFailed('$e'));
     }
   }
 
@@ -1477,19 +1488,19 @@ $placemarks  </Document>
       final choice = await showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Export Settings'),
+          title: Text(AppLocalizations.of(context).settingsExportSettings),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, 'save'),
-              child: const Text('Save to Folder'),
+              child: Text(AppLocalizations.of(context).mapSaveToFolder),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, 'share'),
-              child: const Text('Share'),
+              child: Text(AppLocalizations.of(context).mapShare),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(AppLocalizations.of(context).settingsCancel),
             ),
           ],
         ),
@@ -1499,23 +1510,23 @@ $placemarks  </Document>
 
       if (choice == 'save') {
         await FilePicker.platform.saveFile(
-          dialogTitle: 'Save Settings',
+          dialogTitle: AppLocalizations.of(context).mapSaveSettings,
           fileName: fileName,
           type: FileType.custom,
           allowedExtensions: ['json'],
           bytes: utf8.encode(jsonString),
         );
-        _showSnackBar('Settings exported');
+        _showSnackBar(AppLocalizations.of(context).mapSettingsExported);
       } else if (choice == 'share') {
         final dir = await getApplicationDocumentsDirectory();
         final file = File('${dir.path}/$fileName');
         await file.writeAsString(jsonString);
         await Share.shareXFiles([
           XFile(file.path),
-        ], text: 'MeshCore Wardrive Settings');
+        ], text: AppLocalizations.of(context).mapSettingsShareText);
       }
     } catch (e) {
-      _showSnackBar('Export failed: $e');
+      _showSnackBar(AppLocalizations.of(context).mapExportFailed('$e'));
     }
   }
 
@@ -1536,21 +1547,16 @@ $placemarks  </Document>
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Import Settings'),
-          content: const Text(
-            'This will overwrite your current app settings '
-            '(display options, ping settings, upload servers, carpeater config, etc).\n\n'
-            'Your wardrive data will NOT be affected.\n\n'
-            'Continue?',
-          ),
+          title: Text(AppLocalizations.of(context).settingsImportSettings),
+          content: Text(AppLocalizations.of(context).mapImportSettingsConfirm),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
+              child: Text(AppLocalizations.of(context).settingsCancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Import'),
+              child: Text(AppLocalizations.of(context).mapImport),
             ),
           ],
         ),
@@ -1565,11 +1571,15 @@ $placemarks  </Document>
       _lastAggregatedSampleCount = -1; // Force reaggregation
       await _loadSamples();
 
-      _showSnackBar('Imported $applied settings');
+      _showSnackBar(
+        AppLocalizations.of(context).mapImportedSettingsCount(applied),
+      );
     } on FormatException catch (e) {
-      _showSnackBar('Invalid settings file: ${e.message}');
+      _showSnackBar(
+        AppLocalizations.of(context).mapInvalidSettingsFile(e.message),
+      );
     } catch (e) {
-      _showSnackBar('Import failed: $e');
+      _showSnackBar(AppLocalizations.of(context).mapImportFailed('$e'));
     }
   }
 
@@ -1589,7 +1599,7 @@ $placemarks  </Document>
     final label = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Add Planned Repeater'),
+        title: Text(AppLocalizations.of(ctx).mapAddPlannedRepeater),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1601,9 +1611,9 @@ $placemarks  </Document>
             const SizedBox(height: 12),
             TextField(
               controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'Label (optional)',
-                hintText: 'e.g., Hilltop near Tracyton',
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(ctx).settingsLabelOptional,
+                hintText: AppLocalizations.of(ctx).mapPlannedRepeaterHint,
               ),
             ),
           ],
@@ -1611,11 +1621,11 @@ $placemarks  </Document>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(ctx).settingsCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, controller.text),
-            child: const Text('Add Marker'),
+            child: Text(AppLocalizations.of(ctx).mapAddMarker),
           ),
         ],
       ),
@@ -1628,7 +1638,7 @@ $placemarks  </Document>
         label.isEmpty ? null : label,
       );
       await _loadMarkers();
-      _showSnackBar('Planned repeater marker added');
+      _showSnackBar(AppLocalizations.of(context).mapPlannedRepeaterMarkerAdded);
     }
   }
 
@@ -1644,15 +1654,19 @@ $placemarks  </Document>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(label ?? 'Planned Repeater'),
+        title: Text(label ?? AppLocalizations.of(ctx).mapPlannedRepeater),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Lat: ${lat.toStringAsFixed(6)}'),
-            Text('Lon: ${lon.toStringAsFixed(6)}'),
+            Text(AppLocalizations.of(ctx).mapLat(lat.toStringAsFixed(6))),
+            Text(AppLocalizations.of(ctx).mapLon(lon.toStringAsFixed(6))),
             Text(
-              'Added: ${DateFormat('MMM d, yyyy').format(createdAt)}',
+              AppLocalizations.of(ctx).mapAddedOn(
+                DateFormat.yMMMd(
+                  Localizations.localeOf(ctx).toString(),
+                ).format(createdAt),
+              ),
               style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
           ],
@@ -1663,13 +1677,16 @@ $placemarks  </Document>
               Navigator.pop(ctx);
               await DatabaseService().deleteMarker(id);
               await _loadMarkers();
-              _showSnackBar('Marker deleted');
+              _showSnackBar(AppLocalizations.of(context).mapMarkerDeleted);
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(
+              AppLocalizations.of(ctx).mapDelete,
+              style: const TextStyle(color: Colors.red),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Close'),
+            child: Text(AppLocalizations.of(ctx).mapClose),
           ),
         ],
       ),
@@ -1718,11 +1735,12 @@ $placemarks  </Document>
   }
 
   Future<void> _addPrivacyZone(LatLng center) async {
+    final l10n = AppLocalizations.of(context);
     final radiusOptions = [
-      {'label': '500m (~0.3 mi)', 'meters': 500.0},
-      {'label': '1 km (~0.6 mi)', 'meters': 1000.0},
-      {'label': '2 km (~1.2 mi)', 'meters': 2000.0},
-      {'label': '5 km (~3 mi)', 'meters': 5000.0},
+      {'label': l10n.settingsRadius500m, 'meters': 500.0},
+      {'label': l10n.settingsRadius1km, 'meters': 1000.0},
+      {'label': l10n.settingsRadius2km, 'meters': 2000.0},
+      {'label': l10n.settingsRadius5km, 'meters': 5000.0},
     ];
     double selectedRadius = 1000.0;
     final labelController = TextEditingController();
@@ -1731,32 +1749,38 @@ $placemarks  </Document>
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          title: const Text('Add Privacy Zone'),
+          title: Text(l10n.mapAddPrivacyZone),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Center: ${center.latitude.toStringAsFixed(5)}, ${center.longitude.toStringAsFixed(5)}',
+                l10n.settingsAddImpossibleZoneCenter(
+                  center.latitude.toStringAsFixed(5),
+                  center.longitude.toStringAsFixed(5),
+                ),
                 style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Data inside this zone will be excluded from uploads and exports.',
-                style: TextStyle(fontSize: 12),
+              Text(
+                l10n.mapPrivacyZoneBlurb,
+                style: const TextStyle(fontSize: 12),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: labelController,
-                decoration: const InputDecoration(
-                  labelText: 'Label (optional)',
-                  hintText: 'e.g., Home',
+                decoration: InputDecoration(
+                  labelText: l10n.settingsLabelOptional,
+                  hintText: l10n.mapPrivacyZoneHint,
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
-                'Radius:',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              Text(
+                l10n.settingsRadius,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
               ),
               ...radiusOptions.map(
                 (opt) => RadioListTile<double>(
@@ -1772,11 +1796,11 @@ $placemarks  </Document>
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel'),
+              child: Text(l10n.settingsCancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Add Zone'),
+              child: Text(l10n.settingsAddZone),
             ),
           ],
         ),
@@ -1791,7 +1815,7 @@ $placemarks  </Document>
         labelController.text.isEmpty ? null : labelController.text,
       );
       await _loadPrivacyZones();
-      _showSnackBar('Privacy zone added');
+      _showSnackBar(l10n.mapPrivacyZoneAdded);
     }
   }
 
@@ -1825,23 +1849,30 @@ $placemarks  </Document>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Sample'),
+        title: Text(AppLocalizations.of(ctx).mapDeleteSample),
         content: Text(
-          'Delete this ${sample.pingSuccess == true
-              ? "successful"
-              : sample.pingSuccess == false
-              ? "failed"
-              : "GPS-only"} '
-          'sample from ${DateFormat('MMM d HH:mm').format(sample.timestamp)}?',
+          AppLocalizations.of(ctx).mapDeleteSampleConfirm(
+            sample.pingSuccess == true
+                ? 'success'
+                : sample.pingSuccess == false
+                ? 'fail'
+                : 'gps',
+            DateFormat.MMMd(
+              Localizations.localeOf(ctx).toString(),
+            ).add_Hm().format(sample.timestamp),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(ctx).settingsCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(
+              AppLocalizations.of(ctx).mapDelete,
+              style: const TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),
@@ -1851,7 +1882,7 @@ $placemarks  </Document>
       await DatabaseService().deleteSample(sample.id);
       _lastAggregatedSampleCount = -1;
       await _loadSamples();
-      _showSnackBar('Sample deleted');
+      _showSnackBar(AppLocalizations.of(context).mapSampleDeleted);
     }
   }
 
@@ -1860,22 +1891,22 @@ $placemarks  </Document>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Coverage Cell'),
+        title: Text(AppLocalizations.of(ctx).mapDeleteCoverageCell),
         content: Text(
-          'Delete all $total samples in this coverage area?\n\n'
-          'Cell: ${coverage.id}\n'
-          'This cannot be undone.',
+          AppLocalizations.of(
+            ctx,
+          ).mapDeleteCoverageCellBody(total, coverage.id),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(ctx).settingsCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text(
-              'Delete All',
-              style: TextStyle(color: Colors.red),
+            child: Text(
+              AppLocalizations.of(ctx).mapDeleteAll,
+              style: const TextStyle(color: Colors.red),
             ),
           ),
         ],
@@ -1888,7 +1919,9 @@ $placemarks  </Document>
       );
       _lastAggregatedSampleCount = -1;
       await _loadSamples();
-      _showSnackBar('Deleted $deleted samples from cell');
+      _showSnackBar(
+        AppLocalizations.of(context).mapDeletedSamplesFromCell(deleted),
+      );
     }
   }
 
@@ -2038,40 +2071,41 @@ $placemarks  </Document>
           if (!mounted) return;
           showDialog(
             context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Update Available'),
-              content: Text(
-                'New version $latestVersion is available!\n\n'
-                'Current version: $appVersion\n\n'
-                'Would you like to download it?',
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Later'),
+            builder: (context) {
+              final l10n = AppLocalizations.of(context);
+              return AlertDialog(
+                title: Text(l10n.mapUpdateAvailable),
+                content: Text(
+                  l10n.mapUpdateAvailableBody(latestVersion, appVersion),
                 ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _openGitHub();
-                  },
-                  child: const Text('Download'),
-                ),
-              ],
-            ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(l10n.compassLater),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _openGitHub();
+                    },
+                    child: Text(l10n.mapDownload),
+                  ),
+                ],
+              );
+            },
           );
         } else {
-          _showSnackBar('You\'re on the latest version!');
+          _showSnackBar(AppLocalizations.of(context).mapOnLatestVersion);
         }
       } else {
-        _showSnackBar('Could not check for updates');
+        _showSnackBar(AppLocalizations.of(context).mapCouldNotCheckUpdates);
       }
     } on SocketException {
-      _showSnackBar('No internet connection. Try again when you are online.');
+      _showSnackBar(AppLocalizations.of(context).mapNoInternetTryAgain);
     } on TimeoutException {
-      _showSnackBar('Update check timed out. Try again later.');
+      _showSnackBar(AppLocalizations.of(context).mapUpdateCheckTimedOut);
     } catch (_) {
-      _showSnackBar('Could not check for updates');
+      _showSnackBar(AppLocalizations.of(context).mapCouldNotCheckUpdates);
     }
   }
 
@@ -2082,7 +2116,7 @@ $placemarks  </Document>
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     } else {
-      _showSnackBar('Could not open GitHub');
+      _showSnackBar(AppLocalizations.of(context).mapCouldNotOpenGitHub);
     }
   }
 
@@ -2096,9 +2130,9 @@ $placemarks  </Document>
       if (_currentPosition != null) {
         _mapController.move(_currentPosition!, _mapController.camera.zoom);
       }
-      _showSnackBar('Auto-follow enabled');
+      _showSnackBar(AppLocalizations.of(context).mapAutoFollowEnabled);
     } else {
-      _showSnackBar('Auto-follow disabled');
+      _showSnackBar(AppLocalizations.of(context).mapAutoFollowDisabled);
     }
   }
 
@@ -2112,7 +2146,7 @@ $placemarks  </Document>
         _followHeading = false;
       });
       _mapController.rotate(0);
-      _showSnackBar('Map reset to north');
+      _showSnackBar(AppLocalizations.of(context).mapMapResetToNorth);
       return;
     }
 
@@ -2122,10 +2156,10 @@ $placemarks  </Document>
 
     if (_followHeading) {
       _rotateMapToHeading();
-      _showSnackBar('Heading-up enabled');
+      _showSnackBar(AppLocalizations.of(context).mapHeadingUpEnabled);
     } else {
       _mapController.rotate(0);
-      _showSnackBar('Heading-up disabled — map reset to north');
+      _showSnackBar(AppLocalizations.of(context).mapHeadingUpDisabled);
     }
   }
 
@@ -2154,7 +2188,9 @@ $placemarks  </Document>
       });
 
       if (imageBytes == null) {
-        _showSnackBar('Failed to capture screenshot');
+        _showSnackBar(
+          AppLocalizations.of(context).mapFailedToCaptureScreenshot,
+        );
         return;
       }
 
@@ -2170,19 +2206,21 @@ $placemarks  </Document>
       );
 
       if (result.isSuccess) {
-        _showSnackBar('Screenshot saved to gallery!');
+        _showSnackBar(AppLocalizations.of(context).mapScreenshotSavedToGallery);
 
         // Ask if user wants to share
         if (!mounted) return;
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Screenshot Saved'),
-            content: const Text('Would you like to share the screenshot?'),
+            title: Text(AppLocalizations.of(context).mapScreenshotSavedTitle),
+            content: Text(
+              AppLocalizations.of(context).mapShareScreenshotPrompt,
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('No'),
+                child: Text(AppLocalizations.of(context).mapNo),
               ),
               TextButton(
                 onPressed: () async {
@@ -2193,22 +2231,24 @@ $placemarks  </Document>
                   await file.writeAsBytes(imageBytes);
                   await Share.shareXFiles([
                     XFile(file.path),
-                  ], text: 'MeshCore Wardrive Coverage Map');
+                  ], text: AppLocalizations.of(context).mapScreenshotShareText);
                 },
-                child: const Text('Yes'),
+                child: Text(AppLocalizations.of(context).mapYes),
               ),
             ],
           ),
         );
       } else {
-        _showSnackBar('Failed to save screenshot');
+        _showSnackBar(AppLocalizations.of(context).mapFailedToSaveScreenshot);
       }
     } catch (e) {
       // Restore UI on error
       setState(() {
         _hideUIForScreenshot = false;
       });
-      _showSnackBar('Error capturing screenshot: $e');
+      _showSnackBar(
+        AppLocalizations.of(context).mapErrorCapturingScreenshot('$e'),
+      );
     }
   }
 
@@ -2239,6 +2279,7 @@ $placemarks  </Document>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('MeshCore Wardrive'),
@@ -2251,12 +2292,12 @@ $placemarks  </Document>
                 MaterialPageRoute(builder: (context) => const DebugLogScreen()),
               );
             },
-            tooltip: 'Debug Terminal',
+            tooltip: l10n.mapDebugTerminal,
           ),
           IconButton(
             icon: const Icon(Icons.camera_alt),
             onPressed: _captureScreenshot,
-            tooltip: 'Screenshot',
+            tooltip: l10n.mapScreenshotTooltip,
           ),
           IconButton(
             icon: const Icon(Icons.settings),
@@ -2285,9 +2326,9 @@ $placemarks  </Document>
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Text(
-                              'Quick Settings',
-                              style: TextStyle(
+                            Text(
+                              l10n.mapQuickSettings,
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
                               ),
@@ -2308,9 +2349,9 @@ $placemarks  </Document>
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Text(
-                              'Ping Dist: ',
-                              style: TextStyle(fontSize: 12),
+                            Text(
+                              l10n.mapPingDist,
+                              style: const TextStyle(fontSize: 12),
                             ),
                             PingDistanceDropdown(
                               value: _pingIntervalMeters,
@@ -2325,9 +2366,9 @@ $placemarks  </Document>
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Text(
-                              'Timeout: ',
-                              style: TextStyle(fontSize: 12),
+                            Text(
+                              l10n.mapTimeout,
+                              style: const TextStyle(fontSize: 12),
                             ),
                             DiscoveryTimeoutDropdown(
                               value: _discoveryTimeoutSeconds,
@@ -2341,33 +2382,33 @@ $placemarks  </Document>
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Text(
-                              'Mode: ',
-                              style: TextStyle(fontSize: 12),
+                            Text(
+                              l10n.mapMode,
+                              style: const TextStyle(fontSize: 12),
                             ),
                             DropdownButton<String>(
                               value: _pingMode,
                               isDense: true,
-                              items: const [
+                              items: [
                                 DropdownMenuItem(
                                   value: 'distance',
                                   child: Text(
-                                    'Distance',
-                                    style: TextStyle(fontSize: 12),
+                                    l10n.settingsPingModeDistance,
+                                    style: const TextStyle(fontSize: 12),
                                   ),
                                 ),
                                 DropdownMenuItem(
                                   value: 'time',
                                   child: Text(
-                                    'Time',
-                                    style: TextStyle(fontSize: 12),
+                                    l10n.settingsPingModeTime,
+                                    style: const TextStyle(fontSize: 12),
                                   ),
                                 ),
                                 DropdownMenuItem(
                                   value: 'both',
                                   child: Text(
-                                    'Both',
-                                    style: TextStyle(fontSize: 12),
+                                    l10n.settingsPingModeBoth,
+                                    style: const TextStyle(fontSize: 12),
                                   ),
                                 ),
                               ],
@@ -2409,10 +2450,10 @@ $placemarks  </Document>
                       children: [
                         const Icon(Icons.delete, color: Colors.white, size: 18),
                         const SizedBox(width: 8),
-                        const Expanded(
+                        Expanded(
                           child: Text(
-                            'DELETE MODE: Tap a coverage square or sample to delete',
-                            style: TextStyle(
+                            l10n.mapDeleteModeBanner,
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
@@ -2421,9 +2462,9 @@ $placemarks  </Document>
                         ),
                         TextButton(
                           onPressed: () => setState(() => _deleteMode = false),
-                          child: const Text(
-                            'EXIT',
-                            style: TextStyle(
+                          child: Text(
+                            l10n.mapExit,
+                            style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                             ),
@@ -2454,9 +2495,9 @@ $placemarks  </Document>
                         onPressed: _handleCompassButton,
                         tooltip: _compassInUse && !_lockRotationNorth
                             ? _followHeading
-                                  ? 'Stop heading-up and reset north'
-                                  : 'Rotate map with heading. Long-press to calibrate.'
-                            : 'Reset to North',
+                                  ? l10n.mapStopHeadingUp
+                                  : l10n.mapRotateMapWithHeading
+                            : l10n.mapResetToNorth,
                         backgroundColor: _followHeading ? Colors.blue : null,
                         child: const Icon(Icons.navigation),
                       ),
@@ -2738,7 +2779,7 @@ $placemarks  </Document>
           if (hits == null || hits.isEmpty) return;
           final coverage = hits.first;
           if (_deleteMode && _coverageLodPrecision < _coveragePrecision) {
-            _showSnackBar('Zoom in to delete an individual coverage cell');
+            _showSnackBar(AppLocalizations.of(context).mapZoomToDeleteCell);
             return;
           }
           if (_deleteMode) {
@@ -2793,7 +2834,7 @@ $placemarks  </Document>
         if (_deleteMode && cluster.sampleCount == 1) {
           _deleteSample(cluster.newestSample);
         } else if (_deleteMode) {
-          _showSnackBar('Zoomed points are grouped; delete from coverage view');
+          _showSnackBar(AppLocalizations.of(context).mapZoomedPointsGrouped);
         } else if (cluster.sampleCount == 1) {
           _showSampleInfo(cluster.newestSample);
         } else {
@@ -2908,12 +2949,16 @@ $placemarks  </Document>
             width: 28,
             height: 28,
             child: Semantics(
-              label: 'Approximate radio position, uncertainty $uncertaintyText',
+              label: AppLocalizations.of(
+                context,
+              ).mapApproxRadioPositionUncertainty(uncertaintyText),
               button: true,
               child: GestureDetector(
                 onTap: () => _showSnackBar(
-                  'Approximate radio position · '
-                  '${estimate.repeaterCount} repeaters · ±$uncertaintyText',
+                  AppLocalizations.of(context).mapApproxRadioPositionSnack(
+                    estimate.repeaterCount,
+                    uncertaintyText,
+                  ),
                 ),
                 child: Container(
                   decoration: BoxDecoration(
@@ -3109,9 +3154,10 @@ $placemarks  </Document>
     final positionColor = _positionSource == LocationPositionSource.wifi
         ? Colors.cyan
         : Colors.blue;
+    final l10n = AppLocalizations.of(context);
     final positionLabel = _positionSource == LocationPositionSource.wifi
-        ? 'Current Wi-Fi location from beaconDB'
-        : 'Current fused Android location';
+        ? l10n.mapCurrentWifiLocation
+        : l10n.mapCurrentFusedLocation;
     if (_currentLocationMarkerStyle == CurrentLocationMarkerStyle.circle) {
       return Semantics(
         label: positionLabel,
@@ -3126,7 +3172,10 @@ $placemarks  </Document>
     }
 
     return Semantics(
-      label: '$positionLabel, heading ${_currentHeading.round()} degrees',
+      label: l10n.mapPositionHeadingSemantics(
+        positionLabel,
+        '${_currentHeading.round()}',
+      ),
       child: Transform.rotate(
         angle: _currentHeading * math.pi / 180,
         child: Stack(
@@ -3141,6 +3190,7 @@ $placemarks  </Document>
   }
 
   Widget _buildControlPanel() {
+    final l10n = AppLocalizations.of(context);
     return Positioned(
       top: 16,
       left: 16,
@@ -3162,7 +3212,7 @@ $placemarks  </Document>
               Text(
                 _loraConnected
                     ? (_connectionType == ConnectionType.usb ? 'USB' : 'BT')
-                    : 'No LoRa',
+                    : l10n.mapNoLora,
                 style: TextStyle(
                   fontSize: 12,
                   color: _loraConnected ? Colors.green : Colors.grey,
@@ -3196,7 +3246,7 @@ $placemarks  </Document>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Samples: $_sampleCount',
+                      l10n.mapSamplesCount('$_sampleCount'),
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -3217,13 +3267,13 @@ $placemarks  </Document>
                         child: GestureDetector(
                           onTap: _carpeaterState == CarpeaterState.error
                               ? () async {
-                                  _showSnackBar('Retrying Carpeater...');
+                                  _showSnackBar(l10n.mapRetryingCarpeater);
                                   final ok = await _locationService
                                       .startCarpeater();
                                   _showSnackBar(
                                     ok
-                                        ? 'Carpeater reconnected'
-                                        : 'Carpeater retry failed',
+                                        ? l10n.mapCarpeaterReconnected
+                                        : l10n.mapCarpeaterRetryFailed,
                                   );
                                 }
                               : null,
@@ -3266,7 +3316,9 @@ $placemarks  </Document>
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  'CP: ${_carpeaterStateLabel()}',
+                                  l10n.mapCarpeaterStatus(
+                                    _carpeaterStateLabel(l10n),
+                                  ),
                                   style: TextStyle(
                                     fontSize: 9,
                                     fontWeight: FontWeight.bold,
@@ -3318,7 +3370,9 @@ $placemarks  </Document>
                             ),
                           ),
                           child: Text(
-                            'Ducting: ${DuctingService.riskLabel(_currentDuctingRisk)}',
+                            l10n.mapDuctingStatus(
+                              _localizedDuctingRisk(l10n, _currentDuctingRisk),
+                            ),
                             style: TextStyle(
                               fontSize: 9,
                               fontWeight: FontWeight.bold,
@@ -3340,9 +3394,9 @@ $placemarks  </Document>
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(color: Colors.orange, width: 1),
                           ),
-                          child: const Text(
-                            '🔋 Saver',
-                            style: TextStyle(
+                          child: Text(
+                            l10n.mapBatterySaverBadge,
+                            style: const TextStyle(
                               fontSize: 9,
                               fontWeight: FontWeight.bold,
                               color: Colors.orange,
@@ -3366,7 +3420,7 @@ $placemarks  </Document>
                     minimumSize: Size.zero,
                   ),
                   child: Text(
-                    _isConnecting ? 'Connecting...' : 'Connect',
+                    _isConnecting ? l10n.mapConnecting : l10n.mapConnect,
                     style: const TextStyle(fontSize: 12),
                   ),
                 ),
@@ -3374,7 +3428,7 @@ $placemarks  </Document>
                 IconButton(
                   icon: const Icon(Icons.link_off, size: 16),
                   onPressed: _disconnectLoRa,
-                  tooltip: 'Disconnect',
+                  tooltip: l10n.mapDisconnect,
                   color: Colors.red,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
@@ -3383,7 +3437,7 @@ $placemarks  </Document>
                 IconButton(
                   icon: const Icon(Icons.send, size: 18),
                   onPressed: _manualPing,
-                  tooltip: 'Manual Ping',
+                  tooltip: l10n.mapManualPing,
                   color: Colors.blue,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
@@ -3409,21 +3463,21 @@ $placemarks  </Document>
 
   Future<void> _manualPing() async {
     if (!_loraConnected) {
-      _showSnackBar('Connect LoRa device first');
+      _showSnackBar(AppLocalizations.of(context).mapConnectLoraFirst);
       return;
     }
 
     if (_currentPosition == null) {
-      _showSnackBar('Waiting for GPS location...');
+      _showSnackBar(AppLocalizations.of(context).mapWaitingForGps);
       return;
     }
 
     if (_locationService.loraCompanion.isPingInProgress) {
-      _showSnackBar('A ping is already in progress');
+      _showSnackBar(AppLocalizations.of(context).mapPingAlreadyInProgress);
       return;
     }
 
-    _showSnackBar('Sending ping...');
+    _showSnackBar(AppLocalizations.of(context).mapSendingPing);
     SoundService().playPingSent();
 
     // Send ping via LoRa companion
@@ -3492,14 +3546,17 @@ $placemarks  </Document>
 
     // Show result
     if (pingSuccess) {
+      final l10n = AppLocalizations.of(context);
       final summary = responses.length == 1
-          ? '✅ Ping heard by ${_shortNodeId(responses.single.nodeId)}'
-          : '✅ Discovery complete: found ${responses.length} repeaters';
+          ? l10n.mapPingHeardBy(_shortNodeId(responses.single.nodeId))
+          : l10n.mapDiscoveryComplete(responses.length);
       _showSnackBar(summary);
     } else if (result.status == PingStatus.timeout) {
-      _showSnackBar('❌ No response - dead zone');
+      _showSnackBar(AppLocalizations.of(context).mapNoResponseDeadZone);
     } else {
-      _showSnackBar('❌ Ping failed: ${result.error}');
+      _showSnackBar(
+        AppLocalizations.of(context).mapPingFailed('${result.error}'),
+      );
     }
   }
 
@@ -3511,14 +3568,14 @@ $placemarks  </Document>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Connect LoRa Device'),
+        title: Text(AppLocalizations.of(context).mapConnectLoraDevice),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Choose connection method:',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            Text(
+              AppLocalizations.of(context).mapChooseConnectionMethod,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
@@ -3527,7 +3584,7 @@ $placemarks  </Document>
                 _connectUsb();
               },
               icon: const Icon(Icons.usb),
-              label: const Text('Scan USB Devices'),
+              label: Text(AppLocalizations.of(context).mapScanUsbDevices),
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 40),
               ),
@@ -3539,7 +3596,7 @@ $placemarks  </Document>
                 _connectBluetooth();
               },
               icon: const Icon(Icons.bluetooth),
-              label: const Text('Scan Bluetooth'),
+              label: Text(AppLocalizations.of(context).mapScanBluetooth),
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 40),
               ),
@@ -3549,7 +3606,7 @@ $placemarks  </Document>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(AppLocalizations.of(context).mapClose),
           ),
         ],
       ),
@@ -3565,20 +3622,27 @@ $placemarks  </Document>
       if (!mounted) return;
 
       if (devices.isEmpty) {
-        _showSnackBar('No USB devices found');
+        _showSnackBar(AppLocalizations.of(context).mapNoUsbDevices);
         return;
       }
 
       final selected = await showDialog<UsbDevice>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Select USB Device'),
+          title: Text(AppLocalizations.of(context).mapSelectUsbDevice),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: devices.map((device) {
               return ListTile(
-                title: Text(device.productName ?? 'USB Device'),
-                subtitle: Text('VID: ${device.vid}, PID: ${device.pid}'),
+                title: Text(
+                  device.productName ??
+                      AppLocalizations.of(context).mapUsbDeviceFallback,
+                ),
+                subtitle: Text(
+                  AppLocalizations.of(
+                    context,
+                  ).mapVidPid('${device.vid}', '${device.pid}'),
+                ),
                 onTap: () => Navigator.pop(context, device),
               );
             }).toList(),
@@ -3591,14 +3655,14 @@ $placemarks  </Document>
           selected,
         );
         if (connected) {
-          _showSnackBar('Connected via USB');
+          _showSnackBar(AppLocalizations.of(context).mapConnectedViaUsb);
           await _loadSamples();
         } else {
-          _showSnackBar('Failed to connect USB device');
+          _showSnackBar(AppLocalizations.of(context).mapFailedConnectUsb);
         }
       }
     } catch (e) {
-      _showSnackBar('USB error: $e');
+      _showSnackBar(AppLocalizations.of(context).mapUsbError('$e'));
     } finally {
       if (mounted) setState(() => _isConnecting = false);
     }
@@ -3639,7 +3703,9 @@ $placemarks  </Document>
 
       if (selected == null) return;
 
-      _showSnackBar('Connecting to ${selected.displayName}...');
+      _showSnackBar(
+        AppLocalizations.of(context).mapConnectingTo(selected.displayName),
+      );
 
       final connected = await _locationService.loraCompanion.connectBluetooth(
         BluetoothDevice.fromId(selected.remoteId),
@@ -3649,13 +3715,13 @@ $placemarks  </Document>
           remoteId: selected.remoteId,
           name: _locationService.loraCompanion.deviceName ?? selected.name,
         );
-        _showSnackBar('Connected via Bluetooth!');
+        _showSnackBar(AppLocalizations.of(context).mapConnectedViaBluetooth);
         await _loadSamples();
       } else {
-        _showSnackBar('Failed to connect Bluetooth device');
+        _showSnackBar(AppLocalizations.of(context).mapFailedConnectBluetooth);
       }
     } catch (e) {
-      _showSnackBar('Bluetooth error: $e');
+      _showSnackBar(AppLocalizations.of(context).bluetoothError('$e'));
     } finally {
       if (mounted) setState(() => _isConnecting = false);
     }
@@ -3665,16 +3731,16 @@ $placemarks  </Document>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Disconnect LoRa Device'),
-        content: const Text('Disconnect from your LoRa companion device?'),
+        title: Text(AppLocalizations.of(context).mapDisconnectLoraDevice),
+        content: Text(AppLocalizations.of(context).mapDisconnectConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context).settingsCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Disconnect'),
+            child: Text(AppLocalizations.of(context).mapDisconnect),
           ),
         ],
       ),
@@ -3691,7 +3757,7 @@ $placemarks  </Document>
 
       await _locationService.loraCompanion.disconnectDevice();
       await _loadSamples();
-      _showSnackBar('LoRa device disconnected');
+      _showSnackBar(AppLocalizations.of(context).mapLoraDisconnected);
     }
   }
 
@@ -3710,22 +3776,35 @@ $placemarks  </Document>
     return Colors.red;
   }
 
-  String _carpeaterStateLabel() {
+  String _carpeaterStateLabel(AppLocalizations l10n) {
     switch (_carpeaterState) {
       case CarpeaterState.disabled:
-        return 'Off';
+        return l10n.mapCarpeaterOff;
       case CarpeaterState.connecting:
-        return 'Connecting';
+        return l10n.mapCarpeaterConnecting;
       case CarpeaterState.loggingIn:
-        return 'Login...';
+        return l10n.mapCarpeaterLogin;
       case CarpeaterState.loggedIn:
-        return 'Ready';
+        return l10n.mapCarpeaterReady;
       case CarpeaterState.discovering:
-        return 'Scanning';
+        return l10n.mapCarpeaterScanning;
       case CarpeaterState.fetchingNeighbours:
-        return 'Fetching';
+        return l10n.mapCarpeaterFetching;
       case CarpeaterState.error:
-        return 'Error';
+        return l10n.mapCarpeaterError;
+    }
+  }
+
+  String _localizedDuctingRisk(AppLocalizations l10n, String risk) {
+    switch (risk) {
+      case DuctingRisk.none:
+        return l10n.settingsNone;
+      case DuctingRisk.possible:
+        return l10n.mapDuctingPossible;
+      case DuctingRisk.likely:
+        return l10n.mapDuctingLikely;
+      default:
+        return l10n.settingsUnknown;
     }
   }
 
@@ -3744,11 +3823,11 @@ $placemarks  </Document>
 
   Future<void> _refreshContacts() async {
     if (!_loraConnected) {
-      _showSnackBar('Connect LoRa device first');
+      _showSnackBar(AppLocalizations.of(context).mapConnectLoraFirst);
       return;
     }
 
-    _showSnackBar('Refreshing contact list...');
+    _showSnackBar(AppLocalizations.of(context).mapRefreshingContactList);
 
     // Request full contact list from device
     await _locationService.loraCompanion.refreshContactList();
@@ -3756,16 +3835,16 @@ $placemarks  </Document>
     // Give it a moment to process
     await Future.delayed(const Duration(seconds: 2));
 
-    _showSnackBar('Contact list updated');
+    _showSnackBar(AppLocalizations.of(context).mapContactListUpdated);
   }
 
   Future<void> _scanForRepeaters() async {
     if (!_loraConnected) {
-      _showSnackBar('Connect LoRa device first');
+      _showSnackBar(AppLocalizations.of(context).mapConnectLoraFirst);
       return;
     }
 
-    _showSnackBar('Scanning for repeaters...');
+    _showSnackBar(AppLocalizations.of(context).mapScanningForRepeaters);
 
     final repeaters = await _locationService.loraCompanion.scanForRepeaters();
 
@@ -3774,9 +3853,11 @@ $placemarks  </Document>
     });
 
     if (repeaters.isEmpty) {
-      _showSnackBar('No repeaters found');
+      _showSnackBar(AppLocalizations.of(context).mapNoRepeatersFound);
     } else {
-      _showSnackBar('Found ${repeaters.length} repeater(s)');
+      _showSnackBar(
+        AppLocalizations.of(context).mapRepeatersFound(repeaters.length),
+      );
       _showRepeatersDialog();
     }
   }
@@ -3789,7 +3870,11 @@ $placemarks  </Document>
           onSessionSelected: (session) {
             _applySessionMapView(SessionMapView.session(session));
             _showSnackBar(
-              'Showing session from ${DateFormat('MMM d, h:mm a').format(session.startTime)}',
+              AppLocalizations.of(context).mapShowingSessionFrom(
+                DateFormat.MMMd(
+                  Localizations.localeOf(context).toString(),
+                ).add_Hm().format(session.startTime),
+              ),
             );
           },
           onSessionDeleted: (deletedId, remaining) {
@@ -3816,16 +3901,17 @@ $placemarks  </Document>
   }
 
   String _getInterfaceThemeModeText() {
+    final l10n = AppLocalizations.of(context);
     final appState = MyApp.of(context);
-    if (appState == null) return 'System Default';
+    if (appState == null) return l10n.settingsThemeSystemDefault;
 
     switch (appState.themeMode) {
       case ThemeMode.light:
-        return 'Light';
+        return l10n.settingsThemeLight;
       case ThemeMode.dark:
-        return 'Dark';
+        return l10n.settingsThemeDark;
       case ThemeMode.system:
-        return 'System Default';
+        return l10n.settingsThemeSystemDefault;
     }
   }
 
@@ -3835,29 +3921,32 @@ $placemarks  </Document>
 
     final selected = await showDialog<ThemeMode>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Choose Interface Theme'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: const Text('Light'),
-              leading: const Icon(Icons.light_mode),
-              onTap: () => Navigator.pop(context, ThemeMode.light),
-            ),
-            ListTile(
-              title: const Text('Dark'),
-              leading: const Icon(Icons.dark_mode),
-              onTap: () => Navigator.pop(context, ThemeMode.dark),
-            ),
-            ListTile(
-              title: const Text('System Default'),
-              leading: const Icon(Icons.brightness_auto),
-              onTap: () => Navigator.pop(context, ThemeMode.system),
-            ),
-          ],
-        ),
-      ),
+      builder: (context) {
+        final l10n = AppLocalizations.of(context);
+        return AlertDialog(
+          title: Text(l10n.settingsChooseInterfaceTheme),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: Text(l10n.settingsThemeLight),
+                leading: const Icon(Icons.light_mode),
+                onTap: () => Navigator.pop(context, ThemeMode.light),
+              ),
+              ListTile(
+                title: Text(l10n.settingsThemeDark),
+                leading: const Icon(Icons.dark_mode),
+                onTap: () => Navigator.pop(context, ThemeMode.dark),
+              ),
+              ListTile(
+                title: Text(l10n.settingsThemeSystemDefault),
+                leading: const Icon(Icons.brightness_auto),
+                onTap: () => Navigator.pop(context, ThemeMode.system),
+              ),
+            ],
+          ),
+        );
+      },
     );
 
     if (selected != null) {
@@ -3865,14 +3954,68 @@ $placemarks  </Document>
     }
   }
 
+  String _getAppLocalePreferenceText() {
+    final l10n = AppLocalizations.of(context);
+    switch (MyApp.of(context)?.localePreference) {
+      case AppLocalePreference.en:
+        return l10n.languageEnglish;
+      case AppLocalePreference.ru:
+        return l10n.languageRussian;
+      case AppLocalePreference.system:
+      case null:
+        return l10n.languageSystem;
+    }
+  }
+
+  Future<void> _showLanguageSelector() async {
+    final appState = MyApp.of(context);
+    if (appState == null) return;
+
+    final selected = await showDialog<AppLocalePreference>(
+      context: context,
+      builder: (context) {
+        final l10n = AppLocalizations.of(context);
+        return AlertDialog(
+          title: Text(l10n.languagePickerTitle),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: Text(l10n.languageSystem),
+                leading: const Icon(Icons.brightness_auto),
+                onTap: () => Navigator.pop(context, AppLocalePreference.system),
+              ),
+              ListTile(
+                title: Text(l10n.languageEnglish),
+                leading: const Icon(Icons.language),
+                onTap: () => Navigator.pop(context, AppLocalePreference.en),
+              ),
+              ListTile(
+                title: Text(l10n.languageRussian),
+                leading: const Icon(Icons.language),
+                onTap: () => Navigator.pop(context, AppLocalePreference.ru),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (selected != null) {
+      await appState.setAppLocalePreference(selected);
+      await _locationService.refreshNotificationCopy();
+    }
+  }
+
   String _getMapThemeModeText() {
+    final l10n = AppLocalizations.of(context);
     switch (_mapThemeMode) {
       case MapThemeMode.light:
-        return 'Light';
+        return l10n.settingsThemeLight;
       case MapThemeMode.dark:
-        return 'Dark';
+        return l10n.settingsThemeDark;
       case MapThemeMode.system:
-        return 'System Default';
+        return l10n.settingsThemeSystemDefault;
     }
   }
 
@@ -3890,29 +4033,32 @@ $placemarks  </Document>
   Future<void> _showMapThemeSelector() async {
     final selected = await showDialog<MapThemeMode>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Choose Map Theme'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: const Text('Light'),
-              leading: const Icon(Icons.light_mode),
-              onTap: () => Navigator.pop(context, MapThemeMode.light),
-            ),
-            ListTile(
-              title: const Text('Dark'),
-              leading: const Icon(Icons.dark_mode),
-              onTap: () => Navigator.pop(context, MapThemeMode.dark),
-            ),
-            ListTile(
-              title: const Text('System Default'),
-              leading: const Icon(Icons.brightness_auto),
-              onTap: () => Navigator.pop(context, MapThemeMode.system),
-            ),
-          ],
-        ),
-      ),
+      builder: (context) {
+        final l10n = AppLocalizations.of(context);
+        return AlertDialog(
+          title: Text(l10n.settingsChooseMapTheme),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: Text(l10n.settingsThemeLight),
+                leading: const Icon(Icons.light_mode),
+                onTap: () => Navigator.pop(context, MapThemeMode.light),
+              ),
+              ListTile(
+                title: Text(l10n.settingsThemeDark),
+                leading: const Icon(Icons.dark_mode),
+                onTap: () => Navigator.pop(context, MapThemeMode.dark),
+              ),
+              ListTile(
+                title: Text(l10n.settingsThemeSystemDefault),
+                leading: const Icon(Icons.brightness_auto),
+                onTap: () => Navigator.pop(context, MapThemeMode.system),
+              ),
+            ],
+          ),
+        );
+      },
     );
 
     if (selected != null) {
@@ -3955,21 +4101,22 @@ $placemarks  </Document>
   }
 
   void _showSampleInfo(Sample sample) {
-    final timestamp = DateFormat(
-      'MMM d, yyyy HH:mm:ss',
-    ).format(sample.timestamp);
+    final l10n = AppLocalizations.of(context);
+    final timestamp = DateFormat.yMMMd(
+      Localizations.localeOf(context).toString(),
+    ).add_Hms().format(sample.timestamp);
     final hasSignalData = sample.rssi != null || sample.snr != null;
     final pingStatus = sample.pingSuccess == true
-        ? '✅ Success'
+        ? l10n.mapStatusSuccess
         : sample.pingSuccess == false
-        ? '❌ Failed'
-        : '📍 GPS Only';
+        ? l10n.mapStatusFailed
+        : l10n.mapStatusGpsOnly;
 
     // Get repeater name if available (sample.path holds repeater/node ID)
     final repeaterName = sample.path != null
         ? _getRepeaterName(sample.path)
         : null;
-    final idOrName = repeaterName ?? sample.path ?? 'Unknown';
+    final idOrName = repeaterName ?? sample.path ?? l10n.settingsUnknown;
     final repeaterDisplay = (repeaterName != null)
         ? repeaterName
         : (idOrName.length > 8
@@ -3979,33 +4126,36 @@ $placemarks  </Document>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Sample Info'),
+        title: Text(l10n.mapSampleInfo),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                const Text(
-                  'Status: ',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Text(
+                  l10n.mapStatusLabel,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Text(pingStatus),
               ],
             ),
             const SizedBox(height: 8),
-            Text('Time: $timestamp', style: const TextStyle(fontSize: 12)),
+            Text(
+              l10n.mapTimeLabel(timestamp),
+              style: const TextStyle(fontSize: 12),
+            ),
             const SizedBox(height: 8),
-            Text('Lat: ${sample.position.latitude.toStringAsFixed(6)}'),
-            Text('Lon: ${sample.position.longitude.toStringAsFixed(6)}'),
+            Text(l10n.mapLat(sample.position.latitude.toStringAsFixed(6))),
+            Text(l10n.mapLon(sample.position.longitude.toStringAsFixed(6))),
             if (sample.path != null) ...[
               const Divider(height: 16),
               const SizedBox(height: 8),
               Row(
                 children: [
-                  const Text(
-                    'Repeater: ',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Text(
+                    l10n.mapRepeaterLabel,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Expanded(
                     child: Text(
@@ -4021,9 +4171,9 @@ $placemarks  </Document>
             if (sample.rssi != null)
               Row(
                 children: [
-                  const Text(
-                    'RSSI: ',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Text(
+                    l10n.mapRssiLabel,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Text('${sample.rssi} dBm'),
                 ],
@@ -4031,9 +4181,9 @@ $placemarks  </Document>
             if (sample.snr != null)
               Row(
                 children: [
-                  const Text(
-                    'SNR: ',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Text(
+                    l10n.mapSnrLabel,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Text('${sample.snr} dB'),
                 ],
@@ -4042,9 +4192,9 @@ $placemarks  </Document>
               const SizedBox(height: 4),
               Row(
                 children: [
-                  const Text(
-                    'Response: ',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Text(
+                    l10n.mapResponseLabel,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Text('${sample.responseTimeMs} ms'),
                 ],
@@ -4054,9 +4204,9 @@ $placemarks  </Document>
               const Divider(height: 16),
               Row(
                 children: [
-                  const Text(
-                    'Ducting: ',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Text(
+                    l10n.mapDuctingLabel,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -4070,7 +4220,7 @@ $placemarks  </Document>
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      DuctingService.riskLabel(sample.ductingRisk!),
+                      _localizedDuctingRisk(l10n, sample.ductingRisk!),
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -4086,7 +4236,7 @@ $placemarks  </Document>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(AppLocalizations.of(context).mapClose),
           ),
         ],
       ),
@@ -4094,30 +4244,31 @@ $placemarks  </Document>
   }
 
   void _showSampleClusterInfo(SampleCluster cluster) {
-    final newestTimestamp = DateFormat(
-      'MMM d, yyyy HH:mm:ss',
-    ).format(cluster.newestSample.timestamp);
+    final l10n = AppLocalizations.of(context);
+    final newestTimestamp = DateFormat.yMMMd(
+      Localizations.localeOf(context).toString(),
+    ).add_Hms().format(cluster.newestSample.timestamp);
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('${cluster.sampleCount} grouped samples'),
+        title: Text(l10n.mapGroupedSamples(cluster.sampleCount)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Successful: ${cluster.successfulCount}'),
-            Text('Failed: ${cluster.failedCount}'),
-            Text('GPS only: ${cluster.gpsOnlyCount}'),
+            Text(l10n.mapSuccessfulCount(cluster.successfulCount)),
+            Text(l10n.mapFailedCount(cluster.failedCount)),
+            Text(l10n.mapGpsOnlyCount(cluster.gpsOnlyCount)),
             const SizedBox(height: 8),
-            Text('Newest: $newestTimestamp'),
+            Text(l10n.mapNewest(newestTimestamp)),
             const SizedBox(height: 8),
-            const Text('Zoom in for a more detailed breakdown.'),
+            Text(l10n.mapZoomForBreakdown),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(AppLocalizations.of(context).mapClose),
           ),
         ],
       ),
@@ -4130,22 +4281,44 @@ $placemarks  </Document>
       builder: (context) => AlertDialog(
         title: Text(
           repeater.name ??
-              'Repeater ${(repeater.id.length > 8 ? repeater.id.substring(0, 8) : repeater.id).toUpperCase()}',
+              AppLocalizations.of(context).mapRepeaterFallback(
+                (repeater.id.length > 8
+                        ? repeater.id.substring(0, 8)
+                        : repeater.id)
+                    .toUpperCase(),
+              ),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'ID: ${(repeater.id.length > 8 ? repeater.id.substring(0, 8) : repeater.id).toUpperCase()}',
+              AppLocalizations.of(context).mapIdLabel(
+                (repeater.id.length > 8
+                        ? repeater.id.substring(0, 8)
+                        : repeater.id)
+                    .toUpperCase(),
+              ),
               style: const TextStyle(fontFamily: 'monospace'),
             ),
             const SizedBox(height: 8),
-            Text('Lat: ${repeater.position.latitude.toStringAsFixed(6)}'),
-            Text('Lon: ${repeater.position.longitude.toStringAsFixed(6)}'),
+            Text(
+              AppLocalizations.of(
+                context,
+              ).mapLat(repeater.position.latitude.toStringAsFixed(6)),
+            ),
+            Text(
+              AppLocalizations.of(
+                context,
+              ).mapLon(repeater.position.longitude.toStringAsFixed(6)),
+            ),
             if (repeater.rssi != null) const SizedBox(height: 8),
-            if (repeater.rssi != null) Text('RSSI: ${repeater.rssi} dBm'),
-            if (repeater.snr != null) Text('SNR: ${repeater.snr} dB'),
+            if (repeater.rssi != null)
+              Text(
+                AppLocalizations.of(context).mapRssiValue('${repeater.rssi}'),
+              ),
+            if (repeater.snr != null)
+              Text(AppLocalizations.of(context).mapSnrValue('${repeater.snr}')),
           ],
         ),
         actions: [
@@ -4158,21 +4331,26 @@ $placemarks  </Document>
               await _settingsService.setIncludeOnlyRepeaters(repeater.id);
               _loadSamples();
               _showSnackBar(
-                'Filtering by ${(repeater.id.length > 8 ? repeater.id.substring(0, 8) : repeater.id).toUpperCase()}',
+                AppLocalizations.of(context).mapFilteringBy(
+                  (repeater.id.length > 8
+                          ? repeater.id.substring(0, 8)
+                          : repeater.id)
+                      .toUpperCase(),
+                ),
               );
             },
-            child: const Text('Filter by This'),
+            child: Text(AppLocalizations.of(context).mapFilterByThis),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               _mapController.move(repeater.position, 15.0);
             },
-            child: const Text('Show on Map'),
+            child: Text(AppLocalizations.of(context).mapShowOnMap),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(AppLocalizations.of(context).mapClose),
           ),
         ],
       ),
@@ -4184,8 +4362,10 @@ $placemarks  </Document>
     final total = coverage.received + coverage.lost;
     final successRate = total > 0
         ? ((coverage.received / total) * 100).toStringAsFixed(0)
-        : 'N/A';
-    final reliabilityText = total > 0 ? '$successRate%' : 'No ping data';
+        : AppLocalizations.of(context).mapNotAvailable;
+    final reliabilityText = total > 0
+        ? '$successRate%'
+        : AppLocalizations.of(context).mapNoPingData;
 
     // Round weighted values to 1 decimal place for display
     final receivedDisplay = coverage.received.toStringAsFixed(1);
@@ -4201,21 +4381,21 @@ $placemarks  </Document>
           ..sort();
     final repeaterText = uniquePrefixes.isNotEmpty
         ? uniquePrefixes.join(', ')
-        : 'None';
+        : AppLocalizations.of(context).settingsNone;
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Coverage Square Info'),
+        title: Text(AppLocalizations.of(context).mapCoverageSquareInfo),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                const Text(
-                  'Samples: ',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Text(
+                  AppLocalizations.of(context).mapSamplesLabel,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Text(totalDisplay),
               ],
@@ -4223,9 +4403,9 @@ $placemarks  </Document>
             const SizedBox(height: 8),
             Row(
               children: [
-                const Text(
-                  'Success Rate: ',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Text(
+                  AppLocalizations.of(context).mapSuccessRateLabel,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Text(reliabilityText),
               ],
@@ -4233,9 +4413,9 @@ $placemarks  </Document>
             const SizedBox(height: 8),
             Row(
               children: [
-                const Text(
-                  'Received: ',
-                  style: TextStyle(
+                Text(
+                  AppLocalizations.of(context).mapReceivedLabel,
+                  style: const TextStyle(
                     color: Colors.green,
                     fontWeight: FontWeight.bold,
                   ),
@@ -4246,9 +4426,9 @@ $placemarks  </Document>
             const SizedBox(height: 4),
             Row(
               children: [
-                const Text(
-                  'Lost: ',
-                  style: TextStyle(
+                Text(
+                  AppLocalizations.of(context).mapLostLabel,
+                  style: const TextStyle(
                     color: Colors.red,
                     fontWeight: FontWeight.bold,
                   ),
@@ -4260,9 +4440,9 @@ $placemarks  </Document>
             if (coverage.received > 0)
               Row(
                 children: [
-                  const Text(
-                    'Repeaters Heard: ',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Text(
+                    AppLocalizations.of(context).mapRepeatersHeard,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Text('${uniquePrefixes.length}'),
                 ],
@@ -4272,9 +4452,9 @@ $placemarks  </Document>
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Repeater IDs: ',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  Text(
+                    AppLocalizations.of(context).mapRepeaterIds,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   Expanded(
                     child: Text(
@@ -4292,7 +4472,7 @@ $placemarks  </Document>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(AppLocalizations.of(context).mapClose),
           ),
         ],
       ),
@@ -4303,7 +4483,9 @@ $placemarks  </Document>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Nearby Repeaters (${_repeaters.length})'),
+        title: Text(
+          AppLocalizations.of(context).mapNearbyRepeaters(_repeaters.length),
+        ),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView.builder(
@@ -4313,7 +4495,12 @@ $placemarks  </Document>
               final repeater = _repeaters[index];
               return ListTile(
                 leading: const Icon(Icons.cell_tower, color: Colors.purple),
-                title: Text(repeater.name ?? 'Repeater ${repeater.id}'),
+                title: Text(
+                  repeater.name ??
+                      AppLocalizations.of(
+                        context,
+                      ).mapRepeaterFallback(repeater.id),
+                ),
                 subtitle: Text(
                   '${repeater.position.latitude.toStringAsFixed(4)}, '
                   '${repeater.position.longitude.toStringAsFixed(4)}'
@@ -4338,7 +4525,7 @@ $placemarks  </Document>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(AppLocalizations.of(context).mapClose),
           ),
         ],
       ),
@@ -4378,13 +4565,15 @@ $placemarks  </Document>
                 const SizedBox(height: 16),
                 Text(
                   currentSite.isNotEmpty
-                      ? 'Uploading to $currentSite...'
-                      : 'Uploading samples...',
+                      ? AppLocalizations.of(context).mapUploadingTo(currentSite)
+                      : AppLocalizations.of(context).mapUploadingSamples,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 if (totalBatches > 1)
                   Text(
-                    'Batch $currentBatch of $totalBatches',
+                    AppLocalizations.of(
+                      context,
+                    ).mapUploadBatch(currentBatch, totalBatches),
                     style: const TextStyle(fontSize: 12),
                   ),
               ],
@@ -4440,7 +4629,7 @@ $placemarks  </Document>
             }
           },
         );
-        results = {'Upload': result};
+        results = {AppLocalizations.of(context).mapUploadFallbackName: result};
       }
 
       if (mounted) {
@@ -4453,13 +4642,21 @@ $placemarks  </Document>
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: Text(allSuccess ? 'Upload Complete' : 'Upload Results'),
+            title: Text(
+              allSuccess
+                  ? AppLocalizations.of(context).mapUploadComplete
+                  : AppLocalizations.of(context).mapUploadResults,
+            ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (results.length > 1)
-                  Text('Uploaded to $successCount of ${results.length} sites'),
+                  Text(
+                    AppLocalizations.of(
+                      context,
+                    ).mapUploadedToSites(successCount, results.length),
+                  ),
                 const SizedBox(height: 8),
                 ...results.entries.map((entry) {
                   return Padding(
@@ -4506,7 +4703,7 @@ $placemarks  </Document>
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
+                child: Text(AppLocalizations.of(context).mapOk),
               ),
             ],
           ),
@@ -4515,7 +4712,7 @@ $placemarks  </Document>
     } catch (e) {
       if (mounted) {
         Navigator.pop(context); // Close loading dialog
-        _showSnackBar('Upload error: $e');
+        _showSnackBar(AppLocalizations.of(context).mapUploadError('$e'));
       }
     }
   }
@@ -4545,10 +4742,10 @@ $placemarks  </Document>
                 controller: scrollController,
                 children: [
                   Row(
-                    children: const [
+                    children: [
                       Text(
-                        'Manage Upload Sites',
-                        style: TextStyle(
+                        AppLocalizations.of(context).settingsManageUploadSites,
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),
@@ -4556,15 +4753,17 @@ $placemarks  </Document>
                     ],
                   ),
                   const SizedBox(height: 12),
-                  const Text(
-                    'Select which sites to upload to:',
-                    style: TextStyle(fontSize: 13, color: Colors.grey),
+                  Text(
+                    AppLocalizations.of(context).mapSelectWhichSitesToUpload,
+                    style: const TextStyle(fontSize: 13, color: Colors.grey),
                   ),
                   const SizedBox(height: 12),
                   if (endpoints.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.all(20),
-                      child: Text('No upload sites configured'),
+                    Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Text(
+                        AppLocalizations.of(context).settingsUploadNoSites,
+                      ),
                     )
                   else
                     ...endpoints.map((endpoint) {
@@ -4631,13 +4830,23 @@ $placemarks  </Document>
                                 final confirmed = await showDialog<bool>(
                                   context: context,
                                   builder: (ctx) => AlertDialog(
-                                    title: const Text('Delete Site'),
-                                    content: Text('Delete "${endpoint.name}"?'),
+                                    title: Text(
+                                      AppLocalizations.of(ctx).mapDeleteSite,
+                                    ),
+                                    content: Text(
+                                      AppLocalizations.of(
+                                        ctx,
+                                      ).mapDeleteSiteConfirm(endpoint.name),
+                                    ),
                                     actions: [
                                       TextButton(
                                         onPressed: () =>
                                             Navigator.pop(ctx, false),
-                                        child: const Text('Cancel'),
+                                        child: Text(
+                                          AppLocalizations.of(
+                                            ctx,
+                                          ).settingsCancel,
+                                        ),
                                       ),
                                       TextButton(
                                         onPressed: () =>
@@ -4645,7 +4854,9 @@ $placemarks  </Document>
                                         style: TextButton.styleFrom(
                                           foregroundColor: Colors.red,
                                         ),
-                                        child: const Text('Delete'),
+                                        child: Text(
+                                          AppLocalizations.of(ctx).mapDelete,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -4684,12 +4895,14 @@ $placemarks  </Document>
                           }
                         },
                         icon: const Icon(Icons.add),
-                        label: const Text('Add Site'),
+                        label: Text(AppLocalizations.of(context).mapAddSite),
                       ),
                       const Spacer(),
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('Cancel'),
+                        child: Text(
+                          AppLocalizations.of(context).settingsCancel,
+                        ),
                       ),
                       TextButton(
                         onPressed: () async {
@@ -4697,9 +4910,11 @@ $placemarks  </Document>
                             selectedNames,
                           );
                           Navigator.pop(context);
-                          _showSnackBar('Upload sites updated');
+                          _showSnackBar(
+                            AppLocalizations.of(context).mapUploadSitesUpdated,
+                          );
                         },
-                        child: const Text('Save'),
+                        child: Text(AppLocalizations.of(context).settingsSave),
                       ),
                     ],
                   ),
@@ -4714,7 +4929,7 @@ $placemarks  </Document>
 
   Future<void> _showOfflineTileDownload() async {
     if (_tileCacheStore == null) {
-      _showSnackBar('Tile cache not initialized');
+      _showSnackBar(AppLocalizations.of(context).mapTileCacheNotInitialized);
       return;
     }
 
@@ -4741,14 +4956,16 @@ $placemarks  </Document>
             ); // ~15KB per tile
 
             return AlertDialog(
-              title: const Text('Download Offline Tiles'),
+              title: Text(
+                AppLocalizations.of(context).settingsDownloadOfflineTiles,
+              ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Download map tiles for the current view area.'),
+                  Text(AppLocalizations.of(context).mapDownloadTilesBlurb),
                   const SizedBox(height: 16),
-                  Text('Min Zoom: $minZoom'),
+                  Text(AppLocalizations.of(context).mapMinZoom('$minZoom')),
                   Slider(
                     value: minZoom.toDouble(),
                     min: 3,
@@ -4762,7 +4979,7 @@ $placemarks  </Document>
                       });
                     },
                   ),
-                  Text('Max Zoom: $maxZoom'),
+                  Text(AppLocalizations.of(context).mapMaxZoom('$maxZoom')),
                   Slider(
                     value: maxZoom.toDouble(),
                     min: 3,
@@ -4778,27 +4995,32 @@ $placemarks  </Document>
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '$tileCount tiles (~$estimatedMB MB)',
+                    AppLocalizations.of(
+                      context,
+                    ).mapTilesEstimate(tileCount, estimatedMB),
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   if (tileCount > 5000)
-                    const Text(
-                      'Large download — consider a smaller area or zoom range',
-                      style: TextStyle(color: Colors.orange, fontSize: 12),
+                    Text(
+                      AppLocalizations.of(context).mapLargeDownloadWarning,
+                      style: const TextStyle(
+                        color: Colors.orange,
+                        fontSize: 12,
+                      ),
                     ),
                 ],
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel'),
+                  child: Text(AppLocalizations.of(context).settingsCancel),
                 ),
                 TextButton(
                   onPressed: () => Navigator.pop(context, {
                     'minZoom': minZoom,
                     'maxZoom': maxZoom,
                   }),
-                  child: const Text('Download'),
+                  child: Text(AppLocalizations.of(context).mapDownload),
                 ),
               ],
             );
@@ -4852,7 +5074,11 @@ $placemarks  </Document>
                   .then((succeeded) {
                     if (context.mounted) Navigator.pop(context);
                     if (!downloadCancelled) {
-                      _showSnackBar('Downloaded $succeeded/$totalTiles tiles');
+                      _showSnackBar(
+                        AppLocalizations.of(
+                          context,
+                        ).mapDownloadedTiles(succeeded, totalTiles),
+                      );
                     }
                   });
             }
@@ -4860,13 +5086,17 @@ $placemarks  </Document>
             final progress = totalTiles > 0 ? completed / totalTiles : 0.0;
 
             return AlertDialog(
-              title: const Text('Downloading Tiles'),
+              title: Text(AppLocalizations.of(context).mapDownloadingTiles),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   LinearProgressIndicator(value: progress),
                   const SizedBox(height: 12),
-                  Text('$completed / $totalTiles tiles'),
+                  Text(
+                    AppLocalizations.of(
+                      context,
+                    ).mapTilesProgress(completed, totalTiles),
+                  ),
                 ],
               ),
               actions: [
@@ -4876,10 +5106,12 @@ $placemarks  </Document>
                     downloader.cancel();
                     Navigator.pop(context);
                     _showSnackBar(
-                      'Download cancelled ($completed tiles cached)',
+                      AppLocalizations.of(
+                        context,
+                      ).mapDownloadCancelled(completed),
                     );
                   },
-                  child: const Text('Cancel'),
+                  child: Text(AppLocalizations.of(context).settingsCancel),
                 ),
               ],
             );
@@ -4906,7 +5138,9 @@ $placemarks  </Document>
       });
 
       if (imageBytes == null) {
-        _showSnackBar('Failed to capture screenshot');
+        _showSnackBar(
+          AppLocalizations.of(context).mapFailedToCaptureScreenshot,
+        );
         return;
       }
 
@@ -4917,16 +5151,20 @@ $placemarks  </Document>
           .length;
       final failCount = pingSamples.where((s) => s.pingSuccess == false).length;
       final totalPings = successCount + failCount;
+      final l10n = AppLocalizations.of(context);
       final successRate = totalPings > 0
           ? ((successCount / totalPings) * 100).toStringAsFixed(0)
-          : 'N/A';
+          : l10n.mapNotAvailable;
       final coverageCount = _aggregationResult?.coverages.length ?? 0;
 
-      final statsText =
-          'MeshCore Wardrive Coverage Map\n'
-          '📍 ${_samples.length} samples • $coverageCount coverage areas\n'
-          '✅ $successCount success • ❌ $failCount failed • $successRate% rate\n'
-          '🔁 ${_repeaters.length} repeaters discovered';
+      final statsText = l10n.mapCoverageShareText(
+        '${_samples.length}',
+        '$coverageCount',
+        '$successCount',
+        '$failCount',
+        successRate,
+        '${_repeaters.length}',
+      );
 
       // Save temp file and share
       final tempDir = await getTemporaryDirectory();
@@ -4937,14 +5175,14 @@ $placemarks  </Document>
 
       await Share.shareXFiles(
         [XFile(file.path)],
-        subject: 'MeshCore Wardrive Coverage',
+        subject: AppLocalizations.of(context).mapCoverageShareSubject,
         text: statsText,
       );
     } catch (e) {
       setState(() {
         _hideUIForScreenshot = false;
       });
-      _showSnackBar('Share failed: $e');
+      _showSnackBar(AppLocalizations.of(context).mapShareFailed('$e'));
     }
   }
 
@@ -4961,7 +5199,7 @@ $placemarks  </Document>
     }
 
     if (knownIds.isEmpty) {
-      _showSnackBar('No repeaters found yet - do some wardriving first!');
+      _showSnackBar(AppLocalizations.of(context).mapNoRepeatersYet);
       return;
     }
 
@@ -4970,7 +5208,7 @@ $placemarks  </Document>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Filter by Repeater'),
+        title: Text(AppLocalizations.of(context).mapFilterByRepeater),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView.builder(
@@ -4993,7 +5231,12 @@ $placemarks  </Document>
                   Icons.cell_tower,
                   color: isSelected ? Colors.blue : Colors.purple,
                 ),
-                title: Text(name ?? 'Repeater $displayId'),
+                title: Text(
+                  name ??
+                      AppLocalizations.of(
+                        context,
+                      ).mapRepeaterFallback(displayId),
+                ),
                 subtitle: Text(
                   displayId,
                   style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
@@ -5008,7 +5251,11 @@ $placemarks  </Document>
                   });
                   await _settingsService.setIncludeOnlyRepeaters(id);
                   _loadSamples();
-                  _showSnackBar('Showing coverage from $displayId');
+                  _showSnackBar(
+                    AppLocalizations.of(
+                      context,
+                    ).mapShowingCoverageFrom(displayId),
+                  );
                 },
               );
             },
@@ -5025,16 +5272,18 @@ $placemarks  </Document>
                 });
                 await _settingsService.setIncludeOnlyRepeaters(null);
                 _loadSamples();
-                _showSnackBar('Repeater filter cleared');
+                _showSnackBar(
+                  AppLocalizations.of(context).mapRepeaterFilterCleared,
+                );
               },
-              child: const Text(
-                'Clear Filter',
-                style: TextStyle(color: Colors.red),
+              child: Text(
+                AppLocalizations.of(context).mapClearFilter,
+                style: const TextStyle(color: Colors.red),
               ),
             ),
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context).settingsCancel),
           ),
         ],
       ),
@@ -5043,7 +5292,7 @@ $placemarks  </Document>
 
   void _findCoverageGaps() {
     if (_aggregationResult == null || _aggregationResult!.coverages.isEmpty) {
-      _showSnackBar('No coverage data yet - do some wardriving first!');
+      _showSnackBar(AppLocalizations.of(context).mapNoCoverageYet);
       return;
     }
 
@@ -5067,16 +5316,14 @@ $placemarks  </Document>
     });
 
     if (gaps.isEmpty) {
-      _showSnackBar(
-        'No coverage gaps found! All areas have >30% success rate.',
-      );
+      _showSnackBar(AppLocalizations.of(context).mapNoCoverageGaps);
       return;
     }
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Coverage Gaps (${gaps.length})'),
+        title: Text(AppLocalizations.of(context).mapCoverageGaps(gaps.length)),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView.builder(
@@ -5093,11 +5340,16 @@ $placemarks  </Document>
                   Icons.warning,
                   color: double.parse(rate) == 0 ? Colors.red : Colors.orange,
                 ),
-                title: Text('$rate% success rate'),
+                title: Text(
+                  AppLocalizations.of(context).mapGapSuccessRate(rate),
+                ),
                 subtitle: Text(
-                  '${gap.position.latitude.toStringAsFixed(4)}, '
-                  '${gap.position.longitude.toStringAsFixed(4)}\n'
-                  '${gap.received.toStringAsFixed(1)} received / ${gap.lost.toStringAsFixed(1)} lost',
+                  AppLocalizations.of(context).mapGapSubtitle(
+                    '${gap.position.latitude.toStringAsFixed(4)}, '
+                    '${gap.position.longitude.toStringAsFixed(4)}',
+                    gap.received.toStringAsFixed(1),
+                    gap.lost.toStringAsFixed(1),
+                  ),
                 ),
                 onTap: () {
                   Navigator.pop(context);
@@ -5110,7 +5362,7 @@ $placemarks  </Document>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(AppLocalizations.of(context).mapClose),
           ),
         ],
       ),
@@ -5130,7 +5382,7 @@ $placemarks  </Document>
       selectedUrl = await showDialog<String>(
         context: context,
         builder: (ctx) => SimpleDialog(
-          title: const Text('Download from'),
+          title: Text(AppLocalizations.of(ctx).mapDownloadFrom),
           children: endpoints
               .map(
                 (e) => SimpleDialogOption(
@@ -5145,7 +5397,7 @@ $placemarks  </Document>
 
     if (selectedUrl == null) return;
 
-    _showSnackBar('Downloading coverage data...');
+    _showSnackBar(AppLocalizations.of(context).mapDownloadingCoverage);
 
     final data = await _uploadService.downloadCoverage(
       selectedUrl,
@@ -5159,7 +5411,11 @@ $placemarks  </Document>
         _communityCoverage = coverage;
         _showCommunityCoverage = true;
       });
-      _showSnackBar('Downloaded ${coverage.length} coverage cells');
+      _showSnackBar(
+        AppLocalizations.of(
+          context,
+        ).mapDownloadedCoverageCells(coverage.length),
+      );
     } else {
       // Try loading from cache
       final cached = await _uploadService.loadCachedCoverage();
@@ -5168,10 +5424,13 @@ $placemarks  </Document>
           _communityCoverage = cached['coverage'] as Map<String, dynamic>;
           _showCommunityCoverage = true;
         });
-        _showSnackBar('Loaded cached coverage (offline)');
+        _showSnackBar(AppLocalizations.of(context).mapLoadedCachedCoverage);
       } else {
         _showSnackBar(
-          'Download failed: ${_uploadService.lastDownloadError ?? 'unknown error'}',
+          AppLocalizations.of(context).mapDownloadFailed(
+            _uploadService.lastDownloadError ??
+                AppLocalizations.of(context).mapUnknownError,
+          ),
         );
       }
     }
@@ -5237,10 +5496,15 @@ $placemarks  </Document>
     final successRate = total > 0
         ? ((cell.received / total) * 100).toStringAsFixed(1)
         : '0';
-    final lastUpdate = cell.lastUpdate.isEmpty ? 'Unknown' : cell.lastUpdate;
-    final appVersion = cell.appVersion.isEmpty ? 'Unknown' : cell.appVersion;
+    final l10n = AppLocalizations.of(context);
+    final lastUpdate = cell.lastUpdate.isEmpty
+        ? l10n.settingsUnknown
+        : cell.lastUpdate;
+    final appVersion = cell.appVersion.isEmpty
+        ? l10n.settingsUnknown
+        : cell.appVersion;
 
-    String repeatersText = 'None';
+    String repeatersText = l10n.settingsNone;
     if (cell.repeaters.isNotEmpty) {
       repeatersText = cell.repeaters.entries
           .map((e) {
@@ -5257,35 +5521,42 @@ $placemarks  </Document>
           .join('\n');
     }
 
+    final parsedLastUpdate = DateTime.tryParse(lastUpdate);
+    final lastUpdateDisplay = parsedLastUpdate == null
+        ? lastUpdate
+        : DateFormat.yMMMd(
+            Localizations.localeOf(context).toString(),
+          ).add_Hm().format(parsedLastUpdate.toLocal());
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Community Coverage'),
+        title: Text(l10n.settingsCommunityCoverage),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Success Rate: $successRate%',
+              l10n.mapCommunitySuccessRate(successRate),
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 8),
-            Text('Received: ${cell.received.toStringAsFixed(1)}'),
-            Text('Lost: ${cell.lost.toStringAsFixed(1)}'),
-            Text('Samples: ${cell.samples}'),
+            Text('${l10n.mapReceivedLabel}${cell.received.toStringAsFixed(1)}'),
+            Text('${l10n.mapLostLabel}${cell.lost.toStringAsFixed(1)}'),
+            Text(l10n.mapSamplesCount('${cell.samples}')),
             const SizedBox(height: 8),
-            const Text(
-              'Repeaters:',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            Text(
+              l10n.mapRepeatersHeader,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             Text(repeatersText, style: const TextStyle(fontSize: 12)),
             const SizedBox(height: 8),
             Text(
-              'Last Update: ${DateTime.tryParse(lastUpdate)?.toLocal().toString().substring(0, 16) ?? lastUpdate}',
+              l10n.mapLastUpdate(lastUpdateDisplay),
               style: const TextStyle(fontSize: 11, color: Colors.grey),
             ),
             Text(
-              'App Version: $appVersion',
+              l10n.mapAppVersionLabel(appVersion),
               style: const TextStyle(fontSize: 11, color: Colors.grey),
             ),
           ],
@@ -5293,7 +5564,7 @@ $placemarks  </Document>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Close'),
+            child: Text(l10n.mapClose),
           ),
         ],
       ),
@@ -5309,19 +5580,23 @@ $placemarks  </Document>
     return await showDialog<UploadEndpoint>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Edit Upload Site'),
+        title: Text(AppLocalizations.of(context).mapEditUploadSite),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameController,
-              decoration: const InputDecoration(labelText: 'Site Name'),
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).mapSiteName,
+              ),
               autofocus: true,
             ),
             const SizedBox(height: 12),
             TextField(
               controller: urlController,
-              decoration: const InputDecoration(labelText: 'API URL'),
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).mapApiUrl,
+              ),
               keyboardType: TextInputType.url,
             ),
           ],
@@ -5329,7 +5604,7 @@ $placemarks  </Document>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context).settingsCancel),
           ),
           TextButton(
             onPressed: () {
@@ -5344,7 +5619,7 @@ $placemarks  </Document>
                 );
               }
             },
-            child: const Text('Save'),
+            child: Text(AppLocalizations.of(context).settingsSave),
           ),
         ],
       ),
@@ -5358,23 +5633,23 @@ $placemarks  </Document>
     return await showDialog<UploadEndpoint>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add Upload Site'),
+        title: Text(AppLocalizations.of(context).mapAddUploadSite),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'Site Name',
-                hintText: 'e.g., My Personal Map',
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).mapSiteName,
+                hintText: AppLocalizations.of(context).mapSiteNameHint,
               ),
               autofocus: true,
             ),
             const SizedBox(height: 12),
             TextField(
               controller: urlController,
-              decoration: const InputDecoration(
-                labelText: 'API URL',
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).mapApiUrl,
                 hintText: 'https://your-site.pages.dev/api/samples',
               ),
               keyboardType: TextInputType.url,
@@ -5384,7 +5659,7 @@ $placemarks  </Document>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context).settingsCancel),
           ),
           TextButton(
             onPressed: () {
@@ -5399,7 +5674,7 @@ $placemarks  </Document>
                 );
               }
             },
-            child: const Text('Add'),
+            child: Text(AppLocalizations.of(context).mapAdd),
           ),
         ],
       ),

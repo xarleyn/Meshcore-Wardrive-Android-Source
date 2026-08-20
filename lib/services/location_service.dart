@@ -11,7 +11,10 @@ import 'database_service.dart';
 import 'lora_companion_service.dart';
 import 'location_quality_filter.dart';
 import '../utils/geohash_utils.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import '../l10n/app_locale.dart';
+import '../l10n/generated/app_localizations.dart';
 import 'persistent_debug_logger.dart';
 import 'screen_wake_service.dart';
 import 'settings_service.dart';
@@ -156,18 +159,52 @@ class LocationService {
   int? get currentSessionId => _currentSessionId;
   DateTime? get sessionStartTime => _sessionStartTime;
 
+  /// Localized copy for foreground notifications and start-error snackbars.
+  Future<AppLocalizations> _lookupL10n() async {
+    return AppLocale.lookup(
+      await _settings.getAppLocalePreference(),
+      WidgetsBinding.instance.platformDispatcher.locale,
+    );
+  }
+
+  Future<void> _setNotificationText(
+    String Function(AppLocalizations l10n) text,
+  ) async {
+    final l10n = await _lookupL10n();
+    await FlutterForegroundTask.updateService(
+      notificationTitle: l10n.notificationBrandTitle,
+      notificationText: text(l10n),
+      notificationButtons: [
+        NotificationButton(id: 'stop', text: l10n.notificationStopTracking),
+      ],
+    );
+  }
+
   /// Update foreground notification with live wardrive stats
-  void _updateLiveNotification() {
+  Future<void> _updateLiveNotification() async {
     if (!_isTracking) return;
     final rate = _sessionPingCount > 0
         ? ((_sessionSuccessCount / _sessionPingCount) * 100).toStringAsFixed(0)
         : '--';
     final dist = (_totalDistanceMeters / 1609.34).toStringAsFixed(1);
-    FlutterForegroundTask.updateService(
-      notificationTitle: 'MeshCore Wardrive',
-      notificationText:
-          '✅ $rate% | 📍 $_sessionPingCount pings | 🛣️ ${dist}mi',
+    await _setNotificationText(
+      (l10n) => l10n.notificationLiveStats(rate, _sessionPingCount, dist),
     );
+  }
+
+  Future<void> _updateCarpeaterNotification() async {
+    if (!_isTracking) return;
+    await _setNotificationText((l10n) => l10n.notificationCarpeaterActive);
+  }
+
+  /// Re-apply localized foreground notification copy after a language change.
+  Future<void> refreshNotificationCopy() async {
+    if (!_isTracking) return;
+    if (_carpeaterModeEnabled) {
+      await _updateCarpeaterNotification();
+    } else {
+      await _updateLiveNotification();
+    }
   }
 
   /// Get carpeater service for UI access
@@ -328,7 +365,7 @@ class LocationService {
         permission.toString(),
       );
       if (permission == LocationPermission.denied) {
-        _lastStartError = 'Location permission was denied.';
+        _lastStartError = (await _lookupL10n()).locationPermissionDenied;
         return false;
       }
     }
@@ -336,7 +373,7 @@ class LocationService {
     if (permission == LocationPermission.deniedForever) {
       await _logger.logPermission('Location', 'DENIED_FOREVER');
       _lastStartError =
-          'Location permission is permanently denied. Enable it in Android settings.';
+          (await _lookupL10n()).locationPermissionPermanentlyDenied;
       return false;
     }
 
@@ -512,13 +549,13 @@ class LocationService {
   }
 
   /// Initialize foreground service
-  void _initForegroundTask() {
+  Future<void> _initForegroundTask() async {
+    final l10n = await _lookupL10n();
     FlutterForegroundTask.init(
       androidNotificationOptions: AndroidNotificationOptions(
         channelId: 'meshcore_wardrive_location',
-        channelName: 'MeshCore Wardrive Location Tracking',
-        channelDescription:
-            'This notification appears when location tracking is active',
+        channelName: l10n.notificationChannelName,
+        channelDescription: l10n.notificationChannelDescription,
         channelImportance: NotificationChannelImportance.LOW,
         priority: NotificationPriority.LOW,
       ),
@@ -558,7 +595,7 @@ class LocationService {
     final isEnabled = await isLocationServiceEnabled();
     if (!isEnabled) {
       await _logger.logError('Location Service', 'GPS is disabled');
-      _lastStartError = 'Android location services are disabled.';
+      _lastStartError = (await _lookupL10n()).locationServicesDisabled;
       return false;
     }
 
@@ -573,15 +610,16 @@ class LocationService {
 
     try {
       // Initialize and start foreground service
-      _initForegroundTask();
+      await _initForegroundTask();
       await _logger.logServiceEvent('Foreground task initialized');
 
+      final l10n = await _lookupL10n();
       await FlutterForegroundTask.startService(
         serviceId: 256,
-        notificationTitle: 'MeshCore Wardrive',
-        notificationText: 'Location tracking active',
+        notificationTitle: l10n.notificationBrandTitle,
+        notificationText: l10n.notificationTrackingActive,
         notificationButtons: [
-          const NotificationButton(id: 'stop', text: 'Stop Tracking'),
+          NotificationButton(id: 'stop', text: l10n.notificationStopTracking),
         ],
         callback:
             null, // We handle location in Flutter, not in service callback
@@ -686,7 +724,7 @@ class LocationService {
     } catch (e) {
       _isTracking = false;
       await _logger.logError('Start Tracking', e.toString());
-      _lastStartError = 'Could not start Android location tracking: $e';
+      _lastStartError = (await _lookupL10n()).locationTrackingStartFailed('$e');
       print('Error starting location tracking: $e');
       await FlutterForegroundTask.stopService();
       await ScreenWakeService.instance.setTrackingActive(false);
@@ -819,10 +857,7 @@ class LocationService {
     _pingEventController.add('pinging');
     _soundService.playPingSent();
 
-    FlutterForegroundTask.updateService(
-      notificationTitle: 'MeshCore Wardrive',
-      notificationText: 'Pinging...',
-    );
+    await _setNotificationText((l10n) => l10n.notificationPinging);
 
     _performPingInBackground(position, geohash);
   }
@@ -983,10 +1018,7 @@ class LocationService {
         _soundService.playPingSent();
 
         // Update foreground notification
-        FlutterForegroundTask.updateService(
-          notificationTitle: 'MeshCore Wardrive',
-          notificationText: 'Pinging...',
-        );
+        await _setNotificationText((l10n) => l10n.notificationPinging);
 
         // Start ping in background - don't wait for it
         print(
@@ -1199,16 +1231,15 @@ class LocationService {
       }
 
       // Update notification with result
-      final shortId = (nodeId != null && nodeId.isNotEmpty)
-          ? (nodeId.length > 8
-                ? nodeId.substring(0, 8).toUpperCase()
-                : nodeId.toUpperCase())
-          : 'repeater';
-      final resultText = pingSuccess ? '✅ Heard by $shortId' : '❌ No response';
-      FlutterForegroundTask.updateService(
-        notificationTitle: 'MeshCore Wardrive',
-        notificationText: resultText,
-      );
+      await _setNotificationText((l10n) {
+        if (!pingSuccess) return l10n.notificationNoResponse;
+        final label = (nodeId != null && nodeId.isNotEmpty)
+            ? (nodeId.length > 8
+                  ? nodeId.substring(0, 8).toUpperCase()
+                  : nodeId.toUpperCase())
+            : l10n.notificationRepeaterFallback;
+        return l10n.notificationHeardBy(label);
+      });
 
       // Update session stats
       _sessionPingCount++;
@@ -1504,17 +1535,13 @@ class LocationService {
 
     _sampleSavedController.add(null);
 
-    FlutterForegroundTask.updateService(
-      notificationTitle: 'MeshCore Wardrive',
-      notificationText: results.isEmpty
-          ? 'Carpeater: No neighbours'
-          : 'Carpeater: ${results.length} neighbours found',
+    await _setNotificationText(
+      (l10n) => results.isEmpty
+          ? l10n.notificationCarpeaterNoNeighbours
+          : l10n.notificationCarpeaterNeighboursFound(results.length),
     );
     Future.delayed(const Duration(seconds: 3), () {
-      FlutterForegroundTask.updateService(
-        notificationTitle: 'MeshCore Wardrive',
-        notificationText: 'Carpeater mode active',
-      );
+      _updateCarpeaterNotification();
     });
   }
 

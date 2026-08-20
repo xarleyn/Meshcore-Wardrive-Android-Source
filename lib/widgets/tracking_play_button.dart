@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../l10n/generated/app_localizations.dart';
+
 /// Play/stop FAB. Tooltip is omitted because Material's tooltip long-press
 /// recognizer would swallow the fresh-session gesture.
 class TrackingPlayButton extends StatelessWidget {
@@ -19,11 +21,10 @@ class TrackingPlayButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Semantics(
       button: true,
-      label: isTracking
-          ? 'Stop tracking'
-          : 'Start tracking. Long-press for a blank-map session.',
+      label: isTracking ? l10n.mapStopTracking : l10n.mapStartTracking,
       child: GestureDetector(
         onDoubleTap: onToggleQuickSettings,
         onLongPress: isTracking

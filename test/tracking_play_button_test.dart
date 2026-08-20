@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meshcore_wardrive/widgets/tracking_play_button.dart';
 
+import 'helpers/l10n_harness.dart';
+
 void main() {
   testWidgets(
     'long-press starts a fresh session instead of showing a tooltip',
@@ -10,15 +12,14 @@ void main() {
       var freshStarts = 0;
       var toggles = 0;
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            floatingActionButton: TrackingPlayButton(
-              isTracking: false,
-              onToggle: () => toggles++,
-              onStartFreshSession: () => freshStarts++,
-              onToggleQuickSettings: () {},
-            ),
+      await pumpWithL10n(
+        tester,
+        Scaffold(
+          floatingActionButton: TrackingPlayButton(
+            isTracking: false,
+            onToggle: () => toggles++,
+            onStartFreshSession: () => freshStarts++,
+            onToggleQuickSettings: () {},
           ),
         ),
       );
@@ -34,15 +35,14 @@ void main() {
   testWidgets('short press still toggles tracking', (tester) async {
     var toggles = 0;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          floatingActionButton: TrackingPlayButton(
-            isTracking: false,
-            onToggle: () => toggles++,
-            onStartFreshSession: () {},
-            onToggleQuickSettings: () {},
-          ),
+    await pumpWithL10n(
+      tester,
+      Scaffold(
+        floatingActionButton: TrackingPlayButton(
+          isTracking: false,
+          onToggle: () => toggles++,
+          onStartFreshSession: () {},
+          onToggleQuickSettings: () {},
         ),
       ),
     );

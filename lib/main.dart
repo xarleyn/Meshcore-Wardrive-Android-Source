@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'l10n/app_locale.dart';
+import 'l10n/generated/app_localizations.dart';
 import 'screens/map_screen.dart';
 import 'services/internet_connectivity_service.dart';
 import 'services/screen_wake_service.dart';
@@ -30,15 +32,27 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   ThemeMode _themeMode = ThemeMode.system;
+  AppLocalePreference _localePreference = AppLocalePreference.system;
   late final InternetConnectivityService _connectivityService;
 
   ThemeMode get themeMode => _themeMode;
+
+  AppLocalePreference get localePreference => _localePreference;
+
+  Locale? get _materialLocale {
+    return switch (_localePreference) {
+      AppLocalePreference.system => null,
+      AppLocalePreference.en => const Locale('en'),
+      AppLocalePreference.ru => const Locale('ru'),
+    };
+  }
 
   @override
   void initState() {
     super.initState();
     _connectivityService = InternetConnectivityService()..start();
     _loadThemeMode();
+    _loadAppLocalePreference();
     _loadKeepScreenOn();
   }
 
@@ -65,6 +79,14 @@ class _MyAppState extends State<MyApp> {
     await ScreenWakeService.instance.setAlwaysOn(keepScreenOn);
   }
 
+  Future<void> _loadAppLocalePreference() async {
+    final preference = await SettingsService().getAppLocalePreference();
+    if (!mounted) return;
+    setState(() {
+      _localePreference = preference;
+    });
+  }
+
   Future<void> setThemeMode(ThemeMode mode) async {
     setState(() {
       _themeMode = mode;
@@ -73,10 +95,20 @@ class _MyAppState extends State<MyApp> {
     await prefs.setString('theme_mode', mode.name);
   }
 
+  Future<void> setAppLocalePreference(AppLocalePreference preference) async {
+    setState(() {
+      _localePreference = preference;
+    });
+    await SettingsService().setAppLocalePreference(preference);
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'MeshCore Wardrive',
+      locale: _materialLocale,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       builder: (context, child) => OfflineAppFrame(
         connectivity: _connectivityService,
         child: child ?? const SizedBox.shrink(),

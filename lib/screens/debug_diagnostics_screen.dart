@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../services/location_service.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -53,35 +55,37 @@ class _DebugDiagnosticsScreenState extends State<DebugDiagnosticsScreen> {
   }
 
   Future<void> _shareLogFile(File file) async {
+    final l10n = AppLocalizations.of(context);
     try {
       await Share.shareXFiles(
         [XFile(file.path)],
-        subject: 'MeshCore Wardrive Debug Log',
-        text: 'Debug log for troubleshooting GPS and auto-ping issues',
+        subject: l10n.debugDiagnosticsShareSubject,
+        text: l10n.debugDiagnosticsShareText,
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error sharing file: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.debugDiagnosticsErrorSharing('$e'))),
+        );
       }
     }
   }
 
   Future<void> _deleteLogFile(File file) async {
+    final l10n = AppLocalizations.of(context);
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Log'),
-        content: const Text('Are you sure you want to delete this log file?'),
+        title: Text(l10n.debugDiagnosticsDeleteTitle),
+        content: Text(l10n.debugDiagnosticsDeleteBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.settingsCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
+            child: Text(l10n.mapDelete),
           ),
         ],
       ),
@@ -92,15 +96,21 @@ class _DebugDiagnosticsScreenState extends State<DebugDiagnosticsScreen> {
         await file.delete();
         await _loadLogFiles();
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('Log file deleted')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.debugDiagnosticsLogDeleted)),
+          );
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Error deleting file: $e')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                AppLocalizations.of(
+                  context,
+                ).debugDiagnosticsErrorDeleting('$e'),
+              ),
+            ),
+          );
         }
       }
     }
@@ -122,34 +132,43 @@ class _DebugDiagnosticsScreenState extends State<DebugDiagnosticsScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error reading file: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context).debugDiagnosticsErrorReading('$e'),
+            ),
+          ),
+        );
       }
     }
   }
 
-  String _formatFileSize(int bytes) {
-    if (bytes < 1024) return '$bytes B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+  String _formatFileSize(AppLocalizations l10n, int bytes) {
+    if (bytes < 1024) return l10n.debugDiagnosticsSizeBytes(bytes);
+    if (bytes < 1024 * 1024) {
+      return l10n.debugDiagnosticsSizeKb((bytes / 1024).toStringAsFixed(1));
+    }
+    return l10n.debugDiagnosticsSizeMb(
+      (bytes / (1024 * 1024)).toStringAsFixed(1),
+    );
   }
 
-  String _formatDateTime(DateTime dt) {
-    return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')} '
-        '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+  String _formatDateTime(BuildContext context, DateTime dt) {
+    final locale = Localizations.localeOf(context).toString();
+    return '${DateFormat.yMMMd(locale).format(dt)} ${DateFormat.Hm(locale).format(dt)}';
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Debug Diagnostics'),
+        title: Text(l10n.settingsDebugDiagnostics),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadLogFiles,
-            tooltip: 'Refresh',
+            tooltip: l10n.debugDiagnosticsRefresh,
           ),
         ],
       ),
@@ -161,15 +180,17 @@ class _DebugDiagnosticsScreenState extends State<DebugDiagnosticsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Troubleshooting Samsung Devices',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                Text(
+                  l10n.debugDiagnosticsSamsungTitle,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'This screen shows detailed debug logs for tracking GPS, auto-ping, and service events. '
-                  'If you\'re experiencing issues with auto-ping or GPS tracking, share the latest log file with the developer.',
-                  style: TextStyle(fontSize: 14),
+                Text(
+                  l10n.debugDiagnosticsSamsungBody,
+                  style: const TextStyle(fontSize: 14),
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -182,7 +203,12 @@ class _DebugDiagnosticsScreenState extends State<DebugDiagnosticsScreen> {
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        'Current session: ${widget.locationService.debugLogPath?.split('/').last ?? 'Not started'}',
+                        l10n.debugDiagnosticsCurrentSession(
+                          widget.locationService.debugLogPath
+                                  ?.split('/')
+                                  .last ??
+                              l10n.debugDiagnosticsNotStarted,
+                        ),
                         style: const TextStyle(
                           fontSize: 12,
                           fontStyle: FontStyle.italic,
@@ -198,9 +224,9 @@ class _DebugDiagnosticsScreenState extends State<DebugDiagnosticsScreen> {
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
                 : _logFiles.isEmpty
-                ? const Center(
+                ? Center(
                     child: Text(
-                      'No debug logs found.\nStart tracking to generate logs.',
+                      l10n.debugDiagnosticsEmpty,
                       textAlign: TextAlign.center,
                     ),
                   )
@@ -230,7 +256,7 @@ class _DebugDiagnosticsScreenState extends State<DebugDiagnosticsScreen> {
                             ),
                           ),
                           subtitle: Text(
-                            '${_formatFileSize(fileSize)} • ${_formatDateTime(modified)}',
+                            '${_formatFileSize(l10n, fileSize)} • ${_formatDateTime(context, modified)}',
                             style: const TextStyle(fontSize: 11),
                           ),
                           trailing: PopupMenuButton<String>(
@@ -247,45 +273,50 @@ class _DebugDiagnosticsScreenState extends State<DebugDiagnosticsScreen> {
                                   break;
                               }
                             },
-                            itemBuilder: (context) => [
-                              const PopupMenuItem(
-                                value: 'view',
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.visibility, size: 20),
-                                    SizedBox(width: 8),
-                                    Text('View'),
-                                  ],
+                            itemBuilder: (context) {
+                              final menuL10n = AppLocalizations.of(context);
+                              return [
+                                PopupMenuItem(
+                                  value: 'view',
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.visibility, size: 20),
+                                      const SizedBox(width: 8),
+                                      Text(menuL10n.debugDiagnosticsView),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              const PopupMenuItem(
-                                value: 'share',
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.share, size: 20),
-                                    SizedBox(width: 8),
-                                    Text('Share'),
-                                  ],
+                                PopupMenuItem(
+                                  value: 'share',
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.share, size: 20),
+                                      const SizedBox(width: 8),
+                                      Text(menuL10n.mapShare),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              const PopupMenuItem(
-                                value: 'delete',
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.delete,
-                                      size: 20,
-                                      color: Colors.red,
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      'Delete',
-                                      style: TextStyle(color: Colors.red),
-                                    ),
-                                  ],
+                                PopupMenuItem(
+                                  value: 'delete',
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.delete,
+                                        size: 20,
+                                        color: Colors.red,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        menuL10n.mapDelete,
+                                        style: const TextStyle(
+                                          color: Colors.red,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ];
+                            },
                           ),
                           onTap: () => _viewLogFile(file),
                         ),
@@ -317,7 +348,9 @@ class _LogViewerScreen extends StatelessWidget {
             onPressed: () {
               Share.share(
                 content,
-                subject: 'MeshCore Wardrive Debug Log: $fileName',
+                subject: AppLocalizations.of(
+                  context,
+                ).debugDiagnosticsShareSubjectWithFile(fileName),
               );
             },
           ),

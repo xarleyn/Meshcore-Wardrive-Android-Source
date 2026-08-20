@@ -10,6 +10,7 @@ import '../services/aggregation_service.dart';
 import '../services/database_service.dart';
 import '../services/settings_service.dart';
 import '../utils/geohash_utils.dart';
+import '../l10n/generated/app_localizations.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   final List<Sample> samples;
@@ -32,8 +33,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Analytics')),
+      appBar: AppBar(title: Text(l10n.settingsAnalytics)),
       body: IndexedStack(
         index: _tabIndex,
         children: [
@@ -57,17 +59,26 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         type: BottomNavigationBarType.fixed,
         selectedFontSize: 12,
         unselectedFontSize: 11,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.star), label: 'Score'),
-          BottomNavigationBarItem(icon: Icon(Icons.schedule), label: 'Time'),
-          BottomNavigationBarItem(icon: Icon(Icons.flag), label: 'Goals'),
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.compare_arrows),
-            label: 'Compare',
+            icon: const Icon(Icons.star),
+            label: l10n.analyticsTabScore,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.cell_tower),
-            label: 'Repeaters',
+            icon: const Icon(Icons.schedule),
+            label: l10n.analyticsTabTime,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.flag),
+            label: l10n.analyticsTabGoals,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.compare_arrows),
+            label: l10n.analyticsTabCompare,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.cell_tower),
+            label: l10n.analyticsTabRepeaters,
           ),
         ],
       ),
@@ -89,13 +100,11 @@ class _CoverageScoreTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final pingSamples = samples.where((s) => s.pingSuccess != null).toList();
     if (pingSamples.isEmpty) {
-      return const Center(
-        child: Text(
-          'No ping data yet.\nDo some wardriving first!',
-          textAlign: TextAlign.center,
-        ),
+      return Center(
+        child: Text(l10n.analyticsNoPingData, textAlign: TextAlign.center),
       );
     }
 
@@ -161,11 +170,15 @@ class _CoverageScoreTab extends StatelessWidget {
       gradeColor = Colors.red;
     }
 
-    final shareText =
-        'MeshCore Wardrive Score: $score ($grade)\n'
-        'Cells: $uniqueCells • Success: ${(avgSuccessRate * 100).toStringAsFixed(0)}% • '
-        'Freshness: ${(freshness * 100).toStringAsFixed(0)}%\n'
-        'Repeaters: ${repeaterIds.length} • Pings: $totalPings';
+    final shareText = l10n.analyticsShareText(
+      '$score',
+      grade,
+      '$uniqueCells',
+      (avgSuccessRate * 100).toStringAsFixed(0),
+      (freshness * 100).toStringAsFixed(0),
+      '${repeaterIds.length}',
+      '$totalPings',
+    );
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -194,24 +207,27 @@ class _CoverageScoreTab extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
-                    'Coverage Score',
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                  Text(
+                    l10n.analyticsCoverageScore,
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _scoreStat('Cells', '$uniqueCells'),
+                      _scoreStat(l10n.analyticsStatCells, '$uniqueCells'),
                       _scoreStat(
-                        'Success',
+                        l10n.analyticsStatSuccess,
                         '${(avgSuccessRate * 100).toStringAsFixed(0)}%',
                       ),
                       _scoreStat(
-                        'Fresh',
+                        l10n.analyticsStatFresh,
                         '${(freshness * 100).toStringAsFixed(0)}%',
                       ),
-                      _scoreStat('Repeaters', '${repeaterIds.length}'),
+                      _scoreStat(
+                        l10n.analyticsStatRepeaters,
+                        '${repeaterIds.length}',
+                      ),
                     ],
                   ),
                 ],
@@ -226,24 +242,35 @@ class _CoverageScoreTab extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'How it\'s calculated',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Score = Unique Cells × Success Rate × Freshness',
-                    style: TextStyle(fontFamily: 'monospace', fontSize: 12),
+                  Text(
+                    l10n.analyticsHowCalculated,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '• $uniqueCells cells × ${avgSuccessRate.toStringAsFixed(2)} × ${freshness.toStringAsFixed(2)} = $score',
+                    l10n.analyticsScoreFormula,
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.analyticsScoreBreakdown(
+                      '$uniqueCells',
+                      avgSuccessRate.toStringAsFixed(2),
+                      freshness.toStringAsFixed(2),
+                      '$score',
+                    ),
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
-                    '• Freshness: <1d=100%, <7d=80%, <30d=50%, older=20%',
-                    style: TextStyle(fontSize: 11, color: Colors.grey),
+                  Text(
+                    l10n.analyticsFreshnessLegend,
+                    style: const TextStyle(fontSize: 11, color: Colors.grey),
                   ),
                 ],
               ),
@@ -253,7 +280,7 @@ class _CoverageScoreTab extends StatelessWidget {
           ElevatedButton.icon(
             onPressed: () => Share.share(shareText),
             icon: const Icon(Icons.share, size: 18),
-            label: const Text('Share Score'),
+            label: Text(l10n.analyticsShareScore),
           ),
         ],
       ),
@@ -283,14 +310,12 @@ class _TimeOfDayTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final pingSamples = samples.where((s) => s.pingSuccess != null).toList();
 
     if (pingSamples.isEmpty) {
-      return const Center(
-        child: Text(
-          'No ping data yet.\nDo some wardriving first!',
-          textAlign: TextAlign.center,
-        ),
+      return Center(
+        child: Text(l10n.analyticsNoPingData, textAlign: TextAlign.center),
       );
     }
 
@@ -327,10 +352,10 @@ class _TimeOfDayTab extends StatelessWidget {
 
     // Period breakdown
     final periods = {
-      'Night (0-6)': _periodRate(pingSamples, 0, 6),
-      'Morning (6-12)': _periodRate(pingSamples, 6, 12),
-      'Afternoon (12-18)': _periodRate(pingSamples, 12, 18),
-      'Evening (18-24)': _periodRate(pingSamples, 18, 24),
+      l10n.analyticsPeriodNight: _periodRate(pingSamples, 0, 6),
+      l10n.analyticsPeriodMorning: _periodRate(pingSamples, 6, 12),
+      l10n.analyticsPeriodAfternoon: _periodRate(pingSamples, 12, 18),
+      l10n.analyticsPeriodEvening: _periodRate(pingSamples, 18, 24),
     };
 
     return SingleChildScrollView(
@@ -338,13 +363,13 @@ class _TimeOfDayTab extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Success Rate by Hour',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          Text(
+            l10n.analyticsSuccessRateByHour,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           Text(
-            '${pingSamples.length} pings analyzed',
+            l10n.analyticsPingsAnalyzed(pingSamples.length),
             style: const TextStyle(fontSize: 12, color: Colors.grey),
           ),
           const SizedBox(height: 16),
@@ -363,7 +388,11 @@ class _TimeOfDayTab extends StatelessWidget {
                       final count = counts[h]!;
                       if (rate < 0) return null;
                       return BarTooltipItem(
-                        '${h.toString().padLeft(2, '0')}:00\n${(rate * 100).toStringAsFixed(0)}% ($count pings)',
+                        l10n.analyticsHourTooltip(
+                          '${h.toString().padLeft(2, '0')}:00',
+                          (rate * 100).toStringAsFixed(0),
+                          l10n.analyticsPingsCount(count),
+                        ),
                         const TextStyle(color: Colors.white, fontSize: 11),
                       );
                     },
@@ -439,33 +468,39 @@ class _TimeOfDayTab extends StatelessWidget {
           const SizedBox(height: 24),
           // Summary
           if (bestHour != null) ...[
-            const Text(
-              'Summary',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            Text(
+              l10n.analyticsSummary,
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             _summaryRow(
-              'Best hour',
-              '${bestHour.toString().padLeft(2, '0')}:00 — ${(rates[bestHour]! * 100).toStringAsFixed(0)}%',
+              l10n.analyticsBestHour,
+              l10n.analyticsHourValue(
+                bestHour.toString().padLeft(2, '0'),
+                (rates[bestHour]! * 100).toStringAsFixed(0),
+              ),
               Colors.green,
             ),
             _summaryRow(
-              'Worst hour',
-              '${worstHour.toString().padLeft(2, '0')}:00 — ${(rates[worstHour]! * 100).toStringAsFixed(0)}%',
+              l10n.analyticsWorstHour,
+              l10n.analyticsHourValue(
+                worstHour.toString().padLeft(2, '0'),
+                (rates[worstHour]! * 100).toStringAsFixed(0),
+              ),
               Colors.red,
             ),
             const SizedBox(height: 16),
           ],
-          const Text(
-            'By Period',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+          Text(
+            l10n.analyticsByPeriod,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           ...periods.entries.map((e) {
             final rate = e.value;
             final label = rate != null
                 ? '${(rate * 100).toStringAsFixed(0)}%'
-                : 'No data';
+                : l10n.analyticsNoData;
             final color = rate == null
                 ? Colors.grey
                 : rate > 0.7
@@ -560,6 +595,7 @@ class _CoverageGoalTabState extends State<_CoverageGoalTab> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (_loading) return const Center(child: CircularProgressIndicator());
 
     if (!_hasGoal) {
@@ -571,21 +607,24 @@ class _CoverageGoalTabState extends State<_CoverageGoalTab> {
             children: [
               const Icon(Icons.flag_outlined, size: 64, color: Colors.grey),
               const SizedBox(height: 16),
-              const Text(
-                'No coverage goal set',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              Text(
+                l10n.analyticsNoCoverageGoal,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Set a target area to track your wardriving progress.',
+              Text(
+                l10n.analyticsSetGoalHint,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey),
+                style: const TextStyle(color: Colors.grey),
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 onPressed: _setGoal,
                 icon: const Icon(Icons.add_location),
-                label: const Text('Set Goal Area'),
+                label: Text(l10n.analyticsSetGoalArea),
               ),
             ],
           ),
@@ -603,12 +642,15 @@ class _CoverageGoalTabState extends State<_CoverageGoalTab> {
         children: [
           Row(
             children: [
-              const Text(
-                'Coverage Goal',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              Text(
+                l10n.analyticsCoverageGoal,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const Spacer(),
-              TextButton(onPressed: _setGoal, child: const Text('Edit')),
+              TextButton(onPressed: _setGoal, child: Text(l10n.analyticsEdit)),
               TextButton(
                 onPressed: () async {
                   await _settings.clearGoal();
@@ -617,13 +659,19 @@ class _CoverageGoalTabState extends State<_CoverageGoalTab> {
                     _goalLon = null;
                   });
                 },
-                child: const Text('Clear', style: TextStyle(color: Colors.red)),
+                child: Text(
+                  l10n.settingsClear,
+                  style: const TextStyle(color: Colors.red),
+                ),
               ),
             ],
           ),
           Text(
-            'Center: ${_goalLat!.toStringAsFixed(4)}, ${_goalLon!.toStringAsFixed(4)}\n'
-            'Radius: ${_formatRadius(_goalRadiusMeters)}',
+            l10n.analyticsGoalCenterRadius(
+              _goalLat!.toStringAsFixed(4),
+              _goalLon!.toStringAsFixed(4),
+              _formatRadius(l10n, _goalRadiusMeters),
+            ),
             style: const TextStyle(fontSize: 12, color: Colors.grey),
           ),
           const SizedBox(height: 24),
@@ -663,9 +711,12 @@ class _CoverageGoalTabState extends State<_CoverageGoalTab> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const Text(
-                        'covered',
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      Text(
+                        l10n.analyticsCovered,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
                       ),
                     ],
                   ),
@@ -675,19 +726,26 @@ class _CoverageGoalTabState extends State<_CoverageGoalTab> {
           ),
           const SizedBox(height: 24),
           // Stats
-          _goalStatRow('Total cells in area', '${goalResult.totalCells}'),
           _goalStatRow(
-            'Covered (>0% success)',
+            l10n.analyticsTotalCellsInArea,
+            '${goalResult.totalCells}',
+          ),
+          _goalStatRow(
+            l10n.analyticsCoveredAboveZero,
             '${goalResult.coveredCells}',
             Colors.green,
           ),
           _goalStatRow(
-            'Partial (<30% success)',
+            l10n.analyticsPartialBelow30,
             '${goalResult.partialCells}',
             Colors.orange,
           ),
-          _goalStatRow('Uncovered', '${goalResult.uncoveredCells}', Colors.red),
-          _goalStatRow('Pings in area', '${goalResult.pingsInArea}'),
+          _goalStatRow(
+            l10n.analyticsUncovered,
+            '${goalResult.uncoveredCells}',
+            Colors.red,
+          ),
+          _goalStatRow(l10n.analyticsPingsInArea, '${goalResult.pingsInArea}'),
         ],
       ),
     );
@@ -812,71 +870,76 @@ class _CoverageGoalTabState extends State<_CoverageGoalTab> {
     }
   }
 
-  String _formatRadius(double meters) {
+  String _formatRadius(AppLocalizations l10n, double meters) {
     if (meters >= 1609) {
-      return '${(meters / 1609.34).toStringAsFixed(1)} miles';
+      return l10n.analyticsRadiusMiles((meters / 1609.34).toStringAsFixed(1));
     }
-    return '${meters.toStringAsFixed(0)} m';
+    return l10n.analyticsRadiusMeters(meters.toStringAsFixed(0));
   }
 
   Future<void> _setGoal() async {
-    final radiusOptions = [
-      {'label': '1 mile', 'meters': 1609.34},
-      {'label': '5 miles', 'meters': 8046.72},
-      {'label': '10 miles', 'meters': 16093.4},
-      {'label': '25 miles', 'meters': 40233.6},
-    ];
-
     double selectedRadius = _goalRadiusMeters;
     final useCurrentPos = widget.currentPosition != null;
 
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Set Coverage Goal'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (useCurrentPos)
-                const Text(
-                  'Center: Your current GPS location',
-                  style: TextStyle(fontSize: 13),
-                )
-              else
+      builder: (context) {
+        final l10n = AppLocalizations.of(context);
+        final radiusOptions = [
+          {'label': l10n.analyticsMile1, 'meters': 1609.34},
+          {'label': l10n.analyticsMiles5, 'meters': 8046.72},
+          {'label': l10n.analyticsMiles10, 'meters': 16093.4},
+          {'label': l10n.analyticsMiles25, 'meters': 40233.6},
+        ];
+        return StatefulBuilder(
+          builder: (context, setDialogState) => AlertDialog(
+            title: Text(l10n.analyticsSetCoverageGoal),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (useCurrentPos)
+                  Text(
+                    l10n.analyticsCenterCurrentGps,
+                    style: const TextStyle(fontSize: 13),
+                  )
+                else
+                  Text(
+                    l10n.analyticsCenterCoords(
+                      (_goalLat ?? 0).toStringAsFixed(4),
+                      (_goalLon ?? 0).toStringAsFixed(4),
+                    ),
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                const SizedBox(height: 16),
                 Text(
-                  'Center: ${(_goalLat ?? 0).toStringAsFixed(4)}, ${(_goalLon ?? 0).toStringAsFixed(4)}',
-                  style: const TextStyle(fontSize: 13),
+                  l10n.analyticsRadiusLabel,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-              const SizedBox(height: 16),
-              const Text(
-                'Radius:',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                ...radiusOptions.map(
+                  (opt) => RadioListTile<double>(
+                    title: Text(opt['label'] as String),
+                    value: opt['meters'] as double,
+                    groupValue: selectedRadius,
+                    onChanged: (v) => setDialogState(() => selectedRadius = v!),
+                    dense: true,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(l10n.settingsCancel),
               ),
-              ...radiusOptions.map(
-                (opt) => RadioListTile<double>(
-                  title: Text(opt['label'] as String),
-                  value: opt['meters'] as double,
-                  groupValue: selectedRadius,
-                  onChanged: (v) => setDialogState(() => selectedRadius = v!),
-                  dense: true,
-                ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text(l10n.analyticsSetGoal),
               ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Set Goal'),
-            ),
-          ],
-        ),
-      ),
+        );
+      },
     );
 
     if (confirmed == true) {
@@ -1049,14 +1112,15 @@ class _CoverageComparisonTabState extends State<_CoverageComparisonTab> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (_loading) return const Center(child: CircularProgressIndicator());
 
     if (_sessions.length < 2) {
-      return const Center(
+      return Center(
         child: Text(
-          'Need at least 2 completed sessions\nwith ping data to compare.',
+          l10n.analyticsNeedTwoSessions,
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.grey),
+          style: const TextStyle(color: Colors.grey),
         ),
       );
     }
@@ -1066,13 +1130,13 @@ class _CoverageComparisonTabState extends State<_CoverageComparisonTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Compare Sessions',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          Text(
+            l10n.analyticsCompareSessions,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           _sessionPicker(
-            'Session A (baseline)',
+            l10n.analyticsSessionABaseline,
             _sessionA,
             (s) => setState(() {
               _sessionA = s;
@@ -1081,7 +1145,7 @@ class _CoverageComparisonTabState extends State<_CoverageComparisonTab> {
           ),
           const SizedBox(height: 8),
           _sessionPicker(
-            'Session B (compare)',
+            l10n.analyticsSessionBCompare,
             _sessionB,
             (s) => setState(() {
               _sessionB = s;
@@ -1098,7 +1162,7 @@ class _CoverageComparisonTabState extends State<_CoverageComparisonTab> {
                   ? _compare
                   : null,
               icon: const Icon(Icons.compare_arrows),
-              label: const Text('Compare'),
+              label: Text(l10n.analyticsTabCompare),
             ),
           ),
           if (_result != null) ...[
@@ -1106,35 +1170,63 @@ class _CoverageComparisonTabState extends State<_CoverageComparisonTab> {
             const Divider(),
             const SizedBox(height: 12),
             // Side-by-side stats
-            _compRow('Samples', '${_result!.samplesA}', '${_result!.samplesB}'),
             _compRow(
-              'Success Rate',
+              l10n.analyticsSamples,
+              '${_result!.samplesA}',
+              '${_result!.samplesB}',
+            ),
+            _compRow(
+              l10n.analyticsSuccessRate,
               '${(_result!.rateA * 100).toStringAsFixed(0)}%',
               '${(_result!.rateB * 100).toStringAsFixed(0)}%',
               delta: _result!.rateB - _result!.rateA,
             ),
             _compRow(
-              'Repeaters',
+              l10n.analyticsStatRepeaters,
               '${_result!.repeatersA}',
               '${_result!.repeatersB}',
               delta: (_result!.repeatersB - _result!.repeatersA).toDouble(),
             ),
             _compRow(
-              'Distance',
-              '${(_result!.distanceA / 1609.34).toStringAsFixed(1)} mi',
-              '${(_result!.distanceB / 1609.34).toStringAsFixed(1)} mi',
+              l10n.analyticsDistance,
+              l10n.analyticsDistanceMiles(
+                (_result!.distanceA / 1609.34).toStringAsFixed(1),
+              ),
+              l10n.analyticsDistanceMiles(
+                (_result!.distanceB / 1609.34).toStringAsFixed(1),
+              ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Coverage Changes',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            Text(
+              l10n.analyticsCoverageChanges,
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            _changeRow('New coverage', _result!.newCells, Colors.green),
-            _changeRow('Lost coverage', _result!.lostCells, Colors.red),
-            _changeRow('Improved (>10%)', _result!.improved, Colors.lightGreen),
-            _changeRow('Degraded (>10%)', _result!.degraded, Colors.orange),
-            _changeRow('Unchanged', _result!.unchanged, Colors.grey),
+            _changeRow(
+              l10n.analyticsNewCoverage,
+              _result!.newCells,
+              Colors.green,
+            ),
+            _changeRow(
+              l10n.analyticsLostCoverage,
+              _result!.lostCells,
+              Colors.red,
+            ),
+            _changeRow(
+              l10n.analyticsImproved,
+              _result!.improved,
+              Colors.lightGreen,
+            ),
+            _changeRow(
+              l10n.analyticsDegraded,
+              _result!.degraded,
+              Colors.orange,
+            ),
+            _changeRow(
+              l10n.analyticsUnchanged,
+              _result!.unchanged,
+              Colors.grey,
+            ),
           ],
         ],
       ),
@@ -1146,7 +1238,9 @@ class _CoverageComparisonTabState extends State<_CoverageComparisonTab> {
     WSession? selected,
     void Function(WSession) onPicked,
   ) {
-    final fmt = DateFormat('MMM d, h:mm a');
+    final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
+    final fmt = DateFormat.MMMd(locale).add_jm();
     return InkWell(
       onTap: () async {
         final picked = await showDialog<WSession>(
@@ -1158,8 +1252,11 @@ class _CoverageComparisonTabState extends State<_CoverageComparisonTab> {
                   (s) => SimpleDialogOption(
                     onPressed: () => Navigator.pop(context, s),
                     child: Text(
-                      '${fmt.format(s.startTime)} — ${s.pingCount} pings, '
-                      '${(s.successRate * 100).toStringAsFixed(0)}%',
+                      l10n.analyticsSessionOption(
+                        fmt.format(s.startTime),
+                        l10n.analyticsPingsCount(s.pingCount),
+                        (s.successRate * 100).toStringAsFixed(0),
+                      ),
                     ),
                   ),
                 )
@@ -1179,7 +1276,10 @@ class _CoverageComparisonTabState extends State<_CoverageComparisonTab> {
             Expanded(
               child: Text(
                 selected != null
-                    ? '${fmt.format(selected.startTime)} — ${selected.pingCount} pings'
+                    ? l10n.analyticsSessionSelected(
+                        fmt.format(selected.startTime),
+                        l10n.analyticsPingsCount(selected.pingCount),
+                      )
                     : label,
                 style: TextStyle(
                   color: selected != null ? null : Colors.grey,
@@ -1314,6 +1414,7 @@ class _RepeaterReliabilityTabState extends State<_RepeaterReliabilityTab> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     // Group samples by repeater (path)
     final Map<String, List<Sample>> byRepeater = {};
     for (final s in widget.samples) {
@@ -1324,11 +1425,11 @@ class _RepeaterReliabilityTabState extends State<_RepeaterReliabilityTab> {
     }
 
     if (byRepeater.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
-          'No repeater data yet.\nDo some wardriving first!',
+          l10n.analyticsNoRepeaterData,
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.grey),
+          style: const TextStyle(color: Colors.grey),
         ),
       );
     }
@@ -1361,32 +1462,38 @@ class _RepeaterReliabilityTabState extends State<_RepeaterReliabilityTab> {
           child: Row(
             children: [
               Text(
-                '${stats.length} repeaters',
+                l10n.analyticsRepeaterCount(stats.length),
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const Spacer(),
-              const Text('Sort: ', style: TextStyle(fontSize: 12)),
+              Text(l10n.analyticsSort, style: const TextStyle(fontSize: 12)),
               DropdownButton<String>(
                 value: _sortBy,
                 isDense: true,
-                items: const [
+                items: [
                   DropdownMenuItem(
                     value: 'reliability',
-                    child: Text('Reliability', style: TextStyle(fontSize: 12)),
+                    child: Text(
+                      l10n.analyticsSortReliability,
+                      style: const TextStyle(fontSize: 12),
+                    ),
                   ),
                   DropdownMenuItem(
                     value: 'responseTime',
                     child: Text(
-                      'Response Time',
-                      style: TextStyle(fontSize: 12),
+                      l10n.analyticsSortResponseTime,
+                      style: const TextStyle(fontSize: 12),
                     ),
                   ),
                   DropdownMenuItem(
                     value: 'pings',
-                    child: Text('Ping Count', style: TextStyle(fontSize: 12)),
+                    child: Text(
+                      l10n.analyticsSortPingCount,
+                      style: const TextStyle(fontSize: 12),
+                    ),
                   ),
                 ],
                 onChanged: (v) => setState(() => _sortBy = v!),
@@ -1406,6 +1513,8 @@ class _RepeaterReliabilityTabState extends State<_RepeaterReliabilityTab> {
   }
 
   Widget _buildRepeaterCard(_RepeaterStats stats) {
+    final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
     final displayId = stats.id.length > 8
         ? stats.id.substring(0, 8).toUpperCase()
         : stats.id.toUpperCase();
@@ -1472,26 +1581,33 @@ class _RepeaterReliabilityTabState extends State<_RepeaterReliabilityTab> {
             const SizedBox(height: 8),
             Row(
               children: [
-                _miniStat('Pings', '${stats.totalPings}'),
+                _miniStat(l10n.analyticsMiniPings, '${stats.totalPings}'),
                 _miniStat(
-                  'Avg Response',
+                  l10n.analyticsMiniAvgResponse,
                   stats.avgResponseMs != null
-                      ? '${stats.avgResponseMs!.toStringAsFixed(0)} ms'
+                      ? l10n.analyticsAvgResponseMs(
+                          stats.avgResponseMs!.toStringAsFixed(0),
+                        )
                       : '—',
                 ),
                 _miniStat(
-                  'Consistency',
+                  l10n.analyticsMiniConsistency,
                   stats.consistencyScore != null
                       ? stats.consistencyScore!.toStringAsFixed(0)
                       : '—',
                 ),
-                _miniStat('Trend', stats.trend),
+                _miniStat(
+                  l10n.analyticsMiniTrend,
+                  l10n.analyticsTrend(stats.trend),
+                ),
               ],
             ),
             const SizedBox(height: 4),
             Text(
-              'First seen: ${DateFormat('MMM d').format(stats.firstSeen)} • '
-              'Last: ${DateFormat('MMM d').format(stats.lastSeen)}',
+              l10n.analyticsFirstLastSeen(
+                DateFormat.MMMd(locale).format(stats.firstSeen),
+                DateFormat.MMMd(locale).format(stats.lastSeen),
+              ),
               style: const TextStyle(fontSize: 10, color: Colors.grey),
             ),
           ],

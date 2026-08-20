@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../l10n/generated/app_localizations.dart';
 
 /// Tropospheric ducting forecast viewer using dxinfocentre.com forecast maps.
 class DuctingForecastScreen extends StatefulWidget {
@@ -13,31 +14,31 @@ class DuctingForecastScreen extends StatefulWidget {
 class _DuctingForecastScreenState extends State<DuctingForecastScreen> {
   static const _regionKey = 'ducting_forecast_region';
 
-  static const Map<String, String> _regions = {
-    'wam': 'Western North America',
-    'eam': 'Eastern North America',
-    'enp': 'Eastern North Pacific',
-    'esp': 'Eastern South Pacific',
-    'car': 'Gulf-Caribbean',
-    'nsa': 'Northern South America',
-    'sam': 'Central South America',
-    'sat': 'South Atlantic',
-    'nat': 'North Atlantic',
-    'ent': 'Eastern North Atlantic',
-    'nwe': 'Northwestern Europe',
-    'eur': 'Europe',
-    'eeu': 'Eastern Europe',
-    'afi': 'South Africa',
-    'mid': 'Middle East',
-    'nca': 'North Central Asia',
-    'ino': 'Indian Ocean',
-    'sea': 'Southeast Asia',
-    'eas': 'Far East',
-    'nea': 'Eastern Siberia',
-    'aus': 'Australia & New Zealand',
-    'oce': 'Oceania',
-    'wnp': 'Western North Pacific',
-  };
+  static const List<String> _regionCodes = [
+    'wam',
+    'eam',
+    'enp',
+    'esp',
+    'car',
+    'nsa',
+    'sam',
+    'sat',
+    'nat',
+    'ent',
+    'nwe',
+    'eur',
+    'eeu',
+    'afi',
+    'mid',
+    'nca',
+    'ino',
+    'sea',
+    'eas',
+    'nea',
+    'aus',
+    'oce',
+    'wnp',
+  ];
 
   // 3h intervals for first 36h, then 6h intervals to 138h
   static const List<int> _forecastHours = [
@@ -84,7 +85,7 @@ class _DuctingForecastScreenState extends State<DuctingForecastScreen> {
   Future<void> _loadRegion() async {
     final prefs = await SharedPreferences.getInstance();
     final saved = prefs.getString(_regionKey);
-    if (saved != null && _regions.containsKey(saved)) {
+    if (saved != null && _regionCodes.contains(saved)) {
       setState(() => _region = saved);
     }
   }
@@ -103,12 +104,67 @@ class _DuctingForecastScreenState extends State<DuctingForecastScreen> {
     return 'https://www.dxinfocentre.com/tr_map/fcst/$_region$hours.png';
   }
 
-  String get _timeLabel {
+  String _timeLabel(AppLocalizations l10n) {
     final hours = _forecastHours[_currentIndex];
-    if (hours < 24) return '+${hours}h';
+    if (hours < 24) return l10n.ductingTimeHours(hours);
     final days = hours ~/ 24;
     final rem = hours % 24;
-    return rem == 0 ? '+${days}d' : '+${days}d ${rem}h';
+    return rem == 0
+        ? l10n.ductingTimeDays(days)
+        : l10n.ductingTimeDaysHours(days, rem);
+  }
+
+  String _regionName(AppLocalizations l10n, String code) {
+    switch (code) {
+      case 'wam':
+        return l10n.ductingRegionWam;
+      case 'eam':
+        return l10n.ductingRegionEam;
+      case 'enp':
+        return l10n.ductingRegionEnp;
+      case 'esp':
+        return l10n.ductingRegionEsp;
+      case 'car':
+        return l10n.ductingRegionCar;
+      case 'nsa':
+        return l10n.ductingRegionNsa;
+      case 'sam':
+        return l10n.ductingRegionSam;
+      case 'sat':
+        return l10n.ductingRegionSat;
+      case 'nat':
+        return l10n.ductingRegionNat;
+      case 'ent':
+        return l10n.ductingRegionEnt;
+      case 'nwe':
+        return l10n.ductingRegionNwe;
+      case 'eur':
+        return l10n.ductingRegionEur;
+      case 'eeu':
+        return l10n.ductingRegionEeu;
+      case 'afi':
+        return l10n.ductingRegionAfi;
+      case 'mid':
+        return l10n.ductingRegionMid;
+      case 'nca':
+        return l10n.ductingRegionNca;
+      case 'ino':
+        return l10n.ductingRegionIno;
+      case 'sea':
+        return l10n.ductingRegionSea;
+      case 'eas':
+        return l10n.ductingRegionEas;
+      case 'nea':
+        return l10n.ductingRegionNea;
+      case 'aus':
+        return l10n.ductingRegionAus;
+      case 'oce':
+        return l10n.ductingRegionOce;
+      case 'wnp':
+        return l10n.ductingRegionWnp;
+      default:
+        return code;
+    }
   }
 
   void _play() {
@@ -131,13 +187,14 @@ class _DuctingForecastScreenState extends State<DuctingForecastScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tropo Ducting Forecast'),
+        title: Text(l10n.ductingTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.open_in_new),
-            tooltip: 'Open in browser',
+            tooltip: l10n.ductingOpenInBrowser,
             onPressed: () {
               final page = _region == 'eam' ? 'tropo' : 'tropo_$_region';
               final url = Uri.parse('https://dxinfocentre.com/$page.html');
@@ -153,21 +210,21 @@ class _DuctingForecastScreenState extends State<DuctingForecastScreen> {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
             child: DropdownButtonFormField<String>(
               initialValue: _region,
-              decoration: const InputDecoration(
-                labelText: 'Region',
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(
+              decoration: InputDecoration(
+                labelText: l10n.ductingRegion,
+                border: const OutlineInputBorder(),
+                contentPadding: const EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 8,
                 ),
               ),
               isExpanded: true,
-              items: _regions.entries
+              items: _regionCodes
                   .map(
-                    (e) => DropdownMenuItem(
-                      value: e.key,
+                    (code) => DropdownMenuItem(
+                      value: code,
                       child: Text(
-                        e.value,
+                        _regionName(l10n, code),
                         style: const TextStyle(fontSize: 14),
                       ),
                     ),
@@ -189,11 +246,11 @@ class _DuctingForecastScreenState extends State<DuctingForecastScreen> {
                   if (progress == null) return child;
                   return const Center(child: CircularProgressIndicator());
                 },
-                errorBuilder: (ctx, error, stack) => const Center(
+                errorBuilder: (ctx, error, stack) => Center(
                   child: Text(
-                    'Failed to load forecast image.\nCheck internet connection.',
+                    l10n.ductingFailedToLoad,
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey),
+                    style: const TextStyle(color: Colors.grey),
                   ),
                 ),
               ),
@@ -208,7 +265,7 @@ class _DuctingForecastScreenState extends State<DuctingForecastScreen> {
                 Row(
                   children: [
                     Text(
-                      _timeLabel,
+                      _timeLabel(l10n),
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -216,7 +273,10 @@ class _DuctingForecastScreenState extends State<DuctingForecastScreen> {
                     ),
                     const Spacer(),
                     Text(
-                      '${_currentIndex + 1} / ${_forecastHours.length}',
+                      l10n.ductingFrameIndex(
+                        _currentIndex + 1,
+                        _forecastHours.length,
+                      ),
                       style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
@@ -289,21 +349,21 @@ class _DuctingForecastScreenState extends State<DuctingForecastScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _legendDot(const Color(0xFF00AA00), 'None'),
-                _legendDot(Colors.yellow, 'Marginal'),
-                _legendDot(Colors.orange, 'Moderate'),
-                _legendDot(Colors.red, 'High'),
-                _legendDot(Colors.purple, 'Extreme'),
+                _legendDot(const Color(0xFF00AA00), l10n.ductingLegendNone),
+                _legendDot(Colors.yellow, l10n.ductingLegendMarginal),
+                _legendDot(Colors.orange, l10n.ductingLegendModerate),
+                _legendDot(Colors.red, l10n.ductingLegendHigh),
+                _legendDot(Colors.purple, l10n.ductingLegendExtreme),
               ],
             ),
           ),
 
           // Attribution
-          const Padding(
-            padding: EdgeInsets.only(bottom: 8),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
             child: Text(
-              'Forecast © William R. Hepburn — dxinfocentre.com',
-              style: TextStyle(fontSize: 10, color: Colors.grey),
+              l10n.ductingAttribution,
+              style: const TextStyle(fontSize: 10, color: Colors.grey),
             ),
           ),
         ],
