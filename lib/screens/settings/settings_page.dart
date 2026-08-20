@@ -100,7 +100,7 @@ extension _SettingsPageNavigation on _MapScreenState {
               await _requestWifiScanThrottlingDisabled();
             }
           },
-          onOpenLocationQuality: () => _openLocationQualitySettings(context),
+          onOpenLocationQuality: () => _showLocationQualitySettings(context),
           onRadioPositionChanged: (value) async {
             _updateMapState(() => _showRadioPosition = value);
             setPageState(() {});
@@ -244,8 +244,96 @@ extension _SettingsPageNavigation on _MapScreenState {
       _SettingsCategory(
         title: l10n.settingsSectionAppDevice,
         icon: Icons.tune,
-        builder: (context, setPageState) =>
-            _buildAppDeviceSettings(context, setPageState),
+        builder: (context, setPageState) => buildAppDeviceSettings(
+          context,
+          values: AppDeviceSettingsValues(
+            deviceName: _settingsService.getDeviceName(),
+            keepScreenOn: _keepScreenOn,
+            batterySaverEnabled: _batterySaverEnabled,
+            lockRotationNorth: _lockRotationNorth,
+            currentLocationMarkerStyle: _currentLocationMarkerStyle,
+            interfaceThemeDescription: _getInterfaceThemeModeText(),
+            mapThemeDescription: _getMapThemeModeText(),
+            localePreferenceDescription: _getAppLocalePreferenceText(),
+            loraConnected: _loraConnected,
+            repeaterCount: _repeaters.length,
+            colorMode: _colorMode,
+            distanceUnit: _distanceUnit,
+            fuelUnit: _fuelUnit,
+            colorBlindMode: _colorBlindMode,
+          ),
+          onDeviceNameChanged: (value) async {
+            await _settingsService.setDeviceName(value);
+            setPageState(() {});
+          },
+          onKeepScreenOnChanged: (value) async {
+            _updateMapState(() => _keepScreenOn = value);
+            setPageState(() {});
+            await _settingsService.setKeepScreenOn(value);
+            await ScreenWakeService.instance.setAlwaysOn(value);
+          },
+          onBatterySaverChanged: (value) async {
+            _updateMapState(() => _batterySaverEnabled = value);
+            setPageState(() {});
+            await _settingsService.setBatterySaverEnabled(value);
+            _locationService.setBatterySaverEnabled(value);
+          },
+          onLockRotationNorthChanged: (value) async {
+            _updateMapState(() {
+              _lockRotationNorth = value;
+              if (value) _followHeading = false;
+            });
+            if (value) _mapController.rotate(0);
+            setPageState(() {});
+            await _settingsService.setLockRotationNorth(value);
+          },
+          onCurrentLocationMarkerStyleChanged: (value) async {
+            _updateMapState(() {
+              _currentLocationMarkerStyle = value;
+              if (value == CurrentLocationMarkerStyle.circle) {
+                _followHeading = false;
+              }
+            });
+            if (value == CurrentLocationMarkerStyle.circle) {
+              _mapController.rotate(0);
+            }
+            setPageState(() {});
+            _syncCompassSubscription();
+            await _settingsService.setCurrentLocationMarkerStyle(value);
+          },
+          onCalibrateCompass: () =>
+              _openCompassCalibration(snoozeOnDismiss: false),
+          onSelectInterfaceTheme: _showInterfaceThemeSelector,
+          onSelectMapTheme: _showMapThemeSelector,
+          onSelectLanguage: _showLanguageSelector,
+          onScanForRepeaters: _scanForRepeaters,
+          onRefreshContacts: _refreshContacts,
+          onColorModeChanged: (value) async {
+            _updateMapState(() => _colorMode = value);
+            setPageState(() {});
+            await _settingsService.setColorMode(value);
+          },
+          onDistanceUnitChanged: (value) async {
+            _updateMapState(() {
+              _distanceUnit = value;
+              _totalDistance = value == 'miles'
+                  ? _locationService.totalDistanceMiles
+                  : _locationService.totalDistanceKm;
+            });
+            setPageState(() {});
+            await _settingsService.setDistanceUnit(value);
+          },
+          onFuelUnitChanged: (value) async {
+            _updateMapState(() => _fuelUnit = value);
+            setPageState(() {});
+            await _settingsService.setFuelUnit(value);
+          },
+          onColorBlindModeChanged: (value) async {
+            _updateMapState(() => _colorBlindMode = value);
+            setPageState(() {});
+            await _settingsService.setColorBlindMode(value);
+          },
+        ),
       ),
       _SettingsCategory(
         title: l10n.settingsSectionOnlineMap,
@@ -282,8 +370,94 @@ extension _SettingsPageNavigation on _MapScreenState {
       _SettingsCategory(
         title: l10n.settingsSectionDataManagement,
         icon: Icons.storage_outlined,
-        builder: (context, setPageState) =>
-            _buildDataManagementSettings(context, setPageState),
+        builder: (context, setPageState) => buildDataManagementSettings(
+          context,
+          values: DataManagementSettingsValues(
+            communityCoverageAvailable: _communityCoverage != null,
+            sessionFiltered: _sessionMapView.isFiltered,
+            includeOnlyRepeaters: _includeOnlyRepeaters,
+            activeSourceFilter: _activeSourceFilter,
+            plannedMarkerCount: _plannedMarkers.length,
+            privacyZoneCount: _privacyZones.length,
+          ),
+          onOpenAnalytics: () => Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (context) => AnalyticsScreen(
+                samples: _samples,
+                coveragePrecision: _coveragePrecision,
+                currentPosition: _currentPosition,
+              ),
+            ),
+          ),
+          onOpenAchievements: () => Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (context) => const AchievementsScreen(),
+            ),
+          ),
+          onOpenDeviceComparison: () => Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (context) => const DeviceComparisonScreen(),
+            ),
+          ),
+          onDownloadCommunityCoverage: _downloadCommunityCoverage,
+          onOpenSessionHistory: _openSessionHistory,
+          onClearSessionFilter: () {
+            _updateMapState(() {
+              _sessionMapView = const SessionMapView.all();
+            });
+            setPageState(() {});
+            _mapDataController.invalidate();
+            _loadSamples();
+            _showSnackBar(l10n.settingsSessionFilterCleared);
+          },
+          onExportData: _exportData,
+          onImportData: _importData,
+          onShareCoverageMap: _shareCoverageMap,
+          onOpenRepeaterFilter: _showRepeaterFilterPicker,
+          onClearRepeaterFilter: () async {
+            _updateMapState(() => _includeOnlyRepeaters = null);
+            await _settingsService.setIncludeOnlyRepeaters(null);
+            setPageState(() {});
+            _loadSamples();
+            _showSnackBar(l10n.settingsRepeaterFilterCleared);
+          },
+          onOpenSourceFilter: () => _selectSourceFilter(context, setPageState),
+          onClearSourceFilter: () {
+            _updateMapState(() => _activeSourceFilter = null);
+            setPageState(() {});
+            _mapDataController.invalidate();
+            _loadSamples();
+            _showSnackBar(l10n.settingsSourceFilterCleared);
+          },
+          onFindCoverageGaps: () {
+            _closeSettingsPages(context);
+            _findCoverageGaps();
+          },
+          onEnableDeleteMode: () {
+            _closeSettingsPages(context);
+            _updateMapState(() => _deleteMode = true);
+            _showSnackBar(l10n.settingsDeleteModeOn);
+          },
+          onClearPlannedMarkers: () =>
+              _clearPlannedMarkers(context, setPageState),
+          onAddPrivacyZone: () async {
+            final center = _currentPosition ?? _mapController.camera.center;
+            await _addPrivacyZone(center);
+            setPageState(() {});
+          },
+          onClearPrivacyZones: () => _clearPrivacyZones(context, setPageState),
+          onClearMap: _clearData,
+          onDownloadOfflineTiles: _showOfflineTileDownload,
+          onClearTileCache: () async {
+            final store = _tileCacheStore;
+            if (store == null) return;
+            await store.clean();
+            _showSnackBar(l10n.settingsTileCacheCleared);
+          },
+        ),
       ),
       _SettingsCategory(
         title: l10n.settingsSectionBackup,
@@ -409,6 +583,175 @@ extension _SettingsPageNavigation on _MapScreenState {
       vehicleMpg: await _settingsService.getVehicleMpg(),
       gasPricePerGallon: await _settingsService.getGasPrice(),
     );
+  }
+
+  Future<void> _showLocationQualitySettings(BuildContext context) async {
+    await _loadImpossibleZones();
+    if (!context.mounted) return;
+    await showLocationQualitySettings(
+      context,
+      settings: () => _locationQualitySettings,
+      zones: () => _impossibleZones,
+      newZoneCenter: () => _currentPosition ?? _mapController.camera.center,
+      onSettingsChanged: (settings) async {
+        await _settingsService.setLocationQualitySettings(settings);
+        if (!mounted) return;
+        _updateMapState(() => _locationQualitySettings = settings);
+        _locationService.setLocationQualitySettings(settings);
+      },
+      onResetSettings: () async {
+        const settings = LocationQualitySettings();
+        await _settingsService.setLocationQualitySettings(settings);
+        if (!mounted) return;
+        _updateMapState(() => _locationQualitySettings = settings);
+        _locationService.setLocationQualitySettings(settings);
+        _showSnackBar(
+          AppLocalizations.of(this.context).settingsLocationQualityResetSnack,
+        );
+      },
+      onAddZone: (draft) async {
+        await _databaseService.addImpossibleZone(
+          draft.center.latitude,
+          draft.center.longitude,
+          draft.radiusMeters,
+          draft.label,
+        );
+        await _loadImpossibleZones();
+        if (!mounted) return;
+        _showSnackBar(
+          AppLocalizations.of(this.context).settingsImpossibleZoneAdded,
+        );
+      },
+      onDeleteZone: (id) async {
+        await _databaseService.deleteImpossibleZone(id);
+        await _loadImpossibleZones();
+      },
+      onClearZones: () async {
+        for (final zone in _impossibleZones) {
+          final id = zone.id;
+          if (id != null) await _databaseService.deleteImpossibleZone(id);
+        }
+        await _loadImpossibleZones();
+      },
+    );
+  }
+
+  Future<void> _selectSourceFilter(
+    BuildContext context,
+    StateSetter setPageState,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final sources = await _databaseService.getDistinctSources();
+    if (sources.isEmpty) {
+      _showSnackBar(l10n.settingsNoSourceTaggedData);
+      return;
+    }
+    if (!context.mounted) return;
+    final picked = await showDialog<String>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: Text(AppLocalizations.of(context).settingsFilterBySource),
+        children: [
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(context, null),
+            child: Text(
+              AppLocalizations.of(context).settingsShowAll,
+              style: const TextStyle(fontStyle: FontStyle.italic),
+            ),
+          ),
+          for (final source in sources)
+            SimpleDialogOption(
+              onPressed: () => Navigator.pop(context, source),
+              child: Text(source),
+            ),
+        ],
+      ),
+    );
+    if (!context.mounted) return;
+    if (picked == null && _activeSourceFilter == null) return;
+    _updateMapState(() => _activeSourceFilter = picked);
+    setPageState(() {});
+    _mapDataController.invalidate();
+    _loadSamples();
+    _showSnackBar(
+      picked == null
+          ? l10n.settingsSourceFilterCleared
+          : l10n.settingsShowingDataFrom(picked),
+    );
+  }
+
+  Future<void> _clearPlannedMarkers(
+    BuildContext context,
+    StateSetter setPageState,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context).settingsClearAllMarkers),
+        content: Text(
+          AppLocalizations.of(context).settingsClearAllMarkersConfirm,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(AppLocalizations.of(context).settingsCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              AppLocalizations.of(context).settingsClear,
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    for (final marker in _plannedMarkers) {
+      await _databaseService.deleteMarker(marker['id'] as int);
+    }
+    await _loadMarkers();
+    if (!context.mounted) return;
+    setPageState(() {});
+    _showSnackBar(l10n.settingsAllMarkersCleared);
+  }
+
+  Future<void> _clearPrivacyZones(
+    BuildContext context,
+    StateSetter setPageState,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context).settingsClearPrivacyZones),
+        content: Text(
+          AppLocalizations.of(context).settingsClearPrivacyZonesConfirm,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(AppLocalizations.of(context).settingsCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              AppLocalizations.of(context).settingsClear,
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    for (final zone in _privacyZones) {
+      await _databaseService.deletePrivacyZone(zone['id'] as int);
+    }
+    await _loadPrivacyZones();
+    if (!context.mounted) return;
+    setPageState(() {});
+    _showSnackBar(l10n.settingsPrivacyZonesCleared);
   }
 
   void _openSettingsCategory(BuildContext context, _SettingsCategory category) {
