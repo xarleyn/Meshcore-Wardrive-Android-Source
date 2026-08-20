@@ -52,6 +52,7 @@ that file to your Android device and install it.
 - **Settings Icon** (top right): Access display options
 
 ### Settings Options
+The app language (System / English / Русский) is under Settings → App & device.
 - **Show Samples**: Toggle individual GPS point visibility
 - **Show Edges**: Toggle repeater connection lines
 - **Radio position estimate**: After at least three positioned repeaters answer

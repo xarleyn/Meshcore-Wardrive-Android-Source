@@ -4455,6 +4455,10 @@
   "@notificationCarpeaterActive": {
     "description": "Steady foreground notification text in Carpeater mode"
   },
+  "notificationStopTracking": "Stop Tracking",
+  "@notificationStopTracking": {
+    "description": "Foreground notification action button that stops location tracking"
+  },
   "locationPermissionDenied": "Location permission was denied.",
   "@locationPermissionDenied": {
     "description": "User-visible error when location permission is denied"

@@ -5368,6 +5368,12 @@ abstract class AppLocalizations {
   /// **'Carpeater mode active'**
   String get notificationCarpeaterActive;
 
+  /// Foreground notification action button that stops location tracking
+  ///
+  /// In en, this message translates to:
+  /// **'Stop Tracking'**
+  String get notificationStopTracking;
+
   /// User-visible error when location permission is denied
   ///
   /// In en, this message translates to:

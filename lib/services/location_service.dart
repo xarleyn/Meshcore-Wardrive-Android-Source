@@ -174,6 +174,9 @@ class LocationService {
     await FlutterForegroundTask.updateService(
       notificationTitle: l10n.notificationBrandTitle,
       notificationText: text(l10n),
+      notificationButtons: [
+        NotificationButton(id: 'stop', text: l10n.notificationStopTracking),
+      ],
     );
   }
 
@@ -616,7 +619,7 @@ class LocationService {
         notificationTitle: l10n.notificationBrandTitle,
         notificationText: l10n.notificationTrackingActive,
         notificationButtons: [
-          const NotificationButton(id: 'stop', text: 'Stop Tracking'),
+          NotificationButton(id: 'stop', text: l10n.notificationStopTracking),
         ],
         callback:
             null, // We handle location in Flutter, not in service callback

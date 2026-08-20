@@ -3268,6 +3268,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get notificationCarpeaterActive => 'Режим Carpeater активен';
 
   @override
+  String get notificationStopTracking => 'Остановить';
+
+  @override
   String get locationPermissionDenied => 'Разрешение на геолокацию отклонено.';
 
   @override

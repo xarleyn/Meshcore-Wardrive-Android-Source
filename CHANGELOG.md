@@ -3,6 +3,8 @@
 ## Unreleased
 
 ### Added
+- In-app language (System / English / Русский) under Settings → App & device;
+  Russian UI.
 - **Impossible Zones** in Location Quality Filters: user-defined circles
   where you cannot physically be. GPS or Wi-Fi fixes inside a zone are
   discarded (no sample, no ping) and the map keeps the last valid

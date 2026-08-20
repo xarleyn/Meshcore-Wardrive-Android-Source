@@ -3210,6 +3210,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationCarpeaterActive => 'Carpeater mode active';
 
   @override
+  String get notificationStopTracking => 'Stop Tracking';
+
+  @override
   String get locationPermissionDenied => 'Location permission was denied.';
 
   @override

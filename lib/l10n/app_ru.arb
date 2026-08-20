@@ -875,6 +875,7 @@
   "notificationCarpeaterNoNeighbours": "Carpeater: нет соседей",
   "notificationCarpeaterNeighboursFound": "Carpeater: найдено соседей — {count}",
   "notificationCarpeaterActive": "Режим Carpeater активен",
+  "notificationStopTracking": "Остановить",
   "locationPermissionDenied": "Разрешение на геолокацию отклонено.",
   "locationPermissionPermanentlyDenied": "Разрешение на геолокацию запрещено навсегда. Включите его в настройках Android.",
   "locationServicesDisabled": "Службы геолокации Android отключены.",
