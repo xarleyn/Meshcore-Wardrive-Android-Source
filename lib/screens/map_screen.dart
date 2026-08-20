@@ -40,6 +40,8 @@ import 'map/layers/repeater_layer.dart';
 import 'map/layers/route_trail_layer.dart';
 import 'map/layers/sample_cluster_layer.dart';
 import 'map/layers/sample_heatmap_layer.dart';
+import 'map/dialogs/appearance_dialogs.dart';
+import 'map/dialogs/connection_dialogs.dart';
 import 'map/dialogs/coverage_tools_dialogs.dart';
 import 'map/dialogs/map_entity_dialogs.dart';
 import 'map/dialogs/map_workflow_dialogs.dart';
@@ -1687,31 +1689,14 @@ class _MapScreenState extends State<MapScreen> {
 
         if (latestVersion != appVersion) {
           if (!mounted) return;
-          showDialog(
+          final shouldDownload = await showDialog<bool>(
             context: context,
-            builder: (context) {
-              final l10n = AppLocalizations.of(context);
-              return AlertDialog(
-                title: Text(l10n.mapUpdateAvailable),
-                content: Text(
-                  l10n.mapUpdateAvailableBody(latestVersion, appVersion),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(l10n.compassLater),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      _openGitHub();
-                    },
-                    child: Text(l10n.mapDownload),
-                  ),
-                ],
-              );
-            },
+            builder: (context) => UpdateAvailableDialog(
+              latestVersion: latestVersion,
+              currentVersion: appVersion,
+            ),
           );
+          if (shouldDownload == true) await _openGitHub();
         } else {
           if (!mounted) return;
           _showSnackBar(AppLocalizations.of(context).mapOnLatestVersion);
@@ -1836,36 +1821,17 @@ class _MapScreenState extends State<MapScreen> {
 
         // Ask if user wants to share
         if (!mounted) return;
-        showDialog(
+        final shouldShare = await showDialog<bool>(
           context: context,
-          builder: (context) => AlertDialog(
-            title: Text(AppLocalizations.of(context).mapScreenshotSavedTitle),
-            content: Text(
-              AppLocalizations.of(context).mapShareScreenshotPrompt,
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(AppLocalizations.of(context).mapNo),
-              ),
-              TextButton(
-                onPressed: () async {
-                  final shareText = AppLocalizations.of(
-                    context,
-                  ).mapScreenshotShareText;
-                  Navigator.pop(context);
-                  // Save temp file and share
-                  final tempDir = await getTemporaryDirectory();
-                  final file = File('${tempDir.path}/meshcore_screenshot.png');
-                  await file.writeAsBytes(imageBytes);
-                  if (!mounted) return;
-                  await Share.shareXFiles([XFile(file.path)], text: shareText);
-                },
-                child: Text(AppLocalizations.of(context).mapYes),
-              ),
-            ],
-          ),
+          builder: (context) => const ShareScreenshotDialog(),
         );
+        if (shouldShare != true || !mounted) return;
+        final shareText = AppLocalizations.of(context).mapScreenshotShareText;
+        final tempDir = await getTemporaryDirectory();
+        final file = File('${tempDir.path}/meshcore_screenshot.png');
+        await file.writeAsBytes(imageBytes);
+        if (!mounted) return;
+        await Share.shareXFiles([XFile(file.path)], text: shareText);
       } else {
         if (!mounted) return;
         _showSnackBar(AppLocalizations.of(context).mapFailedToSaveScreenshot);
@@ -2325,53 +2291,19 @@ class _MapScreenState extends State<MapScreen> {
     return (nodeId.length > 8 ? nodeId.substring(0, 8) : nodeId).toUpperCase();
   }
 
-  void _showConnectionDialog() {
-    showDialog(
+  void _showConnectionDialog() async {
+    final method = await showDialog<ConnectionMethod>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context).mapConnectLoraDevice),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              AppLocalizations.of(context).mapChooseConnectionMethod,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.pop(context);
-                _connectUsb();
-              },
-              icon: const Icon(Icons.usb),
-              label: Text(AppLocalizations.of(context).mapScanUsbDevices),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 40),
-              ),
-            ),
-            const SizedBox(height: 8),
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.pop(context);
-                _connectBluetooth();
-              },
-              icon: const Icon(Icons.bluetooth),
-              label: Text(AppLocalizations.of(context).mapScanBluetooth),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 40),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context).mapClose),
-          ),
-        ],
-      ),
+      builder: (context) => const ConnectionMethodDialog(),
     );
+    switch (method) {
+      case ConnectionMethod.usb:
+        await _connectUsb();
+      case ConnectionMethod.bluetooth:
+        await _connectBluetooth();
+      case null:
+        return;
+    }
   }
 
   Future<void> _connectUsb() async {
@@ -2389,26 +2321,7 @@ class _MapScreenState extends State<MapScreen> {
 
       final selected = await showDialog<UsbDevice>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: Text(AppLocalizations.of(context).mapSelectUsbDevice),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: devices.map((device) {
-              return ListTile(
-                title: Text(
-                  device.productName ??
-                      AppLocalizations.of(context).mapUsbDeviceFallback,
-                ),
-                subtitle: Text(
-                  AppLocalizations.of(
-                    context,
-                  ).mapVidPid('${device.vid}', '${device.pid}'),
-                ),
-                onTap: () => Navigator.pop(context, device),
-              );
-            }).toList(),
-          ),
-        ),
+        builder: (context) => UsbDeviceDialog(devices: devices),
       );
 
       if (selected != null) {
@@ -2498,20 +2411,7 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _disconnectLoRa() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context).mapDisconnectLoraDevice),
-        content: Text(AppLocalizations.of(context).mapDisconnectConfirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(AppLocalizations.of(context).settingsCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(AppLocalizations.of(context).mapDisconnect),
-          ),
-        ],
-      ),
+      builder: (context) => const DisconnectDeviceDialog(),
     );
 
     if (confirmed == true) {
@@ -2659,32 +2559,7 @@ class _MapScreenState extends State<MapScreen> {
 
     final selected = await showDialog<ThemeMode>(
       context: context,
-      builder: (context) {
-        final l10n = AppLocalizations.of(context);
-        return AlertDialog(
-          title: Text(l10n.settingsChooseInterfaceTheme),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: Text(l10n.settingsThemeLight),
-                leading: const Icon(Icons.light_mode),
-                onTap: () => Navigator.pop(context, ThemeMode.light),
-              ),
-              ListTile(
-                title: Text(l10n.settingsThemeDark),
-                leading: const Icon(Icons.dark_mode),
-                onTap: () => Navigator.pop(context, ThemeMode.dark),
-              ),
-              ListTile(
-                title: Text(l10n.settingsThemeSystemDefault),
-                leading: const Icon(Icons.brightness_auto),
-                onTap: () => Navigator.pop(context, ThemeMode.system),
-              ),
-            ],
-          ),
-        );
-      },
+      builder: (context) => const InterfaceThemeDialog(),
     );
 
     if (selected != null) {
@@ -2711,32 +2586,7 @@ class _MapScreenState extends State<MapScreen> {
 
     final selected = await showDialog<AppLocalePreference>(
       context: context,
-      builder: (context) {
-        final l10n = AppLocalizations.of(context);
-        return AlertDialog(
-          title: Text(l10n.languagePickerTitle),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: Text(l10n.languageSystem),
-                leading: const Icon(Icons.brightness_auto),
-                onTap: () => Navigator.pop(context, AppLocalePreference.system),
-              ),
-              ListTile(
-                title: Text(l10n.languageEnglish),
-                leading: const Icon(Icons.language),
-                onTap: () => Navigator.pop(context, AppLocalePreference.en),
-              ),
-              ListTile(
-                title: Text(l10n.languageRussian),
-                leading: const Icon(Icons.language),
-                onTap: () => Navigator.pop(context, AppLocalePreference.ru),
-              ),
-            ],
-          ),
-        );
-      },
+      builder: (context) => const AppLocaleDialog(),
     );
 
     if (selected != null) {
@@ -2771,32 +2621,7 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _showMapThemeSelector() async {
     final selected = await showDialog<MapThemeMode>(
       context: context,
-      builder: (context) {
-        final l10n = AppLocalizations.of(context);
-        return AlertDialog(
-          title: Text(l10n.settingsChooseMapTheme),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: Text(l10n.settingsThemeLight),
-                leading: const Icon(Icons.light_mode),
-                onTap: () => Navigator.pop(context, MapThemeMode.light),
-              ),
-              ListTile(
-                title: Text(l10n.settingsThemeDark),
-                leading: const Icon(Icons.dark_mode),
-                onTap: () => Navigator.pop(context, MapThemeMode.dark),
-              ),
-              ListTile(
-                title: Text(l10n.settingsThemeSystemDefault),
-                leading: const Icon(Icons.brightness_auto),
-                onTap: () => Navigator.pop(context, MapThemeMode.system),
-              ),
-            ],
-          ),
-        );
-      },
+      builder: (context) => const MapThemeDialog(),
     );
 
     if (selected != null) {

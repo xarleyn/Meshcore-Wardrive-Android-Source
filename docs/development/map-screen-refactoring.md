@@ -94,6 +94,7 @@ cohesive 200-400 line file over many tiny single-use wrappers.
 - [x] Extract permission, session, export, and settings-import decisions with
   typed results.
 - [x] Extract repeater-filter and coverage-gap dialogs with typed results.
+- [x] Extract connection, appearance, update, and screenshot decisions.
 - [ ] Extract the remaining workflow dialogs.
 - [x] Return typed results from repeater and endpoint dialogs instead of
   mutating screen state directly.

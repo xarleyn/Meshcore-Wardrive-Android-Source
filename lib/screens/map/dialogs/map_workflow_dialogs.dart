@@ -236,3 +236,56 @@ class ImportSettingsConfirmationDialog extends StatelessWidget {
     );
   }
 }
+
+class UpdateAvailableDialog extends StatelessWidget {
+  const UpdateAvailableDialog({
+    required this.latestVersion,
+    required this.currentVersion,
+    super.key,
+  });
+
+  final String latestVersion;
+  final String currentVersion;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(l10n.mapUpdateAvailable),
+      content: Text(l10n.mapUpdateAvailableBody(latestVersion, currentVersion)),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: Text(l10n.compassLater),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: Text(l10n.mapDownload),
+        ),
+      ],
+    );
+  }
+}
+
+class ShareScreenshotDialog extends StatelessWidget {
+  const ShareScreenshotDialog({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(l10n.mapScreenshotSavedTitle),
+      content: Text(l10n.mapShareScreenshotPrompt),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: Text(l10n.mapNo),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: Text(l10n.mapYes),
+        ),
+      ],
+    );
+  }
+}
