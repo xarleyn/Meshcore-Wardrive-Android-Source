@@ -5121,6 +5121,288 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unlocked {date}'**
   String achievementsUnlockedOn(String date);
+
+  /// Map snackbar when an achievement unlocks
+  ///
+  /// In en, this message translates to:
+  /// **'🏆 Achievement unlocked: {icon} {title}'**
+  String achievementsUnlockedSnackbar(String icon, String title);
+
+  /// Title for the first_ping achievement
+  ///
+  /// In en, this message translates to:
+  /// **'First Ping'**
+  String get achievementFirstPingTitle;
+
+  /// Description for the first_ping achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Send your first ping'**
+  String get achievementFirstPingDescription;
+
+  /// Title for the pings_100 achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Century'**
+  String get achievementPings100Title;
+
+  /// Description for the pings_100 achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Send 100 pings'**
+  String get achievementPings100Description;
+
+  /// Title for the pings_1000 achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Kilopinger'**
+  String get achievementPings1000Title;
+
+  /// Description for the pings_1000 achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Send 1,000 pings'**
+  String get achievementPings1000Description;
+
+  /// Title for the pings_10000 achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Ping Lord'**
+  String get achievementPings10000Title;
+
+  /// Description for the pings_10000 achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Send 10,000 pings'**
+  String get achievementPings10000Description;
+
+  /// Title for the first_repeater achievement
+  ///
+  /// In en, this message translates to:
+  /// **'First Contact'**
+  String get achievementFirstRepeaterTitle;
+
+  /// Description for the first_repeater achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Discover your first repeater'**
+  String get achievementFirstRepeaterDescription;
+
+  /// Title for the repeaters_10 achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Network Explorer'**
+  String get achievementRepeaters10Title;
+
+  /// Description for the repeaters_10 achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Discover 10 repeaters'**
+  String get achievementRepeaters10Description;
+
+  /// Title for the repeaters_50 achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Mesh Master'**
+  String get achievementRepeaters50Title;
+
+  /// Description for the repeaters_50 achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Discover 50 repeaters'**
+  String get achievementRepeaters50Description;
+
+  /// Title for the miles_10 achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Road Warrior'**
+  String get achievementMiles10Title;
+
+  /// Description for the miles_10 achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Drive 10 miles wardriving'**
+  String get achievementMiles10Description;
+
+  /// Title for the miles_100 achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Highway Hero'**
+  String get achievementMiles100Title;
+
+  /// Description for the miles_100 achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Drive 100 miles wardriving'**
+  String get achievementMiles100Description;
+
+  /// Title for the miles_500 achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Cross Country'**
+  String get achievementMiles500Title;
+
+  /// Description for the miles_500 achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Drive 500 miles wardriving'**
+  String get achievementMiles500Description;
+
+  /// Title for the cells_50 achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Area Scout'**
+  String get achievementCells50Title;
+
+  /// Description for the cells_50 achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Cover 50 unique cells'**
+  String get achievementCells50Description;
+
+  /// Title for the cells_500 achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Territory King'**
+  String get achievementCells500Title;
+
+  /// Description for the cells_500 achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Cover 500 unique cells'**
+  String get achievementCells500Description;
+
+  /// Title for the first_session achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Getting Started'**
+  String get achievementFirstSessionTitle;
+
+  /// Description for the first_session achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your first session'**
+  String get achievementFirstSessionDescription;
+
+  /// Title for the sessions_50 achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Dedicated Driver'**
+  String get achievementSessions50Title;
+
+  /// Description for the sessions_50 achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Complete 50 sessions'**
+  String get achievementSessions50Description;
+
+  /// Foreground notification title; keep identical across locales
+  ///
+  /// In en, this message translates to:
+  /// **'MeshCore Wardrive'**
+  String get notificationBrandTitle;
+
+  /// Android notification channel name for location tracking
+  ///
+  /// In en, this message translates to:
+  /// **'MeshCore Wardrive Location Tracking'**
+  String get notificationChannelName;
+
+  /// Android notification channel description for location tracking
+  ///
+  /// In en, this message translates to:
+  /// **'This notification appears when location tracking is active'**
+  String get notificationChannelDescription;
+
+  /// Foreground notification text when tracking starts
+  ///
+  /// In en, this message translates to:
+  /// **'Location tracking active'**
+  String get notificationTrackingActive;
+
+  /// Foreground notification text while a ping is in flight
+  ///
+  /// In en, this message translates to:
+  /// **'Pinging...'**
+  String get notificationPinging;
+
+  /// Foreground notification text when a ping is heard
+  ///
+  /// In en, this message translates to:
+  /// **'✅ Heard by {id}'**
+  String notificationHeardBy(String id);
+
+  /// Fallback node label in the heard-by notification
+  ///
+  /// In en, this message translates to:
+  /// **'repeater'**
+  String get notificationRepeaterFallback;
+
+  /// Foreground notification text when a ping times out
+  ///
+  /// In en, this message translates to:
+  /// **'❌ No response'**
+  String get notificationNoResponse;
+
+  /// Foreground notification live session stats
+  ///
+  /// In en, this message translates to:
+  /// **'✅ {rate}% | 📍 {count} pings | 🛣️ {distance}mi'**
+  String notificationLiveStats(String rate, int count, String distance);
+
+  /// Foreground notification when Carpeater finds no neighbours
+  ///
+  /// In en, this message translates to:
+  /// **'Carpeater: No neighbours'**
+  String get notificationCarpeaterNoNeighbours;
+
+  /// Foreground notification when Carpeater finds neighbours
+  ///
+  /// In en, this message translates to:
+  /// **'Carpeater: {count} neighbours found'**
+  String notificationCarpeaterNeighboursFound(int count);
+
+  /// Steady foreground notification text in Carpeater mode
+  ///
+  /// In en, this message translates to:
+  /// **'Carpeater mode active'**
+  String get notificationCarpeaterActive;
+
+  /// User-visible error when location permission is denied
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission was denied.'**
+  String get locationPermissionDenied;
+
+  /// User-visible error when location permission is denied forever
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission is permanently denied. Enable it in Android settings.'**
+  String get locationPermissionPermanentlyDenied;
+
+  /// User-visible error when Android location services are off
+  ///
+  /// In en, this message translates to:
+  /// **'Android location services are disabled.'**
+  String get locationServicesDisabled;
+
+  /// User-visible error when tracking fails to start
+  ///
+  /// In en, this message translates to:
+  /// **'Could not start Android location tracking: {error}'**
+  String locationTrackingStartFailed(String error);
+
+  /// Home widget status while a session is recording
+  ///
+  /// In en, this message translates to:
+  /// **'Tracking'**
+  String get widgetStatusTracking;
+
+  /// Home widget status while not recording
+  ///
+  /// In en, this message translates to:
+  /// **'Idle'**
+  String get widgetStatusIdle;
 }
 
 class _AppLocalizationsDelegate

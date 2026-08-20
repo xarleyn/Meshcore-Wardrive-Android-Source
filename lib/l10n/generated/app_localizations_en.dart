@@ -3074,4 +3074,160 @@ class AppLocalizationsEn extends AppLocalizations {
   String achievementsUnlockedOn(String date) {
     return 'Unlocked $date';
   }
+
+  @override
+  String achievementsUnlockedSnackbar(String icon, String title) {
+    return '🏆 Achievement unlocked: $icon $title';
+  }
+
+  @override
+  String get achievementFirstPingTitle => 'First Ping';
+
+  @override
+  String get achievementFirstPingDescription => 'Send your first ping';
+
+  @override
+  String get achievementPings100Title => 'Century';
+
+  @override
+  String get achievementPings100Description => 'Send 100 pings';
+
+  @override
+  String get achievementPings1000Title => 'Kilopinger';
+
+  @override
+  String get achievementPings1000Description => 'Send 1,000 pings';
+
+  @override
+  String get achievementPings10000Title => 'Ping Lord';
+
+  @override
+  String get achievementPings10000Description => 'Send 10,000 pings';
+
+  @override
+  String get achievementFirstRepeaterTitle => 'First Contact';
+
+  @override
+  String get achievementFirstRepeaterDescription =>
+      'Discover your first repeater';
+
+  @override
+  String get achievementRepeaters10Title => 'Network Explorer';
+
+  @override
+  String get achievementRepeaters10Description => 'Discover 10 repeaters';
+
+  @override
+  String get achievementRepeaters50Title => 'Mesh Master';
+
+  @override
+  String get achievementRepeaters50Description => 'Discover 50 repeaters';
+
+  @override
+  String get achievementMiles10Title => 'Road Warrior';
+
+  @override
+  String get achievementMiles10Description => 'Drive 10 miles wardriving';
+
+  @override
+  String get achievementMiles100Title => 'Highway Hero';
+
+  @override
+  String get achievementMiles100Description => 'Drive 100 miles wardriving';
+
+  @override
+  String get achievementMiles500Title => 'Cross Country';
+
+  @override
+  String get achievementMiles500Description => 'Drive 500 miles wardriving';
+
+  @override
+  String get achievementCells50Title => 'Area Scout';
+
+  @override
+  String get achievementCells50Description => 'Cover 50 unique cells';
+
+  @override
+  String get achievementCells500Title => 'Territory King';
+
+  @override
+  String get achievementCells500Description => 'Cover 500 unique cells';
+
+  @override
+  String get achievementFirstSessionTitle => 'Getting Started';
+
+  @override
+  String get achievementFirstSessionDescription =>
+      'Complete your first session';
+
+  @override
+  String get achievementSessions50Title => 'Dedicated Driver';
+
+  @override
+  String get achievementSessions50Description => 'Complete 50 sessions';
+
+  @override
+  String get notificationBrandTitle => 'MeshCore Wardrive';
+
+  @override
+  String get notificationChannelName => 'MeshCore Wardrive Location Tracking';
+
+  @override
+  String get notificationChannelDescription =>
+      'This notification appears when location tracking is active';
+
+  @override
+  String get notificationTrackingActive => 'Location tracking active';
+
+  @override
+  String get notificationPinging => 'Pinging...';
+
+  @override
+  String notificationHeardBy(String id) {
+    return '✅ Heard by $id';
+  }
+
+  @override
+  String get notificationRepeaterFallback => 'repeater';
+
+  @override
+  String get notificationNoResponse => '❌ No response';
+
+  @override
+  String notificationLiveStats(String rate, int count, String distance) {
+    return '✅ $rate% | 📍 $count pings | 🛣️ ${distance}mi';
+  }
+
+  @override
+  String get notificationCarpeaterNoNeighbours => 'Carpeater: No neighbours';
+
+  @override
+  String notificationCarpeaterNeighboursFound(int count) {
+    return 'Carpeater: $count neighbours found';
+  }
+
+  @override
+  String get notificationCarpeaterActive => 'Carpeater mode active';
+
+  @override
+  String get locationPermissionDenied => 'Location permission was denied.';
+
+  @override
+  String get locationPermissionPermanentlyDenied =>
+      'Location permission is permanently denied. Enable it in Android settings.';
+
+  @override
+  String get locationServicesDisabled =>
+      'Android location services are disabled.';
+
+  @override
+  String locationTrackingStartFailed(String error) {
+    return 'Could not start Android location tracking: $error';
+  }
+
+  @override
+  String get widgetStatusTracking => 'Tracking';
+
+  @override
+  String get widgetStatusIdle => 'Idle';
 }

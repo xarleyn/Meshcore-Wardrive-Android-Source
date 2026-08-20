@@ -34,6 +34,8 @@ class UploadService {
       'https://meshcoretel.io/wardrive/samples';
 
   /// Pick the closest public Meshcoretel endpoint for a fresh install.
+  ///
+  /// Uses the **device** [Platform.localeName], not the in-app UI language.
   static String defaultApiUrlForLocale(String localeName) {
     return localeName.toLowerCase().startsWith('ru')
         ? defaultRuApiUrl

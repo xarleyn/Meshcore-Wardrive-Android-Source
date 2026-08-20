@@ -3128,4 +3128,163 @@ class AppLocalizationsRu extends AppLocalizations {
   String achievementsUnlockedOn(String date) {
     return 'Открыто $date';
   }
+
+  @override
+  String achievementsUnlockedSnackbar(String icon, String title) {
+    return '🏆 Открыто достижение: $icon $title';
+  }
+
+  @override
+  String get achievementFirstPingTitle => 'Первый пинг';
+
+  @override
+  String get achievementFirstPingDescription => 'Отправьте свой первый пинг';
+
+  @override
+  String get achievementPings100Title => 'Сотня';
+
+  @override
+  String get achievementPings100Description => 'Отправьте 100 пингов';
+
+  @override
+  String get achievementPings1000Title => 'Килопингер';
+
+  @override
+  String get achievementPings1000Description => 'Отправьте 1 000 пингов';
+
+  @override
+  String get achievementPings10000Title => 'Повелитель пингов';
+
+  @override
+  String get achievementPings10000Description => 'Отправьте 10 000 пингов';
+
+  @override
+  String get achievementFirstRepeaterTitle => 'Первый контакт';
+
+  @override
+  String get achievementFirstRepeaterDescription =>
+      'Найдите свой первый репитер';
+
+  @override
+  String get achievementRepeaters10Title => 'Исследователь сети';
+
+  @override
+  String get achievementRepeaters10Description => 'Найдите 10 репитеров';
+
+  @override
+  String get achievementRepeaters50Title => 'Мастер меша';
+
+  @override
+  String get achievementRepeaters50Description => 'Найдите 50 репитеров';
+
+  @override
+  String get achievementMiles10Title => 'Дорожный воин';
+
+  @override
+  String get achievementMiles10Description =>
+      'Проедьте 10 миль в режиме вардрайва';
+
+  @override
+  String get achievementMiles100Title => 'Герой трассы';
+
+  @override
+  String get achievementMiles100Description =>
+      'Проедьте 100 миль в режиме вардрайва';
+
+  @override
+  String get achievementMiles500Title => 'Кросс-кантри';
+
+  @override
+  String get achievementMiles500Description =>
+      'Проедьте 500 миль в режиме вардрайва';
+
+  @override
+  String get achievementCells50Title => 'Разведчик территории';
+
+  @override
+  String get achievementCells50Description => 'Покройте 50 уникальных ячеек';
+
+  @override
+  String get achievementCells500Title => 'Король территории';
+
+  @override
+  String get achievementCells500Description => 'Покройте 500 уникальных ячеек';
+
+  @override
+  String get achievementFirstSessionTitle => 'Первые шаги';
+
+  @override
+  String get achievementFirstSessionDescription =>
+      'Завершите свою первую сессию';
+
+  @override
+  String get achievementSessions50Title => 'Преданный водитель';
+
+  @override
+  String get achievementSessions50Description => 'Завершите 50 сессий';
+
+  @override
+  String get notificationBrandTitle => 'MeshCore Wardrive';
+
+  @override
+  String get notificationChannelName =>
+      'Отслеживание геолокации MeshCore Wardrive';
+
+  @override
+  String get notificationChannelDescription =>
+      'Это уведомление отображается при активном отслеживании геолокации';
+
+  @override
+  String get notificationTrackingActive => 'Отслеживание геолокации активно';
+
+  @override
+  String get notificationPinging => 'Пинг...';
+
+  @override
+  String notificationHeardBy(String id) {
+    return '✅ Слышно $id';
+  }
+
+  @override
+  String get notificationRepeaterFallback => 'репитер';
+
+  @override
+  String get notificationNoResponse => '❌ Нет ответа';
+
+  @override
+  String notificationLiveStats(String rate, int count, String distance) {
+    return '✅ $rate% | 📍 $count пингов | 🛣️ $distanceми';
+  }
+
+  @override
+  String get notificationCarpeaterNoNeighbours => 'Carpeater: нет соседей';
+
+  @override
+  String notificationCarpeaterNeighboursFound(int count) {
+    return 'Carpeater: найдено соседей — $count';
+  }
+
+  @override
+  String get notificationCarpeaterActive => 'Режим Carpeater активен';
+
+  @override
+  String get locationPermissionDenied => 'Разрешение на геолокацию отклонено.';
+
+  @override
+  String get locationPermissionPermanentlyDenied =>
+      'Разрешение на геолокацию запрещено навсегда. Включите его в настройках Android.';
+
+  @override
+  String get locationServicesDisabled => 'Службы геолокации Android отключены.';
+
+  @override
+  String locationTrackingStartFailed(String error) {
+    return 'Не удалось начать отслеживание геолокации Android: $error';
+  }
+
+  @override
+  String get widgetStatusTracking => 'Отслеживание';
+
+  @override
+  String get widgetStatusIdle => 'Ожидание';
 }

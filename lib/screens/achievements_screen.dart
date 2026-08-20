@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../l10n/achievement_l10n.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../services/achievement_service.dart';
 
@@ -81,6 +82,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                     itemCount: _achievements.length,
                     itemBuilder: (context, index) {
                       final a = _achievements[index];
+                      final copy = achievementCopy(l10n, a.id);
                       final locale = Localizations.localeOf(context).toString();
                       return ListTile(
                         leading: Text(
@@ -91,7 +93,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                           ),
                         ),
                         title: Text(
-                          a.title,
+                          copy.title,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: a.unlocked ? null : Colors.grey,
@@ -99,8 +101,8 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                         ),
                         subtitle: Text(
                           a.unlocked && a.unlockedAt != null
-                              ? '${a.description}\n${l10n.achievementsUnlockedOn(DateFormat.yMMMd(locale).format(a.unlockedAt!))}'
-                              : a.description,
+                              ? '${copy.description}\n${l10n.achievementsUnlockedOn(DateFormat.yMMMd(locale).format(a.unlockedAt!))}'
+                              : copy.description,
                           style: TextStyle(
                             color: a.unlocked ? null : Colors.grey,
                           ),

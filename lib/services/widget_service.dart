@@ -1,4 +1,8 @@
+import 'package:flutter/widgets.dart';
 import 'package:home_widget/home_widget.dart';
+import '../l10n/app_locale.dart';
+import '../l10n/generated/app_localizations.dart';
+import 'settings_service.dart';
 
 /// Wraps HomeWidget calls to push app state to the Android home screen widget.
 class WidgetService {
@@ -9,6 +13,13 @@ class WidgetService {
     await HomeWidget.setAppGroupId(_appGroupId);
   }
 
+  static Future<AppLocalizations> _l10n() async {
+    return AppLocale.lookup(
+      await SettingsService().getAppLocalePreference(),
+      WidgetsBinding.instance.platformDispatcher.locale,
+    );
+  }
+
   /// Push current stats to the widget.
   static Future<void> update({
     required int sampleCount,
@@ -17,8 +28,12 @@ class WidgetService {
     String successRate = '--',
     String distance = '--',
   }) async {
+    final l10n = await _l10n();
     await HomeWidget.saveWidgetData('samples', sampleCount.toString());
-    await HomeWidget.saveWidgetData('status', isTracking ? 'Tracking' : 'Idle');
+    await HomeWidget.saveWidgetData(
+      'status',
+      isTracking ? l10n.widgetStatusTracking : l10n.widgetStatusIdle,
+    );
     await HomeWidget.saveWidgetData('connection', connectionLabel);
     await HomeWidget.saveWidgetData('success_rate', successRate);
     await HomeWidget.saveWidgetData('distance', distance);
@@ -27,7 +42,11 @@ class WidgetService {
 
   /// Convenience: update only tracking status.
   static Future<void> updateTrackingStatus(bool isTracking) async {
-    await HomeWidget.saveWidgetData('status', isTracking ? 'Tracking' : 'Idle');
+    final l10n = await _l10n();
+    await HomeWidget.saveWidgetData(
+      'status',
+      isTracking ? l10n.widgetStatusTracking : l10n.widgetStatusIdle,
+    );
     await HomeWidget.updateWidget(androidName: _androidWidgetName);
   }
 

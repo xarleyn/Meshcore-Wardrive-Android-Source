@@ -4261,5 +4261,227 @@
         "type": "String"
       }
     }
+  },
+  "achievementsUnlockedSnackbar": "🏆 Achievement unlocked: {icon} {title}",
+  "@achievementsUnlockedSnackbar": {
+    "description": "Map snackbar when an achievement unlocks",
+    "placeholders": {
+      "icon": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "achievementFirstPingTitle": "First Ping",
+  "@achievementFirstPingTitle": {
+    "description": "Title for the first_ping achievement"
+  },
+  "achievementFirstPingDescription": "Send your first ping",
+  "@achievementFirstPingDescription": {
+    "description": "Description for the first_ping achievement"
+  },
+  "achievementPings100Title": "Century",
+  "@achievementPings100Title": {
+    "description": "Title for the pings_100 achievement"
+  },
+  "achievementPings100Description": "Send 100 pings",
+  "@achievementPings100Description": {
+    "description": "Description for the pings_100 achievement"
+  },
+  "achievementPings1000Title": "Kilopinger",
+  "@achievementPings1000Title": {
+    "description": "Title for the pings_1000 achievement"
+  },
+  "achievementPings1000Description": "Send 1,000 pings",
+  "@achievementPings1000Description": {
+    "description": "Description for the pings_1000 achievement"
+  },
+  "achievementPings10000Title": "Ping Lord",
+  "@achievementPings10000Title": {
+    "description": "Title for the pings_10000 achievement"
+  },
+  "achievementPings10000Description": "Send 10,000 pings",
+  "@achievementPings10000Description": {
+    "description": "Description for the pings_10000 achievement"
+  },
+  "achievementFirstRepeaterTitle": "First Contact",
+  "@achievementFirstRepeaterTitle": {
+    "description": "Title for the first_repeater achievement"
+  },
+  "achievementFirstRepeaterDescription": "Discover your first repeater",
+  "@achievementFirstRepeaterDescription": {
+    "description": "Description for the first_repeater achievement"
+  },
+  "achievementRepeaters10Title": "Network Explorer",
+  "@achievementRepeaters10Title": {
+    "description": "Title for the repeaters_10 achievement"
+  },
+  "achievementRepeaters10Description": "Discover 10 repeaters",
+  "@achievementRepeaters10Description": {
+    "description": "Description for the repeaters_10 achievement"
+  },
+  "achievementRepeaters50Title": "Mesh Master",
+  "@achievementRepeaters50Title": {
+    "description": "Title for the repeaters_50 achievement"
+  },
+  "achievementRepeaters50Description": "Discover 50 repeaters",
+  "@achievementRepeaters50Description": {
+    "description": "Description for the repeaters_50 achievement"
+  },
+  "achievementMiles10Title": "Road Warrior",
+  "@achievementMiles10Title": {
+    "description": "Title for the miles_10 achievement"
+  },
+  "achievementMiles10Description": "Drive 10 miles wardriving",
+  "@achievementMiles10Description": {
+    "description": "Description for the miles_10 achievement"
+  },
+  "achievementMiles100Title": "Highway Hero",
+  "@achievementMiles100Title": {
+    "description": "Title for the miles_100 achievement"
+  },
+  "achievementMiles100Description": "Drive 100 miles wardriving",
+  "@achievementMiles100Description": {
+    "description": "Description for the miles_100 achievement"
+  },
+  "achievementMiles500Title": "Cross Country",
+  "@achievementMiles500Title": {
+    "description": "Title for the miles_500 achievement"
+  },
+  "achievementMiles500Description": "Drive 500 miles wardriving",
+  "@achievementMiles500Description": {
+    "description": "Description for the miles_500 achievement"
+  },
+  "achievementCells50Title": "Area Scout",
+  "@achievementCells50Title": {
+    "description": "Title for the cells_50 achievement"
+  },
+  "achievementCells50Description": "Cover 50 unique cells",
+  "@achievementCells50Description": {
+    "description": "Description for the cells_50 achievement"
+  },
+  "achievementCells500Title": "Territory King",
+  "@achievementCells500Title": {
+    "description": "Title for the cells_500 achievement"
+  },
+  "achievementCells500Description": "Cover 500 unique cells",
+  "@achievementCells500Description": {
+    "description": "Description for the cells_500 achievement"
+  },
+  "achievementFirstSessionTitle": "Getting Started",
+  "@achievementFirstSessionTitle": {
+    "description": "Title for the first_session achievement"
+  },
+  "achievementFirstSessionDescription": "Complete your first session",
+  "@achievementFirstSessionDescription": {
+    "description": "Description for the first_session achievement"
+  },
+  "achievementSessions50Title": "Dedicated Driver",
+  "@achievementSessions50Title": {
+    "description": "Title for the sessions_50 achievement"
+  },
+  "achievementSessions50Description": "Complete 50 sessions",
+  "@achievementSessions50Description": {
+    "description": "Description for the sessions_50 achievement"
+  },
+  "notificationBrandTitle": "MeshCore Wardrive",
+  "@notificationBrandTitle": {
+    "description": "Foreground notification title; keep identical across locales"
+  },
+  "notificationChannelName": "MeshCore Wardrive Location Tracking",
+  "@notificationChannelName": {
+    "description": "Android notification channel name for location tracking"
+  },
+  "notificationChannelDescription": "This notification appears when location tracking is active",
+  "@notificationChannelDescription": {
+    "description": "Android notification channel description for location tracking"
+  },
+  "notificationTrackingActive": "Location tracking active",
+  "@notificationTrackingActive": {
+    "description": "Foreground notification text when tracking starts"
+  },
+  "notificationPinging": "Pinging...",
+  "@notificationPinging": {
+    "description": "Foreground notification text while a ping is in flight"
+  },
+  "notificationHeardBy": "✅ Heard by {id}",
+  "@notificationHeardBy": {
+    "description": "Foreground notification text when a ping is heard",
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationRepeaterFallback": "repeater",
+  "@notificationRepeaterFallback": {
+    "description": "Fallback node label in the heard-by notification"
+  },
+  "notificationNoResponse": "❌ No response",
+  "@notificationNoResponse": {
+    "description": "Foreground notification text when a ping times out"
+  },
+  "notificationLiveStats": "✅ {rate}% | 📍 {count} pings | 🛣️ {distance}mi",
+  "@notificationLiveStats": {
+    "description": "Foreground notification live session stats",
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      },
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "notificationCarpeaterNoNeighbours": "Carpeater: No neighbours",
+  "@notificationCarpeaterNoNeighbours": {
+    "description": "Foreground notification when Carpeater finds no neighbours"
+  },
+  "notificationCarpeaterNeighboursFound": "Carpeater: {count} neighbours found",
+  "@notificationCarpeaterNeighboursFound": {
+    "description": "Foreground notification when Carpeater finds neighbours",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notificationCarpeaterActive": "Carpeater mode active",
+  "@notificationCarpeaterActive": {
+    "description": "Steady foreground notification text in Carpeater mode"
+  },
+  "locationPermissionDenied": "Location permission was denied.",
+  "@locationPermissionDenied": {
+    "description": "User-visible error when location permission is denied"
+  },
+  "locationPermissionPermanentlyDenied": "Location permission is permanently denied. Enable it in Android settings.",
+  "@locationPermissionPermanentlyDenied": {
+    "description": "User-visible error when location permission is denied forever"
+  },
+  "locationServicesDisabled": "Android location services are disabled.",
+  "@locationServicesDisabled": {
+    "description": "User-visible error when Android location services are off"
+  },
+  "locationTrackingStartFailed": "Could not start Android location tracking: {error}",
+  "@locationTrackingStartFailed": {
+    "description": "User-visible error when tracking fails to start",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "widgetStatusTracking": "Tracking",
+  "@widgetStatusTracking": {
+    "description": "Home widget status while a session is recording"
+  },
+  "widgetStatusIdle": "Idle",
+  "@widgetStatusIdle": {
+    "description": "Home widget status while not recording"
   }
 }

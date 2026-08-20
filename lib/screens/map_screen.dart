@@ -52,6 +52,7 @@ import 'debug_diagnostics_screen.dart';
 import 'session_history_screen.dart';
 import 'signal_trend_screen.dart';
 import '../main.dart';
+import '../l10n/achievement_l10n.dart';
 import '../l10n/app_locale.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../constants/app_version.dart';
@@ -461,8 +462,10 @@ class _MapScreenState extends State<MapScreen> {
     // Subscribe to achievement unlocks
     AchievementService().unlockStream.listen((achievement) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
+        final copy = achievementCopy(l10n, achievement.id);
         _showSnackBar(
-          '🏆 Achievement unlocked: ${achievement.icon} ${achievement.title}',
+          l10n.achievementsUnlockedSnackbar(achievement.icon, copy.title),
         );
       }
     });
@@ -4007,6 +4010,7 @@ $placemarks  </Document>
 
     if (selected != null) {
       await appState.setAppLocalePreference(selected);
+      await _locationService.refreshNotificationCopy();
     }
   }
 
