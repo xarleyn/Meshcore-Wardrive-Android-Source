@@ -82,3 +82,24 @@ class _UploadEndpointDialogState extends State<UploadEndpointDialog> {
     );
   }
 }
+
+class CommunityCoverageEndpointDialog extends StatelessWidget {
+  const CommunityCoverageEndpointDialog({required this.endpoints, super.key});
+
+  final List<UploadEndpoint> endpoints;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return SimpleDialog(
+      title: Text(l10n.mapDownloadFrom),
+      children: [
+        for (final endpoint in endpoints)
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(context, endpoint),
+            child: Text(endpoint.name),
+          ),
+      ],
+    );
+  }
+}

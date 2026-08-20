@@ -40,6 +40,7 @@ import 'map/layers/repeater_layer.dart';
 import 'map/layers/route_trail_layer.dart';
 import 'map/layers/sample_cluster_layer.dart';
 import 'map/layers/sample_heatmap_layer.dart';
+import 'map/dialogs/coverage_tools_dialogs.dart';
 import 'map/dialogs/map_entity_dialogs.dart';
 import 'map/dialogs/map_workflow_dialogs.dart';
 import 'map/dialogs/marker_dialogs.dart';
@@ -3441,7 +3442,7 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  void _showRepeaterFilterPicker() {
+  void _showRepeaterFilterPicker() async {
     // Collect all known repeater IDs from coverage data and discovered repeaters
     final Set<String> knownIds = {};
     if (_aggregationResult != null) {
@@ -3460,205 +3461,77 @@ class _MapScreenState extends State<MapScreen> {
 
     final sortedIds = knownIds.toList()..sort();
 
-    showDialog(
+    final result = await showDialog<RepeaterFilterResult>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context).mapFilterByRepeater),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: sortedIds.length,
-            itemBuilder: (context, index) {
-              final id = sortedIds[index];
-              final displayId = (id.length > 8 ? id.substring(0, 8) : id)
-                  .toUpperCase();
-              // Find matching repeater for name
-              final repeater = _repeaters.cast<Repeater?>().firstWhere(
-                (r) => r!.id == id,
-                orElse: () => null,
-              );
-              final name = repeater?.name;
-              final isSelected = _includeOnlyRepeaters == id;
-
-              return ListTile(
-                leading: Icon(
-                  Icons.cell_tower,
-                  color: isSelected ? Colors.blue : Colors.purple,
-                ),
-                title: Text(
-                  name ??
-                      AppLocalizations.of(
-                        context,
-                      ).mapRepeaterFallback(displayId),
-                ),
-                subtitle: Text(
-                  displayId,
-                  style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
-                ),
-                trailing: isSelected
-                    ? const Icon(Icons.check_circle, color: Colors.blue)
-                    : null,
-                onTap: () async {
-                  final message = AppLocalizations.of(
-                    context,
-                  ).mapShowingCoverageFrom(displayId);
-                  Navigator.pop(context);
-                  setState(() {
-                    _includeOnlyRepeaters = id;
-                  });
-                  await _settingsService.setIncludeOnlyRepeaters(id);
-                  _loadSamples();
-                  if (!mounted) return;
-                  _showSnackBar(message);
-                },
-              );
-            },
-          ),
-        ),
-        actions: [
-          if (_includeOnlyRepeaters != null &&
-              _includeOnlyRepeaters!.isNotEmpty)
-            TextButton(
-              onPressed: () async {
-                final message = AppLocalizations.of(
-                  context,
-                ).mapRepeaterFilterCleared;
-                Navigator.pop(context);
-                setState(() {
-                  _includeOnlyRepeaters = null;
-                });
-                await _settingsService.setIncludeOnlyRepeaters(null);
-                _loadSamples();
-                if (!mounted) return;
-                _showSnackBar(message);
-              },
-              child: Text(
-                AppLocalizations.of(context).mapClearFilter,
-                style: const TextStyle(color: Colors.red),
-              ),
-            ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context).settingsCancel),
-          ),
-        ],
+      builder: (context) => RepeaterFilterDialog(
+        repeaterIds: sortedIds,
+        repeaters: _repeaters,
+        selectedId: _includeOnlyRepeaters,
       ),
     );
+
+    if (result == null || !mounted) return;
+    final selectedId = result.action == RepeaterFilterAction.clear
+        ? null
+        : result.repeaterId;
+    setState(() => _includeOnlyRepeaters = selectedId);
+    await _settingsService.setIncludeOnlyRepeaters(selectedId);
+    _loadSamples();
+    if (!mounted) return;
+    final l10n = AppLocalizations.of(context);
+    final message = selectedId == null
+        ? l10n.mapRepeaterFilterCleared
+        : l10n.mapShowingCoverageFrom(
+            (selectedId.length > 8 ? selectedId.substring(0, 8) : selectedId)
+                .toUpperCase(),
+          );
+    _showSnackBar(message);
   }
 
-  void _findCoverageGaps() {
+  void _findCoverageGaps() async {
     if (_aggregationResult == null || _aggregationResult!.coverages.isEmpty) {
       _showSnackBar(AppLocalizations.of(context).mapNoCoverageYet);
       return;
     }
 
-    // Find coverage areas with low/zero success rate
-    final gaps = <Coverage>[];
-    for (final cov in _aggregationResult!.coverages) {
-      final total = cov.received + cov.lost;
-      if (total == 0) continue; // Skip GPS-only areas
-      final successRate = cov.received / total;
-      if (successRate < 0.3) {
-        // Less than 30% success = gap
-        gaps.add(cov);
-      }
-    }
-
-    // Sort by success rate (worst first)
-    gaps.sort((a, b) {
-      final aRate = a.received / (a.received + a.lost);
-      final bRate = b.received / (b.received + b.lost);
-      return aRate.compareTo(bRate);
-    });
+    final gaps = coverageGaps(_aggregationResult!.coverages);
 
     if (gaps.isEmpty) {
       _showSnackBar(AppLocalizations.of(context).mapNoCoverageGaps);
       return;
     }
 
-    showDialog(
+    final selected = await showDialog<Coverage>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context).mapCoverageGaps(gaps.length)),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: gaps.length,
-            itemBuilder: (context, index) {
-              final gap = gaps[index];
-              final total = gap.received + gap.lost;
-              final rate = total > 0
-                  ? ((gap.received / total) * 100).toStringAsFixed(0)
-                  : '0';
-              return ListTile(
-                leading: Icon(
-                  Icons.warning,
-                  color: double.parse(rate) == 0 ? Colors.red : Colors.orange,
-                ),
-                title: Text(
-                  AppLocalizations.of(context).mapGapSuccessRate(rate),
-                ),
-                subtitle: Text(
-                  AppLocalizations.of(context).mapGapSubtitle(
-                    '${gap.position.latitude.toStringAsFixed(4)}, '
-                    '${gap.position.longitude.toStringAsFixed(4)}',
-                    gap.received.toStringAsFixed(1),
-                    gap.lost.toStringAsFixed(1),
-                  ),
-                ),
-                onTap: () {
-                  Navigator.pop(context);
-                  _mapController.move(gap.position, 15.0);
-                },
-              );
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context).mapClose),
-          ),
-        ],
-      ),
+      builder: (context) => CoverageGapsDialog(gaps: gaps),
     );
+    if (selected != null) _mapController.move(selected.position, 15.0);
   }
 
   Future<void> _downloadCommunityCoverage() async {
     // Get endpoint to download from
     final endpoints = await _uploadService.getUploadEndpoints();
 
-    String? selectedUrl;
+    UploadEndpoint? selectedEndpoint;
     if (endpoints.length == 1) {
-      selectedUrl = endpoints.first.url;
+      selectedEndpoint = endpoints.first;
     } else {
       // Let user pick which endpoint to download from
       if (!mounted) return;
-      selectedUrl = await showDialog<String>(
+      selectedEndpoint = await showDialog<UploadEndpoint>(
         context: context,
-        builder: (ctx) => SimpleDialog(
-          title: Text(AppLocalizations.of(ctx).mapDownloadFrom),
-          children: endpoints
-              .map(
-                (e) => SimpleDialogOption(
-                  onPressed: () => Navigator.pop(ctx, e.url),
-                  child: Text(e.name),
-                ),
-              )
-              .toList(),
-        ),
+        builder: (context) =>
+            CommunityCoverageEndpointDialog(endpoints: endpoints),
       );
     }
 
-    if (selectedUrl == null) return;
+    if (selectedEndpoint == null) return;
 
     if (!mounted) return;
     _showSnackBar(AppLocalizations.of(context).mapDownloadingCoverage);
 
     final data = await _uploadService.downloadCoverage(
-      selectedUrl,
+      selectedEndpoint.url,
       onProgress: (current, total) {
         // Update snackbar with progress (won't stack, just shows latest)
       },

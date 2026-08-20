@@ -43,4 +43,39 @@ void main() {
     expect(result?.name, 'New name');
     expect(result?.url, 'https://new.example/api');
   });
+
+  testWidgets('community coverage dialog returns a typed endpoint', (
+    tester,
+  ) async {
+    UploadEndpoint? result;
+    const endpoint = UploadEndpoint(
+      name: 'Community',
+      url: 'https://community.example/api',
+    );
+    await pumpWithL10n(
+      tester,
+      Scaffold(
+        body: Builder(
+          builder: (context) => TextButton(
+            onPressed: () async {
+              result = await showDialog<UploadEndpoint>(
+                context: context,
+                builder: (context) => const CommunityCoverageEndpointDialog(
+                  endpoints: [endpoint],
+                ),
+              );
+            },
+            child: const Text('Open'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Community'));
+    await tester.pumpAndSettle();
+
+    expect(result, same(endpoint));
+  });
 }
