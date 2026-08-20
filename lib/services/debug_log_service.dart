@@ -1,5 +1,8 @@
 import 'dart:async';
 
+// Console sink for the in-app debug log viewer.
+// ignore_for_file: avoid_print
+
 /// Service to capture and store debug logs from LoRa device and MQTT
 class DebugLogService {
   static final DebugLogService _instance = DebugLogService._internal();

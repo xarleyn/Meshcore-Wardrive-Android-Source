@@ -3,6 +3,7 @@
 
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 
 /// MeshCore Companion Radio Binary Protocol
 /// Protocol spec: https://github.com/meshcore-dev/MeshCore/blob/main/docs/companion_protocol.md
@@ -410,7 +411,7 @@ class MeshCoreProtocol {
         advLon: advLon,
       );
     } catch (e) {
-      print('Error parsing contact frame: $e');
+      debugPrint('Error parsing contact frame: $e');
       return null;
     }
   }
@@ -456,7 +457,7 @@ class MeshCoreProtocol {
 
       return {'index': index, 'name': name, 'key': key};
     } catch (e) {
-      print('Error parsing channel info frame: $e');
+      debugPrint('Error parsing channel info frame: $e');
       return null;
     }
   }
@@ -612,7 +613,7 @@ class MeshCoreProtocol {
   Map<String, dynamic>? parseRawLogFrame(Uint8List data) {
     try {
       if (data.length < 2) {
-        print('⚠️ Raw log frame too short: ${data.length} bytes');
+        debugPrint('⚠️ Raw log frame too short: ${data.length} bytes');
         return null;
       }
 
@@ -625,7 +626,7 @@ class MeshCoreProtocol {
       int rssi = data[1];
       if (rssi > 127) rssi -= 256; // Convert to signed byte
 
-      print(
+      debugPrint(
         '📻 Raw log frame: SNR=$snr (raw=$snrRaw), RSSI=$rssi, total=${data.length} bytes',
       );
 
@@ -647,7 +648,7 @@ class MeshCoreProtocol {
         // Skip transport codes if present (4 bytes)
         if (hasTransportCodes) {
           if (data.length < offset + 4) {
-            print('  Not enough data for transport codes');
+            debugPrint('  Not enough data for transport codes');
             return {
               'snr': snr,
               'rssi': rssi,
@@ -661,7 +662,7 @@ class MeshCoreProtocol {
 
         // Read path_len (signed byte)
         if (data.length <= offset) {
-          print('  No pathLen byte');
+          debugPrint('  No pathLen byte');
           return {
             'snr': snr,
             'rssi': rssi,
@@ -674,7 +675,7 @@ class MeshCoreProtocol {
         int pathLen = data[offset++];
         // Convert unsigned byte to signed
         if (pathLen > 127) pathLen -= 256;
-        print(
+        debugPrint(
           '  header=0x${header.toRadixString(16)}, routeType=$routeType, hasTransport=$hasTransportCodes, pathLen=$pathLen',
         );
 
@@ -690,20 +691,20 @@ class MeshCoreProtocol {
                 .toRadixString(16)
                 .padLeft(2, '0')
                 .toUpperCase();
-            print(
+            debugPrint(
               '  🎯 FLOOD packet with path! Last hop ($pathLen hops): $repeater',
             );
           } else {
-            print(
+            debugPrint(
               '  Path exists but data too short: pathLen=$pathLen, available=${data.length - offset}',
             );
           }
         } else if (pathLen > 0 && routeType == 0x02) {
           // ROUTE_TYPE_DIRECT
           // Direct routes have full 32-byte keys (not used in wardrive typically)
-          print('  Direct route with full keys (pathLen=$pathLen)');
+          debugPrint('  Direct route with full keys (pathLen=$pathLen)');
         } else if (pathLen == 0 || pathLen < 0) {
-          print('  Zero-hop packet (direct/flood with no path built)');
+          debugPrint('  Zero-hop packet (direct/flood with no path built)');
         }
       }
 
@@ -716,7 +717,7 @@ class MeshCoreProtocol {
         'repeaterKey': repeaterKey,
       };
     } catch (e) {
-      print('Error parsing raw log frame: $e');
+      debugPrint('Error parsing raw log frame: $e');
       return null;
     }
   }
@@ -831,7 +832,7 @@ class MeshCoreProtocol {
   Map<String, dynamic>? parseControlDataPush(Uint8List data) {
     try {
       if (data.length < 3) {
-        print('⚠️ Control data push too short: ${data.length} bytes');
+        debugPrint('⚠️ Control data push too short: ${data.length} bytes');
         return null;
       }
 
@@ -864,7 +865,7 @@ class MeshCoreProtocol {
         'payload': payload,
       };
     } catch (e) {
-      print('Error parsing control data push: $e');
+      debugPrint('Error parsing control data push: $e');
       return null;
     }
   }
@@ -874,7 +875,7 @@ class MeshCoreProtocol {
   Map<String, dynamic>? parseDiscoveryResponse(Uint8List payload) {
     try {
       if (payload.length < 6) {
-        print('⚠️ Discovery response too short: ${payload.length} bytes');
+        debugPrint('⚠️ Discovery response too short: ${payload.length} bytes');
         return null;
       }
 
@@ -886,7 +887,7 @@ class MeshCoreProtocol {
       final nodeType = flags & 0x0F;
 
       if (subType != CONTROL_SUBTYPE_DISCOVER_RESP) {
-        print(
+        debugPrint(
           '⚠️ Not a DISCOVER_RESP: sub_type=0x${subType.toRadixString(16)}',
         );
         return null;
@@ -899,7 +900,7 @@ class MeshCoreProtocol {
 
       // Tag: 4 bytes (little-endian uint32)
       if (payload.length < offset + 4) {
-        print('⚠️ Discovery response: not enough data for tag');
+        debugPrint('⚠️ Discovery response: not enough data for tag');
         return null;
       }
       final tag =
@@ -924,7 +925,7 @@ class MeshCoreProtocol {
         'pubkey_bytes': pubkeyBytes,
       };
     } catch (e) {
-      print('Error parsing discovery response: $e');
+      debugPrint('Error parsing discovery response: $e');
       return null;
     }
   }
@@ -1037,7 +1038,7 @@ class MeshCoreProtocol {
         'firmware_version': firmwareVersion,
       };
     } catch (e) {
-      print('Error parsing login success push: $e');
+      debugPrint('Error parsing login success push: $e');
       return null;
     }
   }
@@ -1114,7 +1115,7 @@ class MeshCoreProtocol {
         'neighbours': neighbours,
       };
     } catch (e) {
-      print('Error parsing binary response neighbours: $e');
+      debugPrint('Error parsing binary response neighbours: $e');
       return null;
     }
   }

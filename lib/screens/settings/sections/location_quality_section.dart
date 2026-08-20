@@ -255,13 +255,21 @@ extension _LocationQualitySettingsSection on _MapScreenState {
                     fontSize: 13,
                   ),
                 ),
-                ...radiusOptions.map(
-                  (opt) => RadioListTile<double>(
-                    title: Text(opt['label'] as String),
-                    value: opt['meters'] as double,
-                    groupValue: selectedRadius,
-                    onChanged: (v) => setDialogState(() => selectedRadius = v!),
-                    dense: true,
+                RadioGroup<double>(
+                  groupValue: selectedRadius,
+                  onChanged: (v) {
+                    if (v != null) setDialogState(() => selectedRadius = v);
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (final opt in radiusOptions)
+                        RadioListTile<double>(
+                          title: Text(opt['label'] as String),
+                          value: opt['meters'] as double,
+                          dense: true,
+                        ),
+                    ],
                   ),
                 ),
               ],

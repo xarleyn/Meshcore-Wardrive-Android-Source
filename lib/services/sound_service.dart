@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'settings_service.dart';
 
@@ -63,10 +64,10 @@ class SoundService {
         'amplitude': amplitude,
       });
       if (result == false) {
-        print('SoundService: Device has no vibrator');
+        debugPrint('SoundService: Device has no vibrator');
       }
     } catch (e) {
-      print('SoundService: Vibration error: $e');
+      debugPrint('SoundService: Vibration error: $e');
     }
   }
 

@@ -973,6 +973,7 @@ class _MapScreenState extends State<MapScreen> {
       // Start tracking
       final started = await _locationService.startTracking();
       if (started) {
+        if (!mounted) return;
         final l10n = AppLocalizations.of(context);
         String startMessage = l10n.mapLocationTrackingStarted;
         // Auto-enable ping or Carpeater if LoRa is connected
@@ -1003,6 +1004,7 @@ class _MapScreenState extends State<MapScreen> {
           startMessage: startMessage,
         );
       } else {
+        if (!mounted) return;
         _showSnackBar(
           _locationService.lastStartError ??
               AppLocalizations.of(context).mapFailedToStartTracking,
@@ -1040,6 +1042,7 @@ class _MapScreenState extends State<MapScreen> {
 
     final accuracy = await Geolocator.getLocationAccuracy();
     if (accuracy != LocationAccuracyStatus.precise) {
+      if (!mounted) return false;
       final l10n = AppLocalizations.of(context);
       await _showSettingsDialog(
         title: l10n.mapPreciseLocationRequiredTitle,
@@ -1052,6 +1055,7 @@ class _MapScreenState extends State<MapScreen> {
 
     var backgroundStatus = await Permission.locationAlways.status;
     if (!backgroundStatus.isGranted) {
+      if (!mounted) return false;
       final l10n = AppLocalizations.of(context);
       final shouldRequest = await _showRequestDialog(
         title: l10n.mapAllowLocationAllTheTimeTitle,
@@ -1061,6 +1065,7 @@ class _MapScreenState extends State<MapScreen> {
 
       backgroundStatus = await Permission.locationAlways.request();
       if (!backgroundStatus.isGranted) {
+        if (!mounted) return false;
         final l10n = AppLocalizations.of(context);
         await _showSettingsDialog(
           title: l10n.mapBackgroundLocationRequiredTitle,
@@ -1074,6 +1079,7 @@ class _MapScreenState extends State<MapScreen> {
 
     final batteryStatus = await Permission.ignoreBatteryOptimizations.status;
     if (!batteryStatus.isGranted) {
+      if (!mounted) return false;
       final l10n = AppLocalizations.of(context);
       final shouldRequest = await _showRequestDialog(
         title: l10n.mapUnrestrictedBatteryTitle,
@@ -1235,6 +1241,7 @@ class _MapScreenState extends State<MapScreen> {
     if (format == null) return;
 
     // Ask save or share
+    if (!mounted) return;
     final choice = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
@@ -1301,6 +1308,7 @@ class _MapScreenState extends State<MapScreen> {
       }
 
       if (choice == 'save') {
+        if (!mounted) return;
         await FilePicker.platform.saveFile(
           dialogTitle: AppLocalizations.of(context).mapSaveExport,
           fileName: fileName,
@@ -1308,6 +1316,7 @@ class _MapScreenState extends State<MapScreen> {
           allowedExtensions: [extension],
           bytes: utf8.encode(content),
         );
+        if (!mounted) return;
         _showSnackBar(
           AppLocalizations.of(
             context,
@@ -1318,14 +1327,17 @@ class _MapScreenState extends State<MapScreen> {
         final file = File('${directory!.path}/$fileName');
         await file.writeAsString(content);
 
+        if (!mounted) return;
         await Share.shareXFiles(
           [XFile(file.path)],
           subject: AppLocalizations.of(context).mapExportShareSubject,
           text: AppLocalizations.of(context).mapExportShareText(samples.length),
         );
+        if (!mounted) return;
         _showSnackBar(AppLocalizations.of(context).mapExportShared);
       }
     } catch (e) {
+      if (!mounted) return;
       _showSnackBar(AppLocalizations.of(context).mapExportFailed('$e'));
     }
   }
@@ -1463,6 +1475,7 @@ $placemarks  </Document>
       _lastAggregatedSampleCount = -1;
       await _loadSamples();
 
+      if (!mounted) return;
       final l10n = AppLocalizations.of(context);
       final sessionLabel = totalSessionsImported > 0
           ? l10n.mapImportedSessionsSuffix(totalSessionsImported)
@@ -1474,6 +1487,7 @@ $placemarks  </Document>
         '${l10n.mapImportedSamples(totalSamplesImported)}$sessionLabel$sourceLabel',
       );
     } catch (e) {
+      if (!mounted) return;
       _showSnackBar(AppLocalizations.of(context).mapImportFailed('$e'));
     }
   }
@@ -1485,6 +1499,7 @@ $placemarks  </Document>
       final fileName = 'meshcore_settings_$timestamp.json';
 
       // Ask save or share
+      if (!mounted) return;
       final choice = await showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(
@@ -1509,6 +1524,7 @@ $placemarks  </Document>
       if (choice == null) return;
 
       if (choice == 'save') {
+        if (!mounted) return;
         await FilePicker.platform.saveFile(
           dialogTitle: AppLocalizations.of(context).mapSaveSettings,
           fileName: fileName,
@@ -1516,16 +1532,19 @@ $placemarks  </Document>
           allowedExtensions: ['json'],
           bytes: utf8.encode(jsonString),
         );
+        if (!mounted) return;
         _showSnackBar(AppLocalizations.of(context).mapSettingsExported);
       } else if (choice == 'share') {
         final dir = await getApplicationDocumentsDirectory();
         final file = File('${dir.path}/$fileName');
         await file.writeAsString(jsonString);
+        if (!mounted) return;
         await Share.shareXFiles([
           XFile(file.path),
         ], text: AppLocalizations.of(context).mapSettingsShareText);
       }
     } catch (e) {
+      if (!mounted) return;
       _showSnackBar(AppLocalizations.of(context).mapExportFailed('$e'));
     }
   }
@@ -1571,14 +1590,17 @@ $placemarks  </Document>
       _lastAggregatedSampleCount = -1; // Force reaggregation
       await _loadSamples();
 
+      if (!mounted) return;
       _showSnackBar(
         AppLocalizations.of(context).mapImportedSettingsCount(applied),
       );
     } on FormatException catch (e) {
+      if (!mounted) return;
       _showSnackBar(
         AppLocalizations.of(context).mapInvalidSettingsFile(e.message),
       );
     } catch (e) {
+      if (!mounted) return;
       _showSnackBar(AppLocalizations.of(context).mapImportFailed('$e'));
     }
   }
@@ -1638,6 +1660,7 @@ $placemarks  </Document>
         label.isEmpty ? null : label,
       );
       await _loadMarkers();
+      if (!mounted) return;
       _showSnackBar(AppLocalizations.of(context).mapPlannedRepeaterMarkerAdded);
     }
   }
@@ -1677,6 +1700,7 @@ $placemarks  </Document>
               Navigator.pop(ctx);
               await DatabaseService().deleteMarker(id);
               await _loadMarkers();
+              if (!mounted) return;
               _showSnackBar(AppLocalizations.of(context).mapMarkerDeleted);
             },
             child: Text(
@@ -1782,13 +1806,21 @@ $placemarks  </Document>
                   fontSize: 13,
                 ),
               ),
-              ...radiusOptions.map(
-                (opt) => RadioListTile<double>(
-                  title: Text(opt['label'] as String),
-                  value: opt['meters'] as double,
-                  groupValue: selectedRadius,
-                  onChanged: (v) => setDialogState(() => selectedRadius = v!),
-                  dense: true,
+              RadioGroup<double>(
+                groupValue: selectedRadius,
+                onChanged: (v) {
+                  if (v != null) setDialogState(() => selectedRadius = v);
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (final opt in radiusOptions)
+                      RadioListTile<double>(
+                        title: Text(opt['label'] as String),
+                        value: opt['meters'] as double,
+                        dense: true,
+                      ),
+                  ],
                 ),
               ),
             ],
@@ -1833,7 +1865,6 @@ $placemarks  </Document>
           color: Colors.grey.withValues(alpha: 0.15),
           borderColor: Colors.grey.withValues(alpha: 0.5),
           borderStrokeWidth: 2,
-          isFilled: true,
         ),
       );
     }
@@ -1882,6 +1913,7 @@ $placemarks  </Document>
       await DatabaseService().deleteSample(sample.id);
       _lastAggregatedSampleCount = -1;
       await _loadSamples();
+      if (!mounted) return;
       _showSnackBar(AppLocalizations.of(context).mapSampleDeleted);
     }
   }
@@ -1919,6 +1951,7 @@ $placemarks  </Document>
       );
       _lastAggregatedSampleCount = -1;
       await _loadSamples();
+      if (!mounted) return;
       _showSnackBar(
         AppLocalizations.of(context).mapDeletedSamplesFromCell(deleted),
       );
@@ -1926,6 +1959,7 @@ $placemarks  </Document>
   }
 
   void _showSnackBar(String message) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
     );
@@ -2095,16 +2129,21 @@ $placemarks  </Document>
             },
           );
         } else {
+          if (!mounted) return;
           _showSnackBar(AppLocalizations.of(context).mapOnLatestVersion);
         }
       } else {
+        if (!mounted) return;
         _showSnackBar(AppLocalizations.of(context).mapCouldNotCheckUpdates);
       }
     } on SocketException {
+      if (!mounted) return;
       _showSnackBar(AppLocalizations.of(context).mapNoInternetTryAgain);
     } on TimeoutException {
+      if (!mounted) return;
       _showSnackBar(AppLocalizations.of(context).mapUpdateCheckTimedOut);
     } catch (_) {
+      if (!mounted) return;
       _showSnackBar(AppLocalizations.of(context).mapCouldNotCheckUpdates);
     }
   }
@@ -2116,6 +2155,7 @@ $placemarks  </Document>
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     } else {
+      if (!mounted) return;
       _showSnackBar(AppLocalizations.of(context).mapCouldNotOpenGitHub);
     }
   }
@@ -2188,6 +2228,7 @@ $placemarks  </Document>
       });
 
       if (imageBytes == null) {
+        if (!mounted) return;
         _showSnackBar(
           AppLocalizations.of(context).mapFailedToCaptureScreenshot,
         );
@@ -2206,6 +2247,7 @@ $placemarks  </Document>
       );
 
       if (result.isSuccess) {
+        if (!mounted) return;
         _showSnackBar(AppLocalizations.of(context).mapScreenshotSavedToGallery);
 
         // Ask if user wants to share
@@ -2224,14 +2266,16 @@ $placemarks  </Document>
               ),
               TextButton(
                 onPressed: () async {
+                  final shareText = AppLocalizations.of(
+                    context,
+                  ).mapScreenshotShareText;
                   Navigator.pop(context);
                   // Save temp file and share
                   final tempDir = await getTemporaryDirectory();
                   final file = File('${tempDir.path}/meshcore_screenshot.png');
                   await file.writeAsBytes(imageBytes);
-                  await Share.shareXFiles([
-                    XFile(file.path),
-                  ], text: AppLocalizations.of(context).mapScreenshotShareText);
+                  if (!mounted) return;
+                  await Share.shareXFiles([XFile(file.path)], text: shareText);
                 },
                 child: Text(AppLocalizations.of(context).mapYes),
               ),
@@ -2239,6 +2283,7 @@ $placemarks  </Document>
           ),
         );
       } else {
+        if (!mounted) return;
         _showSnackBar(AppLocalizations.of(context).mapFailedToSaveScreenshot);
       }
     } catch (e) {
@@ -2246,6 +2291,7 @@ $placemarks  </Document>
       setState(() {
         _hideUIForScreenshot = false;
       });
+      if (!mounted) return;
       _showSnackBar(
         AppLocalizations.of(context).mapErrorCapturingScreenshot('$e'),
       );
@@ -3072,7 +3118,6 @@ $placemarks  </Document>
           color: Colors.red.withValues(alpha: 0.05),
           borderColor: Colors.red.withValues(alpha: 0.35),
           borderStrokeWidth: 1.5,
-          isFilled: true,
         ),
       );
 
@@ -3084,7 +3129,6 @@ $placemarks  </Document>
             color: Colors.yellow.withValues(alpha: 0.08),
             borderColor: Colors.yellow.withValues(alpha: 0.5),
             borderStrokeWidth: 1.5,
-            isFilled: true,
           ),
         );
       }
@@ -3097,7 +3141,6 @@ $placemarks  </Document>
             color: Colors.green.withValues(alpha: 0.10),
             borderColor: Colors.green.withValues(alpha: 0.6),
             borderStrokeWidth: 1.5,
-            isFilled: true,
           ),
         );
       }
@@ -3546,14 +3589,17 @@ $placemarks  </Document>
 
     // Show result
     if (pingSuccess) {
+      if (!mounted) return;
       final l10n = AppLocalizations.of(context);
       final summary = responses.length == 1
           ? l10n.mapPingHeardBy(_shortNodeId(responses.single.nodeId))
           : l10n.mapDiscoveryComplete(responses.length);
       _showSnackBar(summary);
     } else if (result.status == PingStatus.timeout) {
+      if (!mounted) return;
       _showSnackBar(AppLocalizations.of(context).mapNoResponseDeadZone);
     } else {
+      if (!mounted) return;
       _showSnackBar(
         AppLocalizations.of(context).mapPingFailed('${result.error}'),
       );
@@ -3655,13 +3701,16 @@ $placemarks  </Document>
           selected,
         );
         if (connected) {
+          if (!mounted) return;
           _showSnackBar(AppLocalizations.of(context).mapConnectedViaUsb);
           await _loadSamples();
         } else {
+          if (!mounted) return;
           _showSnackBar(AppLocalizations.of(context).mapFailedConnectUsb);
         }
       }
     } catch (e) {
+      if (!mounted) return;
       _showSnackBar(AppLocalizations.of(context).mapUsbError('$e'));
     } finally {
       if (mounted) setState(() => _isConnecting = false);
@@ -3703,6 +3752,7 @@ $placemarks  </Document>
 
       if (selected == null) return;
 
+      if (!mounted) return;
       _showSnackBar(
         AppLocalizations.of(context).mapConnectingTo(selected.displayName),
       );
@@ -3715,12 +3765,15 @@ $placemarks  </Document>
           remoteId: selected.remoteId,
           name: _locationService.loraCompanion.deviceName ?? selected.name,
         );
+        if (!mounted) return;
         _showSnackBar(AppLocalizations.of(context).mapConnectedViaBluetooth);
         await _loadSamples();
       } else {
+        if (!mounted) return;
         _showSnackBar(AppLocalizations.of(context).mapFailedConnectBluetooth);
       }
     } catch (e) {
+      if (!mounted) return;
       _showSnackBar(AppLocalizations.of(context).bluetoothError('$e'));
     } finally {
       if (mounted) setState(() => _isConnecting = false);
@@ -3757,6 +3810,7 @@ $placemarks  </Document>
 
       await _locationService.loraCompanion.disconnectDevice();
       await _loadSamples();
+      if (!mounted) return;
       _showSnackBar(AppLocalizations.of(context).mapLoraDisconnected);
     }
   }
@@ -3835,6 +3889,7 @@ $placemarks  </Document>
     // Give it a moment to process
     await Future.delayed(const Duration(seconds: 2));
 
+    if (!mounted) return;
     _showSnackBar(AppLocalizations.of(context).mapContactListUpdated);
   }
 
@@ -3853,8 +3908,10 @@ $placemarks  </Document>
     });
 
     if (repeaters.isEmpty) {
+      if (!mounted) return;
       _showSnackBar(AppLocalizations.of(context).mapNoRepeatersFound);
     } else {
+      if (!mounted) return;
       _showSnackBar(
         AppLocalizations.of(context).mapRepeatersFound(repeaters.length),
       );
@@ -4324,20 +4381,22 @@ $placemarks  </Document>
         actions: [
           TextButton(
             onPressed: () async {
+              final filterLabel =
+                  (repeater.id.length > 8
+                          ? repeater.id.substring(0, 8)
+                          : repeater.id)
+                      .toUpperCase();
+              final message = AppLocalizations.of(
+                context,
+              ).mapFilteringBy(filterLabel);
               Navigator.pop(context);
               setState(() {
                 _includeOnlyRepeaters = repeater.id;
               });
               await _settingsService.setIncludeOnlyRepeaters(repeater.id);
               _loadSamples();
-              _showSnackBar(
-                AppLocalizations.of(context).mapFilteringBy(
-                  (repeater.id.length > 8
-                          ? repeater.id.substring(0, 8)
-                          : repeater.id)
-                      .toUpperCase(),
-                ),
-              );
+              if (!mounted) return;
+              _showSnackBar(message);
             },
             child: Text(AppLocalizations.of(context).mapFilterByThis),
           ),
@@ -4629,7 +4688,7 @@ $placemarks  </Document>
             }
           },
         );
-        results = {AppLocalizations.of(context).mapUploadFallbackName: result};
+        results = {UploadService.defaultEndpointName: result};
       }
 
       if (mounted) {
@@ -4721,6 +4780,7 @@ $placemarks  </Document>
     final endpoints = await _uploadService.getUploadEndpoints();
     final selectedNames = await _uploadService.getSelectedEndpoints();
 
+    if (!mounted) return;
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -4906,13 +4966,15 @@ $placemarks  </Document>
                       ),
                       TextButton(
                         onPressed: () async {
+                          final message = AppLocalizations.of(
+                            context,
+                          ).mapUploadSitesUpdated;
+                          Navigator.pop(context);
                           await _uploadService.setSelectedEndpoints(
                             selectedNames,
                           );
-                          Navigator.pop(context);
-                          _showSnackBar(
-                            AppLocalizations.of(context).mapUploadSitesUpdated,
-                          );
+                          if (!mounted) return;
+                          _showSnackBar(message);
                         },
                         child: Text(AppLocalizations.of(context).settingsSave),
                       ),
@@ -5047,6 +5109,7 @@ $placemarks  </Document>
 
     // Show progress dialog
     bool downloadCancelled = false;
+    if (!mounted) return;
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -5074,9 +5137,10 @@ $placemarks  </Document>
                   .then((succeeded) {
                     if (context.mounted) Navigator.pop(context);
                     if (!downloadCancelled) {
+                      if (!mounted) return;
                       _showSnackBar(
                         AppLocalizations.of(
-                          context,
+                          this.context,
                         ).mapDownloadedTiles(succeeded, totalTiles),
                       );
                     }
@@ -5138,6 +5202,7 @@ $placemarks  </Document>
       });
 
       if (imageBytes == null) {
+        if (!mounted) return;
         _showSnackBar(
           AppLocalizations.of(context).mapFailedToCaptureScreenshot,
         );
@@ -5151,6 +5216,7 @@ $placemarks  </Document>
           .length;
       final failCount = pingSamples.where((s) => s.pingSuccess == false).length;
       final totalPings = successCount + failCount;
+      if (!mounted) return;
       final l10n = AppLocalizations.of(context);
       final successRate = totalPings > 0
           ? ((successCount / totalPings) * 100).toStringAsFixed(0)
@@ -5173,6 +5239,7 @@ $placemarks  </Document>
       );
       await file.writeAsBytes(imageBytes);
 
+      if (!mounted) return;
       await Share.shareXFiles(
         [XFile(file.path)],
         subject: AppLocalizations.of(context).mapCoverageShareSubject,
@@ -5182,6 +5249,7 @@ $placemarks  </Document>
       setState(() {
         _hideUIForScreenshot = false;
       });
+      if (!mounted) return;
       _showSnackBar(AppLocalizations.of(context).mapShareFailed('$e'));
     }
   }
@@ -5245,17 +5313,17 @@ $placemarks  </Document>
                     ? const Icon(Icons.check_circle, color: Colors.blue)
                     : null,
                 onTap: () async {
+                  final message = AppLocalizations.of(
+                    context,
+                  ).mapShowingCoverageFrom(displayId);
                   Navigator.pop(context);
                   setState(() {
                     _includeOnlyRepeaters = id;
                   });
                   await _settingsService.setIncludeOnlyRepeaters(id);
                   _loadSamples();
-                  _showSnackBar(
-                    AppLocalizations.of(
-                      context,
-                    ).mapShowingCoverageFrom(displayId),
-                  );
+                  if (!mounted) return;
+                  _showSnackBar(message);
                 },
               );
             },
@@ -5266,15 +5334,17 @@ $placemarks  </Document>
               _includeOnlyRepeaters!.isNotEmpty)
             TextButton(
               onPressed: () async {
+                final message = AppLocalizations.of(
+                  context,
+                ).mapRepeaterFilterCleared;
                 Navigator.pop(context);
                 setState(() {
                   _includeOnlyRepeaters = null;
                 });
                 await _settingsService.setIncludeOnlyRepeaters(null);
                 _loadSamples();
-                _showSnackBar(
-                  AppLocalizations.of(context).mapRepeaterFilterCleared,
-                );
+                if (!mounted) return;
+                _showSnackBar(message);
               },
               child: Text(
                 AppLocalizations.of(context).mapClearFilter,
@@ -5397,6 +5467,7 @@ $placemarks  </Document>
 
     if (selectedUrl == null) return;
 
+    if (!mounted) return;
     _showSnackBar(AppLocalizations.of(context).mapDownloadingCoverage);
 
     final data = await _uploadService.downloadCoverage(
@@ -5411,6 +5482,7 @@ $placemarks  </Document>
         _communityCoverage = coverage;
         _showCommunityCoverage = true;
       });
+      if (!mounted) return;
       _showSnackBar(
         AppLocalizations.of(
           context,
@@ -5424,8 +5496,10 @@ $placemarks  </Document>
           _communityCoverage = cached['coverage'] as Map<String, dynamic>;
           _showCommunityCoverage = true;
         });
+        if (!mounted) return;
         _showSnackBar(AppLocalizations.of(context).mapLoadedCachedCoverage);
       } else {
+        if (!mounted) return;
         _showSnackBar(
           AppLocalizations.of(context).mapDownloadFailed(
             _uploadService.lastDownloadError ??

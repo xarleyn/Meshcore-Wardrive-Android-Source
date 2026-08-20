@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-import 'dart:typed_data';
-import 'package:pointycastle/export.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:usb_serial/usb_serial.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:pointycastle/export.dart';
+import 'package:usb_serial/usb_serial.dart';
 import 'debug_log_service.dart';
 import 'meshcore_protocol.dart';
 import '../models/models.dart';
@@ -363,7 +363,7 @@ class LoRaCompanionService {
         ],
       );
     } catch (e) {
-      print('Error listing bonded Bluetooth devices: $e');
+      debugPrint('Error listing bonded Bluetooth devices: $e');
       return const [];
     }
   }
@@ -514,7 +514,7 @@ class LoRaCompanionService {
                 if (value.isNotEmpty) {
                   _batteryPercent = value[0];
                   _batteryController.add(_batteryPercent);
-                  print('Battery level: $_batteryPercent%');
+                  debugPrint('Battery level: $_batteryPercent%');
                 }
 
                 // Subscribe to battery updates if supported
@@ -524,12 +524,12 @@ class LoRaCompanionService {
                     if (value.isNotEmpty) {
                       _batteryPercent = value[0];
                       _batteryController.add(_batteryPercent);
-                      print('Battery level updated: $_batteryPercent%');
+                      debugPrint('Battery level updated: $_batteryPercent%');
                     }
                   });
                 }
               } catch (e) {
-                print('Could not read battery level: $e');
+                debugPrint('Could not read battery level: $e');
               }
             }
           }
@@ -545,13 +545,13 @@ class LoRaCompanionService {
             .toString()
             .replaceAll(':', '')
             .toUpperCase();
-        print(
+        debugPrint(
           'Connected to LoRa device via Bluetooth (ID: $_connectedDeviceId)',
         );
 
         // Monitor connection state for disconnection
         _connectionStateSubscription = device.connectionState.listen((state) {
-          print('Bluetooth connection state: $state');
+          debugPrint('Bluetooth connection state: $state');
           if (state == BluetoothConnectionState.disconnected) {
             _handleBluetoothDisconnection();
           }
@@ -577,7 +577,7 @@ class LoRaCompanionService {
 
       return false;
     } catch (e) {
-      print('Bluetooth connection error: $e');
+      debugPrint('Bluetooth connection error: $e');
       return false;
     }
   }
@@ -591,7 +591,7 @@ class LoRaCompanionService {
     try {
       return await UsbSerial.listDevices();
     } catch (e) {
-      print('Error scanning USB: $e');
+      debugPrint('Error scanning USB: $e');
       return [];
     }
   }
@@ -619,11 +619,11 @@ class LoRaCompanionService {
           _handleDeviceData(Uint8List.fromList(data));
         },
         onError: (error) {
-          print('⚠️ USB stream error: $error');
+          debugPrint('⚠️ USB stream error: $error');
           _handleUsbDisconnection();
         },
         onDone: () {
-          print('⚠️ USB stream closed');
+          debugPrint('⚠️ USB stream closed');
           _handleUsbDisconnection();
         },
       );
@@ -634,7 +634,7 @@ class LoRaCompanionService {
           .replaceAll(' ', '_')
           .toUpperCase();
       _deviceName = device.productName ?? 'USB Device';
-      print('Connected to LoRa device via USB (ID: $_connectedDeviceId)');
+      debugPrint('Connected to LoRa device via USB (ID: $_connectedDeviceId)');
 
       // Ensure USB mode in protocol parser (wrapped frames with '>')
       _protocol.setBLEMode(false);
@@ -650,7 +650,7 @@ class LoRaCompanionService {
 
       return true;
     } catch (e) {
-      print('USB connection error: $e');
+      debugPrint('USB connection error: $e');
       return false;
     }
   }
@@ -680,7 +680,7 @@ class LoRaCompanionService {
       await _requestAllContacts();
 
       _debugLog.logInfo('Requested contact list');
-      print('📡 Loading repeater contacts...');
+      debugPrint('📡 Loading repeater contacts...');
 
       // Wait for contacts to be loaded
       Timer(Duration(seconds: timeoutSeconds), () {
@@ -688,7 +688,9 @@ class LoRaCompanionService {
           _debugLog.logInfo(
             '✅ Scan complete: Cached ${_repeaterContactCache.length} contact(s)',
           );
-          print('✅ Cached ${_repeaterContactCache.length} repeater contact(s)');
+          debugPrint(
+            '✅ Cached ${_repeaterContactCache.length} repeater contact(s)',
+          );
           _scanCompleter!.complete(List.from(_repeaterContactCache.values));
           _scanCompleter = null;
         }
@@ -844,14 +846,14 @@ class LoRaCompanionService {
         if (!isDuplicate) {
           _discoveredRepeaters.add(repeater);
           _debugLog.logInfo('✅ Found: ${name ?? nodeId} at ($lat, $lon)');
-          print(
+          debugPrint(
             '✅ Found repeater: ${name ?? nodeId} at ($lat, $lon), SNR: $snr',
           );
         }
       }
     } catch (e) {
       // Don't spam logs with parse errors, just debug output
-      print('Parse error on line: $line - $e');
+      debugPrint('Parse error on line: $line - $e');
     }
   }
 
@@ -1002,7 +1004,7 @@ class LoRaCompanionService {
       _debugLog.logInfo(
         'Note: Repeaters rate-limit to 4 responses per 2 minutes',
       );
-      print(
+      debugPrint(
         '📍 Discovery ping sent, tag=0x${tag.toRadixString(16)}, waiting for responses...',
       );
 
@@ -1055,7 +1057,7 @@ class LoRaCompanionService {
       _debugLog.logLoRa(
         '📶 Raw RX: ${data.length} bytes - ${data.map((b) => b.toRadixString(16).padLeft(2, '0')).take(20).join(' ')}${data.length > 20 ? '...' : ''}',
       );
-      print('📶 Raw RX: ${data.length} bytes');
+      debugPrint('📶 Raw RX: ${data.length} bytes');
 
       final frames = _protocol.parseIncomingData(data);
       for (final frame in frames) {
@@ -1071,7 +1073,7 @@ class LoRaCompanionService {
     _debugLog.logLoRa(
       '📥 RX Frame: code=0x${frame.code.toRadixString(16).padLeft(2, '0')} (${frame.code}) len=${frame.length}',
     );
-    print(
+    debugPrint(
       '📥 RX Frame: code=0x${frame.code.toRadixString(16).padLeft(2, '0')} (${frame.code}) len=${frame.length}',
     );
 
@@ -1150,7 +1152,7 @@ class LoRaCompanionService {
         _debugLog.logLoRa(
           'Control data hex: ${frame.data.take(50).map((b) => b.toRadixString(16).padLeft(2, "0")).join(" ")}${frame.data.length > 50 ? "..." : ""}',
         );
-        print(
+        debugPrint(
           '🔍 Control data: ${frame.data.take(50).map((b) => b.toRadixString(16).padLeft(2, "0")).join(" ")}',
         );
         _handleControlDataPush(frame.data);
@@ -1204,7 +1206,7 @@ class LoRaCompanionService {
 
     // Avoid duplicate in-flight requests
     if (_pendingContactRequests.contains(keyHex)) {
-      print('⏭️ Skipping duplicate contact request for $keyPrefix');
+      debugPrint('⏭️ Skipping duplicate contact request for $keyPrefix');
       return;
     }
 
@@ -1212,13 +1214,15 @@ class LoRaCompanionService {
     final last = _lastContactRequestAt[keyPrefix];
     final now = DateTime.now();
     if (last != null && now.difference(last) <= _contactRequestCooldown) {
-      print('⏭️ Skipping contact request for $keyPrefix (within cooldown)');
+      debugPrint(
+        '⏭️ Skipping contact request for $keyPrefix (within cooldown)',
+      );
       return;
     }
     _lastContactRequestAt[keyPrefix] = now;
     _pendingContactRequests.add(keyHex);
 
-    print('📞 Requesting contact details for $keyPrefix');
+    debugPrint('📞 Requesting contact details for $keyPrefix');
     _debugLog.logInfo('Requesting contact for $keyPrefix');
 
     final payload = _protocol.createGetContactByKeyPayload(publicKey);
@@ -1254,7 +1258,9 @@ class LoRaCompanionService {
       _debugLog.logInfo(
         '🔍 DISCOVER_RESP: tag=0x${tag.toRadixString(16)}, node=$pubkeyShort, type=$nodeType, SNR=$snr, RSSI=$rssi',
       );
-      print('🔍 Discovery response from $pubkeyShort (SNR=$snr, RSSI=$rssi)');
+      debugPrint(
+        '🔍 Discovery response from $pubkeyShort (SNR=$snr, RSSI=$rssi)',
+      );
 
       // Check if this repeater should be ignored (mobile companion)
       final shouldIgnore = _isIgnoredRepeater(pubkeyShort);
@@ -1496,7 +1502,7 @@ class LoRaCompanionService {
   /// Process a complete line from LoRa device (legacy text mode)
   void _processDeviceLine(String line) {
     _debugLog.logLoRa(line);
-    print('LoRa device: $line');
+    debugPrint('LoRa device: $line');
 
     // Try to parse battery percentage from device messages
     // Common formats:
@@ -1513,7 +1519,7 @@ class LoRaCompanionService {
       if (percent != null && percent >= 0 && percent <= 100) {
         _batteryPercent = percent;
         _batteryController.add(_batteryPercent);
-        print('Battery from device message: $percent%');
+        debugPrint('Battery from device message: $percent%');
       }
     }
 
@@ -1538,7 +1544,7 @@ class LoRaCompanionService {
 
       return decrypted;
     } catch (e) {
-      print('Decryption error: $e');
+      debugPrint('Decryption error: $e');
       return null;
     }
   }
@@ -1565,7 +1571,7 @@ class LoRaCompanionService {
             _batteryController.add(_batteryPercent);
           }
         } catch (e) {
-          print('Error reading battery: $e');
+          debugPrint('Error reading battery: $e');
         }
       }
     });
@@ -1603,7 +1609,7 @@ class LoRaCompanionService {
   /// Handle unexpected USB disconnection
   void _handleUsbDisconnection() {
     if (_connectionType != ConnectionType.usb) return;
-    print('⚠️ USB device disconnected');
+    debugPrint('⚠️ USB device disconnected');
     _debugLog.logError('USB disconnected');
 
     _stopBatteryMonitoring();
@@ -1621,7 +1627,7 @@ class LoRaCompanionService {
 
   /// Handle unexpected Bluetooth disconnection
   void _handleBluetoothDisconnection() {
-    print('⚠️ Bluetooth device disconnected unexpectedly');
+    debugPrint('⚠️ Bluetooth device disconnected unexpectedly');
     _debugLog.logError('Bluetooth disconnected');
 
     _stopBatteryMonitoring();
@@ -1660,12 +1666,12 @@ class LoRaCompanionService {
       _connectionType = ConnectionType.none;
       _deviceName = null;
       _connectionStateSubscription = null;
-      print('LoRa device disconnected');
+      debugPrint('LoRa device disconnected');
 
       // Notify listeners of disconnect
       _disconnectController.add(null);
     } catch (e) {
-      print('Error disconnecting device: $e');
+      debugPrint('Error disconnecting device: $e');
     }
   }
 

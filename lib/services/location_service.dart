@@ -543,7 +543,7 @@ class LocationService {
 
       return LatLng(position.latitude, position.longitude);
     } catch (e) {
-      print('Error getting current position: $e');
+      debugPrint('Error getting current position: $e');
       return null;
     }
   }
@@ -603,7 +603,7 @@ class LocationService {
     final notificationStatus = await Permission.notification.request();
     await _logger.logPermission('Notification', notificationStatus.toString());
     if (!notificationStatus.isGranted) {
-      print(
+      debugPrint(
         'Notification permission denied - foreground service may not work properly',
       );
     }
@@ -626,7 +626,7 @@ class LocationService {
       );
 
       await _logger.logServiceEvent('Foreground service started successfully');
-      print('Foreground service started');
+      debugPrint('Foreground service started');
 
       _qualityFilter.reset();
       _wifiQualityFilter.reset();
@@ -641,7 +641,7 @@ class LocationService {
       // Enable wakelock to prevent screen from sleeping and stopping tracking
       await ScreenWakeService.instance.setTrackingActive(true);
       await _logger.logPowerEvent('Wakelock enabled');
-      print('Wakelock enabled - app will stay active during tracking');
+      debugPrint('Wakelock enabled - app will stay active during tracking');
 
       // Reset the recording state before allowing stream events to be saved.
       _totalDistanceMeters = 0.0;
@@ -725,7 +725,7 @@ class LocationService {
       _isTracking = false;
       await _logger.logError('Start Tracking', e.toString());
       _lastStartError = (await _lookupL10n()).locationTrackingStartFailed('$e');
-      print('Error starting location tracking: $e');
+      debugPrint('Error starting location tracking: $e');
       await FlutterForegroundTask.stopService();
       await ScreenWakeService.instance.setTrackingActive(false);
       _schedulePositionStreamRestart('tracking start failed');
@@ -893,7 +893,7 @@ class LocationService {
       await _logger.logLocationEvent(
         '${source.name} location ignored: $reason',
       );
-      print('Location ignored: $reason');
+      debugPrint('Location ignored: $reason');
       return;
     }
 
@@ -906,14 +906,14 @@ class LocationService {
         await _logger.logLocationEvent(
           '${source.name} location ignored: ${impossible.rejectionReason}',
         );
-        print('Location ignored: ${impossible.rejectionReason}');
+        debugPrint('Location ignored: ${impossible.rejectionReason}');
         return;
       }
     } catch (e) {
       await _logger.logLocationEvent(
         '${source.name} location ignored: impossible zone check failed: $e',
       );
-      print('Location ignored: impossible zone check failed: $e');
+      debugPrint('Location ignored: impossible zone check failed: $e');
       return;
     }
 
@@ -1021,7 +1021,7 @@ class LocationService {
         await _setNotificationText((l10n) => l10n.notificationPinging);
 
         // Start ping in background - don't wait for it
-        print(
+        debugPrint(
           'Triggering auto-ping via LoRa at ${latLng.latitude}, ${latLng.longitude}',
         );
         final geohash = GeohashUtils.sampleKey(
@@ -1078,13 +1078,13 @@ class LocationService {
     // Save to database
     try {
       await _dbService.insertSample(sample);
-      print(
+      debugPrint(
         'Saved GPS sample: ${sample.id} at ${latLng.latitude}, ${latLng.longitude}',
       );
       // Notify listeners that a sample was saved
       _sampleSavedController.add(null);
     } catch (e) {
-      print('Error saving sample: $e');
+      debugPrint('Error saving sample: $e');
     }
   }
 
@@ -1213,7 +1213,7 @@ class LocationService {
       await _logger.logPingEvent(
         'Ping result: ${pingResult.status.name}, Node: $nodeId, RSSI: ${pingResult.rssi}, SNR: ${pingResult.snr}',
       );
-      print(
+      debugPrint(
         'Ping complete: ${pingResult.status.name}, Node: $nodeId, RSSI: ${pingResult.rssi}, SNR: ${pingResult.snr}',
       );
 
@@ -1295,7 +1295,7 @@ class LocationService {
       _sampleSavedController.add(null);
     } catch (e) {
       await _logger.logError('Background Ping', e.toString());
-      print('Error during background ping: $e');
+      debugPrint('Error during background ping: $e');
       // Save failed ping result
       final sample = Sample(
         id: _generateUniqueId(),
@@ -1344,7 +1344,7 @@ class LocationService {
     // Release the tracking reason; Always On may still require the wakelock.
     await ScreenWakeService.instance.setTrackingActive(false);
     await _logger.logPowerEvent('Tracking wakelock released');
-    print('Tracking wakelock released');
+    debugPrint('Tracking wakelock released');
 
     // Finalize session
     if (_currentSessionId != null && _sessionStartTime != null) {

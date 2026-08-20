@@ -1,4 +1,7 @@
 import 'dart:io';
+
+// Fallback when the file sink is unavailable.
+// ignore_for_file: avoid_print
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/intl.dart';
 
