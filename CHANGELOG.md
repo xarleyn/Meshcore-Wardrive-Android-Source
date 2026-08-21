@@ -142,6 +142,10 @@
   service error.
 
 ### Changed
+- The update check and the "View on GitHub" entry in Settings → About now
+  point at the fork's releases. The check uses the releases list endpoint so
+  prerelease-only repositories are detected, and release tags are matched by
+  their dotted version regardless of prefix.
 - Bluetooth device selection no longer waits for the scan timeout. Previously
   used and paired companion radios appear immediately, and newly found devices
   are added to the list while scanning continues.

@@ -25,6 +25,7 @@ import '../utils/session_map_view.dart';
 import '../utils/community_coverage.dart';
 import '../utils/bluetooth_scan.dart';
 import '../utils/sample_export.dart';
+import '../utils/update_check.dart';
 import '../widgets/compass_calibration.dart';
 import '../widgets/bluetooth_device_picker_dialog.dart';
 import 'map/layers/coverage_prediction_layer.dart';
@@ -1597,21 +1598,21 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _checkForUpdates() async {
     try {
       final response = await http
-          .get(
-            Uri.parse(
-              'https://api.github.com/repos/mintylinux/Meshcore-Wardrive-Android/releases/latest',
-            ),
-          )
+          .get(Uri.parse(updateCheckApiUrl))
           .timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final tagName = data['tag_name'].toString();
-        // Extract version from tag like "Meshcore-Wardrive-Android-1.0.2"
-        final latestVersion = tagName.split('-').last;
+        final releases = jsonDecode(response.body) as List<dynamic>;
+        final latestVersion = releases.isEmpty
+            ? null
+            : versionFromReleaseTag(releases.first['tag_name'].toString());
 
-        if (latestVersion != appVersion) {
-          if (!mounted) return;
+        if (!mounted) return;
+        if (latestVersion == null) {
+          _showSnackBar(AppLocalizations.of(context).mapCouldNotCheckUpdates);
+        } else if (latestVersion == appVersion) {
+          _showSnackBar(AppLocalizations.of(context).mapOnLatestVersion);
+        } else {
           final shouldDownload = await showDialog<bool>(
             context: context,
             builder: (context) => UpdateAvailableDialog(
@@ -1620,9 +1621,6 @@ class _MapScreenState extends State<MapScreen> {
             ),
           );
           if (shouldDownload == true) await _openGitHub();
-        } else {
-          if (!mounted) return;
-          _showSnackBar(AppLocalizations.of(context).mapOnLatestVersion);
         }
       } else {
         if (!mounted) return;
@@ -1641,9 +1639,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> _openGitHub() async {
-    final url = Uri.parse(
-      'https://github.com/mintylinux/Meshcore-Wardrive-Android/releases',
-    );
+    final url = Uri.parse(updateCheckReleasesUrl);
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     } else {
