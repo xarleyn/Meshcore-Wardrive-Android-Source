@@ -4,7 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:meshcore_wardrive/models/models.dart';
 import 'package:meshcore_wardrive/screens/map/dialogs/coverage_tools_dialogs.dart';
 
-import 'helpers/l10n_harness.dart';
+import '../helpers/l10n_harness.dart';
 
 void main() {
   test('coverage gaps excludes GPS-only cells and sorts worst first', () {

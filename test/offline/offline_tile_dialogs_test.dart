@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:meshcore_wardrive/screens/map/dialogs/offline_tile_dialogs.dart';
 
-import 'helpers/l10n_harness.dart';
+import '../helpers/l10n_harness.dart';
 
 void main() {
   testWidgets('offline tile options return a typed zoom range', (tester) async {

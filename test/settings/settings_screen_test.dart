@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meshcore_wardrive/l10n/generated/app_localizations.dart';
 import 'package:meshcore_wardrive/screens/settings/settings_screen.dart';
 
-import 'helpers/l10n_harness.dart';
+import '../helpers/l10n_harness.dart';
 
 void main() {
   testWidgets('renders settings as a full categorized page', (tester) async {

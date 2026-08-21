@@ -4,7 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:meshcore_wardrive/models/models.dart';
 import 'package:meshcore_wardrive/screens/map/dialogs/map_entity_dialogs.dart';
 
-import 'helpers/l10n_harness.dart';
+import '../helpers/l10n_harness.dart';
 
 void main() {
   testWidgets('repeater dialog returns a typed action', (tester) async {

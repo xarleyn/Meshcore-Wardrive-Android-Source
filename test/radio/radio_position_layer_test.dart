@@ -5,7 +5,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:meshcore_wardrive/screens/map/layers/radio_position_layer.dart';
 import 'package:meshcore_wardrive/services/radio_position_estimator.dart';
 
-import 'helpers/l10n_harness.dart';
+import '../helpers/l10n_harness.dart';
 
 void main() {
   testWidgets('renders uncertainty area and delegates localized marker tap', (

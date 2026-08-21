@@ -4,7 +4,7 @@ import 'package:meshcore_wardrive/screens/settings/sections/carpeater_section.da
 import 'package:meshcore_wardrive/screens/settings/sections/feedback_section.dart';
 import 'package:meshcore_wardrive/screens/settings/sections/map_display_section.dart';
 
-import 'helpers/l10n_harness.dart';
+import '../helpers/l10n_harness.dart';
 
 void main() {
   testWidgets('feedback section delegates switch changes', (tester) async {

@@ -8,7 +8,7 @@ import 'package:meshcore_wardrive/services/carpeater_service.dart';
 import 'package:meshcore_wardrive/services/lora_companion_service.dart';
 import 'package:meshcore_wardrive/utils/compass_calibration.dart';
 
-import 'helpers/l10n_harness.dart';
+import '../helpers/l10n_harness.dart';
 
 void main() {
   testWidgets('delete mode banner delegates exit', (tester) async {

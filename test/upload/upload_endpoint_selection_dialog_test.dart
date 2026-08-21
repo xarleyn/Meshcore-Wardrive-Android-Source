@@ -4,7 +4,7 @@ import 'package:meshcore_wardrive/l10n/generated/app_localizations.dart';
 import 'package:meshcore_wardrive/screens/settings/settings_screen.dart';
 import 'package:meshcore_wardrive/services/upload_service.dart';
 
-import 'helpers/l10n_harness.dart';
+import '../helpers/l10n_harness.dart';
 
 void main() {
   const firstEndpoint = UploadEndpoint(
