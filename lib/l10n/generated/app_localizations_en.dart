@@ -103,6 +103,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSectionImpossibleZones => 'Impossible Zones';
 
   @override
+  String get settingsSectionAutoPingPause => 'Auto-Ping Pause';
+
+  @override
+  String get settingsPingPauseOnBadFixes => 'Pause Pings on Bad GPS';
+
+  @override
+  String get settingsPingPauseOnBadFixesSubtitle =>
+      'Stop automatic pings while recent position fixes are rejected; resume on the next valid fix';
+
+  @override
+  String get settingsPingPauseBadFixCount => 'Consecutive Bad Fixes';
+
+  @override
+  String get settingsPingPauseBadFixCountSubtitle =>
+      'Rejected fixes in a row before pings pause';
+
+  @override
+  String get settingsPingPauseBadFixCountDescription =>
+      'Number of rejected position fixes in a row that pauses automatic pinging until a valid fix arrives.';
+
+  @override
+  String settingsEnterBadFixCount(int min, int max) {
+    return 'Enter a number between $min and $max';
+  }
+
+  @override
   String get settingsShowCoverageBoxes => 'Show Coverage Boxes';
 
   @override
@@ -1220,6 +1246,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get mapBatterySaverOff =>
       '🔋 Battery saver OFF — normal ping interval restored';
+
+  @override
+  String get mapPingPausedByBadFixes =>
+      '📡 Auto-ping paused: recent GPS fixes are unreliable';
+
+  @override
+  String get mapPingResumedByGoodFix =>
+      '📡 Auto-ping resumed: valid GPS fix received';
 
   @override
   String get mapCompassCalibrated => 'Compass calibrated';

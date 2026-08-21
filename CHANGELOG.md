@@ -3,6 +3,13 @@
 ## Unreleased
 
 ### Added
+- Auto-ping pause on bad GPS: when the configured number of consecutive
+  position fixes is rejected by the location quality filters, automatic pings
+  pause until the next valid fix instead of pinging a stale position. The
+  feature is on by default after 5 rejected fixes; the toggle and threshold
+  live in Settings → Location Quality Filters → Auto-Ping Pause and are
+  included in settings export/import. A snackbar announces each pause and
+  resume.
 - Audible link-loss alert: when the LoRa companion radio disconnects
   unexpectedly, the app plays a distinctive double-beep tone with vibration.
   A disconnect made explicitly from the map stays silent. The alert can be

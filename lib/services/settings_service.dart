@@ -43,6 +43,10 @@ class SettingsService {
       'location_airborne_speed_meters_per_second';
   static const String _maxWardriveSpeedMetersPerSecondKey =
       'location_max_wardrive_speed_meters_per_second';
+  static const String _pausePingsOnBadFixesKey =
+      'location_pause_pings_on_bad_fixes';
+  static const String _pingPauseBadFixCountKey =
+      'location_ping_pause_bad_fix_count';
   static const String _showDuctingKey = 'show_ducting';
   static const String _goalCenterLatKey = 'goal_center_lat';
   static const String _goalCenterLonKey = 'goal_center_lon';
@@ -420,6 +424,15 @@ class SettingsService {
         prefs.getDouble(_maxWardriveSpeedMetersPerSecondKey),
         LocationQualitySettings.defaultMaxWardriveSpeedMetersPerSecond,
       ),
+      pausePingsOnBadFixes:
+          prefs.getBool(_pausePingsOnBadFixesKey) ??
+          LocationQualitySettings.defaultPausePingsOnBadFixes,
+      pingPauseBadFixCount: _intInRangeOrDefault(
+        prefs.getInt(_pingPauseBadFixCountKey),
+        LocationQualitySettings.defaultPingPauseBadFixCount,
+        LocationQualitySettings.minPingPauseBadFixCount,
+        LocationQualitySettings.maxPingPauseBadFixCount,
+      ),
     );
   }
 
@@ -437,6 +450,17 @@ class SettingsService {
         settings,
         'settings',
         'values must be positive',
+      );
+    }
+    final badFixCount = settings.pingPauseBadFixCount;
+    if (badFixCount < LocationQualitySettings.minPingPauseBadFixCount ||
+        badFixCount > LocationQualitySettings.maxPingPauseBadFixCount) {
+      throw ArgumentError.value(
+        settings,
+        'settings',
+        'pingPauseBadFixCount must be between '
+            '${LocationQualitySettings.minPingPauseBadFixCount} and '
+            '${LocationQualitySettings.maxPingPauseBadFixCount}',
       );
     }
 
@@ -457,10 +481,20 @@ class SettingsService {
       _maxWardriveSpeedMetersPerSecondKey,
       settings.maxWardriveSpeedMetersPerSecond,
     );
+    await prefs.setBool(
+      _pausePingsOnBadFixesKey,
+      settings.pausePingsOnBadFixes,
+    );
+    await prefs.setInt(_pingPauseBadFixCountKey, settings.pingPauseBadFixCount);
   }
 
   double _positiveOrDefault(double? value, double defaultValue) {
     if (value == null || !value.isFinite || value <= 0) return defaultValue;
+    return value;
+  }
+
+  int _intInRangeOrDefault(int? value, int defaultValue, int min, int max) {
+    if (value == null || value < min || value > max) return defaultValue;
     return value;
   }
 
@@ -801,6 +835,8 @@ class SettingsService {
     _airborneAltitudeMetersKey,
     _airborneSpeedMetersPerSecondKey,
     _maxWardriveSpeedMetersPerSecondKey,
+    _pausePingsOnBadFixesKey,
+    _pingPauseBadFixCountKey,
     _showDuctingKey,
     _goalCenterLatKey,
     _goalCenterLonKey,

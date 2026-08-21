@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:meshcore_wardrive/l10n/generated/app_localizations.dart';
+import 'package:meshcore_wardrive/models/location_quality_settings.dart';
 import 'package:meshcore_wardrive/screens/settings/sections/carpeater_section.dart';
 import 'package:meshcore_wardrive/screens/settings/sections/feedback_section.dart';
+import 'package:meshcore_wardrive/screens/settings/sections/location_quality_section.dart';
 import 'package:meshcore_wardrive/screens/settings/sections/map_display_section.dart';
 
 import '../helpers/l10n_harness.dart';
 
 void main() {
+  setUp(() => currentSettings = null);
+
   testWidgets('feedback section delegates switch changes', (tester) async {
     bool? soundEnabled;
     bool? linkLossAlertsEnabled;
@@ -118,4 +124,88 @@ void main() {
     expect(changedSetting, MapDisplaySetting.coverage);
     expect(changedValue, isTrue);
   });
+
+  testWidgets('ping pause toggle hides the bad-fix threshold when off', (
+    tester,
+  ) async {
+    final l10n = await _pumpLocationQualitySection(tester);
+
+    await tester.tap(find.text('open location quality'));
+    await tester.pumpAndSettle();
+
+    // The threshold tile only exists while the pause feature is enabled.
+    expect(find.text(l10n.settingsPingPauseOnBadFixes), findsOneWidget);
+    expect(find.byType(SwitchListTile), findsOneWidget);
+
+    await tester.tap(find.byType(SwitchListTile));
+    await tester.pumpAndSettle();
+    expect(currentSettings?.pausePingsOnBadFixes, isFalse);
+
+    await tester.tap(find.byType(SwitchListTile));
+    await tester.pumpAndSettle();
+    expect(currentSettings?.pausePingsOnBadFixes, isTrue);
+
+    final thresholdTitle = find.text(l10n.settingsPingPauseBadFixCount);
+    await tester.scrollUntilVisible(thresholdTitle, 100);
+    expect(thresholdTitle, findsOneWidget);
+    expect(find.text('5'), findsOneWidget);
+  });
+
+  testWidgets('bad-fix threshold dialog validates and saves an integer', (
+    tester,
+  ) async {
+    final l10n = await _pumpLocationQualitySection(tester);
+
+    await tester.tap(find.text('open location quality'));
+    await tester.pumpAndSettle();
+
+    final thresholdTitle = find.text(l10n.settingsPingPauseBadFixCount);
+    await tester.scrollUntilVisible(thresholdTitle, 100);
+    await tester.tap(thresholdTitle);
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), '0');
+    await tester.tap(find.text(l10n.settingsSave));
+    await tester.pumpAndSettle();
+
+    // Invalid input keeps the dialog open with the range error.
+    expect(find.text(l10n.settingsEnterBadFixCount(1, 100)), findsOneWidget);
+    expect(currentSettings, isNull);
+
+    await tester.enterText(find.byType(TextField), '12');
+    await tester.tap(find.text(l10n.settingsSave));
+    await tester.pumpAndSettle();
+
+    expect(currentSettings?.pingPauseBadFixCount, 12);
+    expect(find.text('12'), findsOneWidget);
+  });
+}
+
+LocationQualitySettings? currentSettings;
+
+Future<AppLocalizations> _pumpLocationQualitySection(WidgetTester tester) {
+  return pumpWithL10n(
+    tester,
+    Scaffold(
+      body: Builder(
+        builder: (context) => Center(
+          child: TextButton(
+            onPressed: () => showLocationQualitySettings(
+              context,
+              settings: () =>
+                  currentSettings ?? const LocationQualitySettings(),
+              zones: () => const [],
+              newZoneCenter: () => const LatLng(55, 32),
+              onSettingsChanged: (value) async => currentSettings = value,
+              onResetSettings: () async {},
+              onAddZone: (_) async {},
+              onDeleteZone: (_) async {},
+              onClearZones: () async {},
+            ),
+            child: const Text('open location quality'),
+          ),
+        ),
+      ),
+    ),
+  );
 }

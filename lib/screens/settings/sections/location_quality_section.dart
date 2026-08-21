@@ -155,6 +155,33 @@ List<Widget> _buildLocationQualitySettings(
       ),
     ),
     SettingsSectionHeader(
+      title: l10n.settingsSectionAutoPingPause,
+      icon: Icons.notifications_paused_outlined,
+    ),
+    SwitchListTile(
+      title: Text(l10n.settingsPingPauseOnBadFixes),
+      subtitle: Text(l10n.settingsPingPauseOnBadFixesSubtitle),
+      value: settings.pausePingsOnBadFixes,
+      onChanged: (value) =>
+          onSettingsChanged(settings.copyWith(pausePingsOnBadFixes: value)),
+    ),
+    if (settings.pausePingsOnBadFixes)
+      ListTile(
+        title: Text(l10n.settingsPingPauseBadFixCount),
+        subtitle: Text(l10n.settingsPingPauseBadFixCountSubtitle),
+        trailing: Text('${settings.pingPauseBadFixCount}'),
+        onTap: () => _editIntValue(
+          context,
+          title: l10n.settingsPingPauseBadFixCount,
+          description: l10n.settingsPingPauseBadFixCountDescription,
+          displayedValue: settings.pingPauseBadFixCount,
+          min: LocationQualitySettings.minPingPauseBadFixCount,
+          max: LocationQualitySettings.maxPingPauseBadFixCount,
+          onSaved: (value) =>
+              onSettingsChanged(settings.copyWith(pingPauseBadFixCount: value)),
+        ),
+      ),
+    SettingsSectionHeader(
       title: l10n.settingsSectionImpossibleZones,
       icon: Icons.block_outlined,
     ),
@@ -258,6 +285,35 @@ Future<void> _editValue(
   );
   if (input == null || !context.mounted) return;
   await onSaved(double.parse(input.trim().replaceAll(',', '.')));
+}
+
+Future<void> _editIntValue(
+  BuildContext context, {
+  required String title,
+  required String description,
+  required int displayedValue,
+  required int min,
+  required int max,
+  required Future<void> Function(int value) onSaved,
+}) async {
+  final l10n = AppLocalizations.of(context);
+  final input = await showSettingsTextInputDialog(
+    context: context,
+    title: title,
+    initialValue: '$displayedValue',
+    labelText: title,
+    description: description,
+    keyboardType: const TextInputType.numberWithOptions(),
+    validator: (text) {
+      final parsed = int.tryParse((text ?? '').trim());
+      if (parsed == null || parsed < min || parsed > max) {
+        return l10n.settingsEnterBadFixCount(min, max);
+      }
+      return null;
+    },
+  );
+  if (input == null || !context.mounted) return;
+  await onSaved(int.parse(input.trim()));
 }
 
 String _formatValue(double value) {

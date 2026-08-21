@@ -289,6 +289,8 @@ void main() {
       expect(settings.airborneAltitudeMeters, 500);
       expect(settings.airborneSpeedMetersPerSecond, 45);
       expect(settings.maxWardriveSpeedMetersPerSecond, 83.33);
+      expect(settings.pausePingsOnBadFixes, isTrue);
+      expect(settings.pingPauseBadFixCount, 5);
     });
 
     test('persists all thresholds together', () async {
@@ -298,6 +300,8 @@ void main() {
         airborneAltitudeMeters: 1200,
         airborneSpeedMetersPerSecond: 55,
         maxWardriveSpeedMetersPerSecond: 90,
+        pausePingsOnBadFixes: false,
+        pingPauseBadFixCount: 7,
       );
 
       await service.setLocationQualitySettings(expected);
@@ -307,18 +311,22 @@ void main() {
       expect(actual.airborneAltitudeMeters, 1200);
       expect(actual.airborneSpeedMetersPerSecond, 55);
       expect(actual.maxWardriveSpeedMetersPerSecond, 90);
+      expect(actual.pausePingsOnBadFixes, isFalse);
+      expect(actual.pingPauseBadFixCount, 7);
     });
 
     test('replaces invalid stored values with defaults', () async {
       SharedPreferences.setMockInitialValues({
         'location_max_horizontal_accuracy_meters': -1.0,
         'location_airborne_altitude_meters': double.infinity,
+        'location_ping_pause_bad_fix_count': 0,
       });
 
       final settings = await SettingsService().getLocationQualitySettings();
 
       expect(settings.maxHorizontalAccuracyMeters, 250);
       expect(settings.airborneAltitudeMeters, 500);
+      expect(settings.pingPauseBadFixCount, 5);
     });
 
     test(
@@ -330,6 +338,8 @@ void main() {
           airborneAltitudeMeters: 900,
           airborneSpeedMetersPerSecond: 50,
           maxWardriveSpeedMetersPerSecond: 95,
+          pausePingsOnBadFixes: false,
+          pingPauseBadFixCount: 9,
         );
         await service.setLocationQualitySettings(expected);
 
@@ -338,16 +348,37 @@ void main() {
         expect(exported['location_airborne_altitude_meters'], 900);
         expect(exported['location_airborne_speed_meters_per_second'], 50);
         expect(exported['location_max_wardrive_speed_meters_per_second'], 95);
+        expect(exported['location_pause_pings_on_bad_fixes'], isFalse);
+        expect(exported['location_ping_pause_bad_fix_count'], 9);
 
         SharedPreferences.setMockInitialValues({});
-        expect(await service.importSettings(exported), greaterThanOrEqualTo(4));
+        expect(await service.importSettings(exported), greaterThanOrEqualTo(6));
         final imported = await service.getLocationQualitySettings();
         expect(imported.maxHorizontalAccuracyMeters, 75);
         expect(imported.airborneAltitudeMeters, 900);
         expect(imported.airborneSpeedMetersPerSecond, 50);
         expect(imported.maxWardriveSpeedMetersPerSecond, 95);
+        expect(imported.pausePingsOnBadFixes, isFalse);
+        expect(imported.pingPauseBadFixCount, 9);
       },
     );
+
+    test('rejects a bad-fix count outside the supported range', () async {
+      final service = SettingsService();
+
+      await expectLater(
+        service.setLocationQualitySettings(
+          const LocationQualitySettings(pingPauseBadFixCount: 0),
+        ),
+        throwsArgumentError,
+      );
+      await expectLater(
+        service.setLocationQualitySettings(
+          const LocationQualitySettings(pingPauseBadFixCount: 101),
+        ),
+        throwsArgumentError,
+      );
+    });
   });
 
   group('recent Bluetooth devices', () {

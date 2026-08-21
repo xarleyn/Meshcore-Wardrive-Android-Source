@@ -14,6 +14,7 @@ enum MapRuntimeSubscription {
   newRepeater,
   deadZone,
   batterySaver,
+  pingPause,
   achievement,
   distance,
   speed,

@@ -519,6 +519,19 @@ class _MapScreenState extends State<MapScreen> {
       },
     );
 
+    // Subscribe to auto-ping pause changes caused by bad GPS fixes
+    _runtimeBindings.bind(
+      MapRuntimeSubscription.pingPause,
+      _locationService.pingPauseStream,
+      (paused) {
+        if (!mounted) return;
+        final l10n = AppLocalizations.of(context);
+        _showSnackBar(
+          paused ? l10n.mapPingPausedByBadFixes : l10n.mapPingResumedByGoodFix,
+        );
+      },
+    );
+
     // Subscribe to achievement unlocks
     _runtimeBindings.bind(
       MapRuntimeSubscription.achievement,

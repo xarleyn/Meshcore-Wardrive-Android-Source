@@ -124,6 +124,42 @@
   "@settingsSectionImpossibleZones": {
     "description": "Location quality subsection header"
   },
+  "settingsSectionAutoPingPause": "Auto-Ping Pause",
+  "@settingsSectionAutoPingPause": {
+    "description": "Location quality subsection header for the bad-fix ping pause"
+  },
+  "settingsPingPauseOnBadFixes": "Pause Pings on Bad GPS",
+  "@settingsPingPauseOnBadFixes": {
+    "description": "Toggle to pause automatic pings while position fixes are rejected"
+  },
+  "settingsPingPauseOnBadFixesSubtitle": "Stop automatic pings while recent position fixes are rejected; resume on the next valid fix",
+  "@settingsPingPauseOnBadFixesSubtitle": {
+    "description": "Subtitle for the pause-pings-on-bad-fixes toggle"
+  },
+  "settingsPingPauseBadFixCount": "Consecutive Bad Fixes",
+  "@settingsPingPauseBadFixCount": {
+    "description": "Tile title for the number of rejected fixes that pauses pinging"
+  },
+  "settingsPingPauseBadFixCountSubtitle": "Rejected fixes in a row before pings pause",
+  "@settingsPingPauseBadFixCountSubtitle": {
+    "description": "Subtitle for the consecutive bad fixes threshold"
+  },
+  "settingsPingPauseBadFixCountDescription": "Number of rejected position fixes in a row that pauses automatic pinging until a valid fix arrives.",
+  "@settingsPingPauseBadFixCountDescription": {
+    "description": "Dialog description for the consecutive bad fixes threshold"
+  },
+  "settingsEnterBadFixCount": "Enter a number between {min} and {max}",
+  "@settingsEnterBadFixCount": {
+    "description": "Validation error for the consecutive bad fixes threshold",
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
   "settingsShowCoverageBoxes": "Show Coverage Boxes",
   "@settingsShowCoverageBoxes": {
     "description": "Toggle to show coverage squares on the map"
@@ -1563,6 +1599,14 @@
   "mapBatterySaverOff": "🔋 Battery saver OFF — normal ping interval restored",
   "@mapBatterySaverOff": {
     "description": "Snackbar when battery saver deactivates"
+  },
+  "mapPingPausedByBadFixes": "📡 Auto-ping paused: recent GPS fixes are unreliable",
+  "@mapPingPausedByBadFixes": {
+    "description": "Snackbar when automatic pings pause after repeated bad fixes"
+  },
+  "mapPingResumedByGoodFix": "📡 Auto-ping resumed: valid GPS fix received",
+  "@mapPingResumedByGoodFix": {
+    "description": "Snackbar when automatic pings resume after a valid fix"
   },
   "mapCompassCalibrated": "Compass calibrated",
   "@mapCompassCalibrated": {

@@ -284,6 +284,48 @@ abstract class AppLocalizations {
   /// **'Impossible Zones'**
   String get settingsSectionImpossibleZones;
 
+  /// Location quality subsection header for the bad-fix ping pause
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-Ping Pause'**
+  String get settingsSectionAutoPingPause;
+
+  /// Toggle to pause automatic pings while position fixes are rejected
+  ///
+  /// In en, this message translates to:
+  /// **'Pause Pings on Bad GPS'**
+  String get settingsPingPauseOnBadFixes;
+
+  /// Subtitle for the pause-pings-on-bad-fixes toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Stop automatic pings while recent position fixes are rejected; resume on the next valid fix'**
+  String get settingsPingPauseOnBadFixesSubtitle;
+
+  /// Tile title for the number of rejected fixes that pauses pinging
+  ///
+  /// In en, this message translates to:
+  /// **'Consecutive Bad Fixes'**
+  String get settingsPingPauseBadFixCount;
+
+  /// Subtitle for the consecutive bad fixes threshold
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected fixes in a row before pings pause'**
+  String get settingsPingPauseBadFixCountSubtitle;
+
+  /// Dialog description for the consecutive bad fixes threshold
+  ///
+  /// In en, this message translates to:
+  /// **'Number of rejected position fixes in a row that pauses automatic pinging until a valid fix arrives.'**
+  String get settingsPingPauseBadFixCountDescription;
+
+  /// Validation error for the consecutive bad fixes threshold
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a number between {min} and {max}'**
+  String settingsEnterBadFixCount(int min, int max);
+
   /// Toggle to show coverage squares on the map
   ///
   /// In en, this message translates to:
@@ -2221,6 +2263,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'🔋 Battery saver OFF — normal ping interval restored'**
   String get mapBatterySaverOff;
+
+  /// Snackbar when automatic pings pause after repeated bad fixes
+  ///
+  /// In en, this message translates to:
+  /// **'📡 Auto-ping paused: recent GPS fixes are unreliable'**
+  String get mapPingPausedByBadFixes;
+
+  /// Snackbar when automatic pings resume after a valid fix
+  ///
+  /// In en, this message translates to:
+  /// **'📡 Auto-ping resumed: valid GPS fix received'**
+  String get mapPingResumedByGoodFix;
 
   /// Snackbar after compass calibration completes
   ///

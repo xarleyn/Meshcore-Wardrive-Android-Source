@@ -10,6 +10,7 @@ import '../models/location_quality_settings.dart';
 import 'database_service.dart';
 import 'lora_companion_service.dart';
 import 'location_quality_filter.dart';
+import 'bad_fix_monitor.dart';
 import '../utils/geohash_utils.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
@@ -35,6 +36,7 @@ class LocationService {
   final SoundService _soundService = SoundService();
   final LocationQualityFilter _qualityFilter = LocationQualityFilter();
   final LocationQualityFilter _wifiQualityFilter = LocationQualityFilter();
+  final BadFixMonitor _badFixMonitor = BadFixMonitor();
   final WifiLocationService _wifiLocationService = WifiLocationService();
   String? _lastStartError;
 
@@ -92,6 +94,10 @@ class LocationService {
   bool _autoPingEnabled = false;
   bool _autoPingResumeOnReconnect = false;
 
+  // Auto-ping pause while recent position fixes keep failing quality checks.
+  bool _pingPauseEnabled = LocationQualitySettings.defaultPausePingsOnBadFixes;
+  bool _pingPauseActive = false;
+
   // Subscriptions to the companion service connection lifecycle.
   StreamSubscription<void>? _disconnectSubscription;
   StreamSubscription<void>? _connectedSubscription;
@@ -141,6 +147,14 @@ class LocationService {
   // Stream for broadcasting ping events
   final _pingEventController = StreamController<String>.broadcast();
   Stream<String> get pingEventStream => _pingEventController.stream;
+
+  // Stream for broadcasting auto-ping pause changes (true = paused)
+  final _pingPauseController = StreamController<bool>.broadcast();
+  Stream<bool> get pingPauseStream => _pingPauseController.stream;
+
+  /// Whether automatic pings are currently paused because the recent position
+  /// fixes kept failing quality checks.
+  bool get isPingPausedByBadFixes => _pingPauseActive;
 
   // Stream for broadcasting total distance updates
   final _totalDistanceController = StreamController<double>.broadcast();
@@ -314,6 +328,31 @@ class LocationService {
   void setLocationQualitySettings(LocationQualitySettings settings) {
     _qualityFilter.updateSettings(settings);
     _wifiQualityFilter.updateSettings(settings);
+    _pingPauseEnabled = settings.pausePingsOnBadFixes;
+    _badFixMonitor.requiredBadFixes = settings.pingPauseBadFixCount;
+    if (!_pingPauseEnabled) _badFixMonitor.reset();
+    _syncPingPauseState();
+  }
+
+  /// Re-evaluates the pause state and broadcasts transitions.
+  void _syncPingPauseState() {
+    final paused = _pingPauseEnabled && _badFixMonitor.isPaused;
+    if (paused == _pingPauseActive) return;
+    _pingPauseActive = paused;
+    _pingPauseController.add(paused);
+    if (paused) {
+      unawaited(
+        _logger.logPingEvent(
+          'Auto-ping paused: ${_badFixMonitor.consecutiveBadFixes} '
+          'consecutive bad position fixes (threshold: '
+          '${_badFixMonitor.requiredBadFixes})',
+        ),
+      );
+    } else {
+      unawaited(
+        _logger.logPingEvent('Auto-ping resumed after a valid position fix'),
+      );
+    }
   }
 
   void _startWifiLocationUpdates() {
@@ -672,6 +711,9 @@ class LocationService {
 
       _qualityFilter.reset();
       _wifiQualityFilter.reset();
+      // A new session starts with a clean bad-fix streak and active pings.
+      _badFixMonitor.reset();
+      _pingPauseActive = false;
       _positionSearchRequested = true;
       _monitorLocationServiceStatus();
       _startPositionWatchdog();
@@ -881,6 +923,9 @@ class LocationService {
       return;
     }
     if (!_loraCompanion.isDeviceConnected) return;
+    // Recent fixes are unreliable; pinging a stale position would only
+    // record garbage. Pinging resumes once a valid fix arrives.
+    if (_pingPauseActive) return;
 
     final position = _lastPosition;
     if (position == null) return;
@@ -950,6 +995,8 @@ class LocationService {
         '${source.name} location ignored: $reason',
       );
       debugPrint('Location ignored: $reason');
+      _badFixMonitor.recordRejectedFix();
+      _syncPingPauseState();
       return;
     }
 
@@ -974,6 +1021,10 @@ class LocationService {
     }
 
     qualityFilter.accept(position);
+    // A trustworthy fix clears the bad-fix streak, so a paused auto-ping
+    // resumes with the next valid measurement.
+    _badFixMonitor.recordAcceptedFix();
+    _syncPingPauseState();
 
     if (source == LocationPositionSource.fused) {
       _lastFusedPosition = position;
@@ -1035,6 +1086,7 @@ class LocationService {
         !_carpeaterModeEnabled &&
         !_pingInProgress &&
         !_loraCompanion.isPingInProgress &&
+        !_pingPauseActive &&
         _pingMode != 'time') {
       bool shouldPing = false;
 

@@ -102,6 +102,32 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsSectionImpossibleZones => 'Зоны исключения GPS';
 
   @override
+  String get settingsSectionAutoPingPause => 'Пауза автопинга';
+
+  @override
+  String get settingsPingPauseOnBadFixes => 'Пауза пингов при плохом GPS';
+
+  @override
+  String get settingsPingPauseOnBadFixesSubtitle =>
+      'Не отправлять автопинги, пока последние измерения позиции отклоняются; возобновление после корректного измерения';
+
+  @override
+  String get settingsPingPauseBadFixCount => 'Некорректных измерений подряд';
+
+  @override
+  String get settingsPingPauseBadFixCountSubtitle =>
+      'Сколько подряд отклонённых измерений приостанавливает пинги';
+
+  @override
+  String get settingsPingPauseBadFixCountDescription =>
+      'Количество подряд отклонённых измерений позиции, после которого автопинг приостанавливается до появления корректного измерения.';
+
+  @override
+  String settingsEnterBadFixCount(int min, int max) {
+    return 'Введите число от $min до $max';
+  }
+
+  @override
   String get settingsShowCoverageBoxes => 'Показывать ячейки покрытия';
 
   @override
@@ -1239,6 +1265,14 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get mapBatterySaverOff =>
       '🔋 Энергосбережение ВЫКЛ — обычный интервал пинга восстановлен';
+
+  @override
+  String get mapPingPausedByBadFixes =>
+      '📡 Автопинг на паузе: последние GPS-измерения недостоверны';
+
+  @override
+  String get mapPingResumedByGoodFix =>
+      '📡 Автопинг возобновлён: получено корректное GPS-измерение';
 
   @override
   String get mapCompassCalibrated => 'Компас откалиброван';
