@@ -4472,6 +4472,14 @@
   "@achievementSessions50Description": {
     "description": "Description for the sessions_50 achievement"
   },
+  "achievementSmolenskLegendTitle": "Be a Legend of Smolensk Mesh Networks",
+  "@achievementSmolenskLegendTitle": {
+    "description": "Title for the hidden smolensk_legend achievement"
+  },
+  "achievementSmolenskLegendDescription": "You know what you did.",
+  "@achievementSmolenskLegendDescription": {
+    "description": "Description for the hidden smolensk_legend achievement"
+  },
   "notificationBrandTitle": "MeshCore Wardrive",
   "@notificationBrandTitle": {
     "description": "Foreground notification title; keep identical across locales"

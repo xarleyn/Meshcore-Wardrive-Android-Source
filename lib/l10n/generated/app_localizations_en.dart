@@ -3233,6 +3233,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get achievementSessions50Description => 'Complete 50 sessions';
 
   @override
+  String get achievementSmolenskLegendTitle =>
+      'Be a Legend of Smolensk Mesh Networks';
+
+  @override
+  String get achievementSmolenskLegendDescription => 'You know what you did.';
+
+  @override
   String get notificationBrandTitle => 'MeshCore Wardrive';
 
   @override

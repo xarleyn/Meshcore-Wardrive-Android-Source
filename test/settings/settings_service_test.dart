@@ -417,4 +417,27 @@ void main() {
       },
     );
   });
+
+  group('companion node name', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('defaults to unset while no companion is connected', () async {
+      expect(await SettingsService().getCompanionNodeName(), isNull);
+    });
+
+    test('persists and clears the connected node advert name', () async {
+      final settings = SettingsService();
+
+      await settings.setCompanionNodeName('Ya_Smolensk');
+      expect(await settings.getCompanionNodeName(), 'Ya_Smolensk');
+
+      await settings.setCompanionNodeName(null);
+      expect(await settings.getCompanionNodeName(), isNull);
+
+      await settings.setCompanionNodeName('');
+      expect(await settings.getCompanionNodeName(), isNull);
+    });
+  });
 }

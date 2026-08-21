@@ -9,6 +9,7 @@ import 'package:pointycastle/export.dart';
 import 'package:usb_serial/usb_serial.dart';
 import 'debug_log_service.dart';
 import 'meshcore_protocol.dart';
+import 'settings_service.dart';
 import '../models/models.dart';
 import '../utils/bluetooth_scan.dart';
 
@@ -292,6 +293,7 @@ class LoRaCompanionService {
   UsbPort? _usbPort;
   StreamSubscription? _deviceSubscription;
   String? _deviceName; // Connected device's advertised name
+  String? _nodeAdvertName; // Device's own MeshCore advert name (SELF_INFO)
 
   // State
   final _pingResultController = StreamController<PingResult>.broadcast();
@@ -385,6 +387,11 @@ class LoRaCompanionService {
   bool get isPingInProgress => _startingPing || _pendingPings.isNotEmpty;
   ConnectionType get connectionType => _connectionType;
   String? get deviceName => _deviceName;
+
+  /// The connected device's own MeshCore advert name from SELF_INFO. Unlike
+  /// [deviceName] this is not the Bluetooth/USB transport name and not the
+  /// public key; it is the node name the radio is known by inside the mesh.
+  String? get nodeAdvertName => _nodeAdvertName;
   Stream<PingResult> get pingResults => _pingResultController.stream;
   int? get batteryPercent => _batteryPercent;
   Stream<int?> get batteryStream => _batteryController.stream;
@@ -1073,9 +1080,25 @@ class LoRaCompanionService {
 
   /// Handle RESP_CODE_SELF_INFO - device information
   void _handleSelfInfo(Uint8List data) {
-    // TODO: Parse device name from self info
-    // For now, just log that we received it
-    _debugLog.logInfo('Received device self info');
+    final info = _protocol.parseSelfInfoFrame(data);
+    if (info == null) {
+      _debugLog.logError('Invalid self info response');
+      return;
+    }
+    final name = info['name'] as String?;
+    _nodeAdvertName = name;
+    _debugLog.logInfo(
+      'Received device self info${name == null ? '' : ': $name'}',
+    );
+    // Persist while the connection is active so achievement checks can
+    // inspect the connected node's name without a live radio link.
+    unawaited(SettingsService().setCompanionNodeName(name));
+  }
+
+  /// Forget the connected device's MeshCore advert name after a disconnect.
+  void _forgetNodeAdvertName() {
+    _nodeAdvertName = null;
+    unawaited(SettingsService().setCompanionNodeName(null));
   }
 
   void _handleDeviceInfo(Uint8List data) {
@@ -1829,6 +1852,7 @@ class LoRaCompanionService {
     _usbPort = null;
     _connectionType = ConnectionType.none;
     _deviceName = null;
+    _forgetNodeAdvertName();
 
     _failPendingPings('USB connection lost');
 
@@ -1856,6 +1880,7 @@ class LoRaCompanionService {
     _rxCharacteristic = null;
     _connectionType = ConnectionType.none;
     _deviceName = null;
+    _forgetNodeAdvertName();
 
     _failPendingPings('Bluetooth connection lost');
 
@@ -1890,6 +1915,7 @@ class LoRaCompanionService {
       _usbPort = null;
       _connectionType = ConnectionType.none;
       _deviceName = null;
+      _forgetNodeAdvertName();
       _connectionStateSubscription = null;
       _deviceSubscription = null;
       debugPrint('LoRa device disconnected');

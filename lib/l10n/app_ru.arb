@@ -880,6 +880,8 @@
   "achievementFirstSessionDescription": "Завершите свою первую сессию",
   "achievementSessions50Title": "Преданный водитель",
   "achievementSessions50Description": "Завершите 50 сессий",
+  "achievementSmolenskLegendTitle": "Быть легендой mesh сетей Смоленска",
+  "achievementSmolenskLegendDescription": "Вы знаете, что сделали.",
   "notificationBrandTitle": "MeshCore Wardrive",
   "notificationChannelName": "Отслеживание геолокации MeshCore Wardrive",
   "notificationChannelDescription": "Это уведомление отображается при активном отслеживании геолокации",

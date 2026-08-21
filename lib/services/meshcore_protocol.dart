@@ -487,6 +487,38 @@ class MeshCoreProtocol {
     return result;
   }
 
+  /// Parse RESP_CODE_SELF_INFO (0x05).
+  ///
+  /// Payload layout (code byte already stripped by [parseIncomingData]):
+  /// adv_type(1), tx_power(1), max_tx_power(1), public key(32), lat(4),
+  /// lon(4), multi_acks(1), adv_loc_policy(1), telemetry_mode(1),
+  /// manual_add_contacts(1), freq(4), bw(4), sf(1), cr(1), then the device's
+  /// own advert name as a variable-length UTF-8 string.
+  Map<String, dynamic>? parseSelfInfoFrame(Uint8List data) {
+    if (data.isEmpty) return null;
+
+    final result = <String, dynamic>{'adv_type': data[0]};
+    const nameOffset = 57;
+    if (data.length > nameOffset) {
+      final name = _decodeTailUtf8(data, nameOffset);
+      if (name != null) result['name'] = name;
+    }
+    return result;
+  }
+
+  /// Decode a variable-length UTF-8 string that runs from [offset] to the end
+  /// of [data], cutting at a null terminator when the firmware sends one.
+  String? _decodeTailUtf8(Uint8List data, int offset) {
+    var end = data.length;
+    final zeroIdx = data.indexOf(0, offset);
+    if (zeroIdx >= offset) end = zeroIdx;
+    if (end <= offset) return null;
+    final decoded = utf8
+        .decode(data.sublist(offset, end), allowMalformed: true)
+        .trim();
+    return decoded.isEmpty ? null : decoded;
+  }
+
   String _decodeFixedUtf8(Uint8List data, int offset, int length) {
     final bytes = data.sublist(offset, offset + length);
     final terminator = bytes.indexOf(0);

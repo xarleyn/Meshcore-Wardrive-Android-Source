@@ -5398,6 +5398,18 @@ abstract class AppLocalizations {
   /// **'Complete 50 sessions'**
   String get achievementSessions50Description;
 
+  /// Title for the hidden smolensk_legend achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Be a Legend of Smolensk Mesh Networks'**
+  String get achievementSmolenskLegendTitle;
+
+  /// Description for the hidden smolensk_legend achievement
+  ///
+  /// In en, this message translates to:
+  /// **'You know what you did.'**
+  String get achievementSmolenskLegendDescription;
+
   /// Foreground notification title; keep identical across locales
   ///
   /// In en, this message translates to:

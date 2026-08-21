@@ -3,6 +3,13 @@
 ## Unreleased
 
 ### Added
+- Hidden achievement "Быть легендой mesh сетей Смоленска" (💎): unlocks while
+  the connected companion radio reports a node name starting with "Ya_",
+  "Yakut", or "Якут" (case-insensitive). The badge stays invisible on the
+  Achievements screen until it is unlocked. The device's own MeshCore advert
+  name is now parsed from the SELF_INFO handshake response and tracked while
+  the companion is connected; it is separate from the Bluetooth/USB transport
+  name.
 - Auto-ping pause on bad GPS: when the configured number of consecutive
   position fixes is rejected by the location quality filters, automatic pings
   pause until the next valid fix instead of pinging a stale position. The

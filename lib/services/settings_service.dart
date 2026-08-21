@@ -60,6 +60,7 @@ class SettingsService {
   static const String _carpeaterPasswordKey = 'carpeater_password';
   static const String _carpeaterIntervalKey = 'carpeater_interval_seconds';
   static const String _deviceNameKey = 'device_name';
+  static const String _companionNodeNameKey = 'companion_node_name';
   static const String _lockRotationKey = 'lock_rotation_north';
   static const String _keepScreenOnKey = 'keep_screen_on';
   static const String _currentLocationMarkerStyleKey =
@@ -648,6 +649,25 @@ class SettingsService {
       await prefs.remove(_deviceNameKey);
     } else {
       await prefs.setString(_deviceNameKey, value);
+    }
+  }
+
+  /// MeshCore advert name reported by the connected companion radio, or null
+  /// while no companion connection is active. Runtime state, not a preference:
+  /// it is refreshed by [LoRaCompanionService] on every self-info frame and is
+  /// intentionally excluded from settings export/import.
+  Future<String?> getCompanionNodeName() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_companionNodeNameKey);
+  }
+
+  /// Set or clear the connected companion radio's MeshCore advert name.
+  Future<void> setCompanionNodeName(String? value) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (value == null || value.isEmpty) {
+      await prefs.remove(_companionNodeNameKey);
+    } else {
+      await prefs.setString(_companionNodeNameKey, value);
     }
   }
 

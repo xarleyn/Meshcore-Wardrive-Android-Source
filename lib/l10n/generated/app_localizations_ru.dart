@@ -3290,6 +3290,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get achievementSessions50Description => 'Завершите 50 сессий';
 
   @override
+  String get achievementSmolenskLegendTitle =>
+      'Быть легендой mesh сетей Смоленска';
+
+  @override
+  String get achievementSmolenskLegendDescription => 'Вы знаете, что сделали.';
+
+  @override
   String get notificationBrandTitle => 'MeshCore Wardrive';
 
   @override

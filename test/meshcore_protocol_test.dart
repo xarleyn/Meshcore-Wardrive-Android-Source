@@ -257,6 +257,42 @@ void main() {
       expect(info['path_hash_mode'], 2);
     });
 
+    test('parses the device advert name from self information', () {
+      final data = Uint8List(70);
+      data[0] = ADV_TYPE_CHAT;
+      final nameBytes = utf8.encode('Ya_Smolensk');
+      data.setRange(57, 57 + nameBytes.length, nameBytes);
+      // Firmware pads the tail with zero bytes after the name.
+      data[68] = 0;
+      data[69] = 0;
+
+      final info = protocol.parseSelfInfoFrame(data);
+
+      expect(info, isNotNull);
+      expect(info!['adv_type'], ADV_TYPE_CHAT);
+      expect(info['name'], 'Ya_Smolensk');
+    });
+
+    test('self information decodes a Cyrillic advert name without padding', () {
+      final nameBytes = utf8.encode('Якут');
+      final data = Uint8List(57 + nameBytes.length);
+      data[0] = ADV_TYPE_SENSOR;
+      data.setRange(57, data.length, nameBytes);
+
+      final info = protocol.parseSelfInfoFrame(data);
+
+      expect(info!['name'], 'Якут');
+    });
+
+    test('self information without a name still reports the advert type', () {
+      final shortInfo = protocol.parseSelfInfoFrame(Uint8List.fromList([2]));
+      expect(shortInfo, isNotNull);
+      expect(shortInfo!['adv_type'], 2);
+      expect(shortInfo.containsKey('name'), isFalse);
+
+      expect(protocol.parseSelfInfoFrame(Uint8List(0)), isNull);
+    });
+
     test('parses standard and V3 channel messages', () {
       final standard = protocol.parseChannelMessageFrame(
         Uint8List.fromList([

@@ -9,11 +9,15 @@ class Achievement {
   final bool unlocked;
   final DateTime? unlockedAt;
 
+  /// Hidden achievements stay invisible until they are unlocked.
+  final bool hidden;
+
   Achievement({
     required this.id,
     required this.icon,
     this.unlocked = false,
     this.unlockedAt,
+    this.hidden = false,
   });
 }
 
@@ -43,7 +47,20 @@ class AchievementService {
     {'id': 'cells_500', 'icon': '🏰'},
     {'id': 'first_session', 'icon': '🎬'},
     {'id': 'sessions_50', 'icon': '🏆'},
+    {'id': 'smolensk_legend', 'icon': '💎', 'hidden': 'true'},
   ];
+
+  /// Companion-radio node name prefixes that unlock the hidden legend
+  /// achievement. Matched case-insensitively.
+  static const List<String> _legendNamePrefixes = ['ya_', 'yakut', 'якут'];
+
+  /// Whether [name] — the connected companion radio's own advert name —
+  /// starts with one of the hidden legend prefixes (case-insensitive).
+  static bool isLegendCompanionName(String? name) {
+    if (name == null) return false;
+    final normalized = name.trim().toLowerCase();
+    return _legendNamePrefixes.any(normalized.startsWith);
+  }
 
   /// Get all achievements with their unlock status
   Future<List<Achievement>> getAll() async {
@@ -58,6 +75,7 @@ class AchievementService {
         unlockedAt: unlockedMs != null
             ? DateTime.fromMillisecondsSinceEpoch(unlockedMs)
             : null,
+        hidden: d['hidden'] == 'true',
       );
     }).toList();
   }
@@ -92,6 +110,10 @@ class AchievementService {
       }
     }
 
+    // Connected companion radio's own MeshCore advert name (null while no
+    // companion is connected)
+    final companionNodeName = await settings.getCompanionNodeName();
+
     // Check thresholds
     final checks = <String, bool>{
       'first_ping': pings >= 1,
@@ -108,6 +130,7 @@ class AchievementService {
       'cells_500': cells.length >= 500,
       'first_session': sessions.isNotEmpty,
       'sessions_50': sessions.length >= 50,
+      'smolensk_legend': isLegendCompanionName(companionNodeName),
     };
 
     for (final entry in checks.entries) {
