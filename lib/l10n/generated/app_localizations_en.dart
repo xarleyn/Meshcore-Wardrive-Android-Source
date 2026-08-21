@@ -239,6 +239,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Notify when a never-before-seen repeater is discovered';
 
   @override
+  String get settingsLinkLossAlerts => 'Link Loss Alert';
+
+  @override
+  String get settingsLinkLossAlertsSubtitle =>
+      'Beep when the LoRa device connection is lost';
+
+  @override
   String get settingsEnableCarpeaterMode => 'Enable Carpeater Mode';
 
   @override

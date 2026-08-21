@@ -242,6 +242,13 @@ class AppLocalizationsRu extends AppLocalizations {
       'Уведомлять, когда обнаружен ранее не встречавшийся репитер';
 
   @override
+  String get settingsLinkLossAlerts => 'Сигнал при потере связи';
+
+  @override
+  String get settingsLinkLossAlertsSubtitle =>
+      'Звуковой сигнал при потере связи с LoRa-устройством';
+
+  @override
   String get settingsEnableCarpeaterMode => 'Включить режим Carpeater';
 
   @override

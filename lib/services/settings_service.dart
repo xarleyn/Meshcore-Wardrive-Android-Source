@@ -65,6 +65,7 @@ class SettingsService {
   static const String _showSuccessfulOnlyKey = 'show_successful_only';
   static const String _deadZoneAlertsKey = 'dead_zone_alerts_enabled';
   static const String _newRepeaterAlertsKey = 'new_repeater_alerts_enabled';
+  static const String _linkLossAlertsKey = 'link_loss_alerts_enabled';
   static const String _batterySaverEnabledKey = 'battery_saver_enabled';
   static const String _mapThemeModeKey = 'map_theme_mode';
   static const String _appLocaleKey = 'app_locale';
@@ -91,6 +92,16 @@ class SettingsService {
   Future<void> setNewRepeaterAlertsEnabled(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_newRepeaterAlertsKey, value);
+  }
+
+  Future<bool> getLinkLossAlertsEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_linkLossAlertsKey) ?? true;
+  }
+
+  Future<void> setLinkLossAlertsEnabled(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_linkLossAlertsKey, value);
   }
 
   Future<bool> getBatterySaverEnabled() async {
@@ -809,6 +820,7 @@ class SettingsService {
     _currentLocationMarkerStyleKey,
     _showSuccessfulOnlyKey,
     _mapLodEnabledKey,
+    _linkLossAlertsKey,
     // Upload service keys
     'upload_api_url',
     'auto_upload_enabled',

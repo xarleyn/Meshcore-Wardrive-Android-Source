@@ -188,6 +188,33 @@ void main() {
     });
   });
 
+  group('link loss alert setting', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('defaults to enabled', () async {
+      expect(await SettingsService().getLinkLossAlertsEnabled(), isTrue);
+    });
+
+    test('persists the selected value', () async {
+      final settings = SettingsService();
+
+      await settings.setLinkLossAlertsEnabled(false);
+
+      expect(await settings.getLinkLossAlertsEnabled(), isFalse);
+    });
+
+    test('includes link loss alert in settings backup', () async {
+      final settings = SettingsService();
+      await settings.setLinkLossAlertsEnabled(false);
+
+      final exported = await settings.exportSettings();
+
+      expect(exported['link_loss_alerts_enabled'], isFalse);
+    });
+  });
+
   group('radio position visibility setting', () {
     setUp(() {
       SharedPreferences.setMockInitialValues({});

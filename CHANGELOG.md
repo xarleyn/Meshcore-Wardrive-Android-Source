@@ -3,6 +3,11 @@
 ## Unreleased
 
 ### Added
+- Audible link-loss alert: when the LoRa companion radio disconnects
+  unexpectedly, the app plays a distinctive double-beep tone with vibration.
+  A disconnect made explicitly from the map stays silent. The alert can be
+  turned off in Settings → Feedback ("Link Loss Alert", enabled by default)
+  and is included in settings export/import.
 - Automatic reconnection to the LoRa companion radio after an unexpected
   connection loss (USB unplugged or Bluetooth link dropped). Reconnect attempts
   use exponential backoff (3 s doubling up to once a minute) and refresh the

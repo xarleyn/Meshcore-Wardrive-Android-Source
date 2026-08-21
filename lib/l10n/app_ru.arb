@@ -71,6 +71,8 @@
   "settingsDeadZoneAlertsSubtitle": "Уведомлять при входе в известную мёртвую зону",
   "settingsNewRepeaterAlerts": "Оповещения о новых репитерах",
   "settingsNewRepeaterAlertsSubtitle": "Уведомлять, когда обнаружен ранее не встречавшийся репитер",
+  "settingsLinkLossAlerts": "Сигнал при потере связи",
+  "settingsLinkLossAlertsSubtitle": "Звуковой сигнал при потере связи с LoRa-устройством",
   "settingsEnableCarpeaterMode": "Включить режим Carpeater",
   "settingsCarpeaterEnabledSubtitle": "Обнаружение через репитер",
   "settingsCarpeaterDisabledSubtitle": "Использовать репитер для поиска соседей\nНужна прошивка v1.14+ на всех репитерах",

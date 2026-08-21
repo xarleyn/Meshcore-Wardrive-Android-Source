@@ -45,6 +45,9 @@ class LocationService {
       // A disconnect made by the user is handled by the UI flow that asked
       // for it; only an unexpected loss arms the automatic resume below.
       if (_loraCompanion.userDisconnectRequested) return;
+      if (_linkLossAlertsEnabled) {
+        unawaited(_soundService.playLinkLost());
+      }
       if (_autoPingEnabled) {
         _suspendAutoPingForReconnect();
       }
@@ -155,6 +158,9 @@ class LocationService {
   final _deadZoneController = StreamController<String>.broadcast();
   Stream<String> get deadZoneStream => _deadZoneController.stream;
   bool _deadZoneAlertsEnabled = true;
+
+  // Audible alert for an unexpected LoRa device link loss
+  bool _linkLossAlertsEnabled = true;
 
   // Battery saver mode
   final Battery _battery = Battery();
@@ -275,6 +281,12 @@ class LocationService {
     if (_isTracking) {
       _startBatteryMonitoring();
     }
+  }
+
+  /// Enable or disable the audible alert played when the LoRa device link is
+  /// lost unexpectedly.
+  void setLinkLossAlertsEnabled(bool enabled) {
+    _linkLossAlertsEnabled = enabled;
   }
 
   /// Enable the opt-in beaconDB Wi-Fi location source. A recent, valid Wi-Fi

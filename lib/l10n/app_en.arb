@@ -284,6 +284,14 @@
   "@settingsNewRepeaterAlertsSubtitle": {
     "description": "Subtitle for new repeater alerts"
   },
+  "settingsLinkLossAlerts": "Link Loss Alert",
+  "@settingsLinkLossAlerts": {
+    "description": "Toggle for the LoRa device link loss sound alert"
+  },
+  "settingsLinkLossAlertsSubtitle": "Beep when the LoRa device connection is lost",
+  "@settingsLinkLossAlertsSubtitle": {
+    "description": "Subtitle for the LoRa device link loss alert toggle"
+  },
   "settingsEnableCarpeaterMode": "Enable Carpeater Mode",
   "@settingsEnableCarpeaterMode": {
     "description": "Toggle to enable Carpeater discovery mode"

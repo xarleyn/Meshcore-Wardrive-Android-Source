@@ -111,6 +111,25 @@ class SoundService {
     }
   }
 
+  /// Distinctive double-beep alarm for an unexpected loss of the LoRa device
+  /// link. Unlike the single ping-failure tone this pattern repeats, so it is
+  /// recognizable as "the radio is gone" rather than "a ping failed".
+  Future<void> playLinkLost() async {
+    if (!_enabled && !_vibrationEnabled) return;
+    if (_vibrationEnabled) {
+      await _vibrate(durationMs: 200, amplitude: 255);
+    }
+    if (_enabled) {
+      await _playTone(AndroidTones.TONE_CDMA_ABBR_ALERT, durationMs: 250);
+      await Future<void>.delayed(const Duration(milliseconds: 180));
+      await _playTone(AndroidTones.TONE_CDMA_ABBR_ALERT, durationMs: 250);
+    }
+    if (_vibrationEnabled) {
+      await Future<void>.delayed(const Duration(milliseconds: 120));
+      await _vibrate(durationMs: 200, amplitude: 255);
+    }
+  }
+
   /// Play appropriate tone based on ping result
   Future<void> playForPingResult({
     required bool success,

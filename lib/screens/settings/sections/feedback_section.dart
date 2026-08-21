@@ -9,12 +9,14 @@ class FeedbackSettingsValues {
     required this.vibrationEnabled,
     required this.deadZoneAlertsEnabled,
     required this.newRepeaterAlertsEnabled,
+    required this.linkLossAlertsEnabled,
   });
 
   final bool soundEnabled;
   final bool vibrationEnabled;
   final bool deadZoneAlertsEnabled;
   final bool newRepeaterAlertsEnabled;
+  final bool linkLossAlertsEnabled;
 }
 
 List<Widget> buildFeedbackSettings(
@@ -24,6 +26,7 @@ List<Widget> buildFeedbackSettings(
   required ValueChanged<bool> onVibrationChanged,
   required ValueChanged<bool> onDeadZoneAlertsChanged,
   required ValueChanged<bool> onNewRepeaterAlertsChanged,
+  required ValueChanged<bool> onLinkLossAlertsChanged,
 }) {
   final l10n = AppLocalizations.of(context);
   return [
@@ -54,6 +57,12 @@ List<Widget> buildFeedbackSettings(
       subtitle: Text(l10n.settingsNewRepeaterAlertsSubtitle),
       value: values.newRepeaterAlertsEnabled,
       onChanged: onNewRepeaterAlertsChanged,
+    ),
+    SwitchListTile(
+      title: Text(l10n.settingsLinkLossAlerts),
+      subtitle: Text(l10n.settingsLinkLossAlertsSubtitle),
+      value: values.linkLossAlertsEnabled,
+      onChanged: onLinkLossAlertsChanged,
     ),
   ];
 }

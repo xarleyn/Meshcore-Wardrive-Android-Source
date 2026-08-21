@@ -9,6 +9,7 @@ import '../helpers/l10n_harness.dart';
 void main() {
   testWidgets('feedback section delegates switch changes', (tester) async {
     bool? soundEnabled;
+    bool? linkLossAlertsEnabled;
     await pumpWithL10n(
       tester,
       Builder(
@@ -21,11 +22,13 @@ void main() {
                 vibrationEnabled: false,
                 deadZoneAlertsEnabled: false,
                 newRepeaterAlertsEnabled: false,
+                linkLossAlertsEnabled: false,
               ),
               onSoundChanged: (value) => soundEnabled = value,
               onVibrationChanged: (_) {},
               onDeadZoneAlertsChanged: (_) {},
               onNewRepeaterAlertsChanged: (_) {},
+              onLinkLossAlertsChanged: (value) => linkLossAlertsEnabled = value,
             ),
           ),
         ),
@@ -33,8 +36,10 @@ void main() {
     );
 
     await tester.tap(find.byType(SwitchListTile).first);
+    await tester.tap(find.byType(SwitchListTile).last);
 
     expect(soundEnabled, isTrue);
+    expect(linkLossAlertsEnabled, isTrue);
   });
 
   testWidgets('carpeater section hides details and delegates enable', (

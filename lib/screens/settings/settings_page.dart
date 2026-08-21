@@ -184,6 +184,7 @@ extension _SettingsPageNavigation on _MapScreenState {
             vibrationEnabled: _vibrationEnabled,
             deadZoneAlertsEnabled: _deadZoneAlertsEnabled,
             newRepeaterAlertsEnabled: _newRepeaterAlertsEnabled,
+            linkLossAlertsEnabled: _linkLossAlertsEnabled,
           ),
           onSoundChanged: (value) async {
             _updateMapState(() => _soundEnabled = value);
@@ -207,6 +208,12 @@ extension _SettingsPageNavigation on _MapScreenState {
             setPageState(() {});
             await _settingsService.setNewRepeaterAlertsEnabled(value);
             _locationService.loraCompanion.setNewRepeaterAlertsEnabled(value);
+          },
+          onLinkLossAlertsChanged: (value) async {
+            _updateMapState(() => _linkLossAlertsEnabled = value);
+            setPageState(() {});
+            await _settingsService.setLinkLossAlertsEnabled(value);
+            _locationService.setLinkLossAlertsEnabled(value);
           },
         ),
       ),

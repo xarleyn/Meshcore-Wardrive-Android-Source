@@ -278,6 +278,7 @@ class _MapScreenState extends State<MapScreen> {
   // Alert toggles
   bool _deadZoneAlertsEnabled = true;
   bool _newRepeaterAlertsEnabled = true;
+  bool _linkLossAlertsEnabled = true;
 
   // Community coverage (downloaded from web map)
   Map<String, dynamic>? _communityCoverage;
@@ -635,6 +636,7 @@ class _MapScreenState extends State<MapScreen> {
       _compassCalibrationQuietUntil = settings.compassCalibrationQuietUntil;
       _deadZoneAlertsEnabled = settings.deadZoneAlertsEnabled;
       _newRepeaterAlertsEnabled = settings.newRepeaterAlertsEnabled;
+      _linkLossAlertsEnabled = settings.linkLossAlertsEnabled;
       _batterySaverEnabled = settings.batterySaverEnabled;
       _carpeaterEnabled = settings.carpeaterEnabled;
       _carpeaterRepeaterId = settings.carpeaterRepeaterId;

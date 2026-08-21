@@ -42,6 +42,7 @@ class MapSettingsSnapshot {
     required this.compassCalibrationQuietUntil,
     required this.deadZoneAlertsEnabled,
     required this.newRepeaterAlertsEnabled,
+    required this.linkLossAlertsEnabled,
     required this.batterySaverEnabled,
     required this.carpeaterEnabled,
     required this.carpeaterRepeaterId,
@@ -85,6 +86,7 @@ class MapSettingsSnapshot {
   final DateTime? compassCalibrationQuietUntil;
   final bool deadZoneAlertsEnabled;
   final bool newRepeaterAlertsEnabled;
+  final bool linkLossAlertsEnabled;
   final bool batterySaverEnabled;
   final bool carpeaterEnabled;
   final String? carpeaterRepeaterId;
@@ -113,6 +115,7 @@ class DefaultMapSettingsRuntime implements MapSettingsRuntime {
   Future<void> apply(MapSettingsSnapshot settings) async {
     _soundService.setEnabled(settings.soundEnabled);
     _soundService.setVibrationEnabled(settings.vibrationEnabled);
+    _locationService.setLinkLossAlertsEnabled(settings.linkLossAlertsEnabled);
     _locationService.setPingMode(settings.pingMode);
     _locationService.setPingTimeInterval(settings.pingTimeInterval);
     _locationService.setBatterySaverEnabled(settings.batterySaverEnabled);
@@ -186,6 +189,7 @@ class MapSettingsController {
       deadZoneAlertsEnabled: await _settingsService.getDeadZoneAlertsEnabled(),
       newRepeaterAlertsEnabled: await _settingsService
           .getNewRepeaterAlertsEnabled(),
+      linkLossAlertsEnabled: await _settingsService.getLinkLossAlertsEnabled(),
       batterySaverEnabled: await _settingsService.getBatterySaverEnabled(),
       carpeaterEnabled: await _settingsService.getCarpeaterEnabled(),
       carpeaterRepeaterId: await _settingsService.getCarpeaterRepeaterId(),

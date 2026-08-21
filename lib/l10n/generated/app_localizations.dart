@@ -524,6 +524,18 @@ abstract class AppLocalizations {
   /// **'Notify when a never-before-seen repeater is discovered'**
   String get settingsNewRepeaterAlertsSubtitle;
 
+  /// Toggle for the LoRa device link loss sound alert
+  ///
+  /// In en, this message translates to:
+  /// **'Link Loss Alert'**
+  String get settingsLinkLossAlerts;
+
+  /// Subtitle for the LoRa device link loss alert toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Beep when the LoRa device connection is lost'**
+  String get settingsLinkLossAlertsSubtitle;
+
   /// Toggle to enable Carpeater discovery mode
   ///
   /// In en, this message translates to:
