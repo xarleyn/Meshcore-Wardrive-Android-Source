@@ -19,7 +19,9 @@ stores observations in SQLite, and renders aggregated coverage on a map.
   upload integrations.
 - `lib/utils/`: reusable helpers without UI responsibilities.
 - `android/`: the only maintained Flutter host platform.
-- `test/`: unit and widget tests.
+- `test/`: unit and widget tests, grouped into subdirectories by name prefix
+  such as `test/bluetooth/` and `test/map/`; shared helpers stay in
+  `test/helpers/`.
 - `docs/`: user and developer documentation.
 - `assets/`: source assets; generated launch icons remain under `android/`.
 
@@ -99,6 +101,11 @@ or a physical LoRa device, describe any manual device testing that remains.
   credentials with the existing secure-storage abstraction.
 - Add or update tests for behavior that can be exercised without physical
   hardware. Isolate device and network boundaries so they can be faked.
+- Prefer placing new tests in the `test/` subdirectory matching the test name
+  prefix, for example `bluetooth_scan_test.dart` under `test/bluetooth/`.
+  Create a new prefix subdirectory when no matching one exists yet, and import
+  shared helpers such as `test/helpers/l10n_harness.dart` with a relative path
+  that accounts for the extra level.
 - Avoid editing generated files unless the corresponding generator or Android
   configuration requires it.
 - `lib/l10n/generated/app_localizations*.dart` are tracked, reproducible
