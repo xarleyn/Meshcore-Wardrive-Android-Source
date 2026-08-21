@@ -3,6 +3,12 @@
 ## Unreleased
 
 ### Added
+- Automatic reconnection to the LoRa companion radio after an unexpected
+  connection loss (USB unplugged or Bluetooth link dropped). Reconnect attempts
+  use exponential backoff (3 s doubling up to once a minute) and refresh the
+  contact list on success. Auto-ping suspended by the loss resumes when the
+  link is restored. A disconnect made explicitly from the map is never followed
+  by an automatic reconnection.
 - In-app language (System / English / Русский) under Settings → App & device;
   Russian UI.
 - **Impossible Zones** in Location Quality Filters: user-defined circles

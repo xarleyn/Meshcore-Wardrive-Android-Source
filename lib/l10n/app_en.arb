@@ -2325,6 +2325,24 @@
   "@mapLoraDisconnected": {
     "description": "Snackbar after disconnecting LoRa"
   },
+  "mapLoraReconnecting": "Connection lost. Reconnecting to {name}...",
+  "@mapLoraReconnecting": {
+    "description": "Snackbar when the LoRa connection dropped and automatic reconnection started",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "mapLoraReconnected": "Reconnected to {name}",
+  "@mapLoraReconnected": {
+    "description": "Snackbar when the LoRa device was reconnected automatically",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "mapRefreshingContactList": "Refreshing contact list...",
   "@mapRefreshingContactList": {
     "description": "Snackbar while refreshing radio contacts"

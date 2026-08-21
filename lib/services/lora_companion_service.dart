@@ -80,6 +80,80 @@ class PingResult {
   };
 }
 
+/// Exponential backoff policy for automatic LoRa reconnect attempts.
+///
+/// Attempt numbering is 1-based: the first retry waits [initialDelay], every
+/// following attempt doubles the wait until [maxDelay] is reached.
+class ReconnectBackoff {
+  final Duration initialDelay;
+  final Duration maxDelay;
+
+  const ReconnectBackoff({
+    this.initialDelay = const Duration(seconds: 3),
+    this.maxDelay = const Duration(seconds: 60),
+  });
+
+  /// Wait time before retry [attempt]; capped at [maxDelay].
+  Duration delayForAttempt(int attempt) {
+    var delay = initialDelay;
+    for (var i = 1; i < max(1, attempt); i++) {
+      delay *= 2;
+      if (delay >= maxDelay) return maxDelay;
+    }
+    return delay > maxDelay ? maxDelay : delay;
+  }
+}
+
+/// Snapshot of the automatic reconnection loop for UI and logging listeners.
+class ReconnectStatus {
+  /// Whether the service is trying to restore a lost connection.
+  final bool active;
+
+  /// 1-based number of the upcoming attempt; 0 when inactive.
+  final int nextAttempt;
+
+  /// Human-readable name of the device being restored.
+  final String? deviceName;
+
+  /// Set on the final event when the link was restored automatically.
+  final bool restored;
+
+  const ReconnectStatus({
+    required this.active,
+    this.nextAttempt = 0,
+    this.deviceName,
+    this.restored = false,
+  });
+}
+
+/// Finds the remembered USB device among the currently attached devices.
+///
+/// Android reassigns `deviceId` on every replug, so matching relies on stable
+/// attributes instead: serial number plus VID/PID first, then the interface
+/// path (`deviceName`), then bare VID/PID.
+UsbDevice? matchUsbDevice(List<UsbDevice> attached, UsbDevice remembered) {
+  bool sameVidPid(UsbDevice device) =>
+      device.vid == remembered.vid && device.pid == remembered.pid;
+
+  final rememberedSerial = remembered.serial;
+  if (rememberedSerial != null && rememberedSerial.isNotEmpty) {
+    for (final device in attached) {
+      if (sameVidPid(device) && device.serial == rememberedSerial) {
+        return device;
+      }
+    }
+  }
+  for (final device in attached) {
+    if (sameVidPid(device) && device.deviceName == remembered.deviceName) {
+      return device;
+    }
+  }
+  for (final device in attached) {
+    if (sameVidPid(device)) return device;
+  }
+  return null;
+}
+
 /// Tracks one discovery ping from transmission through its first response.
 ///
 /// The first response completes [result] immediately. Further responses can
@@ -231,6 +305,20 @@ class LoRaCompanionService {
   final _batteryController = StreamController<int?>.broadcast();
   StreamSubscription? _connectionStateSubscription;
 
+  // Automatic reconnection after an unexpected connection loss. A connection
+  // dropped by the user (disconnectDevice) is never restored automatically.
+  static const ReconnectBackoff _reconnectBackoff = ReconnectBackoff();
+  Timer? _reconnectTimer;
+  int _reconnectAttempts = 0;
+  bool _autoReconnectActive = false;
+  bool _connectInFlight = false;
+  bool _userDisconnectRequested = false;
+  String? _lastBluetoothRemoteId;
+  String? _lastBluetoothName;
+  UsbDevice? _lastUsbDevice;
+  final _reconnectStateController =
+      StreamController<ReconnectStatus>.broadcast();
+
   // Connected device identity for sample tagging
   String? _connectedDeviceId; // Stable ID for the connected LoRa companion
   String? get connectedDeviceId => _connectedDeviceId;
@@ -290,6 +378,22 @@ class LoRaCompanionService {
   Stream<PingResult> get pingResults => _pingResultController.stream;
   int? get batteryPercent => _batteryPercent;
   Stream<int?> get batteryStream => _batteryController.stream;
+
+  /// Whether the automatic reconnection loop is engaged after a lost device.
+  bool get isAutoReconnecting => _autoReconnectActive;
+
+  /// Number of failed reconnect attempts since the connection was lost.
+  int get reconnectAttempts => _reconnectAttempts;
+
+  /// Name of the device the reconnection loop is trying to reach.
+  String? get reconnectDeviceName =>
+      _lastBluetoothName ??
+      _lastUsbDevice?.productName ??
+      _lastUsbDevice?.deviceName;
+
+  /// Broadcasts [ReconnectStatus] updates of the automatic reconnection loop.
+  Stream<ReconnectStatus> get reconnectStateStream =>
+      _reconnectStateController.stream;
 
   /// Get the currently ignored repeater prefix
   String? get ignoredRepeaterPrefix => _ignoredRepeaterPrefix;
@@ -466,119 +570,144 @@ class LoRaCompanionService {
     return controller.stream;
   }
 
-  /// Connect to LoRa device via Bluetooth
+  /// Connect to LoRa device via Bluetooth (user-initiated).
+  ///
+  /// Cancels any pending automatic reconnection first so an explicit connect
+  /// always supersedes the background loop.
   Future<bool> connectBluetooth(BluetoothDevice device) async {
+    _stopAutoReconnect();
+    // An explicit user connect re-arms automatic reconnection for the new
+    // session once it is established.
+    _userDisconnectRequested = false;
+    if (_connectInFlight) {
+      _debugLog.logError('Connect skipped: another attempt is in progress');
+      return false;
+    }
+    return _connectBluetoothDevice(device);
+  }
+
+  Future<bool> _connectBluetoothDevice(BluetoothDevice device) async {
+    if (_connectInFlight) return false;
+    _connectInFlight = true;
     try {
-      await device.connect(timeout: const Duration(seconds: 15));
-      _bluetoothDevice = device;
-
       try {
-        await device.requestMtu(512);
-      } catch (e) {
-        _debugLog.logInfo('BLE MTU negotiation unavailable: $e');
-      }
+        await device.connect(timeout: const Duration(seconds: 15));
+        _bluetoothDevice = device;
 
-      List<BluetoothService> services = await device.discoverServices();
-
-      // MeshCore uses the Nordic UART service with fixed RX/TX UUIDs.
-      for (BluetoothService service in services) {
-        if (service.uuid.toString().toLowerCase() == _meshCoreServiceUuid) {
-          for (BluetoothCharacteristic char in service.characteristics) {
-            final uuid = char.uuid.toString().toLowerCase();
-            if (uuid == _meshCoreRxUuid && char.properties.write) {
-              _txCharacteristic = char;
-            }
-            if (uuid == _meshCoreTxUuid && char.properties.notify) {
-              _rxCharacteristic = char;
-              await char.setNotifyValue(true);
-              _deviceSubscription = char.lastValueStream.listen((value) {
-                _handleDeviceData(Uint8List.fromList(value));
-              });
-            }
-          }
+        try {
+          await device.requestMtu(512);
+        } catch (e) {
+          _debugLog.logInfo('BLE MTU negotiation unavailable: $e');
         }
 
-        // Try to read battery service (standard BLE Battery Service)
-        // UUID: 0x180F (Battery Service), 0x2A19 (Battery Level Characteristic)
-        if (service.uuid.toString().toLowerCase() ==
-            '0000180f-0000-1000-8000-00805f9b34fb') {
-          for (BluetoothCharacteristic char in service.characteristics) {
-            if (char.uuid.toString().toLowerCase() ==
-                '00002a19-0000-1000-8000-00805f9b34fb') {
-              try {
-                // Store battery characteristic for periodic reading
-                _batteryCharacteristic = char;
+        List<BluetoothService> services = await device.discoverServices();
 
-                // Try to read battery level
-                final value = await char.read();
-                if (value.isNotEmpty) {
-                  _batteryPercent = value[0];
-                  _batteryController.add(_batteryPercent);
-                  debugPrint('Battery level: $_batteryPercent%');
-                }
+        // MeshCore uses the Nordic UART service with fixed RX/TX UUIDs.
+        for (BluetoothService service in services) {
+          if (service.uuid.toString().toLowerCase() == _meshCoreServiceUuid) {
+            for (BluetoothCharacteristic char in service.characteristics) {
+              final uuid = char.uuid.toString().toLowerCase();
+              if (uuid == _meshCoreRxUuid && char.properties.write) {
+                _txCharacteristic = char;
+              }
+              if (uuid == _meshCoreTxUuid && char.properties.notify) {
+                _rxCharacteristic = char;
+                await char.setNotifyValue(true);
+                _deviceSubscription = char.lastValueStream.listen((value) {
+                  _handleDeviceData(Uint8List.fromList(value));
+                });
+              }
+            }
+          }
 
-                // Subscribe to battery updates if supported
-                if (char.properties.notify) {
-                  await char.setNotifyValue(true);
-                  char.lastValueStream.listen((value) {
-                    if (value.isNotEmpty) {
-                      _batteryPercent = value[0];
-                      _batteryController.add(_batteryPercent);
-                      debugPrint('Battery level updated: $_batteryPercent%');
-                    }
-                  });
+          // Try to read battery service (standard BLE Battery Service)
+          // UUID: 0x180F (Battery Service), 0x2A19 (Battery Level Characteristic)
+          if (service.uuid.toString().toLowerCase() ==
+              '0000180f-0000-1000-8000-00805f9b34fb') {
+            for (BluetoothCharacteristic char in service.characteristics) {
+              if (char.uuid.toString().toLowerCase() ==
+                  '00002a19-0000-1000-8000-00805f9b34fb') {
+                try {
+                  // Store battery characteristic for periodic reading
+                  _batteryCharacteristic = char;
+
+                  // Try to read battery level
+                  final value = await char.read();
+                  if (value.isNotEmpty) {
+                    _batteryPercent = value[0];
+                    _batteryController.add(_batteryPercent);
+                    debugPrint('Battery level: $_batteryPercent%');
+                  }
+
+                  // Subscribe to battery updates if supported
+                  if (char.properties.notify) {
+                    await char.setNotifyValue(true);
+                    char.lastValueStream.listen((value) {
+                      if (value.isNotEmpty) {
+                        _batteryPercent = value[0];
+                        _batteryController.add(_batteryPercent);
+                        debugPrint('Battery level updated: $_batteryPercent%');
+                      }
+                    });
+                  }
+                } catch (e) {
+                  debugPrint('Could not read battery level: $e');
                 }
-              } catch (e) {
-                debugPrint('Could not read battery level: $e');
               }
             }
           }
         }
+
+        if (_txCharacteristic != null && _rxCharacteristic != null) {
+          _connectionType = ConnectionType.bluetooth;
+          _deviceName = device.platformName.isNotEmpty
+              ? device.platformName
+              : device.remoteId.toString();
+          _connectedDeviceId = device.remoteId
+              .toString()
+              .replaceAll(':', '')
+              .toUpperCase();
+          _onConnectionEstablished(
+            bluetoothRemoteId: device.remoteId.toString(),
+            bluetoothName: _deviceName,
+          );
+          debugPrint(
+            'Connected to LoRa device via Bluetooth (ID: $_connectedDeviceId)',
+          );
+
+          // Monitor connection state for disconnection
+          _connectionStateSubscription = device.connectionState.listen((state) {
+            debugPrint('Bluetooth connection state: $state');
+            if (state == BluetoothConnectionState.disconnected) {
+              _handleBluetoothDisconnection();
+            }
+          });
+
+          // Enable BLE mode in protocol parser (unwrapped frames)
+          _protocol.setBLEMode(true);
+          _debugLog.logInfo('Protocol set to BLE mode (unwrapped frames)');
+
+          // Start periodic battery check if not already getting updates
+          _startBatteryMonitoring();
+
+          // Negotiate the protocol and identify the app.
+          await Future.delayed(const Duration(milliseconds: 500));
+          await _sendProtocolHandshake();
+
+          // Load full contact list so repeaters appear on the map
+          await Future.delayed(const Duration(milliseconds: 150));
+          await _requestAllContacts();
+
+          return true;
+        }
+
+        return false;
+      } catch (e) {
+        debugPrint('Bluetooth connection error: $e');
+        return false;
       }
-
-      if (_txCharacteristic != null && _rxCharacteristic != null) {
-        _connectionType = ConnectionType.bluetooth;
-        _deviceName = device.platformName.isNotEmpty
-            ? device.platformName
-            : device.remoteId.toString();
-        _connectedDeviceId = device.remoteId
-            .toString()
-            .replaceAll(':', '')
-            .toUpperCase();
-        debugPrint(
-          'Connected to LoRa device via Bluetooth (ID: $_connectedDeviceId)',
-        );
-
-        // Monitor connection state for disconnection
-        _connectionStateSubscription = device.connectionState.listen((state) {
-          debugPrint('Bluetooth connection state: $state');
-          if (state == BluetoothConnectionState.disconnected) {
-            _handleBluetoothDisconnection();
-          }
-        });
-
-        // Enable BLE mode in protocol parser (unwrapped frames)
-        _protocol.setBLEMode(true);
-        _debugLog.logInfo('Protocol set to BLE mode (unwrapped frames)');
-
-        // Start periodic battery check if not already getting updates
-        _startBatteryMonitoring();
-
-        // Negotiate the protocol and identify the app.
-        await Future.delayed(const Duration(milliseconds: 500));
-        await _sendProtocolHandshake();
-
-        // Load full contact list so repeaters appear on the map
-        await Future.delayed(const Duration(milliseconds: 150));
-        await _requestAllContacts();
-
-        return true;
-      }
-
-      return false;
-    } catch (e) {
-      debugPrint('Bluetooth connection error: $e');
-      return false;
+    } finally {
+      _connectInFlight = false;
     }
   }
 
@@ -596,62 +725,86 @@ class LoRaCompanionService {
     }
   }
 
-  /// Connect to LoRa device via USB
+  /// Connect to LoRa device via USB (user-initiated).
+  ///
+  /// Cancels any pending automatic reconnection first so an explicit connect
+  /// always supersedes the background loop.
   Future<bool> connectUsb(UsbDevice device) async {
-    try {
-      _usbPort = await device.create();
-      if (_usbPort == null) return false;
-
-      bool opened = await _usbPort!.open();
-      if (!opened) return false;
-
-      await _usbPort!.setDTR(true);
-      await _usbPort!.setRTS(true);
-      await _usbPort!.setPortParameters(
-        115200, // Standard baud rate for Meshtastic
-        UsbPort.DATABITS_8,
-        UsbPort.STOPBITS_1,
-        UsbPort.PARITY_NONE,
-      );
-
-      _deviceSubscription = _usbPort!.inputStream?.listen(
-        (data) {
-          _handleDeviceData(Uint8List.fromList(data));
-        },
-        onError: (error) {
-          debugPrint('⚠️ USB stream error: $error');
-          _handleUsbDisconnection();
-        },
-        onDone: () {
-          debugPrint('⚠️ USB stream closed');
-          _handleUsbDisconnection();
-        },
-      );
-
-      _connectionType = ConnectionType.usb;
-      // Use USB device product name + vendor ID as stable identifier
-      _connectedDeviceId = 'USB_${device.productName ?? 'unknown'}'
-          .replaceAll(' ', '_')
-          .toUpperCase();
-      _deviceName = device.productName ?? 'USB Device';
-      debugPrint('Connected to LoRa device via USB (ID: $_connectedDeviceId)');
-
-      // Ensure USB mode in protocol parser (wrapped frames with '>')
-      _protocol.setBLEMode(false);
-      _debugLog.logInfo('Protocol set to USB mode (wrapped frames)');
-
-      // Negotiate the protocol and identify the app.
-      await Future.delayed(const Duration(milliseconds: 500));
-      await _sendProtocolHandshake();
-
-      // Load full contact list so repeaters appear on the map
-      await Future.delayed(const Duration(milliseconds: 150));
-      await _requestAllContacts();
-
-      return true;
-    } catch (e) {
-      debugPrint('USB connection error: $e');
+    _stopAutoReconnect();
+    // An explicit user connect re-arms automatic reconnection for the new
+    // session once it is established.
+    _userDisconnectRequested = false;
+    if (_connectInFlight) {
+      _debugLog.logError('Connect skipped: another attempt is in progress');
       return false;
+    }
+    return _connectUsbDevice(device);
+  }
+
+  Future<bool> _connectUsbDevice(UsbDevice device) async {
+    if (_connectInFlight) return false;
+    _connectInFlight = true;
+    try {
+      try {
+        _usbPort = await device.create();
+        if (_usbPort == null) return false;
+
+        bool opened = await _usbPort!.open();
+        if (!opened) return false;
+
+        await _usbPort!.setDTR(true);
+        await _usbPort!.setRTS(true);
+        await _usbPort!.setPortParameters(
+          115200, // Standard baud rate for Meshtastic
+          UsbPort.DATABITS_8,
+          UsbPort.STOPBITS_1,
+          UsbPort.PARITY_NONE,
+        );
+
+        _deviceSubscription = _usbPort!.inputStream?.listen(
+          (data) {
+            _handleDeviceData(Uint8List.fromList(data));
+          },
+          onError: (error) {
+            debugPrint('⚠️ USB stream error: $error');
+            _handleUsbDisconnection();
+          },
+          onDone: () {
+            debugPrint('⚠️ USB stream closed');
+            _handleUsbDisconnection();
+          },
+        );
+
+        _connectionType = ConnectionType.usb;
+        // Use USB device product name + vendor ID as stable identifier
+        _connectedDeviceId = 'USB_${device.productName ?? 'unknown'}'
+            .replaceAll(' ', '_')
+            .toUpperCase();
+        _deviceName = device.productName ?? 'USB Device';
+        _onConnectionEstablished(usbDevice: device);
+        debugPrint(
+          'Connected to LoRa device via USB (ID: $_connectedDeviceId)',
+        );
+
+        // Ensure USB mode in protocol parser (wrapped frames with '>')
+        _protocol.setBLEMode(false);
+        _debugLog.logInfo('Protocol set to USB mode (wrapped frames)');
+
+        // Negotiate the protocol and identify the app.
+        await Future.delayed(const Duration(milliseconds: 500));
+        await _sendProtocolHandshake();
+
+        // Load full contact list so repeaters appear on the map
+        await Future.delayed(const Duration(milliseconds: 150));
+        await _requestAllContacts();
+
+        return true;
+      } catch (e) {
+        debugPrint('USB connection error: $e');
+        return false;
+      }
+    } finally {
+      _connectInFlight = false;
     }
   }
 
@@ -1614,6 +1767,7 @@ class LoRaCompanionService {
 
     _stopBatteryMonitoring();
     _deviceSubscription?.cancel();
+    _deviceSubscription = null;
 
     _usbPort = null;
     _connectionType = ConnectionType.none;
@@ -1623,16 +1777,22 @@ class LoRaCompanionService {
 
     // Notify listeners of disconnect
     _disconnectController.add(null);
+
+    // The user did not ask for this: try to restore the connection.
+    _beginAutoReconnect();
   }
 
   /// Handle unexpected Bluetooth disconnection
   void _handleBluetoothDisconnection() {
+    if (_connectionType != ConnectionType.bluetooth) return;
     debugPrint('⚠️ Bluetooth device disconnected unexpectedly');
     _debugLog.logError('Bluetooth disconnected');
 
     _stopBatteryMonitoring();
     _connectionStateSubscription?.cancel();
     _deviceSubscription?.cancel();
+    _connectionStateSubscription = null;
+    _deviceSubscription = null;
 
     _bluetoothDevice = null;
     _txCharacteristic = null;
@@ -1644,10 +1804,18 @@ class LoRaCompanionService {
 
     // Notify listeners of disconnect
     _disconnectController.add(null);
+
+    // The user did not ask for this: try to restore the connection.
+    _beginAutoReconnect();
   }
 
   Future<void> disconnectDevice() async {
     try {
+      // User-initiated disconnect: the device must not be reconnected
+      // automatically afterwards.
+      _userDisconnectRequested = true;
+      _stopAutoReconnect();
+
       _stopBatteryMonitoring();
       await _connectionStateSubscription?.cancel();
       await _deviceSubscription?.cancel();
@@ -1666,6 +1834,7 @@ class LoRaCompanionService {
       _connectionType = ConnectionType.none;
       _deviceName = null;
       _connectionStateSubscription = null;
+      _deviceSubscription = null;
       debugPrint('LoRa device disconnected');
 
       // Notify listeners of disconnect
@@ -1673,6 +1842,140 @@ class LoRaCompanionService {
     } catch (e) {
       debugPrint('Error disconnecting device: $e');
     }
+  }
+
+  // ============================================================================
+  // AUTOMATIC RECONNECT
+  // ============================================================================
+
+  /// Starts the automatic reconnection loop after an unexpected disconnect.
+  void _beginAutoReconnect() {
+    if (_userDisconnectRequested) return;
+    if (_lastBluetoothRemoteId == null && _lastUsbDevice == null) return;
+    if (_autoReconnectActive) return;
+
+    _autoReconnectActive = true;
+    _reconnectAttempts = 0;
+    _debugLog.logInfo(
+      'Auto-reconnect started for ${reconnectDeviceName ?? 'device'}',
+    );
+    _scheduleNextReconnectAttempt();
+  }
+
+  /// Schedules the next reconnect attempt using exponential backoff.
+  void _scheduleNextReconnectAttempt() {
+    if (_userDisconnectRequested || isDeviceConnected) return;
+
+    _reconnectTimer?.cancel();
+    final attempt = _reconnectAttempts + 1;
+    final delay = _reconnectBackoff.delayForAttempt(attempt);
+    debugPrint(
+      '⏳ Reconnecting to LoRa device in ${delay.inSeconds}s (attempt $attempt)',
+    );
+    _reconnectTimer = Timer(delay, () {
+      _reconnectTimer = null;
+      unawaited(_attemptReconnect());
+    });
+    _emitReconnectStatus(active: true, nextAttempt: attempt);
+  }
+
+  /// Runs one reconnect attempt against the remembered device and reschedules
+  /// itself with backoff until the connection is restored or the user
+  /// disconnects (or connects manually) in the meantime.
+  Future<void> _attemptReconnect() async {
+    if (_userDisconnectRequested || isDeviceConnected || _connectInFlight) {
+      return;
+    }
+    final bluetoothRemoteId = _lastBluetoothRemoteId;
+    final usbTarget = _lastUsbDevice;
+    if (bluetoothRemoteId == null && usbTarget == null) return;
+
+    _debugLog.logInfo(
+      'Reconnect attempt ${_reconnectAttempts + 1} '
+      '(${bluetoothRemoteId != null ? 'bluetooth' : 'usb'})...',
+    );
+
+    try {
+      if (bluetoothRemoteId != null) {
+        await _connectBluetoothDevice(
+          BluetoothDevice.fromId(bluetoothRemoteId),
+        );
+      } else {
+        // deviceId changes on every replug, so re-scan and match on stable
+        // attributes instead of reusing the stale UsbDevice instance.
+        final attached = await scanUsbDevices();
+        final match = matchUsbDevice(attached, usbTarget!);
+        if (match != null) {
+          await _connectUsbDevice(match);
+        } else {
+          _debugLog.logInfo('Remembered USB device is not attached yet');
+        }
+      }
+    } catch (e) {
+      _debugLog.logError('Reconnect attempt failed: $e');
+    }
+
+    // A user disconnect may have raced the in-flight attempt.
+    if (_userDisconnectRequested) {
+      if (isDeviceConnected) await disconnectDevice();
+      return;
+    }
+
+    if (isDeviceConnected) {
+      _debugLog.logInfo('✅ LoRa device reconnected automatically');
+      _autoReconnectActive = false;
+      _emitReconnectStatus(active: false, restored: true);
+      return;
+    }
+
+    _reconnectAttempts += 1;
+    _scheduleNextReconnectAttempt();
+  }
+
+  /// Stops the automatic reconnection loop (user disconnect or manual
+  /// connect) and reports the loop as inactive.
+  void _stopAutoReconnect() {
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
+    if (!_autoReconnectActive) return;
+    _autoReconnectActive = false;
+    _emitReconnectStatus(active: false);
+  }
+
+  /// Records a successfully established connection and re-arms the
+  /// automatic reconnection for future unexpected losses.
+  ///
+  /// Never clears [_userDisconnectRequested]: if the user asked to disconnect
+  /// while a connect attempt was still in flight, the caller is responsible
+  /// for tearing the connection down again.
+  void _onConnectionEstablished({
+    String? bluetoothRemoteId,
+    String? bluetoothName,
+    UsbDevice? usbDevice,
+  }) {
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
+    _reconnectAttempts = 0;
+    _autoReconnectActive = false;
+    _lastBluetoothRemoteId = bluetoothRemoteId;
+    _lastBluetoothName = bluetoothName;
+    _lastUsbDevice = usbDevice;
+  }
+
+  void _emitReconnectStatus({
+    required bool active,
+    int nextAttempt = 0,
+    bool restored = false,
+  }) {
+    if (_reconnectStateController.isClosed) return;
+    _reconnectStateController.add(
+      ReconnectStatus(
+        active: active,
+        nextAttempt: nextAttempt,
+        deviceName: reconnectDeviceName,
+        restored: restored,
+      ),
+    );
   }
 
   Future<void> disconnectMqtt() async {
@@ -1771,9 +2074,11 @@ class LoRaCompanionService {
   }
 
   void dispose() {
+    _stopAutoReconnect();
     disconnectDevice();
     _pingResultController.close();
     _batteryController.close();
     _disconnectController.close();
+    _reconnectStateController.close();
   }
 }

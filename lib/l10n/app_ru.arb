@@ -503,6 +503,8 @@
   "mapDisconnectLoraDevice": "Отключить устройство LoRa",
   "mapDisconnectConfirm": "Отключить LoRa-компаньон?",
   "mapLoraDisconnected": "Устройство LoRa отключено",
+  "mapLoraReconnecting": "Связь потеряна. Переподключение к {name}...",
+  "mapLoraReconnected": "Соединение с {name} восстановлено",
   "mapRefreshingContactList": "Обновление списка контактов...",
   "mapContactListUpdated": "Список контактов обновлён",
   "mapScanningForRepeaters": "Сканирование репитеров...",

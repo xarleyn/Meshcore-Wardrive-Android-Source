@@ -3116,6 +3116,18 @@ abstract class AppLocalizations {
   /// **'LoRa device disconnected'**
   String get mapLoraDisconnected;
 
+  /// Snackbar when the LoRa connection dropped and automatic reconnection started
+  ///
+  /// In en, this message translates to:
+  /// **'Connection lost. Reconnecting to {name}...'**
+  String mapLoraReconnecting(String name);
+
+  /// Snackbar when the LoRa device was reconnected automatically
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnected to {name}'**
+  String mapLoraReconnected(String name);
+
   /// Snackbar while refreshing radio contacts
   ///
   /// In en, this message translates to:

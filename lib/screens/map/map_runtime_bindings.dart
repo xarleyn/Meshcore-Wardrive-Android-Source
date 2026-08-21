@@ -4,6 +4,7 @@ enum MapRuntimeSubscription {
   battery,
   radioPosition,
   carpeater,
+  reconnect,
   position,
   positionSource,
   course,

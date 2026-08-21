@@ -40,12 +40,20 @@ class LocationService {
 
   LocationService() {
     _carpeaterService = CarpeaterService(_loraCompanion, _settings);
-    // Auto-disable auto-ping on device disconnect
+    // Suspend auto-ping while the device connection is lost...
     _loraCompanion.disconnectStream.listen((_) {
       if (_autoPingEnabled) {
-        disableAutoPing();
-        _logger.logPingEvent('Auto-ping disabled (device disconnected)');
+        _suspendAutoPingForReconnect();
       }
+    });
+    // ...and resume it once the automatic reconnection restores the link.
+    // A disconnect made by the user never triggers a reconnection, so
+    // auto-ping stays off in that case.
+    _loraCompanion.reconnectStateStream.listen((status) {
+      if (!status.restored || !_autoPingResumeOnReconnect) return;
+      _autoPingResumeOnReconnect = false;
+      enableAutoPing();
+      _logger.logPingEvent('Auto-ping resumed after automatic reconnection');
     });
   }
   StreamSubscription<Position>? _positionStreamSubscription;
@@ -64,6 +72,7 @@ class LocationService {
   LocationPositionSource _activePositionSource = LocationPositionSource.fused;
   bool _isTracking = false;
   bool _autoPingEnabled = false;
+  bool _autoPingResumeOnReconnect = false;
   double _pingIntervalMeters = 805.0; // Default 0.5 miles
   LatLng? _lastPingPosition;
 
@@ -744,6 +753,7 @@ class LocationService {
       'enableAutoPing() called - Device connected: $isConnected, Type: ${connectionType.name}',
     );
 
+    _autoPingResumeOnReconnect = false;
     if (isConnected) {
       _autoPingEnabled = true;
       _logger.logPingEvent(
@@ -760,7 +770,20 @@ class LocationService {
     _autoPingEnabled = false;
     _timePingTimer?.cancel();
     _timePingTimer = null;
+    _autoPingResumeOnReconnect = false;
     _logger.logPingEvent('Auto-ping disabled');
+  }
+
+  /// Disable auto-ping because the device connection was lost unexpectedly.
+  ///
+  /// Unlike [disableAutoPing], the intent to ping is remembered so it can be
+  /// resumed when the automatic reconnection restores the device.
+  void _suspendAutoPingForReconnect() {
+    _autoPingEnabled = false;
+    _timePingTimer?.cancel();
+    _timePingTimer = null;
+    _autoPingResumeOnReconnect = true;
+    _logger.logPingEvent('Auto-ping disabled (device disconnected)');
   }
 
   /// Check if auto-ping is enabled

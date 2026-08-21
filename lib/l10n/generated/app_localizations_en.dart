@@ -1782,6 +1782,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mapLoraDisconnected => 'LoRa device disconnected';
 
   @override
+  String mapLoraReconnecting(String name) {
+    return 'Connection lost. Reconnecting to $name...';
+  }
+
+  @override
+  String mapLoraReconnected(String name) {
+    return 'Reconnected to $name';
+  }
+
+  @override
   String get mapRefreshingContactList => 'Refreshing contact list...';
 
   @override

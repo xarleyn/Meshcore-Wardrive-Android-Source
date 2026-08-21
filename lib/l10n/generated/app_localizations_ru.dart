@@ -1812,6 +1812,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mapLoraDisconnected => 'Устройство LoRa отключено';
 
   @override
+  String mapLoraReconnecting(String name) {
+    return 'Связь потеряна. Переподключение к $name...';
+  }
+
+  @override
+  String mapLoraReconnected(String name) {
+    return 'Соединение с $name восстановлено';
+  }
+
+  @override
   String get mapRefreshingContactList => 'Обновление списка контактов...';
 
   @override

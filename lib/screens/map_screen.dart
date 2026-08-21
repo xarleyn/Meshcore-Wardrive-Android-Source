@@ -366,6 +366,23 @@ class _MapScreenState extends State<MapScreen> {
       },
     );
 
+    // Subscribe to automatic reconnection status updates
+    _runtimeBindings.bind(
+      MapRuntimeSubscription.reconnect,
+      loraService.reconnectStateStream,
+      (status) {
+        if (!mounted) return;
+        final name = status.deviceName;
+        if (status.restored && name != null) {
+          _showSnackBar(AppLocalizations.of(context).mapLoraReconnected(name));
+        } else if (status.active && status.nextAttempt == 1 && name != null) {
+          _showSnackBar(AppLocalizations.of(context).mapLoraReconnecting(name));
+        }
+        // Refresh connection badges and the home screen widget.
+        _loadSamples();
+      },
+    );
+
     // Subscribe to Carpeater state changes
     _runtimeBindings.bind(
       MapRuntimeSubscription.carpeater,
