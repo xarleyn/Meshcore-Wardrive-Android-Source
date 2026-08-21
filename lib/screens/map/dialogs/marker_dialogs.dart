@@ -7,11 +7,95 @@ import '../../../models/models.dart';
 
 enum PlannedMarkerAction { delete }
 
+enum MapLongPressAction { plannedRepeater, privacyZone, impossibleZone }
+
 class PrivacyZoneDraft {
   const PrivacyZoneDraft({required this.radiusMeters, this.label});
 
   final double radiusMeters;
   final String? label;
+}
+
+class ImpossibleZoneDraft {
+  const ImpossibleZoneDraft({
+    required this.center,
+    required this.radiusMeters,
+    required this.label,
+  });
+
+  final LatLng center;
+  final double radiusMeters;
+  final String? label;
+}
+
+class MapLongPressActionSheet extends StatelessWidget {
+  const MapLongPressActionSheet({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 12),
+              child: Text(
+                l10n.mapLongPressActionTitle,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+            _MapLongPressActionTile(
+              icon: Icons.cell_tower_outlined,
+              title: l10n.mapAddPlannedRepeater,
+              subtitle: l10n.mapLongPressPlannedRepeaterSubtitle,
+              action: MapLongPressAction.plannedRepeater,
+            ),
+            _MapLongPressActionTile(
+              icon: Icons.privacy_tip_outlined,
+              title: l10n.mapAddPrivacyZone,
+              subtitle: l10n.mapLongPressPrivacyZoneSubtitle,
+              action: MapLongPressAction.privacyZone,
+            ),
+            _MapLongPressActionTile(
+              icon: Icons.gps_off_outlined,
+              title: l10n.settingsAddImpossibleZone,
+              subtitle: l10n.mapLongPressImpossibleZoneSubtitle,
+              action: MapLongPressAction.impossibleZone,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MapLongPressActionTile extends StatelessWidget {
+  const _MapLongPressActionTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.action,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final MapLongPressAction action;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      subtitle: Text(subtitle),
+      onTap: () => Navigator.pop(context, action),
+    );
+  }
 }
 
 class AddPlannedMarkerDialog extends StatefulWidget {
@@ -123,16 +207,68 @@ class PlannedMarkerInfoDialog extends StatelessWidget {
   }
 }
 
-class AddPrivacyZoneDialog extends StatefulWidget {
+class AddPrivacyZoneDialog extends StatelessWidget {
   const AddPrivacyZoneDialog({required this.center, super.key});
 
   final LatLng center;
 
   @override
-  State<AddPrivacyZoneDialog> createState() => _AddPrivacyZoneDialogState();
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return _AddCircularZoneDialog<PrivacyZoneDraft>(
+      center: center,
+      title: l10n.mapAddPrivacyZone,
+      blurb: l10n.mapPrivacyZoneBlurb,
+      labelHint: l10n.mapPrivacyZoneHint,
+      createDraft: (radiusMeters, label) =>
+          PrivacyZoneDraft(radiusMeters: radiusMeters, label: label),
+    );
+  }
 }
 
-class _AddPrivacyZoneDialogState extends State<AddPrivacyZoneDialog> {
+class AddImpossibleZoneDialog extends StatelessWidget {
+  const AddImpossibleZoneDialog({required this.center, super.key});
+
+  final LatLng center;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return _AddCircularZoneDialog<ImpossibleZoneDraft>(
+      center: center,
+      title: l10n.settingsAddImpossibleZone,
+      blurb: l10n.settingsAddImpossibleZoneBlurb,
+      labelHint: l10n.settingsLabelHintAirport,
+      createDraft: (radiusMeters, label) => ImpossibleZoneDraft(
+        center: center,
+        radiusMeters: radiusMeters,
+        label: label,
+      ),
+    );
+  }
+}
+
+class _AddCircularZoneDialog<T> extends StatefulWidget {
+  const _AddCircularZoneDialog({
+    required this.center,
+    required this.title,
+    required this.blurb,
+    required this.labelHint,
+    required this.createDraft,
+  });
+
+  final LatLng center;
+  final String title;
+  final String blurb;
+  final String labelHint;
+  final T Function(double radiusMeters, String? label) createDraft;
+
+  @override
+  State<_AddCircularZoneDialog<T>> createState() =>
+      _AddCircularZoneDialogState<T>();
+}
+
+class _AddCircularZoneDialogState<T> extends State<_AddCircularZoneDialog<T>> {
   final _labelController = TextEditingController();
   double _selectedRadius = 1000;
 
@@ -153,7 +289,7 @@ class _AddPrivacyZoneDialogState extends State<AddPrivacyZoneDialog> {
     ];
 
     return AlertDialog(
-      title: Text(l10n.mapAddPrivacyZone),
+      title: Text(widget.title),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,13 +302,13 @@ class _AddPrivacyZoneDialogState extends State<AddPrivacyZoneDialog> {
             style: const TextStyle(fontSize: 12, color: Colors.grey),
           ),
           const SizedBox(height: 8),
-          Text(l10n.mapPrivacyZoneBlurb, style: const TextStyle(fontSize: 12)),
+          Text(widget.blurb, style: const TextStyle(fontSize: 12)),
           const SizedBox(height: 12),
           TextField(
             controller: _labelController,
             decoration: InputDecoration(
               labelText: l10n.settingsLabelOptional,
-              hintText: l10n.mapPrivacyZoneHint,
+              hintText: widget.labelHint,
             ),
           ),
           const SizedBox(height: 12),
@@ -206,13 +342,10 @@ class _AddPrivacyZoneDialogState extends State<AddPrivacyZoneDialog> {
         ),
         TextButton(
           onPressed: () {
-            final label = _labelController.text;
+            final label = _labelController.text.trim();
             Navigator.pop(
               context,
-              PrivacyZoneDraft(
-                radiusMeters: _selectedRadius,
-                label: label.isEmpty ? null : label,
-              ),
+              widget.createDraft(_selectedRadius, label.isEmpty ? null : label),
             );
           },
           child: Text(l10n.settingsAddZone),

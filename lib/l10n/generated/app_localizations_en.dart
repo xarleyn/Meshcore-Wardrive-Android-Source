@@ -1427,6 +1427,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mapAddPlannedRepeater => 'Add Planned Repeater';
 
   @override
+  String get mapLongPressActionTitle => 'Add to map';
+
+  @override
+  String get mapLongPressPlannedRepeaterSubtitle =>
+      'Mark a possible future repeater location';
+
+  @override
+  String get mapLongPressPrivacyZoneSubtitle =>
+      'Exclude this area from uploads and exports';
+
+  @override
+  String get mapLongPressImpossibleZoneSubtitle =>
+      'Reject unreliable GPS positions in this area';
+
+  @override
   String get mapPlannedRepeaterHint => 'e.g., Hilltop near Tracyton';
 
   @override

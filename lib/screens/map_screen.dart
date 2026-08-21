@@ -1337,7 +1337,28 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-  void _handleMapLongPress(LatLng point) async {
+  Future<void> _handleMapLongPress(LatLng point) async {
+    final action = await showModalBottomSheet<MapLongPressAction>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => const MapLongPressActionSheet(),
+    );
+    if (!mounted || action == null) return;
+
+    switch (action) {
+      case MapLongPressAction.plannedRepeater:
+        await _addPlannedMarker(point);
+        break;
+      case MapLongPressAction.privacyZone:
+        await _addPrivacyZone(point);
+        break;
+      case MapLongPressAction.impossibleZone:
+        await _addImpossibleZone(point);
+        break;
+    }
+  }
+
+  Future<void> _addPlannedMarker(LatLng point) async {
     final label = await showDialog<String>(
       context: context,
       builder: (context) => AddPlannedMarkerDialog(position: point),
@@ -1419,6 +1440,25 @@ class _MapScreenState extends State<MapScreen> {
       if (!mounted) return;
       _showSnackBar(l10n.mapPrivacyZoneAdded);
     }
+  }
+
+  Future<void> _addImpossibleZone(LatLng center) async {
+    final l10n = AppLocalizations.of(context);
+    final draft = await showDialog<ImpossibleZoneDraft>(
+      context: context,
+      builder: (context) => AddImpossibleZoneDialog(center: center),
+    );
+
+    if (draft == null) return;
+    await _databaseService.addImpossibleZone(
+      draft.center.latitude,
+      draft.center.longitude,
+      draft.radiusMeters,
+      draft.label,
+    );
+    await _loadImpossibleZones();
+    if (!mounted) return;
+    _showSnackBar(l10n.settingsImpossibleZoneAdded);
   }
 
   // ============================================================================

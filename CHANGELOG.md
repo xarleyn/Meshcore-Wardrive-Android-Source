@@ -8,7 +8,10 @@
 - **Impossible Zones** in Location Quality Filters: user-defined circles
   where you cannot physically be. GPS or Wi-Fi fixes inside a zone are
   discarded (no sample, no ping) and the map keeps the last valid
-  position. Managed in Settings only; not drawn on the map.
+  position. They can be added from Settings or by long-pressing the map;
+  they are not drawn on the map.
+- Long-pressing the map now opens a choice of what to add: a planned repeater,
+  a privacy zone, or a GPS-impossible zone.
 - Before a GPS fix is available, the map opens on the average of stored
   measurements at a city-scale zoom. Spread-out samples zoom out to fit. With
   no samples it keeps the previous default view, and the first GPS fix still

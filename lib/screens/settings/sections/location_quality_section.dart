@@ -4,19 +4,8 @@ import 'package:latlong2/latlong.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/impossible_zone.dart';
 import '../../../models/location_quality_settings.dart';
+import '../../map/dialogs/marker_dialogs.dart';
 import '../settings_screen.dart';
-
-class ImpossibleZoneDraft {
-  const ImpossibleZoneDraft({
-    required this.center,
-    required this.radiusMeters,
-    required this.label,
-  });
-
-  final LatLng center;
-  final double radiusMeters;
-  final String? label;
-}
 
 Future<void> showLocationQualitySettings(
   BuildContext context, {
@@ -185,7 +174,11 @@ List<Widget> _buildLocationQualitySettings(
       ),
       leading: const Icon(Icons.add_location_alt_outlined),
       onTap: () async {
-        final draft = await _showAddZoneDialog(context, newZoneCenter());
+        final draft = await showDialog<ImpossibleZoneDraft>(
+          context: context,
+          builder: (context) =>
+              AddImpossibleZoneDialog(center: newZoneCenter()),
+        );
         if (draft != null) await onAddZone(draft);
       },
     ),
@@ -265,103 +258,6 @@ Future<void> _editValue(
   );
   if (input == null || !context.mounted) return;
   await onSaved(double.parse(input.trim().replaceAll(',', '.')));
-}
-
-Future<ImpossibleZoneDraft?> _showAddZoneDialog(
-  BuildContext context,
-  LatLng center,
-) async {
-  final l10n = AppLocalizations.of(context);
-  final radiusOptions = [
-    (label: l10n.settingsRadius500m, meters: 500.0),
-    (label: l10n.settingsRadius1km, meters: 1000.0),
-    (label: l10n.settingsRadius2km, meters: 2000.0),
-    (label: l10n.settingsRadius5km, meters: 5000.0),
-  ];
-  var selectedRadius = 1000.0;
-  final labelController = TextEditingController();
-  try {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: Text(l10n.settingsAddImpossibleZone),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.settingsAddImpossibleZoneCenter(
-                  center.latitude.toStringAsFixed(5),
-                  center.longitude.toStringAsFixed(5),
-                ),
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                l10n.settingsAddImpossibleZoneBlurb,
-                style: const TextStyle(fontSize: 12),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: labelController,
-                decoration: InputDecoration(
-                  labelText: l10n.settingsLabelOptional,
-                  hintText: l10n.settingsLabelHintAirport,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                l10n.settingsRadius,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 13,
-                ),
-              ),
-              RadioGroup<double>(
-                groupValue: selectedRadius,
-                onChanged: (value) {
-                  if (value != null) {
-                    setDialogState(() => selectedRadius = value);
-                  }
-                },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    for (final option in radiusOptions)
-                      RadioListTile<double>(
-                        title: Text(option.label),
-                        value: option.meters,
-                        dense: true,
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text(l10n.settingsCancel),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text(l10n.settingsAddZone),
-            ),
-          ],
-        ),
-      ),
-    );
-    if (confirmed != true) return null;
-    final label = labelController.text.trim();
-    return ImpossibleZoneDraft(
-      center: center,
-      radiusMeters: selectedRadius,
-      label: label.isEmpty ? null : label,
-    );
-  } finally {
-    labelController.dispose();
-  }
 }
 
 String _formatValue(double value) {

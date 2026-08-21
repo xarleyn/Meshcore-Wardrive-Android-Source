@@ -1454,6 +1454,21 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mapAddPlannedRepeater => 'Добавить запланированный репитер';
 
   @override
+  String get mapLongPressActionTitle => 'Что добавить на карту';
+
+  @override
+  String get mapLongPressPlannedRepeaterSubtitle =>
+      'Отметить возможное место будущего репитера';
+
+  @override
+  String get mapLongPressPrivacyZoneSubtitle =>
+      'Исключить эту область из отправки и экспорта';
+
+  @override
+  String get mapLongPressImpossibleZoneSubtitle =>
+      'Отбрасывать недостоверные GPS-позиции в этой области';
+
+  @override
   String get mapPlannedRepeaterHint => 'напр., холм у Tracyton';
 
   @override

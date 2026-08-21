@@ -1832,6 +1832,22 @@
   "@mapAddPlannedRepeater": {
     "description": "Title when dropping a planned repeater marker"
   },
+  "mapLongPressActionTitle": "Add to map",
+  "@mapLongPressActionTitle": {
+    "description": "Title of the action picker shown after a long press on the map"
+  },
+  "mapLongPressPlannedRepeaterSubtitle": "Mark a possible future repeater location",
+  "@mapLongPressPlannedRepeaterSubtitle": {
+    "description": "Description of the planned repeater long-press action"
+  },
+  "mapLongPressPrivacyZoneSubtitle": "Exclude this area from uploads and exports",
+  "@mapLongPressPrivacyZoneSubtitle": {
+    "description": "Description of the privacy zone long-press action"
+  },
+  "mapLongPressImpossibleZoneSubtitle": "Reject unreliable GPS positions in this area",
+  "@mapLongPressImpossibleZoneSubtitle": {
+    "description": "Description of the impossible GPS zone long-press action"
+  },
   "mapPlannedRepeaterHint": "e.g., Hilltop near Tracyton",
   "@mapPlannedRepeaterHint": {
     "description": "Hint for an optional planned-repeater label"

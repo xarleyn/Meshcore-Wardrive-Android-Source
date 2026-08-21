@@ -2522,6 +2522,30 @@ abstract class AppLocalizations {
   /// **'Add Planned Repeater'**
   String get mapAddPlannedRepeater;
 
+  /// Title of the action picker shown after a long press on the map
+  ///
+  /// In en, this message translates to:
+  /// **'Add to map'**
+  String get mapLongPressActionTitle;
+
+  /// Description of the planned repeater long-press action
+  ///
+  /// In en, this message translates to:
+  /// **'Mark a possible future repeater location'**
+  String get mapLongPressPlannedRepeaterSubtitle;
+
+  /// Description of the privacy zone long-press action
+  ///
+  /// In en, this message translates to:
+  /// **'Exclude this area from uploads and exports'**
+  String get mapLongPressPrivacyZoneSubtitle;
+
+  /// Description of the impossible GPS zone long-press action
+  ///
+  /// In en, this message translates to:
+  /// **'Reject unreliable GPS positions in this area'**
+  String get mapLongPressImpossibleZoneSubtitle;
+
   /// Hint for an optional planned-repeater label
   ///
   /// In en, this message translates to:
