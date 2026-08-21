@@ -40,20 +40,35 @@ class LocationService {
 
   LocationService() {
     _carpeaterService = CarpeaterService(_loraCompanion, _settings);
-    // Suspend auto-ping while the device connection is lost...
-    _loraCompanion.disconnectStream.listen((_) {
+    // Suspend radio-driven sampling while the device connection is lost...
+    _disconnectSubscription = _loraCompanion.disconnectStream.listen((_) {
+      // A disconnect made by the user is handled by the UI flow that asked
+      // for it; only an unexpected loss arms the automatic resume below.
+      if (_loraCompanion.userDisconnectRequested) return;
       if (_autoPingEnabled) {
         _suspendAutoPingForReconnect();
       }
+      if (_carpeaterModeEnabled && _isTracking) {
+        _carpeaterNeighboursSubscription?.cancel();
+        _carpeaterDiscoveryStartedSubscription?.cancel();
+        _carpeaterService.stop();
+        _carpeaterResumeOnReconnect = true;
+        _logger.logServiceEvent('Carpeater paused: device link lost');
+      }
     });
-    // ...and resume it once the automatic reconnection restores the link.
-    // A disconnect made by the user never triggers a reconnection, so
-    // auto-ping stays off in that case.
-    _loraCompanion.reconnectStateStream.listen((status) {
-      if (!status.restored || !_autoPingResumeOnReconnect) return;
-      _autoPingResumeOnReconnect = false;
-      enableAutoPing();
-      _logger.logPingEvent('Auto-ping resumed after automatic reconnection');
+    // ...and resume it once ANY reconnection restores the link, whether the
+    // automatic loop got there first or the user reconnected the device
+    // manually. A deliberate disconnect never arms a resume, so sampling
+    // stays off in that case.
+    _connectedSubscription = _loraCompanion.connectedStream.listen((_) {
+      if (_autoPingResumeOnReconnect) {
+        enableAutoPing();
+        _logger.logPingEvent('Auto-ping resumed after device reconnection');
+      }
+      if (_carpeaterResumeOnReconnect) {
+        _carpeaterResumeOnReconnect = false;
+        _restartCarpeaterAfterReconnect();
+      }
     });
   }
   StreamSubscription<Position>? _positionStreamSubscription;
@@ -73,6 +88,10 @@ class LocationService {
   bool _isTracking = false;
   bool _autoPingEnabled = false;
   bool _autoPingResumeOnReconnect = false;
+
+  // Subscriptions to the companion service connection lifecycle.
+  StreamSubscription<void>? _disconnectSubscription;
+  StreamSubscription<void>? _connectedSubscription;
   double _pingIntervalMeters = 805.0; // Default 0.5 miles
   LatLng? _lastPingPosition;
 
@@ -154,6 +173,7 @@ class LocationService {
   // Carpeater mode
   late final CarpeaterService _carpeaterService;
   bool _carpeaterModeEnabled = false;
+  bool _carpeaterResumeOnReconnect = false;
   StreamSubscription<List<Map<String, dynamic>>>?
   _carpeaterNeighboursSubscription;
   StreamSubscription<void>? _carpeaterDiscoveryStartedSubscription;
@@ -353,6 +373,7 @@ class LocationService {
       startCarpeater();
     } else if (!enabled && wasEnabled) {
       // Switching off carpeater: stop it and resume auto-ping if tracking
+      _carpeaterResumeOnReconnect = false;
       _carpeaterNeighboursSubscription?.cancel();
       _carpeaterDiscoveryStartedSubscription?.cancel();
       _carpeaterService.stop();
@@ -1351,6 +1372,9 @@ class LocationService {
     // Stop time-based ping timer
     _timePingTimer?.cancel();
     _timePingTimer = null;
+    // A finished session must not resurrect sampling on a later reconnect.
+    _autoPingResumeOnReconnect = false;
+    _carpeaterResumeOnReconnect = false;
 
     // Stop battery monitoring and deactivate battery saver
     _stopBatteryMonitoring();
@@ -1463,6 +1487,20 @@ class LocationService {
       _carpeaterNeighboursSubscription?.cancel();
     }
     return started;
+  }
+
+  /// Restart Carpeater sampling after a lost device link was restored.
+  Future<void> _restartCarpeaterAfterReconnect() async {
+    if (!_isTracking || !_loraCompanion.isDeviceConnected) return;
+    await _logger.logServiceEvent(
+      'Carpeater restarting after device reconnection',
+    );
+    final started = await startCarpeater();
+    if (!started) {
+      await _logger.logServiceEvent(
+        'Carpeater restart failed after device reconnection',
+      );
+    }
   }
 
   /// Handle Carpeater neighbour results — save as samples
@@ -1580,6 +1618,8 @@ class LocationService {
     _positionStreamSubscription?.cancel();
     _positionStreamSubscription = null;
     stopTracking();
+    _disconnectSubscription?.cancel();
+    _connectedSubscription?.cancel();
     _logger.close();
     _currentPositionController.close();
     _positionSourceController.close();

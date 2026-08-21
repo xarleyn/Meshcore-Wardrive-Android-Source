@@ -312,12 +312,22 @@ class LoRaCompanionService {
   int _reconnectAttempts = 0;
   bool _autoReconnectActive = false;
   bool _connectInFlight = false;
+
+  // Settled tail of the serialized explicit-connect queue. A manual connect
+  // waits behind an in-flight background reconnection attempt instead of
+  // failing outright while that attempt holds the link busy.
+  Future<bool>? _connectChainTail;
+
   bool _userDisconnectRequested = false;
   String? _lastBluetoothRemoteId;
   String? _lastBluetoothName;
   UsbDevice? _lastUsbDevice;
   final _reconnectStateController =
       StreamController<ReconnectStatus>.broadcast();
+
+  /// Emits after every successfully established device connection - initial,
+  /// manual, or automatic.
+  final _connectedController = StreamController<void>.broadcast();
 
   // Connected device identity for sample tagging
   String? _connectedDeviceId; // Stable ID for the connected LoRa companion
@@ -394,6 +404,18 @@ class LoRaCompanionService {
   /// Broadcasts [ReconnectStatus] updates of the automatic reconnection loop.
   Stream<ReconnectStatus> get reconnectStateStream =>
       _reconnectStateController.stream;
+
+  /// Emits once per established device connection, after the protocol
+  /// handshake has been sent.
+  ///
+  /// Unlike [reconnectStateStream] this fires for every connection source,
+  /// including a manual connect made while the automatic loop was still
+  /// trying, so listeners can resume work that paused on a lost link.
+  Stream<void> get connectedStream => _connectedController.stream;
+
+  /// Whether the current (or most recent) teardown was requested by the user
+  /// rather than caused by an unexpected link loss.
+  bool get userDisconnectRequested => _userDisconnectRequested;
 
   /// Get the currently ignored repeater prefix
   String? get ignoredRepeaterPrefix => _ignoredRepeaterPrefix;
@@ -570,24 +592,56 @@ class LoRaCompanionService {
     return controller.stream;
   }
 
+  /// Queues [action] behind any in-flight or queued explicit connect.
+  ///
+  /// A manual connect made while a background reconnection attempt is still
+  /// running therefore waits for it instead of failing outright. Ownership
+  /// may change while waiting: a user disconnect that arrives meanwhile fails
+  /// the queued request, and a link restored by the automatic loop (which
+  /// always targets the remembered device) counts as success.
+  Future<bool> _serializeConnect(Future<bool> Function() action) {
+    final earlier = _connectChainTail;
+    late final Future<bool> current;
+    current = () async {
+      if (earlier != null) {
+        try {
+          await earlier;
+        } catch (_) {}
+      }
+      if (_userDisconnectRequested) return false;
+      if (isDeviceConnected) return true;
+      return action();
+    }();
+    _connectChainTail = current;
+    unawaited(
+      current.whenComplete(() {
+        if (identical(_connectChainTail, current)) {
+          _connectChainTail = null;
+        }
+      }),
+    );
+    return current;
+  }
+
   /// Connect to LoRa device via Bluetooth (user-initiated).
   ///
   /// Cancels any pending automatic reconnection first so an explicit connect
-  /// always supersedes the background loop.
-  Future<bool> connectBluetooth(BluetoothDevice device) async {
+  /// always supersedes the background loop, and waits behind an in-flight
+  /// attempt instead of being rejected while that attempt is running.
+  Future<bool> connectBluetooth(BluetoothDevice device) {
     _stopAutoReconnect();
     // An explicit user connect re-arms automatic reconnection for the new
     // session once it is established.
     _userDisconnectRequested = false;
-    if (_connectInFlight) {
-      _debugLog.logError('Connect skipped: another attempt is in progress');
-      return false;
-    }
-    return _connectBluetoothDevice(device);
+    return _serializeConnect(() => _connectBluetoothDevice(device));
   }
 
   Future<bool> _connectBluetoothDevice(BluetoothDevice device) async {
     if (_connectInFlight) return false;
+    if (isDeviceConnected) {
+      _debugLog.logInfo('Connect skipped: a device link already exists');
+      return true;
+    }
     _connectInFlight = true;
     try {
       try {
@@ -698,6 +752,7 @@ class LoRaCompanionService {
           await Future.delayed(const Duration(milliseconds: 150));
           await _requestAllContacts();
 
+          _notifyConnectionEstablished();
           return true;
         }
 
@@ -728,21 +783,22 @@ class LoRaCompanionService {
   /// Connect to LoRa device via USB (user-initiated).
   ///
   /// Cancels any pending automatic reconnection first so an explicit connect
-  /// always supersedes the background loop.
-  Future<bool> connectUsb(UsbDevice device) async {
+  /// always supersedes the background loop, and waits behind an in-flight
+  /// attempt instead of being rejected while that attempt is running.
+  Future<bool> connectUsb(UsbDevice device) {
     _stopAutoReconnect();
     // An explicit user connect re-arms automatic reconnection for the new
     // session once it is established.
     _userDisconnectRequested = false;
-    if (_connectInFlight) {
-      _debugLog.logError('Connect skipped: another attempt is in progress');
-      return false;
-    }
-    return _connectUsbDevice(device);
+    return _serializeConnect(() => _connectUsbDevice(device));
   }
 
   Future<bool> _connectUsbDevice(UsbDevice device) async {
     if (_connectInFlight) return false;
+    if (isDeviceConnected) {
+      _debugLog.logInfo('Connect skipped: a device link already exists');
+      return true;
+    }
     _connectInFlight = true;
     try {
       try {
@@ -798,6 +854,7 @@ class LoRaCompanionService {
         await Future.delayed(const Duration(milliseconds: 150));
         await _requestAllContacts();
 
+        _notifyConnectionEstablished();
         return true;
       } catch (e) {
         debugPrint('USB connection error: $e');
@@ -1962,6 +2019,12 @@ class LoRaCompanionService {
     _lastUsbDevice = usbDevice;
   }
 
+  void _notifyConnectionEstablished() {
+    if (!_connectedController.isClosed) {
+      _connectedController.add(null);
+    }
+  }
+
   void _emitReconnectStatus({
     required bool active,
     int nextAttempt = 0,
@@ -2080,5 +2143,6 @@ class LoRaCompanionService {
     _batteryController.close();
     _disconnectController.close();
     _reconnectStateController.close();
+    _connectedController.close();
   }
 }
