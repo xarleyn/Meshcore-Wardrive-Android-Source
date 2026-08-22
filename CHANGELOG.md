@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Changed
+- Settings overview groups categories by topic (Map, Sampling & alerts, App,
+  Data, System) with uppercase headers and a one-line description on each
+  category tile.
+
 ### Added
 - Hidden achievement "Быть легендой mesh сетей Смоленска" (💎): unlocks while
   the connected companion radio reports a node name starting with "Ya_",

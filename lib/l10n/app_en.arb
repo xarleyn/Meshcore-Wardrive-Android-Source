@@ -116,6 +116,74 @@
   "@settingsSectionAbout": {
     "description": "Settings section header"
   },
+  "settingsOverviewGroupMap": "Map",
+  "@settingsOverviewGroupMap": {
+    "description": "Overview group header for map-related settings; shown in uppercase"
+  },
+  "settingsOverviewGroupSampling": "Sampling & alerts",
+  "@settingsOverviewGroupSampling": {
+    "description": "Overview group header for discovery, alerts, and Carpeater; shown in uppercase"
+  },
+  "settingsOverviewGroupApp": "App",
+  "@settingsOverviewGroupApp": {
+    "description": "Overview group header for app and statistics settings; shown in uppercase"
+  },
+  "settingsOverviewGroupData": "Data",
+  "@settingsOverviewGroupData": {
+    "description": "Overview group header for data and backup settings; shown in uppercase"
+  },
+  "settingsOverviewGroupSystem": "System",
+  "@settingsOverviewGroupSystem": {
+    "description": "Overview group header for diagnostics and about; shown in uppercase"
+  },
+  "settingsSectionMapDisplayDescription": "Coverage layers, samples, heatmap, and overlays",
+  "@settingsSectionMapDisplayDescription": {
+    "description": "One-line summary for the map display settings category"
+  },
+  "settingsSectionLocationDescription": "GPS, Wi-Fi positioning, and radio location",
+  "@settingsSectionLocationDescription": {
+    "description": "One-line summary for the location settings category"
+  },
+  "settingsSectionDiscoveryDescription": "Pings, timeouts, and repeater filters",
+  "@settingsSectionDiscoveryDescription": {
+    "description": "One-line summary for the discovery settings category"
+  },
+  "settingsSectionFeedbackDescription": "Sound, vibration, and alerts",
+  "@settingsSectionFeedbackDescription": {
+    "description": "One-line summary for the feedback settings category"
+  },
+  "settingsSectionCarpeaterDescription": "Hop through a chosen repeater",
+  "@settingsSectionCarpeaterDescription": {
+    "description": "One-line summary for the Carpeater settings category"
+  },
+  "settingsSectionAppDeviceDescription": "Theme, language, screen, and units",
+  "@settingsSectionAppDeviceDescription": {
+    "description": "One-line summary for the app and device settings category"
+  },
+  "settingsSectionOnlineMapDescription": "Upload samples to community coverage",
+  "@settingsSectionOnlineMapDescription": {
+    "description": "One-line summary for the online map settings category"
+  },
+  "settingsSectionStatisticsDescription": "Distance driven and fuel estimates",
+  "@settingsSectionStatisticsDescription": {
+    "description": "One-line summary for the statistics settings category"
+  },
+  "settingsSectionDataManagementDescription": "Export, import, filters, and privacy",
+  "@settingsSectionDataManagementDescription": {
+    "description": "One-line summary for the data management settings category"
+  },
+  "settingsSectionBackupDescription": "Export and restore app settings",
+  "@settingsSectionBackupDescription": {
+    "description": "One-line summary for the settings backup category"
+  },
+  "settingsSectionDiagnosticsDescription": "Debug logs and device checks",
+  "@settingsSectionDiagnosticsDescription": {
+    "description": "One-line summary for the diagnostics settings category"
+  },
+  "settingsSectionAboutDescription": "Version, updates, and source",
+  "@settingsSectionAboutDescription": {
+    "description": "One-line summary for the about settings category"
+  },
   "settingsSectionThresholds": "Thresholds",
   "@settingsSectionThresholds": {
     "description": "Location quality subsection header"

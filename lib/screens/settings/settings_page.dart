@@ -3,14 +3,27 @@ part of '../map_screen.dart';
 typedef _SettingsCategoryBuilder =
     List<Widget> Function(BuildContext context, StateSetter setPageState);
 
+enum _SettingsOverviewGroupId { map, sampling, app, data, system }
+
+class _SettingsOverviewGroup {
+  const _SettingsOverviewGroup({required this.title, required this.categories});
+
+  final String title;
+  final List<_SettingsCategory> categories;
+}
+
 class _SettingsCategory {
   const _SettingsCategory({
+    required this.group,
     required this.title,
+    required this.subtitle,
     required this.icon,
     required this.builder,
   });
 
+  final _SettingsOverviewGroupId group;
   final String title;
+  final String subtitle;
   final IconData icon;
   final _SettingsCategoryBuilder builder;
 }
@@ -28,7 +41,7 @@ extension _SettingsPageNavigation on _MapScreenState {
         builder: (context) => SettingsScreen(
           version: appVersion,
           contentBuilder: (context, setPageState, scrollController) {
-            final categories = _buildSettingsCategories(context);
+            final groups = _buildSettingsOverviewGroups(context);
 
             return ListView(
               controller: scrollController,
@@ -39,11 +52,19 @@ extension _SettingsPageNavigation on _MapScreenState {
                 24 + MediaQuery.viewInsetsOf(context).bottom,
               ),
               children: [
-                _buildSettingsOverviewCard(context, categories.take(4)),
-                const SizedBox(height: 16),
-                _buildSettingsOverviewCard(context, categories.skip(4).take(4)),
-                const SizedBox(height: 16),
-                _buildSettingsOverviewCard(context, categories.skip(8).take(4)),
+                for (final group in groups)
+                  SettingsOverviewGroup(
+                    title: group.title,
+                    children: [
+                      for (final category in group.categories)
+                        SettingsCategoryTile(
+                          title: category.title,
+                          subtitle: category.subtitle,
+                          icon: category.icon,
+                          onTap: () => _openSettingsCategory(context, category),
+                        ),
+                    ],
+                  ),
               ],
             );
           },
@@ -52,12 +73,39 @@ extension _SettingsPageNavigation on _MapScreenState {
     );
   }
 
+  List<_SettingsOverviewGroup> _buildSettingsOverviewGroups(
+    BuildContext context,
+  ) {
+    final l10n = AppLocalizations.of(context);
+    final categories = _buildSettingsCategories(context);
+
+    return [
+      for (final groupId in _SettingsOverviewGroupId.values)
+        _SettingsOverviewGroup(
+          title: switch (groupId) {
+            _SettingsOverviewGroupId.map => l10n.settingsOverviewGroupMap,
+            _SettingsOverviewGroupId.sampling =>
+              l10n.settingsOverviewGroupSampling,
+            _SettingsOverviewGroupId.app => l10n.settingsOverviewGroupApp,
+            _SettingsOverviewGroupId.data => l10n.settingsOverviewGroupData,
+            _SettingsOverviewGroupId.system => l10n.settingsOverviewGroupSystem,
+          },
+          categories: [
+            for (final category in categories)
+              if (category.group == groupId) category,
+          ],
+        ),
+    ];
+  }
+
   List<_SettingsCategory> _buildSettingsCategories(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
     return [
       _SettingsCategory(
+        group: _SettingsOverviewGroupId.map,
         title: l10n.settingsSectionMapDisplay,
+        subtitle: l10n.settingsSectionMapDisplayDescription,
         icon: Icons.map_outlined,
         builder: (context, setPageState) => buildMapDisplaySettings(
           context,
@@ -81,7 +129,9 @@ extension _SettingsPageNavigation on _MapScreenState {
         ),
       ),
       _SettingsCategory(
+        group: _SettingsOverviewGroupId.map,
         title: l10n.settingsSectionLocation,
+        subtitle: l10n.settingsSectionLocationDescription,
         icon: Icons.my_location_outlined,
         builder: (context, setPageState) => buildLocationSettings(
           context,
@@ -120,7 +170,9 @@ extension _SettingsPageNavigation on _MapScreenState {
         ),
       ),
       _SettingsCategory(
+        group: _SettingsOverviewGroupId.sampling,
         title: l10n.settingsSectionDiscovery,
+        subtitle: l10n.settingsSectionDiscoveryDescription,
         icon: Icons.radar_outlined,
         builder: (context, setPageState) => buildDiscoverySettings(
           context,
@@ -175,7 +227,9 @@ extension _SettingsPageNavigation on _MapScreenState {
         ),
       ),
       _SettingsCategory(
+        group: _SettingsOverviewGroupId.sampling,
         title: l10n.settingsSectionFeedback,
+        subtitle: l10n.settingsSectionFeedbackDescription,
         icon: Icons.notifications_outlined,
         builder: (context, setPageState) => buildFeedbackSettings(
           context,
@@ -218,7 +272,9 @@ extension _SettingsPageNavigation on _MapScreenState {
         ),
       ),
       _SettingsCategory(
+        group: _SettingsOverviewGroupId.sampling,
         title: l10n.settingsSectionCarpeater,
+        subtitle: l10n.settingsSectionCarpeaterDescription,
         icon: Icons.cell_tower,
         builder: (context, setPageState) => buildCarpeaterSettings(
           context,
@@ -255,7 +311,9 @@ extension _SettingsPageNavigation on _MapScreenState {
         ),
       ),
       _SettingsCategory(
+        group: _SettingsOverviewGroupId.app,
         title: l10n.settingsSectionAppDevice,
+        subtitle: l10n.settingsSectionAppDeviceDescription,
         icon: Icons.tune,
         builder: (context, setPageState) => buildAppDeviceSettings(
           context,
@@ -349,7 +407,9 @@ extension _SettingsPageNavigation on _MapScreenState {
         ),
       ),
       _SettingsCategory(
+        group: _SettingsOverviewGroupId.map,
         title: l10n.settingsSectionOnlineMap,
+        subtitle: l10n.settingsSectionOnlineMapDescription,
         icon: Icons.cloud_outlined,
         builder: (context, _) => buildOnlineMapSettings(
           context,
@@ -358,7 +418,9 @@ extension _SettingsPageNavigation on _MapScreenState {
         ),
       ),
       _SettingsCategory(
+        group: _SettingsOverviewGroupId.app,
         title: l10n.settingsSectionStatistics,
+        subtitle: l10n.settingsSectionStatisticsDescription,
         icon: Icons.query_stats,
         builder: (context, setPageState) => buildStatisticsSettings(
           context,
@@ -381,7 +443,9 @@ extension _SettingsPageNavigation on _MapScreenState {
         ),
       ),
       _SettingsCategory(
+        group: _SettingsOverviewGroupId.data,
         title: l10n.settingsSectionDataManagement,
+        subtitle: l10n.settingsSectionDataManagementDescription,
         icon: Icons.storage_outlined,
         builder: (context, setPageState) => buildDataManagementSettings(
           context,
@@ -473,7 +537,9 @@ extension _SettingsPageNavigation on _MapScreenState {
         ),
       ),
       _SettingsCategory(
+        group: _SettingsOverviewGroupId.data,
         title: l10n.settingsSectionBackup,
+        subtitle: l10n.settingsSectionBackupDescription,
         icon: Icons.settings_backup_restore,
         builder: (context, _) => buildBackupSettings(
           context,
@@ -482,7 +548,9 @@ extension _SettingsPageNavigation on _MapScreenState {
         ),
       ),
       _SettingsCategory(
+        group: _SettingsOverviewGroupId.system,
         title: l10n.settingsSectionDiagnostics,
+        subtitle: l10n.settingsSectionDiagnosticsDescription,
         icon: Icons.bug_report_outlined,
         builder: (context, _) => buildDiagnosticsSettings(
           context,
@@ -491,7 +559,9 @@ extension _SettingsPageNavigation on _MapScreenState {
         ),
       ),
       _SettingsCategory(
+        group: _SettingsOverviewGroupId.system,
         title: l10n.settingsSectionAbout,
+        subtitle: l10n.settingsSectionAboutDescription,
         icon: Icons.info_outline,
         builder: (context, _) => buildAboutSettings(
           context,
@@ -501,22 +571,6 @@ extension _SettingsPageNavigation on _MapScreenState {
         ),
       ),
     ];
-  }
-
-  Widget _buildSettingsOverviewCard(
-    BuildContext context,
-    Iterable<_SettingsCategory> categories,
-  ) {
-    return SettingsOverviewCard(
-      children: [
-        for (final category in categories)
-          SettingsCategoryTile(
-            title: category.title,
-            icon: category.icon,
-            onTap: () => _openSettingsCategory(context, category),
-          ),
-      ],
-    );
   }
 
   Future<void> _editPingInterval(BuildContext context) async {

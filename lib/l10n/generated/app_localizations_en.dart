@@ -97,6 +97,68 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSectionAbout => 'About';
 
   @override
+  String get settingsOverviewGroupMap => 'Map';
+
+  @override
+  String get settingsOverviewGroupSampling => 'Sampling & alerts';
+
+  @override
+  String get settingsOverviewGroupApp => 'App';
+
+  @override
+  String get settingsOverviewGroupData => 'Data';
+
+  @override
+  String get settingsOverviewGroupSystem => 'System';
+
+  @override
+  String get settingsSectionMapDisplayDescription =>
+      'Coverage layers, samples, heatmap, and overlays';
+
+  @override
+  String get settingsSectionLocationDescription =>
+      'GPS, Wi-Fi positioning, and radio location';
+
+  @override
+  String get settingsSectionDiscoveryDescription =>
+      'Pings, timeouts, and repeater filters';
+
+  @override
+  String get settingsSectionFeedbackDescription =>
+      'Sound, vibration, and alerts';
+
+  @override
+  String get settingsSectionCarpeaterDescription =>
+      'Hop through a chosen repeater';
+
+  @override
+  String get settingsSectionAppDeviceDescription =>
+      'Theme, language, screen, and units';
+
+  @override
+  String get settingsSectionOnlineMapDescription =>
+      'Upload samples to community coverage';
+
+  @override
+  String get settingsSectionStatisticsDescription =>
+      'Distance driven and fuel estimates';
+
+  @override
+  String get settingsSectionDataManagementDescription =>
+      'Export, import, filters, and privacy';
+
+  @override
+  String get settingsSectionBackupDescription =>
+      'Export and restore app settings';
+
+  @override
+  String get settingsSectionDiagnosticsDescription =>
+      'Debug logs and device checks';
+
+  @override
+  String get settingsSectionAboutDescription => 'Version, updates, and source';
+
+  @override
   String get settingsSectionThresholds => 'Thresholds';
 
   @override

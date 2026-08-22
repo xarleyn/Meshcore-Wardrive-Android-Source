@@ -272,6 +272,108 @@ abstract class AppLocalizations {
   /// **'About'**
   String get settingsSectionAbout;
 
+  /// Overview group header for map-related settings; shown in uppercase
+  ///
+  /// In en, this message translates to:
+  /// **'Map'**
+  String get settingsOverviewGroupMap;
+
+  /// Overview group header for discovery, alerts, and Carpeater; shown in uppercase
+  ///
+  /// In en, this message translates to:
+  /// **'Sampling & alerts'**
+  String get settingsOverviewGroupSampling;
+
+  /// Overview group header for app and statistics settings; shown in uppercase
+  ///
+  /// In en, this message translates to:
+  /// **'App'**
+  String get settingsOverviewGroupApp;
+
+  /// Overview group header for data and backup settings; shown in uppercase
+  ///
+  /// In en, this message translates to:
+  /// **'Data'**
+  String get settingsOverviewGroupData;
+
+  /// Overview group header for diagnostics and about; shown in uppercase
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get settingsOverviewGroupSystem;
+
+  /// One-line summary for the map display settings category
+  ///
+  /// In en, this message translates to:
+  /// **'Coverage layers, samples, heatmap, and overlays'**
+  String get settingsSectionMapDisplayDescription;
+
+  /// One-line summary for the location settings category
+  ///
+  /// In en, this message translates to:
+  /// **'GPS, Wi-Fi positioning, and radio location'**
+  String get settingsSectionLocationDescription;
+
+  /// One-line summary for the discovery settings category
+  ///
+  /// In en, this message translates to:
+  /// **'Pings, timeouts, and repeater filters'**
+  String get settingsSectionDiscoveryDescription;
+
+  /// One-line summary for the feedback settings category
+  ///
+  /// In en, this message translates to:
+  /// **'Sound, vibration, and alerts'**
+  String get settingsSectionFeedbackDescription;
+
+  /// One-line summary for the Carpeater settings category
+  ///
+  /// In en, this message translates to:
+  /// **'Hop through a chosen repeater'**
+  String get settingsSectionCarpeaterDescription;
+
+  /// One-line summary for the app and device settings category
+  ///
+  /// In en, this message translates to:
+  /// **'Theme, language, screen, and units'**
+  String get settingsSectionAppDeviceDescription;
+
+  /// One-line summary for the online map settings category
+  ///
+  /// In en, this message translates to:
+  /// **'Upload samples to community coverage'**
+  String get settingsSectionOnlineMapDescription;
+
+  /// One-line summary for the statistics settings category
+  ///
+  /// In en, this message translates to:
+  /// **'Distance driven and fuel estimates'**
+  String get settingsSectionStatisticsDescription;
+
+  /// One-line summary for the data management settings category
+  ///
+  /// In en, this message translates to:
+  /// **'Export, import, filters, and privacy'**
+  String get settingsSectionDataManagementDescription;
+
+  /// One-line summary for the settings backup category
+  ///
+  /// In en, this message translates to:
+  /// **'Export and restore app settings'**
+  String get settingsSectionBackupDescription;
+
+  /// One-line summary for the diagnostics settings category
+  ///
+  /// In en, this message translates to:
+  /// **'Debug logs and device checks'**
+  String get settingsSectionDiagnosticsDescription;
+
+  /// One-line summary for the about settings category
+  ///
+  /// In en, this message translates to:
+  /// **'Version, updates, and source'**
+  String get settingsSectionAboutDescription;
+
   /// Location quality subsection header
   ///
   /// In en, this message translates to:

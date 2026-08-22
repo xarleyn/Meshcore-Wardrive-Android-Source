@@ -96,6 +96,66 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsSectionAbout => 'О приложении';
 
   @override
+  String get settingsOverviewGroupMap => 'Карта';
+
+  @override
+  String get settingsOverviewGroupSampling => 'Сбор и оповещения';
+
+  @override
+  String get settingsOverviewGroupApp => 'Приложение';
+
+  @override
+  String get settingsOverviewGroupData => 'Данные';
+
+  @override
+  String get settingsOverviewGroupSystem => 'Система';
+
+  @override
+  String get settingsSectionMapDisplayDescription =>
+      'Слои покрытия, семплы, теплокарта';
+
+  @override
+  String get settingsSectionLocationDescription => 'GPS, Wi-Fi и позиция радио';
+
+  @override
+  String get settingsSectionDiscoveryDescription =>
+      'Пинги, таймауты, фильтры репитеров';
+
+  @override
+  String get settingsSectionFeedbackDescription => 'Звук, вибрация и алерты';
+
+  @override
+  String get settingsSectionCarpeaterDescription =>
+      'Работа через выбранный репитер';
+
+  @override
+  String get settingsSectionAppDeviceDescription =>
+      'Тема, язык, экран и единицы';
+
+  @override
+  String get settingsSectionOnlineMapDescription =>
+      'Загрузка семплов в общее покрытие';
+
+  @override
+  String get settingsSectionStatisticsDescription => 'Пробег и оценка топлива';
+
+  @override
+  String get settingsSectionDataManagementDescription =>
+      'Экспорт, импорт, фильтры и приватность';
+
+  @override
+  String get settingsSectionBackupDescription =>
+      'Экспорт и восстановление настроек';
+
+  @override
+  String get settingsSectionDiagnosticsDescription =>
+      'Логи и проверки устройства';
+
+  @override
+  String get settingsSectionAboutDescription =>
+      'Версия, обновления и исходники';
+
+  @override
   String get settingsSectionThresholds => 'Пороги';
 
   @override
