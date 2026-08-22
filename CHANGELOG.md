@@ -1,5 +1,26 @@
 # Changelog
 
+## v1.0.44-xarleyn.1 - 2026-08-22
+
+### Breaking change
+
+- Changed the Android package ID from `mintylinux.meshcore.wardrive` to
+  `io.github.xarleyn.meshcore.wardrive`. Android installs this fork separately
+  from the original application and from older fork builds. No data migration
+  is provided: the new package starts with empty local data and default
+  settings, and requires permissions, background/MIUI settings, device access,
+  widgets, offline maps, and credentials to be configured again.
+
+### Changed
+
+- Debug builds now use `io.github.xarleyn.meshcore.wardrive.debug`, allowing a
+  debug and signed release build of the fork to coexist.
+- Fork releases use `base-xarleyn.N` version names. The update checker compares
+  both the base version and fork revision, ignores downgrades, and selects the
+  newest compatible tag from multiple GitHub releases.
+- The release workflow verifies package ID, version name, increasing version
+  code, APK signature, release tag, and asset name before publication.
+
 ## v1.0.43 - 2026-08-22
 
 ### Changed
