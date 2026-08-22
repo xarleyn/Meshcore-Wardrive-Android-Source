@@ -1473,7 +1473,10 @@ class LoRaCompanionService {
         return;
       }
 
-      final snr = controlData['snr'] as int;
+      final snrDb = controlData['snr'] as double;
+      // Persistence/UI models currently store whole-dB SNR. Keep the protocol
+      // parser lossless and round only at this explicit application boundary.
+      final snr = snrDb.round();
       final rssi = controlData['rssi'] as int;
       final payload = controlData['payload'] as Uint8List;
 
@@ -1698,7 +1701,9 @@ class LoRaCompanionService {
       _protocol.createDeviceQueryPayload(),
     );
     await _sendBinaryToDevice(query);
-    _debugLog.logInfo('Sent protocol v$COMPANION_PROTOCOL_VERSION handshake');
+    _debugLog.logInfo(
+      'Sent companion app-target v$COMPANION_APP_TARGET_VERSION handshake',
+    );
   }
 
   /// Create command frame based on connection type (BLE vs USB)

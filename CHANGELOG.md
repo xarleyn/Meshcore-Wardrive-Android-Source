@@ -135,10 +135,13 @@
   response arrives, with the actual response time. Additional repeater
   responses are still collected for radio-position estimation without delaying
   feedback, and overlapping discovery cycles are prevented.
-- Companion-radio communication now matches MeshCore protocol version 13:
-  valid app startup and device negotiation, correct contact lookup and advert
-  handling, current packet assignments, and corrected raw/control/login frame
-  parsing. BLE connections now use the official UART UUIDs and request MTU 512.
+- Companion-radio communication now parses firmware layout 13 while correctly
+  negotiating the documented app response layout 3. Golden protocol tests pin
+  command/response assignments, USB/BLE framing, discovery, contacts,
+  SELF_INFO, channel data, UTF-8 text, coordinates, and malformed-frame
+  handling. Channel messages no longer use UTF-16 bytes or append an extra
+  NUL, and quarter-dB SNR is preserved until the integer application boundary.
+  BLE connections use the official UART UUIDs and request MTU 512.
 - Update checks now time out quickly and show a concise offline error instead
   of leaving the request hanging.
 - Android location fixes now use the fused provider so GPS, cellular, and

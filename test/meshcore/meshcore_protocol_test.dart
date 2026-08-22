@@ -24,7 +24,7 @@ void main() {
           CMD_DEVICE_QUERY,
           protocol.createDeviceQueryPayload(),
         ),
-        [CMD_DEVICE_QUERY, COMPANION_PROTOCOL_VERSION],
+        [CMD_DEVICE_QUERY, COMPANION_APP_TARGET_VERSION],
       );
     });
 
@@ -284,13 +284,14 @@ void main() {
       expect(info!['name'], 'Якут');
     });
 
-    test('self information without a name still reports the advert type', () {
-      final shortInfo = protocol.parseSelfInfoFrame(Uint8List.fromList([2]));
-      expect(shortInfo, isNotNull);
-      expect(shortInfo!['adv_type'], 2);
-      expect(shortInfo.containsKey('name'), isFalse);
+    test('self information requires the complete fixed layout', () {
+      expect(protocol.parseSelfInfoFrame(Uint8List(56)), isNull);
 
-      expect(protocol.parseSelfInfoFrame(Uint8List(0)), isNull);
+      final unnamedInfo = Uint8List(57)..[0] = ADV_TYPE_REPEATER;
+      final parsed = protocol.parseSelfInfoFrame(unnamedInfo);
+      expect(parsed, isNotNull);
+      expect(parsed!['adv_type'], ADV_TYPE_REPEATER);
+      expect(parsed.containsKey('name'), isFalse);
     });
 
     test('parses standard and V3 channel messages', () {

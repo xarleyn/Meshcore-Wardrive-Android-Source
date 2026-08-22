@@ -106,6 +106,11 @@ or a physical LoRa device, describe any manual device testing that remains.
   Create a new prefix subdirectory when no matching one exists yet, and import
   shared helpers such as `test/helpers/l10n_harness.dart` with a relative path
   that accounts for the extra level.
+- Treat `test/meshcore/` as a protected protocol-contract test suite. Before
+  adding, editing, moving, renaming, regenerating, or deleting any file in that
+  directory, obtain separate explicit approval from the user for that specific
+  test-suite change, even when a related implementation change was already
+  requested. Running the protected tests does not require approval.
 - Avoid editing generated files unless the corresponding generator or Android
   configuration requires it.
 - `lib/l10n/generated/app_localizations*.dart` are tracked, reproducible
