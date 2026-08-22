@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.0.43 - 2026-08-22
 
 ### Changed
 - Settings overview groups categories by topic (Map, Sampling & alerts, App,
