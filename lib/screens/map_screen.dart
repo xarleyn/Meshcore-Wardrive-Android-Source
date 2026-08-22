@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+
 import '../models/models.dart';
 import '../models/location_quality_settings.dart';
 import '../models/impossible_zone.dart';
@@ -56,6 +58,7 @@ import 'map/widgets/map_action_buttons.dart';
 import 'map/widgets/map_control_panel.dart';
 import 'map/widgets/map_quick_settings_panel.dart';
 import '../services/widget_service.dart';
+
 import 'package:usb_serial/usb_serial.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:http/http.dart' as http;
@@ -69,7 +72,9 @@ import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:dio_cache_interceptor_file_store/dio_cache_interceptor_file_store.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+
 import 'dart:typed_data';
+
 import 'debug_log_screen.dart';
 import 'debug_diagnostics_screen.dart';
 import 'session_history_screen.dart';
@@ -1186,9 +1191,8 @@ class _MapScreenState extends State<MapScreen> {
         );
         if (!mounted) return;
         _showSnackBar(
-          AppLocalizations.of(
-            context,
-          ).mapExportedSamples(samples.length, format.displayName),
+          AppLocalizations.of(context)
+              .mapExportedSamples(samples.length, format.displayName),
         );
       } else if (choice == ExportDestination.share) {
         final directory = await getExternalStorageDirectory();
@@ -1196,10 +1200,13 @@ class _MapScreenState extends State<MapScreen> {
         await file.writeAsString(content);
 
         if (!mounted) return;
-        await Share.shareXFiles(
-          [XFile(file.path)],
-          subject: AppLocalizations.of(context).mapExportShareSubject,
-          text: AppLocalizations.of(context).mapExportShareText(samples.length),
+        await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile(file.path)],
+            subject: AppLocalizations.of(context).mapExportShareSubject,
+            text: AppLocalizations.of(context)
+                .mapExportShareText(samples.length),
+          ),
         );
         if (!mounted) return;
         _showSnackBar(AppLocalizations.of(context).mapExportShared);
@@ -1305,9 +1312,12 @@ class _MapScreenState extends State<MapScreen> {
         final file = File('${dir.path}/$fileName');
         await file.writeAsString(jsonString);
         if (!mounted) return;
-        await Share.shareXFiles([
-          XFile(file.path),
-        ], text: AppLocalizations.of(context).mapSettingsShareText);
+        await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile(file.path)],
+            text: AppLocalizations.of(context).mapSettingsShareText,
+          ),
+        );
       }
     } catch (e) {
       if (!mounted) return;
@@ -1322,9 +1332,10 @@ class _MapScreenState extends State<MapScreen> {
         allowedExtensions: ['json'],
       );
 
-      if (result == null || result.files.single.path == null) return;
+      if (result == null || result.files.isEmpty) return;
+      final pickedFile = result.files.single;
 
-      final file = File(result.files.single.path!);
+      final file = File(pickedFile.path!);
       final jsonString = await file.readAsString();
 
       // Show confirmation dialog
@@ -1730,7 +1741,7 @@ class _MapScreenState extends State<MapScreen> {
         imageBytes,
         quality: 100,
         fileName: fileName,
-        androidRelativePath: "Pictures/MeshCore",
+        androidRelativePath: 'MeshCore',
         skipIfExists: false,
       );
 
@@ -1750,7 +1761,9 @@ class _MapScreenState extends State<MapScreen> {
         final file = File('${tempDir.path}/meshcore_screenshot.png');
         await file.writeAsBytes(imageBytes);
         if (!mounted) return;
-        await Share.shareXFiles([XFile(file.path)], text: shareText);
+        await SharePlus.instance.share(
+          ShareParams(files: [XFile(file.path)], text: shareText),
+        );
       } else {
         if (!mounted) return;
         _showSnackBar(AppLocalizations.of(context).mapFailedToSaveScreenshot);
@@ -2418,9 +2431,9 @@ class _MapScreenState extends State<MapScreen> {
             _applySessionMapView(SessionMapView.session(session));
             _showSnackBar(
               AppLocalizations.of(context).mapShowingSessionFrom(
-                DateFormat.MMMd(
-                  Localizations.localeOf(context).toString(),
-                ).add_Hm().format(session.startTime),
+                DateFormat.MMMd(Localizations.localeOf(context).toString())
+                    .add_Hm()
+                    .format(session.startTime),
               ),
             );
           },
@@ -2850,10 +2863,12 @@ class _MapScreenState extends State<MapScreen> {
       await file.writeAsBytes(imageBytes);
 
       if (!mounted) return;
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        subject: AppLocalizations.of(context).mapCoverageShareSubject,
-        text: statsText,
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path)],
+          subject: AppLocalizations.of(context).mapCoverageShareSubject,
+          text: statsText,
+        ),
       );
     } catch (e) {
       setState(() {
@@ -2966,9 +2981,8 @@ class _MapScreenState extends State<MapScreen> {
       });
       if (!mounted) return;
       _showSnackBar(
-        AppLocalizations.of(
-          context,
-        ).mapDownloadedCoverageCells(coverage.length),
+        AppLocalizations.of(context)
+            .mapDownloadedCoverageCells(coverage.length),
       );
     } else {
       // Try loading from cache

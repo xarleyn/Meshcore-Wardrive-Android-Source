@@ -1,11 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'database_service.dart';
 import '../models/models.dart';
 import '../constants/app_version.dart';
+
 import 'package:flutter/foundation.dart';
 
 class UploadService {

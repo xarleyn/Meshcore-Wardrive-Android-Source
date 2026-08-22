@@ -6,3 +6,9 @@ analyzer:
     - .toolchain/**
     - build/**
     - flutter/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**

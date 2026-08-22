@@ -30,8 +30,9 @@ class OfflineTileDownloadOutcome {
   final int succeeded;
 }
 
-typedef OfflineTileDownload =
-    Future<int> Function(void Function(int done, int total) onProgress);
+typedef OfflineTileDownload = Future<int> Function(
+  void Function(int done, int total) onProgress,
+);
 
 class OfflineTileDownloadDialog extends StatefulWidget {
   const OfflineTileDownloadDialog({

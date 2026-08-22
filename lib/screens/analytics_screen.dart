@@ -1,10 +1,12 @@
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geohash_plus/geohash_plus.dart' as geohash;
 import 'package:share_plus/share_plus.dart';
+
 import '../models/models.dart';
 import '../services/aggregation_service.dart';
 import '../services/database_service.dart';
@@ -278,7 +280,8 @@ class _CoverageScoreTab extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           ElevatedButton.icon(
-            onPressed: () => Share.share(shareText),
+            onPressed: () =>
+                SharePlus.instance.share(ShareParams(text: shareText)),
             icon: const Icon(Icons.share, size: 18),
             label: Text(l10n.analyticsShareScore),
           ),

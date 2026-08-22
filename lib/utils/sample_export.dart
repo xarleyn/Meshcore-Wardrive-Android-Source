@@ -20,9 +20,8 @@ abstract final class SampleExport {
   static String buildGpx(List<Sample> samples, {DateTime? generatedAt}) {
     final sorted = List<Sample>.from(samples)
       ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
-    final generatedDate = DateFormat(
-      'yyyy-MM-dd',
-    ).format(generatedAt ?? DateTime.now());
+    final generatedDate = DateFormat('yyyy-MM-dd')
+        .format(generatedAt ?? DateTime.now());
 
     final buffer = StringBuffer();
     buffer.writeln('<?xml version="1.0" encoding="UTF-8"?>');
@@ -56,9 +55,8 @@ abstract final class SampleExport {
   static String buildKml(List<Sample> samples, {DateTime? generatedAt}) {
     final sorted = List<Sample>.from(samples)
       ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
-    final generatedDate = DateFormat(
-      'yyyy-MM-dd',
-    ).format(generatedAt ?? DateTime.now());
+    final generatedDate = DateFormat('yyyy-MM-dd')
+        .format(generatedAt ?? DateTime.now());
 
     final coords = sorted
         .map(

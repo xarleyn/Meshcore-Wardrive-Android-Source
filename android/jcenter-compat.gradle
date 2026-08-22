@@ -1,0 +1,19 @@
+// Gradle 9 removed RepositoryHandler.jcenter(). Some Flutter plugins still call it
+// during evaluation (notably usb_serial 0.5.2). Map those calls to mavenCentral().
+def aliasJcenter = { repos ->
+    repos.metaClass.jcenter = { Object[] args ->
+        repos.mavenCentral()
+    }
+}
+
+gradle.beforeProject { project ->
+    aliasJcenter(project.buildscript.repositories)
+    aliasJcenter(project.repositories)
+}
+
+gradle.projectsLoaded {
+    gradle.rootProject.allprojects { project ->
+        aliasJcenter(project.buildscript.repositories)
+        aliasJcenter(project.repositories)
+    }
+}

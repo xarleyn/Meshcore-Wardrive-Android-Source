@@ -1,5 +1,7 @@
 import 'dart:async';
+
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'database_service.dart';
 import 'settings_service.dart';
 

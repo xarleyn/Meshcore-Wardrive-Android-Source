@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'dart:math';
+
 import 'package:battery_plus/battery_plus.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:permission_handler/permission_handler.dart' hide ServiceStatus;
+
 import '../models/models.dart';
 import '../models/location_quality_settings.dart';
 import 'database_service.dart';
@@ -12,8 +14,10 @@ import 'lora_companion_service.dart';
 import 'location_quality_filter.dart';
 import 'bad_fix_monitor.dart';
 import '../utils/geohash_utils.dart';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+
 import '../l10n/app_locale.dart';
 import '../l10n/generated/app_localizations.dart';
 import 'persistent_debug_logger.dart';
@@ -564,28 +568,27 @@ class LocationService {
 
       _lastPositionEventAt = DateTime.now();
       _positionStreamSubscription =
-          Geolocator.getPositionStream(
-            locationSettings: locationSettings,
-          ).listen(
-            (position) {
-              if (generation != _positionStreamGeneration) return;
-              _lastPositionEventAt = DateTime.now();
-              _handleNewPosition(
-                position,
-                source: LocationPositionSource.fused,
+          Geolocator.getPositionStream(locationSettings: locationSettings)
+              .listen(
+                (position) {
+                  if (generation != _positionStreamGeneration) return;
+                  _lastPositionEventAt = DateTime.now();
+                  _handleNewPosition(
+                    position,
+                    source: LocationPositionSource.fused,
+                  );
+                },
+                onError: (Object error) {
+                  if (generation != _positionStreamGeneration) return;
+                  _logger.logError('Location Stream', error.toString());
+                  _schedulePositionStreamRestart('stream error: $error');
+                },
+                onDone: () {
+                  if (generation != _positionStreamGeneration) return;
+                  _positionStreamSubscription = null;
+                  _schedulePositionStreamRestart('stream closed');
+                },
               );
-            },
-            onError: (Object error) {
-              if (generation != _positionStreamGeneration) return;
-              _logger.logError('Location Stream', error.toString());
-              _schedulePositionStreamRestart('stream error: $error');
-            },
-            onDone: () {
-              if (generation != _positionStreamGeneration) return;
-              _positionStreamSubscription = null;
-              _schedulePositionStreamRestart('stream closed');
-            },
-          );
       await _logger.logLocationEvent(
         'Position stream started ($reason; fused provider, 0m filter)',
       );

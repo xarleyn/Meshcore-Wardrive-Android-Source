@@ -1,4 +1,5 @@
 import 'dart:ui';
+
 import '../models/models.dart';
 import '../utils/geohash_utils.dart';
 import '../utils/color_blind_palette.dart';

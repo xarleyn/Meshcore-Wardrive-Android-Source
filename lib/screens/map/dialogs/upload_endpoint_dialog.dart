@@ -326,10 +326,9 @@ class UploadProgressOutcome {
   final Object? error;
 }
 
-typedef UploadOperation =
-    Future<Map<String, UploadResult>> Function(
-      void Function(String siteName, int current, int total) onProgress,
-    );
+typedef UploadOperation = Future<Map<String, UploadResult>> Function(
+  void Function(String siteName, int current, int total) onProgress,
+);
 
 class UploadProgressDialog extends StatefulWidget {
   const UploadProgressDialog({required this.upload, super.key});

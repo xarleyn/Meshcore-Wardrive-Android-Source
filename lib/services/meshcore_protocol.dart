@@ -3,6 +3,7 @@
 
 import 'dart:convert';
 import 'dart:typed_data';
+
 import 'package:flutter/foundation.dart';
 
 /// MeshCore Companion Radio Binary Protocol
@@ -837,8 +838,7 @@ class MeshCoreProtocol {
       return {
         'snr': snr,
         'rssi': rssi,
-        'sender':
-            null, // Not extracting sender from encrypted payload, use repeater instead
+        'sender': null, // Not extracting sender from encrypted payload, use repeater instead
         'repeater': repeater,
         'repeaterKey': repeaterKey,
       };

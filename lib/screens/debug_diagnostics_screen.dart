@@ -1,9 +1,12 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
+
 import '../l10n/generated/app_localizations.dart';
 import '../services/location_service.dart';
+
 import 'package:path_provider/path_provider.dart';
 
 /// Debug diagnostics screen for troubleshooting Samsung device issues
@@ -57,10 +60,12 @@ class _DebugDiagnosticsScreenState extends State<DebugDiagnosticsScreen> {
   Future<void> _shareLogFile(File file) async {
     final l10n = AppLocalizations.of(context);
     try {
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        subject: l10n.debugDiagnosticsShareSubject,
-        text: l10n.debugDiagnosticsShareText,
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path)],
+          subject: l10n.debugDiagnosticsShareSubject,
+          text: l10n.debugDiagnosticsShareText,
+        ),
       );
     } catch (e) {
       if (mounted) {
@@ -105,9 +110,8 @@ class _DebugDiagnosticsScreenState extends State<DebugDiagnosticsScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                AppLocalizations.of(
-                  context,
-                ).debugDiagnosticsErrorDeleting('$e'),
+                AppLocalizations.of(context)
+                    .debugDiagnosticsErrorDeleting('$e'),
               ),
             ),
           );
@@ -346,11 +350,12 @@ class _LogViewerScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.share),
             onPressed: () {
-              Share.share(
-                content,
-                subject: AppLocalizations.of(
-                  context,
-                ).debugDiagnosticsShareSubjectWithFile(fileName),
+              SharePlus.instance.share(
+                ShareParams(
+                  text: content,
+                  subject: AppLocalizations.of(context)
+                      .debugDiagnosticsShareSubjectWithFile(fileName),
+                ),
               );
             },
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'l10n/app_locale.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'screens/map_screen.dart';

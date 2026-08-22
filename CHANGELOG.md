@@ -157,6 +157,17 @@
   service error.
 
 ### Changed
+- Dart and Android plugins are updated within the Flutter 3.47 / API 36
+  toolchain. BLE connect now uses FlutterBluePlus's nonprofit license. The map
+  stack stays on `flutter_map` 7 because `flutter_map_heatmap` still does not
+  support v8. Packages that need Android 17 (API 37) or AGP 9 built-in Kotlin
+  stay on the last versions that compile against API 36.
+- Android builds now follow the Flutter 3.47 toolchain: Gradle 9.3.1, Android
+  Gradle Plugin 9.1.0, and Kotlin 2.4.0. CI and release workflows pin Flutter
+  3.47.1 so the Gradle/AGP/Kotlin warnings no longer appear. Gradle 9 no longer
+  provides `jcenter()`, so the Android build maps leftover plugin calls to
+  Maven Central. Android library plugins are compiled against API 36 so they
+  satisfy AGP 9's compile SDK requirement.
 - The update check and the "View on GitHub" entry in Settings → About now
   point at the fork's releases. The check uses the releases list endpoint so
   prerelease-only repositories are detected, and release tags are matched by

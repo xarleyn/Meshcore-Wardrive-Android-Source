@@ -1,7 +1,9 @@
 part of '../map_screen.dart';
 
-typedef _SettingsCategoryBuilder =
-    List<Widget> Function(BuildContext context, StateSetter setPageState);
+typedef _SettingsCategoryBuilder = List<Widget> Function(
+  BuildContext context,
+  StateSetter setPageState,
+);
 
 enum _SettingsOverviewGroupId { map, sampling, app, data, system }
 

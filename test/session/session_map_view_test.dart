@@ -134,9 +134,8 @@ void main() {
         endTime: DateTime.utc(2026, 8, 19, 12),
         sampleCount: 4,
       );
-      final next = SessionMapView.session(
-        current,
-      ).afterStopWithSamples(finalized);
+      final next = SessionMapView.session(current)
+          .afterStopWithSamples(finalized);
       expect(next.session?.endTime, finalized.endTime);
       expect(next.session?.sampleCount, 4);
     });

@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:pointycastle/export.dart';
 import 'package:usb_serial/usb_serial.dart';
+
 import 'debug_log_service.dart';
 import 'meshcore_protocol.dart';
 import 'settings_service.dart';
@@ -652,7 +654,10 @@ class LoRaCompanionService {
     _connectInFlight = true;
     try {
       try {
-        await device.connect(timeout: const Duration(seconds: 15));
+        await device.connect(
+          license: License.nonprofit,
+          timeout: const Duration(seconds: 15),
+        );
         _bluetoothDevice = device;
 
         try {
@@ -1028,18 +1033,16 @@ class LoRaCompanionService {
 
         // Extract SNR
         int? snr;
-        final snrMatch = RegExp(
-          r'[Ss][Nn][Rr][:\s=]*(-?\d+(?:\.\d+)?)',
-        ).firstMatch(line);
+        final snrMatch = RegExp(r'[Ss][Nn][Rr][:\s=]*(-?\d+(?:\.\d+)?)')
+            .firstMatch(line);
         if (snrMatch != null) {
           snr = double.tryParse(snrMatch.group(1)!)?.toInt();
         }
 
         // Extract RSSI
         int? rssi;
-        final rssiMatch = RegExp(
-          r'[Rr][Ss][Ss][Ii][:\s=]*(-?\d+)',
-        ).firstMatch(line);
+        final rssiMatch = RegExp(r'[Rr][Ss][Ss][Ii][:\s=]*(-?\d+)')
+            .firstMatch(line);
         if (rssiMatch != null) {
           rssi = int.tryParse(rssiMatch.group(1)!);
         }

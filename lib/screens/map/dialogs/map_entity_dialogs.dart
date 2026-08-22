@@ -338,9 +338,9 @@ class CommunityCellInfoDialog extends StatelessWidget {
     final parsedLastUpdate = DateTime.tryParse(lastUpdate);
     final lastUpdateDisplay = parsedLastUpdate == null
         ? lastUpdate
-        : DateFormat.yMMMd(
-            Localizations.localeOf(context).toString(),
-          ).add_Hm().format(parsedLastUpdate.toLocal());
+        : DateFormat.yMMMd(Localizations.localeOf(context).toString())
+              .add_Hm()
+              .format(parsedLastUpdate.toLocal());
     final repeatersText = cell.repeaters.isEmpty
         ? l10n.settingsNone
         : cell.repeaters.entries
