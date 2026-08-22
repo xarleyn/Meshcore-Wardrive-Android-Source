@@ -1614,14 +1614,17 @@ class _MapScreenState extends State<MapScreen> {
 
       if (response.statusCode == 200) {
         final releases = jsonDecode(response.body) as List<dynamic>;
-        final latestVersion = releases.isEmpty
-            ? null
-            : versionFromReleaseTag(releases.first['tag_name'].toString());
+        final latestVersion = latestVersionFromReleaseTags(
+          releases
+              .whereType<Map<String, dynamic>>()
+              .map((release) => release['tag_name'])
+              .whereType<String>(),
+        );
 
         if (!mounted) return;
         if (latestVersion == null) {
           _showSnackBar(AppLocalizations.of(context).mapCouldNotCheckUpdates);
-        } else if (latestVersion == appVersion) {
+        } else if (!isNewerAppVersion(latestVersion, appVersion)) {
           _showSnackBar(AppLocalizations.of(context).mapOnLatestVersion);
         } else {
           final shouldDownload = await showDialog<bool>(
