@@ -6,7 +6,7 @@ import 'package:meshcore_wardrive/l10n/generated/app_localizations.dart';
 import 'package:meshcore_wardrive/utils/bluetooth_scan.dart';
 import 'package:meshcore_wardrive/widgets/bluetooth_device_picker_dialog.dart';
 
-import 'helpers/l10n_harness.dart';
+import '../helpers/l10n_harness.dart';
 
 void main() {
   Future<AppLocalizations> showPicker(

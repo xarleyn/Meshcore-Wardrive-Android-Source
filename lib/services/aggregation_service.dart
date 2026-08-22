@@ -194,15 +194,23 @@ class AggregationService {
       final gradientColors = ColorBlindPalette.getAgeGradient(colorBlindMode);
 
       // Interpolate through gradient based on age
-      if (age < 1) return gradientColors[0].value; // Recent
+      if (age < 1) return gradientColors[0].toARGB32(); // Recent
       if (age < 7) {
-        return Color.lerp(gradientColors[0], gradientColors[1], 0.5)!.value;
+        return Color.lerp(
+          gradientColors[0],
+          gradientColors[1],
+          0.5,
+        )!.toARGB32();
       }
-      if (age < 30) return gradientColors[1].value; // Medium
+      if (age < 30) return gradientColors[1].toARGB32(); // Medium
       if (age < 90) {
-        return Color.lerp(gradientColors[1], gradientColors[2], 0.5)!.value;
+        return Color.lerp(
+          gradientColors[1],
+          gradientColors[2],
+          0.5,
+        )!.toARGB32();
       }
-      return gradientColors[2].value; // Old
+      return gradientColors[2].toARGB32(); // Old
     } else if (colorMode == 'redundancy') {
       // Color by number of unique repeaters that cover this cell
       final count = coverage.repeaters.length;
@@ -234,7 +242,7 @@ class AggregationService {
       return ColorBlindPalette.getQualityColor(
         colorBlindMode,
         effectiveRate,
-      ).value;
+      ).toARGB32();
     }
   }
 

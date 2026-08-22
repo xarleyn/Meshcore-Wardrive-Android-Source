@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'database_service.dart';
 import '../models/models.dart';
 import '../constants/app_version.dart';
+import 'package:flutter/foundation.dart';
 
 class UploadService {
   bool _isDefaultEndpoint(String url) {
@@ -142,7 +143,7 @@ class UploadService {
 
       final samplesJson = _samplesToJson(samples, repeaterNames: repeaterNames);
 
-      print('Uploading ${samplesJson.length} samples in batches...');
+      debugPrint('Uploading ${samplesJson.length} samples in batches...');
 
       // Split into batches of 100 samples each
       const batchSize = 100;
@@ -161,7 +162,7 @@ class UploadService {
           onProgress(i + 1, totalBatches);
         }
 
-        print(
+        debugPrint(
           'Uploading batch ${i + 1}/$totalBatches (${batch.length} samples)',
         );
 
@@ -188,7 +189,7 @@ class UploadService {
             } else {
               error = 'Server error: ${response.statusCode}';
               if (attempt == 0) {
-                print(
+                debugPrint(
                   'Batch ${i + 1} failed with ${response.statusCode}, retrying...',
                 );
                 await Future.delayed(const Duration(seconds: 2));
@@ -197,7 +198,7 @@ class UploadService {
           } catch (e) {
             error = e.toString();
             if (attempt == 0) {
-              print('Batch ${i + 1} failed: $e, retrying...');
+              debugPrint('Batch ${i + 1} failed: $e, retrying...');
               await Future.delayed(const Duration(seconds: 2));
             }
           }
@@ -250,7 +251,7 @@ class UploadService {
   }) async {
     lastDownloadError = null;
     try {
-      print('Downloading coverage from: $apiUrl');
+      debugPrint('Downloading coverage from: $apiUrl');
       final response = await http
           .get(Uri.parse(apiUrl), headers: {'Accept': 'application/json'})
           .timeout(const Duration(seconds: 60));
@@ -270,7 +271,7 @@ class UploadService {
       if (data.containsKey('shards') && !data.containsKey('coverage')) {
         final shards = data['shards'] as Map<String, dynamic>;
         final prefixes = shards.keys.toList();
-        print('Sharded format: ${prefixes.length} shards to fetch');
+        debugPrint('Sharded format: ${prefixes.length} shards to fetch');
 
         final allCoverage = <String, dynamic>{};
 
@@ -302,7 +303,7 @@ class UploadService {
               }
             }
           } catch (e) {
-            print('Shard batch ${i + 1} failed: $e');
+            debugPrint('Shard batch ${i + 1} failed: $e');
             // Continue with remaining batches
           }
         }
@@ -319,7 +320,7 @@ class UploadService {
         final cacheFile = File('${dir.path}/community_coverage.json');
         await cacheFile.writeAsString(jsonEncode(result));
 
-        print(
+        debugPrint(
           'Downloaded ${allCoverage.length} coverage cells from ${prefixes.length} shards',
         );
         return result;
@@ -333,7 +334,7 @@ class UploadService {
       return data;
     } catch (e) {
       lastDownloadError = e.toString();
-      print('Download coverage failed: $e');
+      debugPrint('Download coverage failed: $e');
       return null;
     }
   }
@@ -520,7 +521,9 @@ class UploadService {
   }) async {
     final samplesJson = _samplesToJson(samples, repeaterNames: repeaterNames);
 
-    print('Uploading ${samplesJson.length} samples to $apiUrl in batches...');
+    debugPrint(
+      'Uploading ${samplesJson.length} samples to $apiUrl in batches...',
+    );
 
     // Split into batches of 100 samples each
     const batchSize = 100;
@@ -539,7 +542,9 @@ class UploadService {
         onProgress(i + 1, totalBatches);
       }
 
-      print('Uploading batch ${i + 1}/$totalBatches (${batch.length} samples)');
+      debugPrint(
+        'Uploading batch ${i + 1}/$totalBatches (${batch.length} samples)',
+      );
 
       // Try up to 2 times (original + 1 retry)
       bool success = false;
@@ -564,7 +569,7 @@ class UploadService {
           } else {
             error = 'Server error: ${response.statusCode}';
             if (attempt == 0) {
-              print(
+              debugPrint(
                 'Batch ${i + 1} failed with ${response.statusCode}, retrying...',
               );
               await Future.delayed(const Duration(seconds: 2));
@@ -573,7 +578,7 @@ class UploadService {
         } catch (e) {
           error = e.toString();
           if (attempt == 0) {
-            print('Batch ${i + 1} failed: $e, retrying...');
+            debugPrint('Batch ${i + 1} failed: $e, retrying...');
             await Future.delayed(const Duration(seconds: 2));
           }
         }

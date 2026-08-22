@@ -3,12 +3,21 @@
 
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 
 /// MeshCore Companion Radio Binary Protocol
 /// Protocol spec: https://github.com/meshcore-dev/MeshCore/blob/main/docs/companion_protocol.md
 
-/// Highest companion protocol version understood by this client.
-const int COMPANION_PROTOCOL_VERSION = 13;
+/// Response-layout version understood by this client and sent in DEVICE_QUERY.
+///
+/// This is deliberately 3, as required by the companion protocol. It is not
+/// the firmware layout/version byte returned in RESP_CODE_DEVICE_INFO (which
+/// is currently 13). The firmware stores this value as `app_target_ver` and
+/// uses it to choose the response layouts sent to the app.
+const int COMPANION_APP_TARGET_VERSION = 3;
+
+/// Maximum command/response bytes inside a companion transport frame.
+const int COMPANION_MAX_FRAME_SIZE = 176;
 
 // Frame delimiters
 const int FRAME_START_OUTBOUND = 0x3E; // '>' - radio -> app
@@ -37,12 +46,19 @@ const int CMD_REBOOT = 19;
 const int CMD_GET_BATT_AND_STORAGE = 20; // CMD_GET_BATTERY_VOLTAGE
 const int CMD_SET_TUNING_PARAMS = 21;
 const int CMD_DEVICE_QUERY = 22;
+const int CMD_EXPORT_PRIVATE_KEY = 23;
+const int CMD_IMPORT_PRIVATE_KEY = 24;
 const int CMD_SEND_RAW_DATA = 25;
 const int CMD_SEND_LOGIN = 26; // Send login to repeater/room server
 const int CMD_SEND_STATUS_REQ = 27; // Send status/data request after login
+const int CMD_HAS_CONNECTION = 28;
+const int CMD_LOGOUT = 29;
 const int CMD_GET_CONTACT_BY_KEY = 30; // Get contact by public key
 const int CMD_GET_CHANNEL = 31; // Get channel info by index
 const int CMD_SET_CHANNEL = 32; // Set channel configuration
+const int CMD_SIGN_START = 33;
+const int CMD_SIGN_DATA = 34;
+const int CMD_SIGN_FINISH = 35;
 const int CMD_SEND_TRACE_PATH = 36;
 const int CMD_SET_DEVICE_PIN = 37;
 const int CMD_SET_OTHER_PARAMS = 38;
@@ -54,6 +70,8 @@ const int CMD_GET_TUNING_PARAMS = 43;
 const int CMD_SEND_BINARY_REQ =
     50; // Send arbitrary binary request to a contact
 const int CMD_FACTORY_RESET = 51;
+const int CMD_SEND_PATH_DISCOVERY_REQ = 52;
+const int CMD_SET_FLOOD_SCOPE_KEY = 54;
 const int CMD_SEND_CONTROL_DATA = 55;
 const int CMD_GET_STATS = 56;
 const int CMD_SEND_ANON_REQ = 57; // Send anonymous request (for basic info)
@@ -81,10 +99,13 @@ const int RESP_CODE_NO_MORE_MESSAGES = 10;
 const int RESP_CODE_EXPORT_CONTACT = 11;
 const int RESP_CODE_BATT_AND_STORAGE = 12;
 const int RESP_CODE_DEVICE_INFO = 13;
+const int RESP_CODE_PRIVATE_KEY = 14;
 const int RESP_CODE_DISABLED = 15;
 const int RESP_CODE_CONTACT_MSG_RECV_V3 = 16;
 const int RESP_CODE_CHANNEL_MSG_RECV_V3 = 17;
 const int RESP_CODE_CHANNEL_INFO = 18;
+const int RESP_CODE_SIGN_START = 19;
+const int RESP_CODE_SIGNATURE = 20;
 const int RESP_CODE_CUSTOM_VARS = 21;
 const int RESP_CODE_ADVERT_PATH = 22;
 const int RESP_CODE_TUNING_PARAMS = 23;
@@ -122,6 +143,7 @@ const int ERR_CODE_FILE_IO_ERROR = 5;
 const int ERR_CODE_ILLEGAL_ARG = 6;
 
 // Advertisement types
+const int ADV_TYPE_NONE = 0;
 const int ADV_TYPE_CHAT = 1;
 const int ADV_TYPE_REPEATER = 2;
 const int ADV_TYPE_ROOM_SERVER = 3;
@@ -130,6 +152,7 @@ const int ADV_TYPE_SENSOR = 4;
 // Text message types (CMD_SEND_MESSAGE txt_type field)
 const int TXT_TYPE_PLAIN = 0;
 const int TXT_TYPE_CLI_DATA = 1;
+const int TXT_TYPE_SIGNED_PLAIN = 2;
 
 // Control data sub-types
 const int CONTROL_SUBTYPE_DISCOVER_REQ = 0x8;
@@ -165,6 +188,7 @@ class MeshCoreContact {
   final int? lastAdvert; // Unix timestamp
   final double? advLat;
   final double? advLon;
+  final int? lastModified; // Unix timestamp
 
   MeshCoreContact({
     required this.publicKey,
@@ -176,6 +200,7 @@ class MeshCoreContact {
     this.lastAdvert,
     this.advLat,
     this.advLon,
+    this.lastModified,
   });
 
   String get publicKeyHex =>
@@ -240,6 +265,16 @@ class MeshCoreProtocol {
         // Read frame length (little-endian uint16)
         final frameLength = bytes[1] | (bytes[2] << 8);
 
+        // Firmware accepts at most COMPANION_MAX_FRAME_SIZE bytes. Treat an
+        // impossible length as a corrupt marker and continue resynchronizing;
+        // otherwise one damaged header could make the parser wait forever.
+        if (frameLength == 0 || frameLength > COMPANION_MAX_FRAME_SIZE) {
+          final remaining = bytes.sublist(1);
+          _buffer.clear();
+          _buffer.add(remaining);
+          continue;
+        }
+
         // Check if we have the complete frame
         if (bytes.length < 3 + frameLength) break; // Wait for more data
 
@@ -277,6 +312,7 @@ class MeshCoreProtocol {
 
     final frameBytes = frameData.toBytes();
     final length = frameBytes.length;
+    _checkFrameLength(length);
 
     // Build complete frame: '<' + length(2 bytes LE) + frame data
     final result = BytesBuilder();
@@ -295,7 +331,9 @@ class MeshCoreProtocol {
     if (payload != null && payload.isNotEmpty) {
       frameData.add(payload);
     }
-    return frameData.toBytes();
+    final frameBytes = frameData.toBytes();
+    _checkFrameLength(frameBytes.length);
+    return frameBytes;
   }
 
   /// Create the required CMD_APP_START payload.
@@ -310,9 +348,9 @@ class MeshCoreProtocol {
     return payload.toBytes();
   }
 
-  /// Advertise the highest companion protocol version this app can parse.
+  /// Advertise the response-layout version this app can parse.
   Uint8List createDeviceQueryPayload() =>
-      Uint8List.fromList([COMPANION_PROTOCOL_VERSION]);
+      Uint8List.fromList([COMPANION_APP_TARGET_VERSION]);
 
   /// Create the payload for a single contact lookup.
   Uint8List createGetContactByKeyPayload(Uint8List publicKey) {
@@ -367,6 +405,7 @@ class MeshCoreProtocol {
       int? lastAdvert;
       double? advLat;
       double? advLon;
+      int? lastModified;
 
       if (data.length >= offset + 4) {
         // Last advert timestamp (4 bytes, uint32 LE)
@@ -398,6 +437,10 @@ class MeshCoreProtocol {
         offset += 4;
       }
 
+      if (data.length >= offset + 4) {
+        lastModified = _readUint32LE(data, offset);
+      }
+
       return MeshCoreContact(
         publicKey: publicKey,
         advType: advType,
@@ -408,9 +451,10 @@ class MeshCoreProtocol {
         lastAdvert: lastAdvert,
         advLat: advLat,
         advLon: advLon,
+        lastModified: lastModified,
       );
     } catch (e) {
-      print('Error parsing contact frame: $e');
+      debugPrint('Error parsing contact frame: $e');
       return null;
     }
   }
@@ -456,7 +500,7 @@ class MeshCoreProtocol {
 
       return {'index': index, 'name': name, 'key': key};
     } catch (e) {
-      print('Error parsing channel info frame: $e');
+      debugPrint('Error parsing channel info frame: $e');
       return null;
     }
   }
@@ -467,7 +511,8 @@ class MeshCoreProtocol {
 
     final firmwareProtocol = data[0];
     final result = <String, dynamic>{'firmware_protocol': firmwareProtocol};
-    if (firmwareProtocol >= 3 && data.length >= 79) {
+    if (firmwareProtocol >= 3) {
+      if (data.length < 79) return null;
       result.addAll({
         'max_contacts': data[1] * 2,
         'max_channels': data[2],
@@ -484,6 +529,56 @@ class MeshCoreProtocol {
       result['path_hash_mode'] = data[80];
     }
     return result;
+  }
+
+  /// Parse RESP_CODE_SELF_INFO (0x05).
+  ///
+  /// Payload layout (code byte already stripped by [parseIncomingData]):
+  /// adv_type(1), tx_power(1), max_tx_power(1), public key(32), lat(4),
+  /// lon(4), multi_acks(1), adv_loc_policy(1), telemetry_mode(1),
+  /// manual_add_contacts(1), freq(4), bw(4), sf(1), cr(1), then the device's
+  /// own advert name as a variable-length UTF-8 string.
+  Map<String, dynamic>? parseSelfInfoFrame(Uint8List data) {
+    const nameOffset = 57;
+    if (data.length < nameOffset) return null;
+
+    final telemetryMode = data[45];
+    final result = <String, dynamic>{
+      'adv_type': data[0],
+      'tx_power': data[1],
+      'max_tx_power': data[2],
+      'public_key': Uint8List.fromList(data.sublist(3, 35)),
+      'adv_lat': _readInt32LE(data, 35) / 1000000.0,
+      'adv_lon': _readInt32LE(data, 39) / 1000000.0,
+      'multi_acks': data[43],
+      'adv_loc_policy': data[44],
+      'telemetry_mode_env': (telemetryMode >> 4) & 0x03,
+      'telemetry_mode_loc': (telemetryMode >> 2) & 0x03,
+      'telemetry_mode_base': telemetryMode & 0x03,
+      'manual_add_contacts': data[46] != 0,
+      'radio_freq': _readUint32LE(data, 47) / 1000.0,
+      'radio_bw': _readUint32LE(data, 51) / 1000.0,
+      'radio_sf': data[55],
+      'radio_cr': data[56],
+    };
+    if (data.length > nameOffset) {
+      final name = _decodeTailUtf8(data, nameOffset);
+      if (name != null) result['name'] = name;
+    }
+    return result;
+  }
+
+  /// Decode a variable-length UTF-8 string that runs from [offset] to the end
+  /// of [data], cutting at a null terminator when the firmware sends one.
+  String? _decodeTailUtf8(Uint8List data, int offset) {
+    var end = data.length;
+    final zeroIdx = data.indexOf(0, offset);
+    if (zeroIdx >= offset) end = zeroIdx;
+    if (end <= offset) return null;
+    final decoded = utf8
+        .decode(data.sublist(offset, end), allowMalformed: true)
+        .trim();
+    return decoded.isEmpty ? null : decoded;
   }
 
   String _decodeFixedUtf8(Uint8List data, int offset, int length) {
@@ -512,8 +607,12 @@ class MeshCoreProtocol {
       (data[offset + 2] << 16) |
       (data[offset + 3] << 24);
 
+  int _readInt32LE(Uint8List data, int offset) =>
+      _int32ToSigned(_readUint32LE(data, offset));
+
   /// Create CMD_GET_CHANNEL command to query channel at specific index
   Uint8List createGetChannelPayload(int channelIdx) {
+    _checkChannelIndex(channelIdx);
     final payload = BytesBuilder();
     payload.addByte(channelIdx);
     return payload.toBytes();
@@ -529,6 +628,7 @@ class MeshCoreProtocol {
     String channelName,
     Uint8List channelKey,
   ) {
+    _checkChannelIndex(channelIdx);
     if (channelKey.length != 16) {
       throw ArgumentError('Channel key must be 16 bytes');
     }
@@ -538,7 +638,8 @@ class MeshCoreProtocol {
 
     // Channel name (32 bytes, null-terminated)
     final nameBytes = Uint8List(32);
-    final encoded = _encodeUtf8AtMost(channelName, 32);
+    // The field is a C string. Keep byte 31 as the required terminator.
+    final encoded = _encodeUtf8AtMost(channelName, 31);
     final len = encoded.length;
     nameBytes.setRange(0, len, encoded);
     payload.add(nameBytes);
@@ -553,6 +654,16 @@ class MeshCoreProtocol {
   /// lat/lon: GPS coordinates in degrees
   /// Returns payload only - caller must wrap with createCommandFrame() or createCommandFrameBLE()
   Uint8List createPositionPayload(double latitude, double longitude) {
+    if (!latitude.isFinite || latitude < -90 || latitude > 90) {
+      throw ArgumentError.value(latitude, 'latitude', 'must be within -90..90');
+    }
+    if (!longitude.isFinite || longitude < -180 || longitude > 180) {
+      throw ArgumentError.value(
+        longitude,
+        'longitude',
+        'must be within -180..180',
+      );
+    }
     final payload = BytesBuilder();
 
     // Latitude as int32 (degrees * 1E6, little-endian)
@@ -579,8 +690,17 @@ class MeshCoreProtocol {
   Uint8List createChannelMessagePayload(
     int channelIdx,
     String message, {
-    int txtType = 0,
+    int txtType = TXT_TYPE_PLAIN,
+    int? senderTimestamp,
   }) {
+    _checkChannelIndex(channelIdx);
+    if (txtType != TXT_TYPE_PLAIN) {
+      throw ArgumentError.value(
+        txtType,
+        'txtType',
+        'companion firmware only accepts TXT_TYPE_PLAIN for channel messages',
+      );
+    }
     final payload = BytesBuilder();
 
     // txtType (1 byte) - 0 = plain text
@@ -590,16 +710,23 @@ class MeshCoreProtocol {
     payload.addByte(channelIdx);
 
     // senderTimestamp (4 bytes, uint32 LE) - epoch seconds
-    final timestamp = (DateTime.now().millisecondsSinceEpoch / 1000).floor();
+    final timestamp =
+        senderTimestamp ?? DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    if (timestamp < 0 || timestamp > 0xFFFFFFFF) {
+      throw ArgumentError.value(
+        timestamp,
+        'senderTimestamp',
+        'must fit in an unsigned 32-bit integer',
+      );
+    }
     payload.addByte(timestamp & 0xFF);
     payload.addByte((timestamp >> 8) & 0xFF);
     payload.addByte((timestamp >> 16) & 0xFF);
     payload.addByte((timestamp >> 24) & 0xFF);
 
-    // Message text (null-terminated)
-    final msgBytes = message.codeUnits;
-    payload.add(Uint8List.fromList(msgBytes));
-    payload.addByte(0); // Null terminator
+    // Message text occupies the remainder of the frame and is UTF-8. There is
+    // no null terminator in the companion protocol command layout.
+    payload.add(utf8.encode(message));
 
     return payload.toBytes();
   }
@@ -612,20 +739,20 @@ class MeshCoreProtocol {
   Map<String, dynamic>? parseRawLogFrame(Uint8List data) {
     try {
       if (data.length < 2) {
-        print('⚠️ Raw log frame too short: ${data.length} bytes');
+        debugPrint('⚠️ Raw log frame too short: ${data.length} bytes');
         return null;
       }
 
       // SNR at byte 0 (scaled by 4x in firmware)
       var snrRaw = data[0];
       if (snrRaw > 127) snrRaw -= 256;
-      final snr = (snrRaw / 4.0).round(); // Convert back to actual SNR
+      final snr = snrRaw / 4.0;
 
       // RSSI at byte 1 (raw value)
       int rssi = data[1];
       if (rssi > 127) rssi -= 256; // Convert to signed byte
 
-      print(
+      debugPrint(
         '📻 Raw log frame: SNR=$snr (raw=$snrRaw), RSSI=$rssi, total=${data.length} bytes',
       );
 
@@ -647,7 +774,7 @@ class MeshCoreProtocol {
         // Skip transport codes if present (4 bytes)
         if (hasTransportCodes) {
           if (data.length < offset + 4) {
-            print('  Not enough data for transport codes');
+            debugPrint('  Not enough data for transport codes');
             return {
               'snr': snr,
               'rssi': rssi,
@@ -661,7 +788,7 @@ class MeshCoreProtocol {
 
         // Read path_len (signed byte)
         if (data.length <= offset) {
-          print('  No pathLen byte');
+          debugPrint('  No pathLen byte');
           return {
             'snr': snr,
             'rssi': rssi,
@@ -674,7 +801,7 @@ class MeshCoreProtocol {
         int pathLen = data[offset++];
         // Convert unsigned byte to signed
         if (pathLen > 127) pathLen -= 256;
-        print(
+        debugPrint(
           '  header=0x${header.toRadixString(16)}, routeType=$routeType, hasTransport=$hasTransportCodes, pathLen=$pathLen',
         );
 
@@ -690,20 +817,20 @@ class MeshCoreProtocol {
                 .toRadixString(16)
                 .padLeft(2, '0')
                 .toUpperCase();
-            print(
+            debugPrint(
               '  🎯 FLOOD packet with path! Last hop ($pathLen hops): $repeater',
             );
           } else {
-            print(
+            debugPrint(
               '  Path exists but data too short: pathLen=$pathLen, available=${data.length - offset}',
             );
           }
         } else if (pathLen > 0 && routeType == 0x02) {
           // ROUTE_TYPE_DIRECT
           // Direct routes have full 32-byte keys (not used in wardrive typically)
-          print('  Direct route with full keys (pathLen=$pathLen)');
+          debugPrint('  Direct route with full keys (pathLen=$pathLen)');
         } else if (pathLen == 0 || pathLen < 0) {
-          print('  Zero-hop packet (direct/flood with no path built)');
+          debugPrint('  Zero-hop packet (direct/flood with no path built)');
         }
       }
 
@@ -716,7 +843,7 @@ class MeshCoreProtocol {
         'repeaterKey': repeaterKey,
       };
     } catch (e) {
-      print('Error parsing raw log frame: $e');
+      debugPrint('Error parsing raw log frame: $e');
       return null;
     }
   }
@@ -831,7 +958,7 @@ class MeshCoreProtocol {
   Map<String, dynamic>? parseControlDataPush(Uint8List data) {
     try {
       if (data.length < 3) {
-        print('⚠️ Control data push too short: ${data.length} bytes');
+        debugPrint('⚠️ Control data push too short: ${data.length} bytes');
         return null;
       }
 
@@ -840,7 +967,7 @@ class MeshCoreProtocol {
       // SNR at byte 0 (scaled by 4x)
       int snrRaw = data[offset++];
       if (snrRaw > 127) snrRaw -= 256; // Convert to signed
-      final snr = (snrRaw / 4.0).round();
+      final snr = snrRaw / 4.0;
 
       // RSSI at byte 1 (signed)
       int rssi = data[offset++];
@@ -864,7 +991,7 @@ class MeshCoreProtocol {
         'payload': payload,
       };
     } catch (e) {
-      print('Error parsing control data push: $e');
+      debugPrint('Error parsing control data push: $e');
       return null;
     }
   }
@@ -874,7 +1001,7 @@ class MeshCoreProtocol {
   Map<String, dynamic>? parseDiscoveryResponse(Uint8List payload) {
     try {
       if (payload.length < 6) {
-        print('⚠️ Discovery response too short: ${payload.length} bytes');
+        debugPrint('⚠️ Discovery response too short: ${payload.length} bytes');
         return null;
       }
 
@@ -886,7 +1013,7 @@ class MeshCoreProtocol {
       final nodeType = flags & 0x0F;
 
       if (subType != CONTROL_SUBTYPE_DISCOVER_RESP) {
-        print(
+        debugPrint(
           '⚠️ Not a DISCOVER_RESP: sub_type=0x${subType.toRadixString(16)}',
         );
         return null;
@@ -895,11 +1022,11 @@ class MeshCoreProtocol {
       // SNR at byte 1 (already scaled by 4, signed)
       int snrRaw = payload[offset++];
       if (snrRaw > 127) snrRaw -= 256;
-      final snr = (snrRaw / 4.0).round();
+      final snr = snrRaw / 4.0;
 
       // Tag: 4 bytes (little-endian uint32)
       if (payload.length < offset + 4) {
-        print('⚠️ Discovery response: not enough data for tag');
+        debugPrint('⚠️ Discovery response: not enough data for tag');
         return null;
       }
       final tag =
@@ -909,8 +1036,11 @@ class MeshCoreProtocol {
           (payload[offset + 3] << 24);
       offset += 4;
 
-      // Public key: 8 or 32 bytes (depends on prefix_only flag in request)
+      // Public key: exactly 8 or 32 bytes (depends on prefix_only in request).
       final pubkeyBytes = payload.sublist(offset);
+      if (pubkeyBytes.length != 8 && pubkeyBytes.length != 32) {
+        return null;
+      }
       final pubkey = pubkeyBytes
           .map((b) => b.toRadixString(16).padLeft(2, '0'))
           .join('')
@@ -924,8 +1054,28 @@ class MeshCoreProtocol {
         'pubkey_bytes': pubkeyBytes,
       };
     } catch (e) {
-      print('Error parsing discovery response: $e');
+      debugPrint('Error parsing discovery response: $e');
       return null;
+    }
+  }
+
+  void _checkChannelIndex(int channelIdx) {
+    if (channelIdx < 0 || channelIdx > 7) {
+      throw ArgumentError.value(
+        channelIdx,
+        'channelIdx',
+        'must be within 0..7',
+      );
+    }
+  }
+
+  void _checkFrameLength(int length) {
+    if (length < 1 || length > COMPANION_MAX_FRAME_SIZE) {
+      throw ArgumentError.value(
+        length,
+        'frameLength',
+        'must be within 1..$COMPANION_MAX_FRAME_SIZE bytes',
+      );
     }
   }
 
@@ -1037,7 +1187,7 @@ class MeshCoreProtocol {
         'firmware_version': firmwareVersion,
       };
     } catch (e) {
-      print('Error parsing login success push: $e');
+      debugPrint('Error parsing login success push: $e');
       return null;
     }
   }
@@ -1114,7 +1264,7 @@ class MeshCoreProtocol {
         'neighbours': neighbours,
       };
     } catch (e) {
-      print('Error parsing binary response neighbours: $e');
+      debugPrint('Error parsing binary response neighbours: $e');
       return null;
     }
   }

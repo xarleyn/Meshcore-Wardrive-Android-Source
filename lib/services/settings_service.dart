@@ -43,6 +43,10 @@ class SettingsService {
       'location_airborne_speed_meters_per_second';
   static const String _maxWardriveSpeedMetersPerSecondKey =
       'location_max_wardrive_speed_meters_per_second';
+  static const String _pausePingsOnBadFixesKey =
+      'location_pause_pings_on_bad_fixes';
+  static const String _pingPauseBadFixCountKey =
+      'location_ping_pause_bad_fix_count';
   static const String _showDuctingKey = 'show_ducting';
   static const String _goalCenterLatKey = 'goal_center_lat';
   static const String _goalCenterLonKey = 'goal_center_lon';
@@ -56,6 +60,7 @@ class SettingsService {
   static const String _carpeaterPasswordKey = 'carpeater_password';
   static const String _carpeaterIntervalKey = 'carpeater_interval_seconds';
   static const String _deviceNameKey = 'device_name';
+  static const String _companionNodeNameKey = 'companion_node_name';
   static const String _lockRotationKey = 'lock_rotation_north';
   static const String _keepScreenOnKey = 'keep_screen_on';
   static const String _currentLocationMarkerStyleKey =
@@ -65,6 +70,7 @@ class SettingsService {
   static const String _showSuccessfulOnlyKey = 'show_successful_only';
   static const String _deadZoneAlertsKey = 'dead_zone_alerts_enabled';
   static const String _newRepeaterAlertsKey = 'new_repeater_alerts_enabled';
+  static const String _linkLossAlertsKey = 'link_loss_alerts_enabled';
   static const String _batterySaverEnabledKey = 'battery_saver_enabled';
   static const String _mapThemeModeKey = 'map_theme_mode';
   static const String _appLocaleKey = 'app_locale';
@@ -91,6 +97,16 @@ class SettingsService {
   Future<void> setNewRepeaterAlertsEnabled(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_newRepeaterAlertsKey, value);
+  }
+
+  Future<bool> getLinkLossAlertsEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_linkLossAlertsKey) ?? true;
+  }
+
+  Future<void> setLinkLossAlertsEnabled(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_linkLossAlertsKey, value);
   }
 
   Future<bool> getBatterySaverEnabled() async {
@@ -409,6 +425,15 @@ class SettingsService {
         prefs.getDouble(_maxWardriveSpeedMetersPerSecondKey),
         LocationQualitySettings.defaultMaxWardriveSpeedMetersPerSecond,
       ),
+      pausePingsOnBadFixes:
+          prefs.getBool(_pausePingsOnBadFixesKey) ??
+          LocationQualitySettings.defaultPausePingsOnBadFixes,
+      pingPauseBadFixCount: _intInRangeOrDefault(
+        prefs.getInt(_pingPauseBadFixCountKey),
+        LocationQualitySettings.defaultPingPauseBadFixCount,
+        LocationQualitySettings.minPingPauseBadFixCount,
+        LocationQualitySettings.maxPingPauseBadFixCount,
+      ),
     );
   }
 
@@ -426,6 +451,17 @@ class SettingsService {
         settings,
         'settings',
         'values must be positive',
+      );
+    }
+    final badFixCount = settings.pingPauseBadFixCount;
+    if (badFixCount < LocationQualitySettings.minPingPauseBadFixCount ||
+        badFixCount > LocationQualitySettings.maxPingPauseBadFixCount) {
+      throw ArgumentError.value(
+        settings,
+        'settings',
+        'pingPauseBadFixCount must be between '
+            '${LocationQualitySettings.minPingPauseBadFixCount} and '
+            '${LocationQualitySettings.maxPingPauseBadFixCount}',
       );
     }
 
@@ -446,10 +482,20 @@ class SettingsService {
       _maxWardriveSpeedMetersPerSecondKey,
       settings.maxWardriveSpeedMetersPerSecond,
     );
+    await prefs.setBool(
+      _pausePingsOnBadFixesKey,
+      settings.pausePingsOnBadFixes,
+    );
+    await prefs.setInt(_pingPauseBadFixCountKey, settings.pingPauseBadFixCount);
   }
 
   double _positiveOrDefault(double? value, double defaultValue) {
     if (value == null || !value.isFinite || value <= 0) return defaultValue;
+    return value;
+  }
+
+  int _intInRangeOrDefault(int? value, int defaultValue, int min, int max) {
+    if (value == null || value < min || value > max) return defaultValue;
     return value;
   }
 
@@ -603,6 +649,25 @@ class SettingsService {
       await prefs.remove(_deviceNameKey);
     } else {
       await prefs.setString(_deviceNameKey, value);
+    }
+  }
+
+  /// MeshCore advert name reported by the connected companion radio, or null
+  /// while no companion connection is active. Runtime state, not a preference:
+  /// it is refreshed by [LoRaCompanionService] on every self-info frame and is
+  /// intentionally excluded from settings export/import.
+  Future<String?> getCompanionNodeName() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_companionNodeNameKey);
+  }
+
+  /// Set or clear the connected companion radio's MeshCore advert name.
+  Future<void> setCompanionNodeName(String? value) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (value == null || value.isEmpty) {
+      await prefs.remove(_companionNodeNameKey);
+    } else {
+      await prefs.setString(_companionNodeNameKey, value);
     }
   }
 
@@ -790,6 +855,8 @@ class SettingsService {
     _airborneAltitudeMetersKey,
     _airborneSpeedMetersPerSecondKey,
     _maxWardriveSpeedMetersPerSecondKey,
+    _pausePingsOnBadFixesKey,
+    _pingPauseBadFixCountKey,
     _showDuctingKey,
     _goalCenterLatKey,
     _goalCenterLonKey,
@@ -809,6 +876,7 @@ class SettingsService {
     _currentLocationMarkerStyleKey,
     _showSuccessfulOnlyKey,
     _mapLodEnabledKey,
+    _linkLossAlertsKey,
     // Upload service keys
     'upload_api_url',
     'auto_upload_enabled',

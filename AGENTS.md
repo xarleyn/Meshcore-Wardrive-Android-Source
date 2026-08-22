@@ -19,7 +19,9 @@ stores observations in SQLite, and renders aggregated coverage on a map.
   upload integrations.
 - `lib/utils/`: reusable helpers without UI responsibilities.
 - `android/`: the only maintained Flutter host platform.
-- `test/`: unit and widget tests.
+- `test/`: unit and widget tests, grouped into subdirectories by name prefix
+  such as `test/bluetooth/` and `test/map/`; shared helpers stay in
+  `test/helpers/`.
 - `docs/`: user and developer documentation.
 - `assets/`: source assets; generated launch icons remain under `android/`.
 
@@ -99,8 +101,28 @@ or a physical LoRa device, describe any manual device testing that remains.
   credentials with the existing secure-storage abstraction.
 - Add or update tests for behavior that can be exercised without physical
   hardware. Isolate device and network boundaries so they can be faked.
+- Prefer placing new tests in the `test/` subdirectory matching the test name
+  prefix, for example `bluetooth_scan_test.dart` under `test/bluetooth/`.
+  Create a new prefix subdirectory when no matching one exists yet, and import
+  shared helpers such as `test/helpers/l10n_harness.dart` with a relative path
+  that accounts for the extra level.
+- Treat `test/meshcore/` as a protected protocol-contract test suite. Before
+  adding, editing, moving, renaming, regenerating, or deleting any file in that
+  directory, obtain separate explicit approval from the user for that specific
+  test-suite change, even when a related implementation change was already
+  requested. Running the protected tests does not require approval.
 - Avoid editing generated files unless the corresponding generator or Android
   configuration requires it.
+- `lib/l10n/generated/app_localizations*.dart` are tracked, reproducible
+  `gen_l10n` outputs. If they disappear during an agent or tool run, first use
+  `git status`, `git diff --cached`, and `git log -- <paths>` to verify that
+  `HEAD` still tracks them and that their deletion is neither committed nor an
+  intentional user change. In that case, treat the deletion as tooling fallout,
+  restore the files from `HEAD` with `git restore --worktree -- <paths>` or
+  regenerate them with `flutter gen-l10n`, and do not stage the transient
+  deletion. Do not restore them when deletion is committed, explicitly
+  requested, or accompanied by intentional ARB, `l10n.yaml`, or `pubspec.yaml`
+  changes that alter the generated output.
 
 ## Documentation and repository hygiene
 

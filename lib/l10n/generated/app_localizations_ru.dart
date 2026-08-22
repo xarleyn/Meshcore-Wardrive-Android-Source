@@ -96,10 +96,96 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsSectionAbout => 'О приложении';
 
   @override
+  String get settingsOverviewGroupMap => 'Карта';
+
+  @override
+  String get settingsOverviewGroupSampling => 'Сбор и оповещения';
+
+  @override
+  String get settingsOverviewGroupApp => 'Приложение';
+
+  @override
+  String get settingsOverviewGroupData => 'Данные';
+
+  @override
+  String get settingsOverviewGroupSystem => 'Система';
+
+  @override
+  String get settingsSectionMapDisplayDescription =>
+      'Слои покрытия, семплы, теплокарта';
+
+  @override
+  String get settingsSectionLocationDescription => 'GPS, Wi-Fi и позиция радио';
+
+  @override
+  String get settingsSectionDiscoveryDescription =>
+      'Пинги, таймауты, фильтры репитеров';
+
+  @override
+  String get settingsSectionFeedbackDescription => 'Звук, вибрация и алерты';
+
+  @override
+  String get settingsSectionCarpeaterDescription =>
+      'Работа через выбранный репитер';
+
+  @override
+  String get settingsSectionAppDeviceDescription =>
+      'Тема, язык, экран и единицы';
+
+  @override
+  String get settingsSectionOnlineMapDescription =>
+      'Загрузка семплов в общее покрытие';
+
+  @override
+  String get settingsSectionStatisticsDescription => 'Пробег и оценка топлива';
+
+  @override
+  String get settingsSectionDataManagementDescription =>
+      'Экспорт, импорт, фильтры и приватность';
+
+  @override
+  String get settingsSectionBackupDescription =>
+      'Экспорт и восстановление настроек';
+
+  @override
+  String get settingsSectionDiagnosticsDescription =>
+      'Логи и проверки устройства';
+
+  @override
+  String get settingsSectionAboutDescription =>
+      'Версия, обновления и исходники';
+
+  @override
   String get settingsSectionThresholds => 'Пороги';
 
   @override
   String get settingsSectionImpossibleZones => 'Зоны исключения GPS';
+
+  @override
+  String get settingsSectionAutoPingPause => 'Пауза автопинга';
+
+  @override
+  String get settingsPingPauseOnBadFixes => 'Пауза пингов при плохом GPS';
+
+  @override
+  String get settingsPingPauseOnBadFixesSubtitle =>
+      'Не отправлять автопинги, пока последние измерения позиции отклоняются; возобновление после корректного измерения';
+
+  @override
+  String get settingsPingPauseBadFixCount => 'Некорректных измерений подряд';
+
+  @override
+  String get settingsPingPauseBadFixCountSubtitle =>
+      'Сколько подряд отклонённых измерений приостанавливает пинги';
+
+  @override
+  String get settingsPingPauseBadFixCountDescription =>
+      'Количество подряд отклонённых измерений позиции, после которого автопинг приостанавливается до появления корректного измерения.';
+
+  @override
+  String settingsEnterBadFixCount(int min, int max) {
+    return 'Введите число от $min до $max';
+  }
 
   @override
   String get settingsShowCoverageBoxes => 'Показывать ячейки покрытия';
@@ -240,6 +326,13 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get settingsNewRepeaterAlertsSubtitle =>
       'Уведомлять, когда обнаружен ранее не встречавшийся репитер';
+
+  @override
+  String get settingsLinkLossAlerts => 'Сигнал при потере связи';
+
+  @override
+  String get settingsLinkLossAlertsSubtitle =>
+      'Звуковой сигнал при потере связи с LoRa-устройством';
 
   @override
   String get settingsEnableCarpeaterMode => 'Включить режим Carpeater';
@@ -1234,6 +1327,14 @@ class AppLocalizationsRu extends AppLocalizations {
       '🔋 Энергосбережение ВЫКЛ — обычный интервал пинга восстановлен';
 
   @override
+  String get mapPingPausedByBadFixes =>
+      '📡 Автопинг на паузе: последние GPS-измерения недостоверны';
+
+  @override
+  String get mapPingResumedByGoodFix =>
+      '📡 Автопинг возобновлён: получено корректное GPS-измерение';
+
+  @override
   String get mapCompassCalibrated => 'Компас откалиброван';
 
   @override
@@ -1452,6 +1553,21 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get mapAddPlannedRepeater => 'Добавить запланированный репитер';
+
+  @override
+  String get mapLongPressActionTitle => 'Что добавить на карту';
+
+  @override
+  String get mapLongPressPlannedRepeaterSubtitle =>
+      'Отметить возможное место будущего репитера';
+
+  @override
+  String get mapLongPressPrivacyZoneSubtitle =>
+      'Исключить эту область из отправки и экспорта';
+
+  @override
+  String get mapLongPressImpossibleZoneSubtitle =>
+      'Отбрасывать недостоверные GPS-позиции в этой области';
 
   @override
   String get mapPlannedRepeaterHint => 'напр., холм у Tracyton';
@@ -1795,6 +1911,16 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get mapLoraDisconnected => 'Устройство LoRa отключено';
+
+  @override
+  String mapLoraReconnecting(String name) {
+    return 'Связь потеряна. Переподключение к $name...';
+  }
+
+  @override
+  String mapLoraReconnected(String name) {
+    return 'Соединение с $name восстановлено';
+  }
 
   @override
   String get mapRefreshingContactList => 'Обновление списка контактов...';
@@ -3222,6 +3348,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get achievementSessions50Description => 'Завершите 50 сессий';
+
+  @override
+  String get achievementSmolenskLegendTitle =>
+      'Быть легендой mesh сетей Смоленска';
+
+  @override
+  String get achievementSmolenskLegendDescription => 'Вы знаете, что сделали.';
 
   @override
   String get notificationBrandTitle => 'MeshCore Wardrive';

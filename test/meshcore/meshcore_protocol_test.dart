@@ -24,7 +24,7 @@ void main() {
           CMD_DEVICE_QUERY,
           protocol.createDeviceQueryPayload(),
         ),
-        [CMD_DEVICE_QUERY, COMPANION_PROTOCOL_VERSION],
+        [CMD_DEVICE_QUERY, COMPANION_APP_TARGET_VERSION],
       );
     });
 
@@ -255,6 +255,43 @@ void main() {
       expect(info['firmware_version'], '1.17.0');
       expect(info['client_repeat'], isTrue);
       expect(info['path_hash_mode'], 2);
+    });
+
+    test('parses the device advert name from self information', () {
+      final data = Uint8List(70);
+      data[0] = ADV_TYPE_CHAT;
+      final nameBytes = utf8.encode('Ya_Smolensk');
+      data.setRange(57, 57 + nameBytes.length, nameBytes);
+      // Firmware pads the tail with zero bytes after the name.
+      data[68] = 0;
+      data[69] = 0;
+
+      final info = protocol.parseSelfInfoFrame(data);
+
+      expect(info, isNotNull);
+      expect(info!['adv_type'], ADV_TYPE_CHAT);
+      expect(info['name'], 'Ya_Smolensk');
+    });
+
+    test('self information decodes a Cyrillic advert name without padding', () {
+      final nameBytes = utf8.encode('Якут');
+      final data = Uint8List(57 + nameBytes.length);
+      data[0] = ADV_TYPE_SENSOR;
+      data.setRange(57, data.length, nameBytes);
+
+      final info = protocol.parseSelfInfoFrame(data);
+
+      expect(info!['name'], 'Якут');
+    });
+
+    test('self information requires the complete fixed layout', () {
+      expect(protocol.parseSelfInfoFrame(Uint8List(56)), isNull);
+
+      final unnamedInfo = Uint8List(57)..[0] = ADV_TYPE_REPEATER;
+      final parsed = protocol.parseSelfInfoFrame(unnamedInfo);
+      expect(parsed, isNotNull);
+      expect(parsed!['adv_type'], ADV_TYPE_REPEATER);
+      expect(parsed.containsKey('name'), isFalse);
     });
 
     test('parses standard and V3 channel messages', () {

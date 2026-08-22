@@ -104,6 +104,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 }
 
+class SettingsOverviewGroup extends StatelessWidget {
+  const SettingsOverviewGroup({
+    required this.title,
+    required this.children,
+    super.key,
+  });
+
+  final String title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+            child: Text(
+              title.toUpperCase(),
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: colors.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.8,
+              ),
+            ),
+          ),
+          SettingsOverviewCard(children: children),
+        ],
+      ),
+    );
+  }
+}
+
 class SettingsOverviewCard extends StatelessWidget {
   const SettingsOverviewCard({required this.children, super.key});
 
@@ -125,7 +162,7 @@ class SettingsOverviewCard extends StatelessWidget {
             if (index != children.length - 1)
               Divider(
                 height: 1,
-                indent: 76,
+                indent: 56,
                 endIndent: 20,
                 color: colors.outlineVariant.withValues(alpha: 0.55),
               ),
@@ -139,36 +176,33 @@ class SettingsOverviewCard extends StatelessWidget {
 class SettingsCategoryTile extends StatelessWidget {
   const SettingsCategoryTile({
     required this.title,
+    required this.subtitle,
     required this.icon,
     required this.onTap,
     super.key,
   });
 
   final String title;
+  final String subtitle;
   final IconData icon;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
 
     return ListTile(
-      minTileHeight: 72,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-      leading: DecoratedBox(
-        decoration: BoxDecoration(
-          color: colors.primaryContainer,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: SizedBox.square(
-          dimension: 44,
-          child: Icon(icon, color: colors.onPrimaryContainer, size: 24),
-        ),
-      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      leading: Icon(icon, color: colors.onSurfaceVariant, size: 24),
       title: Text(title),
-      titleTextStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
+      subtitle: Text(subtitle),
+      titleTextStyle: theme.textTheme.titleMedium?.copyWith(
         color: colors.onSurface,
         fontWeight: FontWeight.w500,
+      ),
+      subtitleTextStyle: theme.textTheme.bodySmall?.copyWith(
+        color: colors.onSurfaceVariant,
       ),
       trailing: Icon(Icons.chevron_right, color: colors.onSurfaceVariant),
       onTap: onTap,

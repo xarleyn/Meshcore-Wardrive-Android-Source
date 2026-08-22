@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meshcore_wardrive/l10n/generated/app_localizations.dart';
 import 'package:meshcore_wardrive/screens/settings/settings_screen.dart';
 
-import 'helpers/l10n_harness.dart';
+import '../helpers/l10n_harness.dart';
 
 void main() {
   testWidgets('renders settings as a full categorized page', (tester) async {
@@ -121,10 +121,12 @@ void main() {
           controller: scrollController,
           padding: const EdgeInsets.all(16),
           children: [
-            SettingsOverviewCard(
+            SettingsOverviewGroup(
+              title: 'Map',
               children: [
                 SettingsCategoryTile(
                   title: 'Map display',
+                  subtitle: 'Coverage layers, samples, heatmap, and overlays',
                   icon: Icons.map_outlined,
                   onTap: () {
                     Navigator.of(context).push(
@@ -177,8 +179,13 @@ void main() {
       ),
     );
 
+    expect(find.text('MAP'), findsOneWidget);
     expect(find.byType(SettingsOverviewCard), findsOneWidget);
     expect(find.text('Map display'), findsOneWidget);
+    expect(
+      find.text('Coverage layers, samples, heatmap, and overlays'),
+      findsOneWidget,
+    );
 
     await tester.tap(find.text('Map display'));
     await tester.pumpAndSettle();
@@ -228,5 +235,30 @@ void main() {
 
     expect(find.text('Setting 0'), findsOneWidget);
     expect(find.text('Setting 29'), findsNothing);
+  });
+
+  testWidgets('uppercases overview group headers and shows tile subtitles', (
+    tester,
+  ) async {
+    await pumpWithL10n(
+      tester,
+      Scaffold(
+        body: SettingsOverviewGroup(
+          title: 'Sampling & alerts',
+          children: [
+            SettingsCategoryTile(
+              title: 'Discovery & sampling',
+              subtitle: 'Pings, timeouts, and repeater filters',
+              icon: Icons.radar_outlined,
+              onTap: () {},
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.text('SAMPLING & ALERTS'), findsOneWidget);
+    expect(find.text('Sampling & alerts'), findsNothing);
+    expect(find.text('Pings, timeouts, and repeater filters'), findsOneWidget);
   });
 }

@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import '../models/impossible_zone.dart';
 import '../models/models.dart';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 class DatabaseService {
   static Database? _database;
@@ -543,7 +544,7 @@ class DatabaseService {
             sessionsImported++;
           }
         } catch (e) {
-          print('Error importing session: $e');
+          debugPrint('Error importing session: $e');
         }
       }
     }
@@ -577,7 +578,7 @@ class DatabaseService {
           importedCount++;
         }
       } catch (e) {
-        print('Error importing sample: $e');
+        debugPrint('Error importing sample: $e');
         // Skip invalid samples
       }
     }
