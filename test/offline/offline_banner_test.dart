@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meshcore_wardrive/services/internet_connectivity_service.dart';
 import 'package:meshcore_wardrive/widgets/offline_banner.dart';
 
-import 'helpers/l10n_harness.dart';
+import '../helpers/l10n_harness.dart';
 
 void main() {
   testWidgets('shows the banner only while offline', (tester) async {

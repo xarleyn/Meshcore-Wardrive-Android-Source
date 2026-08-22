@@ -35,8 +35,12 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final unlocked = _achievements.where((a) => a.unlocked).length;
-    final total = _achievements.length;
+    // Hidden achievements stay invisible until they are unlocked.
+    final visible = _achievements
+        .where((a) => !a.hidden || a.unlocked)
+        .toList();
+    final unlocked = visible.where((a) => a.unlocked).length;
+    final total = visible.length;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settingsAchievements)),
@@ -80,9 +84,9 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                 Expanded(
                   child: ListView.builder(
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    itemCount: _achievements.length,
+                    itemCount: visible.length,
                     itemBuilder: (context, index) {
-                      final a = _achievements[index];
+                      final a = visible[index];
                       final copy = achievementCopy(l10n, a.id);
                       final locale = Localizations.localeOf(context).toString();
                       return ListTile(

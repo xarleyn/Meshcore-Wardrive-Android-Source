@@ -2,13 +2,46 @@
 
 ## Unreleased
 
+### Changed
+- Settings overview groups categories by topic (Map, Sampling & alerts, App,
+  Data, System) with uppercase headers and a one-line description on each
+  category tile.
+
 ### Added
+- Hidden achievement "Быть легендой mesh сетей Смоленска" (💎): unlocks while
+  the connected companion radio reports a node name starting with "Ya_",
+  "Yakut", or "Якут" (case-insensitive). The badge stays invisible on the
+  Achievements screen until it is unlocked. The device's own MeshCore advert
+  name is now parsed from the SELF_INFO handshake response and tracked while
+  the companion is connected; it is separate from the Bluetooth/USB transport
+  name.
+- Auto-ping pause on bad GPS: when the configured number of consecutive
+  position fixes is rejected by the location quality filters, automatic pings
+  pause until the next valid fix instead of pinging a stale position. The
+  feature is on by default after 5 rejected fixes; the toggle and threshold
+  live in Settings → Location Quality Filters → Auto-Ping Pause and are
+  included in settings export/import. A snackbar announces each pause and
+  resume.
+- Audible link-loss alert: when the LoRa companion radio disconnects
+  unexpectedly, the app plays a distinctive double-beep tone with vibration.
+  A disconnect made explicitly from the map stays silent. The alert can be
+  turned off in Settings → Feedback ("Link Loss Alert", enabled by default)
+  and is included in settings export/import.
+- Automatic reconnection to the LoRa companion radio after an unexpected
+  connection loss (USB unplugged or Bluetooth link dropped). Reconnect attempts
+  use exponential backoff (3 s doubling up to once a minute) and refresh the
+  contact list on success. Auto-ping suspended by the loss resumes when the
+  link is restored. A disconnect made explicitly from the map is never followed
+  by an automatic reconnection.
 - In-app language (System / English / Русский) under Settings → App & device;
   Russian UI.
 - **Impossible Zones** in Location Quality Filters: user-defined circles
   where you cannot physically be. GPS or Wi-Fi fixes inside a zone are
   discarded (no sample, no ping) and the map keeps the last valid
-  position. Managed in Settings only; not drawn on the map.
+  position. They can be added from Settings or by long-pressing the map;
+  they are not drawn on the map.
+- Long-pressing the map now opens a choice of what to add: a planned repeater,
+  a privacy zone, or a GPS-impossible zone.
 - Before a GPS fix is available, the map opens on the average of stored
   measurements at a city-scale zoom. Spread-out samples zoom out to fit. With
   no samples it keeps the previous default view, and the first GPS fix still
@@ -107,10 +140,13 @@
   response arrives, with the actual response time. Additional repeater
   responses are still collected for radio-position estimation without delaying
   feedback, and overlapping discovery cycles are prevented.
-- Companion-radio communication now matches MeshCore protocol version 13:
-  valid app startup and device negotiation, correct contact lookup and advert
-  handling, current packet assignments, and corrected raw/control/login frame
-  parsing. BLE connections now use the official UART UUIDs and request MTU 512.
+- Companion-radio communication now parses firmware layout 13 while correctly
+  negotiating the documented app response layout 3. Golden protocol tests pin
+  command/response assignments, USB/BLE framing, discovery, contacts,
+  SELF_INFO, channel data, UTF-8 text, coordinates, and malformed-frame
+  handling. Channel messages no longer use UTF-16 bytes or append an extra
+  NUL, and quarter-dB SNR is preserved until the integer application boundary.
+  BLE connections use the official UART UUIDs and request MTU 512.
 - Update checks now time out quickly and show a concise offline error instead
   of leaving the request hanging.
 - Android location fixes now use the fused provider so GPS, cellular, and
@@ -132,6 +168,10 @@
   provides `jcenter()`, so the Android build maps leftover plugin calls to
   Maven Central. Android library plugins are compiled against API 36 so they
   satisfy AGP 9's compile SDK requirement.
+- The update check and the "View on GitHub" entry in Settings → About now
+  point at the fork's releases. The check uses the releases list endpoint so
+  prerelease-only repositories are detected, and release tags are matched by
+  their dotted version regardless of prefix.
 - Bluetooth device selection no longer waits for the scan timeout. Previously
   used and paired companion radios appear immediately, and newly found devices
   are added to the list while scanning continues.

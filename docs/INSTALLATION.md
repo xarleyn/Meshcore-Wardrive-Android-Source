@@ -8,7 +8,7 @@
 3. Enable **Install from Unknown Sources** or **Allow from this source** (for Android 8+)
 
 ### Step 2: Download the APK
-1. Download the latest APK from the [GitHub Releases page](https://github.com/mintylinux/Meshcore-Wardrive-Android/releases)
+1. Download the latest APK from the [GitHub Releases page](https://github.com/xarleyn/Meshcore-Wardrive-Android-Source/releases)
 2. Transfer to your Android device if downloaded on computer
 
 ### Step 3: Install

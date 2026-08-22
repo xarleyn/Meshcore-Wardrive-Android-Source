@@ -66,6 +66,10 @@ AchievementCopy achievementCopy(AppLocalizations l10n, String id) {
       title: l10n.achievementSessions50Title,
       description: l10n.achievementSessions50Description,
     ),
+    'smolensk_legend' => AchievementCopy(
+      title: l10n.achievementSmolenskLegendTitle,
+      description: l10n.achievementSmolenskLegendDescription,
+    ),
     _ => throw ArgumentError.value(id, 'id', 'Unknown achievement id'),
   };
 }

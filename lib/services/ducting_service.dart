@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 
 import 'database_service.dart';
 
+import 'package:flutter/foundation.dart';
+
 /// Atmospheric ducting risk levels
 class DuctingRisk {
   static const String none = 'none'; // Normal atmosphere
@@ -148,7 +150,7 @@ class DuctingService {
       return true;
     } catch (e) {
       // Silently fail — offline is fine, we'll use cached data
-      print('Ducting fetch failed (offline?): $e');
+      debugPrint('Ducting fetch failed (offline?): $e');
       return false;
     }
   }
@@ -177,7 +179,7 @@ class DuctingService {
         return results.first['risk'] as String;
       }
     } catch (e) {
-      print('Ducting cache lookup failed: $e');
+      debugPrint('Ducting cache lookup failed: $e');
     }
     return DuctingRisk.unknown;
   }
@@ -202,7 +204,7 @@ class DuctingService {
         return results.first['risk'] as String;
       }
     } catch (e) {
-      print('Ducting latest risk lookup failed: $e');
+      debugPrint('Ducting latest risk lookup failed: $e');
     }
     return DuctingRisk.unknown;
   }

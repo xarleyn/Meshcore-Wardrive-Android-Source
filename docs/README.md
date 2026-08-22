@@ -13,6 +13,7 @@
 
 ## Development
 
+- [Map screen refactoring plan](development/map-screen-refactoring.md)
 - [Impossible GPS zones](superpowers/specs/2026-08-20-impossible-zones-design.md)
 - [In-app localization (en / ru)](superpowers/specs/2026-08-20-localization-design.md)
 - [Localization implementation plan](superpowers/plans/2026-08-20-localization.md)

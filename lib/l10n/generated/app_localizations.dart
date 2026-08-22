@@ -272,6 +272,108 @@ abstract class AppLocalizations {
   /// **'About'**
   String get settingsSectionAbout;
 
+  /// Overview group header for map-related settings; shown in uppercase
+  ///
+  /// In en, this message translates to:
+  /// **'Map'**
+  String get settingsOverviewGroupMap;
+
+  /// Overview group header for discovery, alerts, and Carpeater; shown in uppercase
+  ///
+  /// In en, this message translates to:
+  /// **'Sampling & alerts'**
+  String get settingsOverviewGroupSampling;
+
+  /// Overview group header for app and statistics settings; shown in uppercase
+  ///
+  /// In en, this message translates to:
+  /// **'App'**
+  String get settingsOverviewGroupApp;
+
+  /// Overview group header for data and backup settings; shown in uppercase
+  ///
+  /// In en, this message translates to:
+  /// **'Data'**
+  String get settingsOverviewGroupData;
+
+  /// Overview group header for diagnostics and about; shown in uppercase
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get settingsOverviewGroupSystem;
+
+  /// One-line summary for the map display settings category
+  ///
+  /// In en, this message translates to:
+  /// **'Coverage layers, samples, heatmap, and overlays'**
+  String get settingsSectionMapDisplayDescription;
+
+  /// One-line summary for the location settings category
+  ///
+  /// In en, this message translates to:
+  /// **'GPS, Wi-Fi positioning, and radio location'**
+  String get settingsSectionLocationDescription;
+
+  /// One-line summary for the discovery settings category
+  ///
+  /// In en, this message translates to:
+  /// **'Pings, timeouts, and repeater filters'**
+  String get settingsSectionDiscoveryDescription;
+
+  /// One-line summary for the feedback settings category
+  ///
+  /// In en, this message translates to:
+  /// **'Sound, vibration, and alerts'**
+  String get settingsSectionFeedbackDescription;
+
+  /// One-line summary for the Carpeater settings category
+  ///
+  /// In en, this message translates to:
+  /// **'Hop through a chosen repeater'**
+  String get settingsSectionCarpeaterDescription;
+
+  /// One-line summary for the app and device settings category
+  ///
+  /// In en, this message translates to:
+  /// **'Theme, language, screen, and units'**
+  String get settingsSectionAppDeviceDescription;
+
+  /// One-line summary for the online map settings category
+  ///
+  /// In en, this message translates to:
+  /// **'Upload samples to community coverage'**
+  String get settingsSectionOnlineMapDescription;
+
+  /// One-line summary for the statistics settings category
+  ///
+  /// In en, this message translates to:
+  /// **'Distance driven and fuel estimates'**
+  String get settingsSectionStatisticsDescription;
+
+  /// One-line summary for the data management settings category
+  ///
+  /// In en, this message translates to:
+  /// **'Export, import, filters, and privacy'**
+  String get settingsSectionDataManagementDescription;
+
+  /// One-line summary for the settings backup category
+  ///
+  /// In en, this message translates to:
+  /// **'Export and restore app settings'**
+  String get settingsSectionBackupDescription;
+
+  /// One-line summary for the diagnostics settings category
+  ///
+  /// In en, this message translates to:
+  /// **'Debug logs and device checks'**
+  String get settingsSectionDiagnosticsDescription;
+
+  /// One-line summary for the about settings category
+  ///
+  /// In en, this message translates to:
+  /// **'Version, updates, and source'**
+  String get settingsSectionAboutDescription;
+
   /// Location quality subsection header
   ///
   /// In en, this message translates to:
@@ -283,6 +385,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Impossible Zones'**
   String get settingsSectionImpossibleZones;
+
+  /// Location quality subsection header for the bad-fix ping pause
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-Ping Pause'**
+  String get settingsSectionAutoPingPause;
+
+  /// Toggle to pause automatic pings while position fixes are rejected
+  ///
+  /// In en, this message translates to:
+  /// **'Pause Pings on Bad GPS'**
+  String get settingsPingPauseOnBadFixes;
+
+  /// Subtitle for the pause-pings-on-bad-fixes toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Stop automatic pings while recent position fixes are rejected; resume on the next valid fix'**
+  String get settingsPingPauseOnBadFixesSubtitle;
+
+  /// Tile title for the number of rejected fixes that pauses pinging
+  ///
+  /// In en, this message translates to:
+  /// **'Consecutive Bad Fixes'**
+  String get settingsPingPauseBadFixCount;
+
+  /// Subtitle for the consecutive bad fixes threshold
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected fixes in a row before pings pause'**
+  String get settingsPingPauseBadFixCountSubtitle;
+
+  /// Dialog description for the consecutive bad fixes threshold
+  ///
+  /// In en, this message translates to:
+  /// **'Number of rejected position fixes in a row that pauses automatic pinging until a valid fix arrives.'**
+  String get settingsPingPauseBadFixCountDescription;
+
+  /// Validation error for the consecutive bad fixes threshold
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a number between {min} and {max}'**
+  String settingsEnterBadFixCount(int min, int max);
 
   /// Toggle to show coverage squares on the map
   ///
@@ -523,6 +667,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Notify when a never-before-seen repeater is discovered'**
   String get settingsNewRepeaterAlertsSubtitle;
+
+  /// Toggle for the LoRa device link loss sound alert
+  ///
+  /// In en, this message translates to:
+  /// **'Link Loss Alert'**
+  String get settingsLinkLossAlerts;
+
+  /// Subtitle for the LoRa device link loss alert toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Beep when the LoRa device connection is lost'**
+  String get settingsLinkLossAlertsSubtitle;
 
   /// Toggle to enable Carpeater discovery mode
   ///
@@ -2210,6 +2366,18 @@ abstract class AppLocalizations {
   /// **'🔋 Battery saver OFF — normal ping interval restored'**
   String get mapBatterySaverOff;
 
+  /// Snackbar when automatic pings pause after repeated bad fixes
+  ///
+  /// In en, this message translates to:
+  /// **'📡 Auto-ping paused: recent GPS fixes are unreliable'**
+  String get mapPingPausedByBadFixes;
+
+  /// Snackbar when automatic pings resume after a valid fix
+  ///
+  /// In en, this message translates to:
+  /// **'📡 Auto-ping resumed: valid GPS fix received'**
+  String get mapPingResumedByGoodFix;
+
   /// Snackbar after compass calibration completes
   ///
   /// In en, this message translates to:
@@ -2521,6 +2689,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add Planned Repeater'**
   String get mapAddPlannedRepeater;
+
+  /// Title of the action picker shown after a long press on the map
+  ///
+  /// In en, this message translates to:
+  /// **'Add to map'**
+  String get mapLongPressActionTitle;
+
+  /// Description of the planned repeater long-press action
+  ///
+  /// In en, this message translates to:
+  /// **'Mark a possible future repeater location'**
+  String get mapLongPressPlannedRepeaterSubtitle;
+
+  /// Description of the privacy zone long-press action
+  ///
+  /// In en, this message translates to:
+  /// **'Exclude this area from uploads and exports'**
+  String get mapLongPressPrivacyZoneSubtitle;
+
+  /// Description of the impossible GPS zone long-press action
+  ///
+  /// In en, this message translates to:
+  /// **'Reject unreliable GPS positions in this area'**
+  String get mapLongPressImpossibleZoneSubtitle;
 
   /// Hint for an optional planned-repeater label
   ///
@@ -3091,6 +3283,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'LoRa device disconnected'**
   String get mapLoraDisconnected;
+
+  /// Snackbar when the LoRa connection dropped and automatic reconnection started
+  ///
+  /// In en, this message translates to:
+  /// **'Connection lost. Reconnecting to {name}...'**
+  String mapLoraReconnecting(String name);
+
+  /// Snackbar when the LoRa device was reconnected automatically
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnected to {name}'**
+  String mapLoraReconnected(String name);
 
   /// Snackbar while refreshing radio contacts
   ///
@@ -5295,6 +5499,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Complete 50 sessions'**
   String get achievementSessions50Description;
+
+  /// Title for the hidden smolensk_legend achievement
+  ///
+  /// In en, this message translates to:
+  /// **'Be a Legend of Smolensk Mesh Networks'**
+  String get achievementSmolenskLegendTitle;
+
+  /// Description for the hidden smolensk_legend achievement
+  ///
+  /// In en, this message translates to:
+  /// **'You know what you did.'**
+  String get achievementSmolenskLegendDescription;
 
   /// Foreground notification title; keep identical across locales
   ///

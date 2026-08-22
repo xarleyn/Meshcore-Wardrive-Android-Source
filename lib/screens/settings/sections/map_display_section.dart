@@ -1,163 +1,141 @@
-part of '../../map_screen.dart';
+import 'dart:async';
 
-extension _MapDisplaySettingsSection on _MapScreenState {
-  List<Widget> _buildMapDisplaySettings(StateSetter setModalState) {
-    final l10n = AppLocalizations.of(context);
-    return [
-      SettingsSectionHeader(
-        title: l10n.settingsSectionMapDisplay,
-        icon: Icons.map_outlined,
+import 'package:flutter/material.dart';
+
+import '../../../l10n/generated/app_localizations.dart';
+import '../widgets/settings_section_header.dart';
+
+enum MapDisplaySetting {
+  coverage,
+  mapLod,
+  samples,
+  edges,
+  repeaters,
+  gpsSamples,
+  successfulOnly,
+  routeTrail,
+  communityCoverage,
+  heatmap,
+  predictionRings,
+}
+
+class MapDisplaySettingsValues {
+  const MapDisplaySettingsValues({
+    required this.showCoverage,
+    required this.mapLodEnabled,
+    required this.showSamples,
+    required this.showEdges,
+    required this.showRepeaters,
+    required this.showGpsSamples,
+    required this.showSuccessfulOnly,
+    required this.showRouteTrail,
+    required this.communityCoverageAvailable,
+    required this.showCommunityCoverage,
+    required this.showHeatmap,
+    required this.showPredictionRings,
+  });
+
+  final bool showCoverage;
+  final bool mapLodEnabled;
+  final bool showSamples;
+  final bool showEdges;
+  final bool showRepeaters;
+  final bool showGpsSamples;
+  final bool showSuccessfulOnly;
+  final bool showRouteTrail;
+  final bool communityCoverageAvailable;
+  final bool showCommunityCoverage;
+  final bool showHeatmap;
+  final bool showPredictionRings;
+}
+
+List<Widget> buildMapDisplaySettings(
+  BuildContext context, {
+  required MapDisplaySettingsValues values,
+  required FutureOr<void> Function(MapDisplaySetting setting, bool value)
+  onChanged,
+  required FutureOr<void> Function() onClearCommunityCoverage,
+}) {
+  final l10n = AppLocalizations.of(context);
+  return [
+    SettingsSectionHeader(
+      title: l10n.settingsSectionMapDisplay,
+      icon: Icons.map_outlined,
+    ),
+    SwitchListTile(
+      title: Text(l10n.settingsShowCoverageBoxes),
+      value: values.showCoverage,
+      onChanged: (value) => onChanged(MapDisplaySetting.coverage, value),
+    ),
+    SwitchListTile(
+      title: Text(l10n.settingsSimplifyMapAtLowZoom),
+      subtitle: Text(l10n.settingsSimplifyMapAtLowZoomSubtitle),
+      value: values.mapLodEnabled,
+      onChanged: (value) => onChanged(MapDisplaySetting.mapLod, value),
+    ),
+    SwitchListTile(
+      title: Text(l10n.settingsShowSamples),
+      value: values.showSamples,
+      onChanged: (value) => onChanged(MapDisplaySetting.samples, value),
+    ),
+    SwitchListTile(
+      title: Text(l10n.settingsShowEdges),
+      value: values.showEdges,
+      onChanged: (value) => onChanged(MapDisplaySetting.edges, value),
+    ),
+    SwitchListTile(
+      title: Text(l10n.settingsShowRepeaters),
+      value: values.showRepeaters,
+      onChanged: (value) => onChanged(MapDisplaySetting.repeaters, value),
+    ),
+    SwitchListTile(
+      title: Text(l10n.settingsShowGpsSamples),
+      subtitle: Text(l10n.settingsShowGpsSamplesSubtitle),
+      value: values.showGpsSamples,
+      onChanged: (value) => onChanged(MapDisplaySetting.gpsSamples, value),
+    ),
+    SwitchListTile(
+      title: Text(l10n.settingsShowSuccessfulPingsOnly),
+      subtitle: Text(l10n.settingsShowSuccessfulPingsOnlySubtitle),
+      value: values.showSuccessfulOnly,
+      onChanged: (value) => onChanged(MapDisplaySetting.successfulOnly, value),
+    ),
+    SwitchListTile(
+      title: Text(l10n.settingsShowRouteTrail),
+      subtitle: Text(l10n.settingsShowRouteTrailSubtitle),
+      value: values.showRouteTrail,
+      onChanged: (value) => onChanged(MapDisplaySetting.routeTrail, value),
+    ),
+    SwitchListTile(
+      title: Text(l10n.settingsCommunityCoverage),
+      subtitle: Text(
+        values.communityCoverageAvailable
+            ? l10n.settingsCommunityCoverageDownloaded
+            : l10n.settingsCommunityCoverageNeedDownload,
       ),
-      SwitchListTile(
-        title: Text(l10n.settingsShowCoverageBoxes),
-        value: _showCoverage,
-        onChanged: (value) async {
-          _updateMapState(() {
-            _showCoverage = value;
-          });
-          setModalState(() {});
-          await _settingsService.setShowCoverage(value);
-        },
-      ),
-      SwitchListTile(
-        title: Text(l10n.settingsSimplifyMapAtLowZoom),
-        subtitle: Text(l10n.settingsSimplifyMapAtLowZoomSubtitle),
-        value: _mapLodEnabled,
-        onChanged: (value) async {
-          _updateMapState(() {
-            _mapLodEnabled = value;
-          });
-          setModalState(() {});
-          await _settingsService.setMapLodEnabled(value);
-        },
-      ),
-      SwitchListTile(
-        title: Text(l10n.settingsShowSamples),
-        value: _showSamples,
-        onChanged: (value) async {
-          _updateMapState(() {
-            _showSamples = value;
-          });
-          setModalState(() {});
-          await _settingsService.setShowSamples(value);
-        },
-      ),
-      SwitchListTile(
-        title: Text(l10n.settingsShowEdges),
-        value: _showEdges,
-        onChanged: (value) async {
-          _updateMapState(() {
-            _showEdges = value;
-          });
-          setModalState(() {});
-          await _settingsService.setShowEdges(value);
-        },
-      ),
-      SwitchListTile(
-        title: Text(l10n.settingsShowRepeaters),
-        value: _showRepeaters,
-        onChanged: (value) async {
-          _updateMapState(() {
-            _showRepeaters = value;
-          });
-          setModalState(() {});
-          await _settingsService.setShowRepeaters(value);
-        },
-      ),
-      SwitchListTile(
-        title: Text(l10n.settingsShowGpsSamples),
-        subtitle: Text(l10n.settingsShowGpsSamplesSubtitle),
-        value: _showGpsSamples,
-        onChanged: (value) async {
-          _updateMapState(() {
-            _showGpsSamples = value;
-          });
-          setModalState(() {});
-          await _settingsService.setShowGpsSamples(value);
-        },
-      ),
-      SwitchListTile(
-        title: Text(l10n.settingsShowSuccessfulPingsOnly),
-        subtitle: Text(l10n.settingsShowSuccessfulPingsOnlySubtitle),
-        value: _showSuccessfulOnly,
-        onChanged: (value) async {
-          _updateMapState(() {
-            _showSuccessfulOnly = value;
-          });
-          setModalState(() {});
-          await _settingsService.setShowSuccessfulOnly(value);
-        },
-      ),
-      SwitchListTile(
-        title: Text(l10n.settingsShowRouteTrail),
-        subtitle: Text(l10n.settingsShowRouteTrailSubtitle),
-        value: _showRouteTrail,
-        onChanged: (value) async {
-          _updateMapState(() {
-            _showRouteTrail = value;
-          });
-          setModalState(() {});
-          await _settingsService.setShowRouteTrail(value);
-        },
-      ),
-      SwitchListTile(
-        title: Text(l10n.settingsCommunityCoverage),
-        subtitle: Text(
-          _communityCoverage != null
-              ? l10n.settingsCommunityCoverageDownloaded
-              : l10n.settingsCommunityCoverageNeedDownload,
-        ),
-        value: _showCommunityCoverage,
-        onChanged: _communityCoverage != null
-            ? (value) {
-                _updateMapState(() {
-                  _showCommunityCoverage = value;
-                });
-                setModalState(() {});
-              }
-            : null,
-        secondary: _communityCoverage != null
-            ? IconButton(
-                icon: const Icon(Icons.delete_outline, size: 20),
-                tooltip: l10n.settingsClearDownloadedCoverageTooltip,
-                onPressed: () async {
-                  await _uploadService.clearCachedCoverage();
-                  _updateMapState(() {
-                    _communityCoverage = null;
-                    _showCommunityCoverage = false;
-                  });
-                  setModalState(() {});
-                  _showSnackBar(l10n.settingsCommunityCoverageCleared);
-                },
-              )
-            : null,
-      ),
-      SwitchListTile(
-        title: Text(l10n.settingsShowHeatmap),
-        subtitle: Text(l10n.settingsShowHeatmapSubtitle),
-        value: _showHeatmap,
-        onChanged: (value) async {
-          _updateMapState(() {
-            _showHeatmap = value;
-          });
-          setModalState(() {});
-          await _settingsService.setShowHeatmap(value);
-          // Trigger heatmap rebuild
-          _heatmapRebuildStream.add(null);
-        },
-      ),
-      SwitchListTile(
-        title: Text(l10n.settingsShowPredictionRings),
-        subtitle: Text(l10n.settingsShowPredictionRingsSubtitle),
-        value: _showPredictionRings,
-        onChanged: (value) async {
-          _updateMapState(() {
-            _showPredictionRings = value;
-          });
-          setModalState(() {});
-          await _settingsService.setShowPredictionRings(value);
-        },
-      ),
-    ];
-  }
+      value: values.showCommunityCoverage,
+      onChanged: values.communityCoverageAvailable
+          ? (value) => onChanged(MapDisplaySetting.communityCoverage, value)
+          : null,
+      secondary: values.communityCoverageAvailable
+          ? IconButton(
+              icon: const Icon(Icons.delete_outline, size: 20),
+              tooltip: l10n.settingsClearDownloadedCoverageTooltip,
+              onPressed: onClearCommunityCoverage,
+            )
+          : null,
+    ),
+    SwitchListTile(
+      title: Text(l10n.settingsShowHeatmap),
+      subtitle: Text(l10n.settingsShowHeatmapSubtitle),
+      value: values.showHeatmap,
+      onChanged: (value) => onChanged(MapDisplaySetting.heatmap, value),
+    ),
+    SwitchListTile(
+      title: Text(l10n.settingsShowPredictionRings),
+      subtitle: Text(l10n.settingsShowPredictionRingsSubtitle),
+      value: values.showPredictionRings,
+      onChanged: (value) => onChanged(MapDisplaySetting.predictionRings, value),
+    ),
+  ];
 }

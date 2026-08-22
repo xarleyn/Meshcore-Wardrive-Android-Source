@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'settings_service.dart';
@@ -64,10 +65,10 @@ class SoundService {
         'amplitude': amplitude,
       });
       if (result == false) {
-        print('SoundService: Device has no vibrator');
+        debugPrint('SoundService: Device has no vibrator');
       }
     } catch (e) {
-      print('SoundService: Vibration error: $e');
+      debugPrint('SoundService: Vibration error: $e');
     }
   }
 
@@ -108,6 +109,25 @@ class SoundService {
     }
     if (_enabled) {
       await _playTone(AndroidTones.TONE_PROP_NACK, durationMs: 300);
+    }
+  }
+
+  /// Distinctive double-beep alarm for an unexpected loss of the LoRa device
+  /// link. Unlike the single ping-failure tone this pattern repeats, so it is
+  /// recognizable as "the radio is gone" rather than "a ping failed".
+  Future<void> playLinkLost() async {
+    if (!_enabled && !_vibrationEnabled) return;
+    if (_vibrationEnabled) {
+      await _vibrate(durationMs: 200, amplitude: 255);
+    }
+    if (_enabled) {
+      await _playTone(AndroidTones.TONE_CDMA_ABBR_ALERT, durationMs: 250);
+      await Future<void>.delayed(const Duration(milliseconds: 180));
+      await _playTone(AndroidTones.TONE_CDMA_ABBR_ALERT, durationMs: 250);
+    }
+    if (_vibrationEnabled) {
+      await Future<void>.delayed(const Duration(milliseconds: 120));
+      await _vibrate(durationMs: 200, amplitude: 255);
     }
   }
 

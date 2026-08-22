@@ -98,10 +98,98 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSectionAbout => 'About';
 
   @override
+  String get settingsOverviewGroupMap => 'Map';
+
+  @override
+  String get settingsOverviewGroupSampling => 'Sampling & alerts';
+
+  @override
+  String get settingsOverviewGroupApp => 'App';
+
+  @override
+  String get settingsOverviewGroupData => 'Data';
+
+  @override
+  String get settingsOverviewGroupSystem => 'System';
+
+  @override
+  String get settingsSectionMapDisplayDescription =>
+      'Coverage layers, samples, heatmap, and overlays';
+
+  @override
+  String get settingsSectionLocationDescription =>
+      'GPS, Wi-Fi positioning, and radio location';
+
+  @override
+  String get settingsSectionDiscoveryDescription =>
+      'Pings, timeouts, and repeater filters';
+
+  @override
+  String get settingsSectionFeedbackDescription =>
+      'Sound, vibration, and alerts';
+
+  @override
+  String get settingsSectionCarpeaterDescription =>
+      'Hop through a chosen repeater';
+
+  @override
+  String get settingsSectionAppDeviceDescription =>
+      'Theme, language, screen, and units';
+
+  @override
+  String get settingsSectionOnlineMapDescription =>
+      'Upload samples to community coverage';
+
+  @override
+  String get settingsSectionStatisticsDescription =>
+      'Distance driven and fuel estimates';
+
+  @override
+  String get settingsSectionDataManagementDescription =>
+      'Export, import, filters, and privacy';
+
+  @override
+  String get settingsSectionBackupDescription =>
+      'Export and restore app settings';
+
+  @override
+  String get settingsSectionDiagnosticsDescription =>
+      'Debug logs and device checks';
+
+  @override
+  String get settingsSectionAboutDescription => 'Version, updates, and source';
+
+  @override
   String get settingsSectionThresholds => 'Thresholds';
 
   @override
   String get settingsSectionImpossibleZones => 'Impossible Zones';
+
+  @override
+  String get settingsSectionAutoPingPause => 'Auto-Ping Pause';
+
+  @override
+  String get settingsPingPauseOnBadFixes => 'Pause Pings on Bad GPS';
+
+  @override
+  String get settingsPingPauseOnBadFixesSubtitle =>
+      'Stop automatic pings while recent position fixes are rejected; resume on the next valid fix';
+
+  @override
+  String get settingsPingPauseBadFixCount => 'Consecutive Bad Fixes';
+
+  @override
+  String get settingsPingPauseBadFixCountSubtitle =>
+      'Rejected fixes in a row before pings pause';
+
+  @override
+  String get settingsPingPauseBadFixCountDescription =>
+      'Number of rejected position fixes in a row that pauses automatic pinging until a valid fix arrives.';
+
+  @override
+  String settingsEnterBadFixCount(int min, int max) {
+    return 'Enter a number between $min and $max';
+  }
 
   @override
   String get settingsShowCoverageBoxes => 'Show Coverage Boxes';
@@ -238,6 +326,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsNewRepeaterAlertsSubtitle =>
       'Notify when a never-before-seen repeater is discovered';
+
+  @override
+  String get settingsLinkLossAlerts => 'Link Loss Alert';
+
+  @override
+  String get settingsLinkLossAlertsSubtitle =>
+      'Beep when the LoRa device connection is lost';
 
   @override
   String get settingsEnableCarpeaterMode => 'Enable Carpeater Mode';
@@ -1216,6 +1311,14 @@ class AppLocalizationsEn extends AppLocalizations {
       '🔋 Battery saver OFF — normal ping interval restored';
 
   @override
+  String get mapPingPausedByBadFixes =>
+      '📡 Auto-ping paused: recent GPS fixes are unreliable';
+
+  @override
+  String get mapPingResumedByGoodFix =>
+      '📡 Auto-ping resumed: valid GPS fix received';
+
+  @override
   String get mapCompassCalibrated => 'Compass calibrated';
 
   @override
@@ -1426,6 +1529,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mapAddPlannedRepeater => 'Add Planned Repeater';
+
+  @override
+  String get mapLongPressActionTitle => 'Add to map';
+
+  @override
+  String get mapLongPressPlannedRepeaterSubtitle =>
+      'Mark a possible future repeater location';
+
+  @override
+  String get mapLongPressPrivacyZoneSubtitle =>
+      'Exclude this area from uploads and exports';
+
+  @override
+  String get mapLongPressImpossibleZoneSubtitle =>
+      'Reject unreliable GPS positions in this area';
 
   @override
   String get mapPlannedRepeaterHint => 'e.g., Hilltop near Tracyton';
@@ -1766,6 +1884,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mapLoraDisconnected => 'LoRa device disconnected';
+
+  @override
+  String mapLoraReconnecting(String name) {
+    return 'Connection lost. Reconnecting to $name...';
+  }
+
+  @override
+  String mapLoraReconnected(String name) {
+    return 'Reconnected to $name';
+  }
 
   @override
   String get mapRefreshingContactList => 'Refreshing contact list...';
@@ -3166,6 +3294,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get achievementSessions50Description => 'Complete 50 sessions';
+
+  @override
+  String get achievementSmolenskLegendTitle =>
+      'Be a Legend of Smolensk Mesh Networks';
+
+  @override
+  String get achievementSmolenskLegendDescription => 'You know what you did.';
 
   @override
   String get notificationBrandTitle => 'MeshCore Wardrive';

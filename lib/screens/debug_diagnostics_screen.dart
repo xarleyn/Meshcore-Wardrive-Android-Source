@@ -52,7 +52,7 @@ class _DebugDiagnosticsScreenState extends State<DebugDiagnosticsScreen> {
         });
       }
     } catch (e) {
-      print('Error loading log files: $e');
+      debugPrint('Error loading log files: $e');
       setState(() => _loading = false);
     }
   }

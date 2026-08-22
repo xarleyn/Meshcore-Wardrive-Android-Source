@@ -12,6 +12,7 @@ import '../models/location_quality_settings.dart';
 import 'database_service.dart';
 import 'lora_companion_service.dart';
 import 'location_quality_filter.dart';
+import 'bad_fix_monitor.dart';
 import '../utils/geohash_utils.dart';
 
 import 'package:flutter/widgets.dart';
@@ -39,16 +40,43 @@ class LocationService {
   final SoundService _soundService = SoundService();
   final LocationQualityFilter _qualityFilter = LocationQualityFilter();
   final LocationQualityFilter _wifiQualityFilter = LocationQualityFilter();
+  final BadFixMonitor _badFixMonitor = BadFixMonitor();
   final WifiLocationService _wifiLocationService = WifiLocationService();
   String? _lastStartError;
 
   LocationService() {
     _carpeaterService = CarpeaterService(_loraCompanion, _settings);
-    // Auto-disable auto-ping on device disconnect
-    _loraCompanion.disconnectStream.listen((_) {
+    // Suspend radio-driven sampling while the device connection is lost...
+    _disconnectSubscription = _loraCompanion.disconnectStream.listen((_) {
+      // A disconnect made by the user is handled by the UI flow that asked
+      // for it; only an unexpected loss arms the automatic resume below.
+      if (_loraCompanion.userDisconnectRequested) return;
+      if (_linkLossAlertsEnabled) {
+        unawaited(_soundService.playLinkLost());
+      }
       if (_autoPingEnabled) {
-        disableAutoPing();
-        _logger.logPingEvent('Auto-ping disabled (device disconnected)');
+        _suspendAutoPingForReconnect();
+      }
+      if (_carpeaterModeEnabled && _isTracking) {
+        _carpeaterNeighboursSubscription?.cancel();
+        _carpeaterDiscoveryStartedSubscription?.cancel();
+        _carpeaterService.stop();
+        _carpeaterResumeOnReconnect = true;
+        _logger.logServiceEvent('Carpeater paused: device link lost');
+      }
+    });
+    // ...and resume it once ANY reconnection restores the link, whether the
+    // automatic loop got there first or the user reconnected the device
+    // manually. A deliberate disconnect never arms a resume, so sampling
+    // stays off in that case.
+    _connectedSubscription = _loraCompanion.connectedStream.listen((_) {
+      if (_autoPingResumeOnReconnect) {
+        enableAutoPing();
+        _logger.logPingEvent('Auto-ping resumed after device reconnection');
+      }
+      if (_carpeaterResumeOnReconnect) {
+        _carpeaterResumeOnReconnect = false;
+        _restartCarpeaterAfterReconnect();
       }
     });
   }
@@ -68,6 +96,15 @@ class LocationService {
   LocationPositionSource _activePositionSource = LocationPositionSource.fused;
   bool _isTracking = false;
   bool _autoPingEnabled = false;
+  bool _autoPingResumeOnReconnect = false;
+
+  // Auto-ping pause while recent position fixes keep failing quality checks.
+  bool _pingPauseEnabled = LocationQualitySettings.defaultPausePingsOnBadFixes;
+  bool _pingPauseActive = false;
+
+  // Subscriptions to the companion service connection lifecycle.
+  StreamSubscription<void>? _disconnectSubscription;
+  StreamSubscription<void>? _connectedSubscription;
   double _pingIntervalMeters = 805.0; // Default 0.5 miles
   LatLng? _lastPingPosition;
 
@@ -115,6 +152,14 @@ class LocationService {
   final _pingEventController = StreamController<String>.broadcast();
   Stream<String> get pingEventStream => _pingEventController.stream;
 
+  // Stream for broadcasting auto-ping pause changes (true = paused)
+  final _pingPauseController = StreamController<bool>.broadcast();
+  Stream<bool> get pingPauseStream => _pingPauseController.stream;
+
+  /// Whether automatic pings are currently paused because the recent position
+  /// fixes kept failing quality checks.
+  bool get isPingPausedByBadFixes => _pingPauseActive;
+
   // Stream for broadcasting total distance updates
   final _totalDistanceController = StreamController<double>.broadcast();
   Stream<double> get totalDistanceStream => _totalDistanceController.stream;
@@ -131,6 +176,9 @@ class LocationService {
   final _deadZoneController = StreamController<String>.broadcast();
   Stream<String> get deadZoneStream => _deadZoneController.stream;
   bool _deadZoneAlertsEnabled = true;
+
+  // Audible alert for an unexpected LoRa device link loss
+  bool _linkLossAlertsEnabled = true;
 
   // Battery saver mode
   final Battery _battery = Battery();
@@ -149,6 +197,7 @@ class LocationService {
   // Carpeater mode
   late final CarpeaterService _carpeaterService;
   bool _carpeaterModeEnabled = false;
+  bool _carpeaterResumeOnReconnect = false;
   StreamSubscription<List<Map<String, dynamic>>>?
   _carpeaterNeighboursSubscription;
   StreamSubscription<void>? _carpeaterDiscoveryStartedSubscription;
@@ -252,6 +301,12 @@ class LocationService {
     }
   }
 
+  /// Enable or disable the audible alert played when the LoRa device link is
+  /// lost unexpectedly.
+  void setLinkLossAlertsEnabled(bool enabled) {
+    _linkLossAlertsEnabled = enabled;
+  }
+
   /// Enable the opt-in beaconDB Wi-Fi location source. A recent, valid Wi-Fi
   /// fix takes priority over Android's fused provider.
   void setWifiPositioningEnabled(bool enabled) {
@@ -277,6 +332,31 @@ class LocationService {
   void setLocationQualitySettings(LocationQualitySettings settings) {
     _qualityFilter.updateSettings(settings);
     _wifiQualityFilter.updateSettings(settings);
+    _pingPauseEnabled = settings.pausePingsOnBadFixes;
+    _badFixMonitor.requiredBadFixes = settings.pingPauseBadFixCount;
+    if (!_pingPauseEnabled) _badFixMonitor.reset();
+    _syncPingPauseState();
+  }
+
+  /// Re-evaluates the pause state and broadcasts transitions.
+  void _syncPingPauseState() {
+    final paused = _pingPauseEnabled && _badFixMonitor.isPaused;
+    if (paused == _pingPauseActive) return;
+    _pingPauseActive = paused;
+    _pingPauseController.add(paused);
+    if (paused) {
+      unawaited(
+        _logger.logPingEvent(
+          'Auto-ping paused: ${_badFixMonitor.consecutiveBadFixes} '
+          'consecutive bad position fixes (threshold: '
+          '${_badFixMonitor.requiredBadFixes})',
+        ),
+      );
+    } else {
+      unawaited(
+        _logger.logPingEvent('Auto-ping resumed after a valid position fix'),
+      );
+    }
   }
 
   void _startWifiLocationUpdates() {
@@ -348,6 +428,7 @@ class LocationService {
       startCarpeater();
     } else if (!enabled && wasEnabled) {
       // Switching off carpeater: stop it and resume auto-ping if tracking
+      _carpeaterResumeOnReconnect = false;
       _carpeaterNeighboursSubscription?.cancel();
       _carpeaterDiscoveryStartedSubscription?.cancel();
       _carpeaterService.stop();
@@ -546,7 +627,7 @@ class LocationService {
 
       return LatLng(position.latitude, position.longitude);
     } catch (e) {
-      print('Error getting current position: $e');
+      debugPrint('Error getting current position: $e');
       return null;
     }
   }
@@ -606,7 +687,7 @@ class LocationService {
     final notificationStatus = await Permission.notification.request();
     await _logger.logPermission('Notification', notificationStatus.toString());
     if (!notificationStatus.isGranted) {
-      print(
+      debugPrint(
         'Notification permission denied - foreground service may not work properly',
       );
     }
@@ -629,10 +710,13 @@ class LocationService {
       );
 
       await _logger.logServiceEvent('Foreground service started successfully');
-      print('Foreground service started');
+      debugPrint('Foreground service started');
 
       _qualityFilter.reset();
       _wifiQualityFilter.reset();
+      // A new session starts with a clean bad-fix streak and active pings.
+      _badFixMonitor.reset();
+      _pingPauseActive = false;
       _positionSearchRequested = true;
       _monitorLocationServiceStatus();
       _startPositionWatchdog();
@@ -644,7 +728,7 @@ class LocationService {
       // Enable wakelock to prevent screen from sleeping and stopping tracking
       await ScreenWakeService.instance.setTrackingActive(true);
       await _logger.logPowerEvent('Wakelock enabled');
-      print('Wakelock enabled - app will stay active during tracking');
+      debugPrint('Wakelock enabled - app will stay active during tracking');
 
       // Reset the recording state before allowing stream events to be saved.
       _totalDistanceMeters = 0.0;
@@ -728,7 +812,7 @@ class LocationService {
       _isTracking = false;
       await _logger.logError('Start Tracking', e.toString());
       _lastStartError = (await _lookupL10n()).locationTrackingStartFailed('$e');
-      print('Error starting location tracking: $e');
+      debugPrint('Error starting location tracking: $e');
       await FlutterForegroundTask.stopService();
       await ScreenWakeService.instance.setTrackingActive(false);
       _schedulePositionStreamRestart('tracking start failed');
@@ -747,6 +831,7 @@ class LocationService {
       'enableAutoPing() called - Device connected: $isConnected, Type: ${connectionType.name}',
     );
 
+    _autoPingResumeOnReconnect = false;
     if (isConnected) {
       _autoPingEnabled = true;
       _logger.logPingEvent(
@@ -763,7 +848,20 @@ class LocationService {
     _autoPingEnabled = false;
     _timePingTimer?.cancel();
     _timePingTimer = null;
+    _autoPingResumeOnReconnect = false;
     _logger.logPingEvent('Auto-ping disabled');
+  }
+
+  /// Disable auto-ping because the device connection was lost unexpectedly.
+  ///
+  /// Unlike [disableAutoPing], the intent to ping is remembered so it can be
+  /// resumed when the automatic reconnection restores the device.
+  void _suspendAutoPingForReconnect() {
+    _autoPingEnabled = false;
+    _timePingTimer?.cancel();
+    _timePingTimer = null;
+    _autoPingResumeOnReconnect = true;
+    _logger.logPingEvent('Auto-ping disabled (device disconnected)');
   }
 
   /// Check if auto-ping is enabled
@@ -828,6 +926,9 @@ class LocationService {
       return;
     }
     if (!_loraCompanion.isDeviceConnected) return;
+    // Recent fixes are unreliable; pinging a stale position would only
+    // record garbage. Pinging resumes once a valid fix arrives.
+    if (_pingPauseActive) return;
 
     final position = _lastPosition;
     if (position == null) return;
@@ -896,7 +997,9 @@ class LocationService {
       await _logger.logLocationEvent(
         '${source.name} location ignored: $reason',
       );
-      print('Location ignored: $reason');
+      debugPrint('Location ignored: $reason');
+      _badFixMonitor.recordRejectedFix();
+      _syncPingPauseState();
       return;
     }
 
@@ -909,18 +1012,22 @@ class LocationService {
         await _logger.logLocationEvent(
           '${source.name} location ignored: ${impossible.rejectionReason}',
         );
-        print('Location ignored: ${impossible.rejectionReason}');
+        debugPrint('Location ignored: ${impossible.rejectionReason}');
         return;
       }
     } catch (e) {
       await _logger.logLocationEvent(
         '${source.name} location ignored: impossible zone check failed: $e',
       );
-      print('Location ignored: impossible zone check failed: $e');
+      debugPrint('Location ignored: impossible zone check failed: $e');
       return;
     }
 
     qualityFilter.accept(position);
+    // A trustworthy fix clears the bad-fix streak, so a paused auto-ping
+    // resumes with the next valid measurement.
+    _badFixMonitor.recordAcceptedFix();
+    _syncPingPauseState();
 
     if (source == LocationPositionSource.fused) {
       _lastFusedPosition = position;
@@ -982,6 +1089,7 @@ class LocationService {
         !_carpeaterModeEnabled &&
         !_pingInProgress &&
         !_loraCompanion.isPingInProgress &&
+        !_pingPauseActive &&
         _pingMode != 'time') {
       bool shouldPing = false;
 
@@ -1024,7 +1132,7 @@ class LocationService {
         await _setNotificationText((l10n) => l10n.notificationPinging);
 
         // Start ping in background - don't wait for it
-        print(
+        debugPrint(
           'Triggering auto-ping via LoRa at ${latLng.latitude}, ${latLng.longitude}',
         );
         final geohash = GeohashUtils.sampleKey(
@@ -1081,13 +1189,13 @@ class LocationService {
     // Save to database
     try {
       await _dbService.insertSample(sample);
-      print(
+      debugPrint(
         'Saved GPS sample: ${sample.id} at ${latLng.latitude}, ${latLng.longitude}',
       );
       // Notify listeners that a sample was saved
       _sampleSavedController.add(null);
     } catch (e) {
-      print('Error saving sample: $e');
+      debugPrint('Error saving sample: $e');
     }
   }
 
@@ -1216,7 +1324,7 @@ class LocationService {
       await _logger.logPingEvent(
         'Ping result: ${pingResult.status.name}, Node: $nodeId, RSSI: ${pingResult.rssi}, SNR: ${pingResult.snr}',
       );
-      print(
+      debugPrint(
         'Ping complete: ${pingResult.status.name}, Node: $nodeId, RSSI: ${pingResult.rssi}, SNR: ${pingResult.snr}',
       );
 
@@ -1298,7 +1406,7 @@ class LocationService {
       _sampleSavedController.add(null);
     } catch (e) {
       await _logger.logError('Background Ping', e.toString());
-      print('Error during background ping: $e');
+      debugPrint('Error during background ping: $e');
       // Save failed ping result
       final sample = Sample(
         id: _generateUniqueId(),
@@ -1331,6 +1439,9 @@ class LocationService {
     // Stop time-based ping timer
     _timePingTimer?.cancel();
     _timePingTimer = null;
+    // A finished session must not resurrect sampling on a later reconnect.
+    _autoPingResumeOnReconnect = false;
+    _carpeaterResumeOnReconnect = false;
 
     // Stop battery monitoring and deactivate battery saver
     _stopBatteryMonitoring();
@@ -1347,7 +1458,7 @@ class LocationService {
     // Release the tracking reason; Always On may still require the wakelock.
     await ScreenWakeService.instance.setTrackingActive(false);
     await _logger.logPowerEvent('Tracking wakelock released');
-    print('Tracking wakelock released');
+    debugPrint('Tracking wakelock released');
 
     // Finalize session
     if (_currentSessionId != null && _sessionStartTime != null) {
@@ -1443,6 +1554,20 @@ class LocationService {
       _carpeaterNeighboursSubscription?.cancel();
     }
     return started;
+  }
+
+  /// Restart Carpeater sampling after a lost device link was restored.
+  Future<void> _restartCarpeaterAfterReconnect() async {
+    if (!_isTracking || !_loraCompanion.isDeviceConnected) return;
+    await _logger.logServiceEvent(
+      'Carpeater restarting after device reconnection',
+    );
+    final started = await startCarpeater();
+    if (!started) {
+      await _logger.logServiceEvent(
+        'Carpeater restart failed after device reconnection',
+      );
+    }
   }
 
   /// Handle Carpeater neighbour results — save as samples
@@ -1560,6 +1685,8 @@ class LocationService {
     _positionStreamSubscription?.cancel();
     _positionStreamSubscription = null;
     stopTracking();
+    _disconnectSubscription?.cancel();
+    _connectedSubscription?.cancel();
     _logger.close();
     _currentPositionController.close();
     _positionSourceController.close();

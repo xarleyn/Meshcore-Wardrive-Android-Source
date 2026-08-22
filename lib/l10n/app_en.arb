@@ -116,6 +116,74 @@
   "@settingsSectionAbout": {
     "description": "Settings section header"
   },
+  "settingsOverviewGroupMap": "Map",
+  "@settingsOverviewGroupMap": {
+    "description": "Overview group header for map-related settings; shown in uppercase"
+  },
+  "settingsOverviewGroupSampling": "Sampling & alerts",
+  "@settingsOverviewGroupSampling": {
+    "description": "Overview group header for discovery, alerts, and Carpeater; shown in uppercase"
+  },
+  "settingsOverviewGroupApp": "App",
+  "@settingsOverviewGroupApp": {
+    "description": "Overview group header for app and statistics settings; shown in uppercase"
+  },
+  "settingsOverviewGroupData": "Data",
+  "@settingsOverviewGroupData": {
+    "description": "Overview group header for data and backup settings; shown in uppercase"
+  },
+  "settingsOverviewGroupSystem": "System",
+  "@settingsOverviewGroupSystem": {
+    "description": "Overview group header for diagnostics and about; shown in uppercase"
+  },
+  "settingsSectionMapDisplayDescription": "Coverage layers, samples, heatmap, and overlays",
+  "@settingsSectionMapDisplayDescription": {
+    "description": "One-line summary for the map display settings category"
+  },
+  "settingsSectionLocationDescription": "GPS, Wi-Fi positioning, and radio location",
+  "@settingsSectionLocationDescription": {
+    "description": "One-line summary for the location settings category"
+  },
+  "settingsSectionDiscoveryDescription": "Pings, timeouts, and repeater filters",
+  "@settingsSectionDiscoveryDescription": {
+    "description": "One-line summary for the discovery settings category"
+  },
+  "settingsSectionFeedbackDescription": "Sound, vibration, and alerts",
+  "@settingsSectionFeedbackDescription": {
+    "description": "One-line summary for the feedback settings category"
+  },
+  "settingsSectionCarpeaterDescription": "Hop through a chosen repeater",
+  "@settingsSectionCarpeaterDescription": {
+    "description": "One-line summary for the Carpeater settings category"
+  },
+  "settingsSectionAppDeviceDescription": "Theme, language, screen, and units",
+  "@settingsSectionAppDeviceDescription": {
+    "description": "One-line summary for the app and device settings category"
+  },
+  "settingsSectionOnlineMapDescription": "Upload samples to community coverage",
+  "@settingsSectionOnlineMapDescription": {
+    "description": "One-line summary for the online map settings category"
+  },
+  "settingsSectionStatisticsDescription": "Distance driven and fuel estimates",
+  "@settingsSectionStatisticsDescription": {
+    "description": "One-line summary for the statistics settings category"
+  },
+  "settingsSectionDataManagementDescription": "Export, import, filters, and privacy",
+  "@settingsSectionDataManagementDescription": {
+    "description": "One-line summary for the data management settings category"
+  },
+  "settingsSectionBackupDescription": "Export and restore app settings",
+  "@settingsSectionBackupDescription": {
+    "description": "One-line summary for the settings backup category"
+  },
+  "settingsSectionDiagnosticsDescription": "Debug logs and device checks",
+  "@settingsSectionDiagnosticsDescription": {
+    "description": "One-line summary for the diagnostics settings category"
+  },
+  "settingsSectionAboutDescription": "Version, updates, and source",
+  "@settingsSectionAboutDescription": {
+    "description": "One-line summary for the about settings category"
+  },
   "settingsSectionThresholds": "Thresholds",
   "@settingsSectionThresholds": {
     "description": "Location quality subsection header"
@@ -123,6 +191,42 @@
   "settingsSectionImpossibleZones": "Impossible Zones",
   "@settingsSectionImpossibleZones": {
     "description": "Location quality subsection header"
+  },
+  "settingsSectionAutoPingPause": "Auto-Ping Pause",
+  "@settingsSectionAutoPingPause": {
+    "description": "Location quality subsection header for the bad-fix ping pause"
+  },
+  "settingsPingPauseOnBadFixes": "Pause Pings on Bad GPS",
+  "@settingsPingPauseOnBadFixes": {
+    "description": "Toggle to pause automatic pings while position fixes are rejected"
+  },
+  "settingsPingPauseOnBadFixesSubtitle": "Stop automatic pings while recent position fixes are rejected; resume on the next valid fix",
+  "@settingsPingPauseOnBadFixesSubtitle": {
+    "description": "Subtitle for the pause-pings-on-bad-fixes toggle"
+  },
+  "settingsPingPauseBadFixCount": "Consecutive Bad Fixes",
+  "@settingsPingPauseBadFixCount": {
+    "description": "Tile title for the number of rejected fixes that pauses pinging"
+  },
+  "settingsPingPauseBadFixCountSubtitle": "Rejected fixes in a row before pings pause",
+  "@settingsPingPauseBadFixCountSubtitle": {
+    "description": "Subtitle for the consecutive bad fixes threshold"
+  },
+  "settingsPingPauseBadFixCountDescription": "Number of rejected position fixes in a row that pauses automatic pinging until a valid fix arrives.",
+  "@settingsPingPauseBadFixCountDescription": {
+    "description": "Dialog description for the consecutive bad fixes threshold"
+  },
+  "settingsEnterBadFixCount": "Enter a number between {min} and {max}",
+  "@settingsEnterBadFixCount": {
+    "description": "Validation error for the consecutive bad fixes threshold",
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
   },
   "settingsShowCoverageBoxes": "Show Coverage Boxes",
   "@settingsShowCoverageBoxes": {
@@ -283,6 +387,14 @@
   "settingsNewRepeaterAlertsSubtitle": "Notify when a never-before-seen repeater is discovered",
   "@settingsNewRepeaterAlertsSubtitle": {
     "description": "Subtitle for new repeater alerts"
+  },
+  "settingsLinkLossAlerts": "Link Loss Alert",
+  "@settingsLinkLossAlerts": {
+    "description": "Toggle for the LoRa device link loss sound alert"
+  },
+  "settingsLinkLossAlertsSubtitle": "Beep when the LoRa device connection is lost",
+  "@settingsLinkLossAlertsSubtitle": {
+    "description": "Subtitle for the LoRa device link loss alert toggle"
   },
   "settingsEnableCarpeaterMode": "Enable Carpeater Mode",
   "@settingsEnableCarpeaterMode": {
@@ -1556,6 +1668,14 @@
   "@mapBatterySaverOff": {
     "description": "Snackbar when battery saver deactivates"
   },
+  "mapPingPausedByBadFixes": "📡 Auto-ping paused: recent GPS fixes are unreliable",
+  "@mapPingPausedByBadFixes": {
+    "description": "Snackbar when automatic pings pause after repeated bad fixes"
+  },
+  "mapPingResumedByGoodFix": "📡 Auto-ping resumed: valid GPS fix received",
+  "@mapPingResumedByGoodFix": {
+    "description": "Snackbar when automatic pings resume after a valid fix"
+  },
   "mapCompassCalibrated": "Compass calibrated",
   "@mapCompassCalibrated": {
     "description": "Snackbar after compass calibration completes"
@@ -1831,6 +1951,22 @@
   "mapAddPlannedRepeater": "Add Planned Repeater",
   "@mapAddPlannedRepeater": {
     "description": "Title when dropping a planned repeater marker"
+  },
+  "mapLongPressActionTitle": "Add to map",
+  "@mapLongPressActionTitle": {
+    "description": "Title of the action picker shown after a long press on the map"
+  },
+  "mapLongPressPlannedRepeaterSubtitle": "Mark a possible future repeater location",
+  "@mapLongPressPlannedRepeaterSubtitle": {
+    "description": "Description of the planned repeater long-press action"
+  },
+  "mapLongPressPrivacyZoneSubtitle": "Exclude this area from uploads and exports",
+  "@mapLongPressPrivacyZoneSubtitle": {
+    "description": "Description of the privacy zone long-press action"
+  },
+  "mapLongPressImpossibleZoneSubtitle": "Reject unreliable GPS positions in this area",
+  "@mapLongPressImpossibleZoneSubtitle": {
+    "description": "Description of the impossible GPS zone long-press action"
   },
   "mapPlannedRepeaterHint": "e.g., Hilltop near Tracyton",
   "@mapPlannedRepeaterHint": {
@@ -2308,6 +2444,24 @@
   "mapLoraDisconnected": "LoRa device disconnected",
   "@mapLoraDisconnected": {
     "description": "Snackbar after disconnecting LoRa"
+  },
+  "mapLoraReconnecting": "Connection lost. Reconnecting to {name}...",
+  "@mapLoraReconnecting": {
+    "description": "Snackbar when the LoRa connection dropped and automatic reconnection started",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "mapLoraReconnected": "Reconnected to {name}",
+  "@mapLoraReconnected": {
+    "description": "Snackbar when the LoRa device was reconnected automatically",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "mapRefreshingContactList": "Refreshing contact list...",
   "@mapRefreshingContactList": {
@@ -4385,6 +4539,14 @@
   "achievementSessions50Description": "Complete 50 sessions",
   "@achievementSessions50Description": {
     "description": "Description for the sessions_50 achievement"
+  },
+  "achievementSmolenskLegendTitle": "Be a Legend of Smolensk Mesh Networks",
+  "@achievementSmolenskLegendTitle": {
+    "description": "Title for the hidden smolensk_legend achievement"
+  },
+  "achievementSmolenskLegendDescription": "You know what you did.",
+  "@achievementSmolenskLegendDescription": {
+    "description": "Description for the hidden smolensk_legend achievement"
   },
   "notificationBrandTitle": "MeshCore Wardrive",
   "@notificationBrandTitle": {

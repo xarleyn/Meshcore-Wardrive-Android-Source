@@ -73,7 +73,11 @@ The app language (System / English / Русский) is under Settings → App &
   airport). GPS inside a zone is discarded and the last valid position is
   kept. Zones are managed only in this settings page and are not drawn on
   the map. Speeds are entered in km/h. **Restore Defaults** resets the
-  thresholds, not the zones.
+  thresholds, not the zones. The **Auto-Ping Pause** section stops automatic
+  pings while recent position fixes keep failing these filters, so a broken
+  GPS signal cannot ping a stale position; pinging resumes on the next valid
+  fix. The pause engages after 5 rejected fixes in a row by default, and both
+  the toggle and the threshold are configurable.
 - **Color Mode**:
   - Quality: Green (excellent) → Red (poor)
   - Age: Green (fresh) → Red (old)
