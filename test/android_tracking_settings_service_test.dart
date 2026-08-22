@@ -6,7 +6,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   const channel = MethodChannel(
-    'mintylinux.meshcore.wardrive/tracking_settings',
+    'io.github.xarleyn.meshcore.wardrive/tracking_settings',
   );
   final service = AndroidTrackingSettingsService();
 

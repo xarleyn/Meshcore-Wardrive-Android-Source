@@ -51,7 +51,7 @@ class WifiLocationService {
       _scanner = scanner ?? _scanWithPlatformChannel;
 
   static const _channel = MethodChannel(
-    'mintylinux.meshcore.wardrive/wifi_location',
+    'io.github.xarleyn.meshcore.wardrive/wifi_location',
   );
   static final Uri _endpoint = Uri.parse(
     'https://api.beacondb.net/v1/geolocate',

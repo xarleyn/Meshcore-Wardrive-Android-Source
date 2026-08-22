@@ -1975,7 +1975,7 @@ class _MapScreenState extends State<MapScreen> {
               ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
               : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
           subdomains: isDarkMode ? const ['a', 'b', 'c', 'd'] : const [],
-          userAgentPackageName: 'com.meshcore.wardrive',
+          userAgentPackageName: 'io.github.xarleyn.meshcore.wardrive',
           tileProvider: _tileCacheStore != null
               ? CachedTileProvider(store: _tileCacheStore!)
               : null,

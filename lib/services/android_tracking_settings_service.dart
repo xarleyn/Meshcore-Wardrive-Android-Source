@@ -2,7 +2,7 @@ import 'package:flutter/services.dart';
 
 class AndroidTrackingSettingsService {
   static const MethodChannel _channel = MethodChannel(
-    'mintylinux.meshcore.wardrive/tracking_settings',
+    'io.github.xarleyn.meshcore.wardrive/tracking_settings',
   );
 
   Future<bool?> isWifiScanThrottlingEnabled() {

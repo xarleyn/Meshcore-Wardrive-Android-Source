@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">MeshCore Wardrive</string>
+    <string name="app_name">MeshCore Wardrive (xarleyn)</string>
     <string name="widget_status_idle">Ожидание</string>
     <string name="widget_label_samples">Замеры</string>
     <string name="widget_label_lora">LoRa</string>

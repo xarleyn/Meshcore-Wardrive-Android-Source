@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  const channel = MethodChannel('mintylinux.meshcore.wardrive/feedback');
+  const channel = MethodChannel('io.github.xarleyn.meshcore.wardrive/feedback');
   final toneCalls = <Map<Object?, Object?>>[];
   final vibrateCalls = <Map<Object?, Object?>>[];
 
