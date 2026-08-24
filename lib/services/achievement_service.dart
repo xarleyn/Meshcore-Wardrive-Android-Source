@@ -56,6 +56,19 @@ class AchievementService {
   /// achievement. Matched case-insensitively.
   static const List<String> _legendNamePrefixes = ['ya_', 'yakut', 'якут'];
 
+  /// Meters per mile, used when distance thresholds are compared in miles.
+  static const double _metersPerMile = 1609.34;
+
+  /// Converts a stored total in meters into the user-selected [distanceUnit]
+  /// ('miles' or 'km').
+  ///
+  /// Distance achievement thresholds are plain numbers shared by both units
+  /// (100 miles == 100 km): the total is only rescaled into the selected unit,
+  /// never converted across units.
+  static double totalDistanceInUnits(double meters, String distanceUnit) {
+    return distanceUnit == 'km' ? meters / 1000.0 : meters / _metersPerMile;
+  }
+
   /// Whether [name] — the connected companion radio's own advert name —
   /// starts with one of the hidden legend prefixes (case-insensitive).
   static bool isLegendCompanionName(String? name) {
@@ -93,7 +106,11 @@ class AchievementService {
     final samples = await db.getAllSamples();
     final pings = samples.where((s) => s.pingSuccess != null).length;
     final sessions = await db.getAllSessions();
-    final totalMiles = (await settings.getTotalDistanceDriven()) / 1609.34;
+    final distanceUnit = await settings.getDistanceUnit();
+    final totalDistance = totalDistanceInUnits(
+      await settings.getTotalDistanceDriven(),
+      distanceUnit,
+    );
 
     // Unique repeaters
     final repeaterIds = <String>{};
@@ -125,9 +142,9 @@ class AchievementService {
       'first_repeater': repeaterIds.isNotEmpty,
       'repeaters_10': repeaterIds.length >= 10,
       'repeaters_50': repeaterIds.length >= 50,
-      'miles_10': totalMiles >= 10,
-      'miles_100': totalMiles >= 100,
-      'miles_500': totalMiles >= 500,
+      'miles_10': totalDistance >= 10,
+      'miles_100': totalDistance >= 100,
+      'miles_500': totalDistance >= 500,
       'cells_50': cells.length >= 50,
       'cells_500': cells.length >= 500,
       'first_session': sessions.isNotEmpty,

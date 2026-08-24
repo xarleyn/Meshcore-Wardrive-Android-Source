@@ -5470,17 +5470,29 @@ abstract class AppLocalizations {
   /// **'Discover 50 repeaters'**
   String get achievementRepeaters50Description;
 
+  /// Word for miles used in distance achievement descriptions when the distance unit setting is miles
+  ///
+  /// In en, this message translates to:
+  /// **'miles'**
+  String get achievementDistanceUnitMiles;
+
+  /// Word for kilometers used in distance achievement descriptions when the distance unit setting is kilometers
+  ///
+  /// In en, this message translates to:
+  /// **'km'**
+  String get achievementDistanceUnitKm;
+
   /// Title for the miles_10 achievement
   ///
   /// In en, this message translates to:
   /// **'Road Warrior'**
   String get achievementMiles10Title;
 
-  /// Description for the miles_10 achievement
+  /// Description for the miles_10 achievement; {unit} follows the selected distance unit without conversion
   ///
   /// In en, this message translates to:
-  /// **'Drive 10 miles wardriving'**
-  String get achievementMiles10Description;
+  /// **'Drive 10 {unit} wardriving'**
+  String achievementMiles10Description(Object unit);
 
   /// Title for the miles_100 achievement
   ///
@@ -5488,11 +5500,11 @@ abstract class AppLocalizations {
   /// **'Highway Hero'**
   String get achievementMiles100Title;
 
-  /// Description for the miles_100 achievement
+  /// Description for the miles_100 achievement; {unit} follows the selected distance unit without conversion
   ///
   /// In en, this message translates to:
-  /// **'Drive 100 miles wardriving'**
-  String get achievementMiles100Description;
+  /// **'Drive 100 {unit} wardriving'**
+  String achievementMiles100Description(Object unit);
 
   /// Title for the miles_500 achievement
   ///
@@ -5500,11 +5512,11 @@ abstract class AppLocalizations {
   /// **'Cross Country'**
   String get achievementMiles500Title;
 
-  /// Description for the miles_500 achievement
+  /// Description for the miles_500 achievement; {unit} follows the selected distance unit without conversion
   ///
   /// In en, this message translates to:
-  /// **'Drive 500 miles wardriving'**
-  String get achievementMiles500Description;
+  /// **'Drive 500 {unit} wardriving'**
+  String achievementMiles500Description(Object unit);
 
   /// Title for the cells_50 achievement
   ///

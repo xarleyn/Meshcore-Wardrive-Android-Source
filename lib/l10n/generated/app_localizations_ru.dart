@@ -3336,25 +3336,34 @@ class AppLocalizationsRu extends AppLocalizations {
   String get achievementRepeaters50Description => 'Найдите 50 репитеров';
 
   @override
+  String get achievementDistanceUnitMiles => 'миль';
+
+  @override
+  String get achievementDistanceUnitKm => 'км';
+
+  @override
   String get achievementMiles10Title => 'Дорожный воин';
 
   @override
-  String get achievementMiles10Description =>
-      'Проедьте 10 миль в режиме вардрайва';
+  String achievementMiles10Description(Object unit) {
+    return 'Проедьте 10 $unit в режиме вардрайва';
+  }
 
   @override
   String get achievementMiles100Title => 'Герой трассы';
 
   @override
-  String get achievementMiles100Description =>
-      'Проедьте 100 миль в режиме вардрайва';
+  String achievementMiles100Description(Object unit) {
+    return 'Проедьте 100 $unit в режиме вардрайва';
+  }
 
   @override
   String get achievementMiles500Title => 'Кросс-кантри';
 
   @override
-  String get achievementMiles500Description =>
-      'Проедьте 500 миль в режиме вардрайва';
+  String achievementMiles500Description(Object unit) {
+    return 'Проедьте 500 $unit в режиме вардрайва';
+  }
 
   @override
   String get achievementCells50Title => 'Разведчик территории';

@@ -7,8 +7,25 @@ class AchievementCopy {
   final String description;
 }
 
+/// Localized word for the user's [distanceUnit] ('miles' or 'km') used in
+/// distance achievement descriptions.
+String achievementDistanceUnitWord(AppLocalizations l10n, String distanceUnit) {
+  return distanceUnit == 'km'
+      ? l10n.achievementDistanceUnitKm
+      : l10n.achievementDistanceUnitMiles;
+}
+
 /// Localized title and description for a persisted achievement [id].
-AchievementCopy achievementCopy(AppLocalizations l10n, String id) {
+///
+/// Distance achievements describe their thresholds in [distanceUnit] — the
+/// selected distance unit ('miles' or 'km'). Threshold numbers are shared by
+/// both units (100 miles == 100 km), so no conversion is applied.
+AchievementCopy achievementCopy(
+  AppLocalizations l10n,
+  String id, {
+  String distanceUnit = 'km',
+}) {
+  final unitWord = achievementDistanceUnitWord(l10n, distanceUnit);
   return switch (id) {
     'first_ping' => AchievementCopy(
       title: l10n.achievementFirstPingTitle,
@@ -40,15 +57,15 @@ AchievementCopy achievementCopy(AppLocalizations l10n, String id) {
     ),
     'miles_10' => AchievementCopy(
       title: l10n.achievementMiles10Title,
-      description: l10n.achievementMiles10Description,
+      description: l10n.achievementMiles10Description(unitWord),
     ),
     'miles_100' => AchievementCopy(
       title: l10n.achievementMiles100Title,
-      description: l10n.achievementMiles100Description,
+      description: l10n.achievementMiles100Description(unitWord),
     ),
     'miles_500' => AchievementCopy(
       title: l10n.achievementMiles500Title,
-      description: l10n.achievementMiles500Description,
+      description: l10n.achievementMiles500Description(unitWord),
     ),
     'cells_50' => AchievementCopy(
       title: l10n.achievementCells50Title,

@@ -37,6 +37,39 @@ void main() {
     });
   });
 
+  group('totalDistanceInUnits', () {
+    test('scales the total into miles when the unit setting is miles', () {
+      expect(
+        AchievementService.totalDistanceInUnits(1609.34, 'miles'),
+        closeTo(1, 1e-9),
+      );
+      expect(
+        AchievementService.totalDistanceInUnits(160934, 'miles'),
+        closeTo(100, 1e-9),
+        reason: 'the miles_100 threshold unlocks at 100 real miles',
+      );
+    });
+
+    test('scales the total into kilometers when the unit setting is km', () {
+      expect(
+        AchievementService.totalDistanceInUnits(1000, 'km'),
+        closeTo(1, 1e-9),
+      );
+      expect(
+        AchievementService.totalDistanceInUnits(100000, 'km'),
+        closeTo(100, 1e-9),
+        reason: 'the miles_100 threshold unlocks at 100 km with no conversion',
+      );
+    });
+
+    test('treats unknown units as the legacy miles scale', () {
+      expect(
+        AchievementService.totalDistanceInUnits(1609.34, ''),
+        closeTo(1, 1e-9),
+      );
+    });
+  });
+
   group('getAll', () {
     test('reports the hidden flag and unlock state from preferences', () async {
       final unlockedAt = DateTime.utc(2026, 3, 2);

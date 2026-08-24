@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../l10n/achievement_l10n.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../services/achievement_service.dart';
+import '../services/settings_service.dart';
 
 class AchievementsScreen extends StatefulWidget {
   const AchievementsScreen({super.key});
@@ -14,6 +15,7 @@ class AchievementsScreen extends StatefulWidget {
 
 class _AchievementsScreenState extends State<AchievementsScreen> {
   List<Achievement> _achievements = [];
+  String _distanceUnit = 'km';
   bool _loading = true;
 
   @override
@@ -26,8 +28,12 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
     // Check for new unlocks first
     await AchievementService().checkAndUnlock();
     final all = await AchievementService().getAll();
+    // Distance achievements describe and count thresholds in the selected unit.
+    final distanceUnit = await SettingsService().getDistanceUnit();
+    if (!mounted) return;
     setState(() {
       _achievements = all;
+      _distanceUnit = distanceUnit;
       _loading = false;
     });
   }
@@ -87,7 +93,11 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                     itemCount: visible.length,
                     itemBuilder: (context, index) {
                       final a = visible[index];
-                      final copy = achievementCopy(l10n, a.id);
+                      final copy = achievementCopy(
+                        l10n,
+                        a.id,
+                        distanceUnit: _distanceUnit,
+                      );
                       final locale = Localizations.localeOf(context).toString();
                       return ListTile(
                         leading: Text(

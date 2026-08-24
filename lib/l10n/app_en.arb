@@ -4530,29 +4530,46 @@
   "@achievementRepeaters50Description": {
     "description": "Description for the repeaters_50 achievement"
   },
+  "achievementDistanceUnitMiles": "miles",
+  "@achievementDistanceUnitMiles": {
+    "description": "Word for miles used in distance achievement descriptions when the distance unit setting is miles"
+  },
+  "achievementDistanceUnitKm": "km",
+  "@achievementDistanceUnitKm": {
+    "description": "Word for kilometers used in distance achievement descriptions when the distance unit setting is kilometers"
+  },
   "achievementMiles10Title": "Road Warrior",
   "@achievementMiles10Title": {
     "description": "Title for the miles_10 achievement"
   },
-  "achievementMiles10Description": "Drive 10 miles wardriving",
+  "achievementMiles10Description": "Drive 10 {unit} wardriving",
   "@achievementMiles10Description": {
-    "description": "Description for the miles_10 achievement"
+    "description": "Description for the miles_10 achievement; {unit} follows the selected distance unit without conversion",
+    "placeholders": {
+      "unit": {}
+    }
   },
   "achievementMiles100Title": "Highway Hero",
   "@achievementMiles100Title": {
     "description": "Title for the miles_100 achievement"
   },
-  "achievementMiles100Description": "Drive 100 miles wardriving",
+  "achievementMiles100Description": "Drive 100 {unit} wardriving",
   "@achievementMiles100Description": {
-    "description": "Description for the miles_100 achievement"
+    "description": "Description for the miles_100 achievement; {unit} follows the selected distance unit without conversion",
+    "placeholders": {
+      "unit": {}
+    }
   },
   "achievementMiles500Title": "Cross Country",
   "@achievementMiles500Title": {
     "description": "Title for the miles_500 achievement"
   },
-  "achievementMiles500Description": "Drive 500 miles wardriving",
+  "achievementMiles500Description": "Drive 500 {unit} wardriving",
   "@achievementMiles500Description": {
-    "description": "Description for the miles_500 achievement"
+    "description": "Description for the miles_500 achievement; {unit} follows the selected distance unit without conversion",
+    "placeholders": {
+      "unit": {}
+    }
   },
   "achievementCells50Title": "Area Scout",
   "@achievementCells50Title": {

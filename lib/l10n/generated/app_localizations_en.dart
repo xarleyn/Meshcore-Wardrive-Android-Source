@@ -3284,22 +3284,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get achievementRepeaters50Description => 'Discover 50 repeaters';
 
   @override
+  String get achievementDistanceUnitMiles => 'miles';
+
+  @override
+  String get achievementDistanceUnitKm => 'km';
+
+  @override
   String get achievementMiles10Title => 'Road Warrior';
 
   @override
-  String get achievementMiles10Description => 'Drive 10 miles wardriving';
+  String achievementMiles10Description(Object unit) {
+    return 'Drive 10 $unit wardriving';
+  }
 
   @override
   String get achievementMiles100Title => 'Highway Hero';
 
   @override
-  String get achievementMiles100Description => 'Drive 100 miles wardriving';
+  String achievementMiles100Description(Object unit) {
+    return 'Drive 100 $unit wardriving';
+  }
 
   @override
   String get achievementMiles500Title => 'Cross Country';
 
   @override
-  String get achievementMiles500Description => 'Drive 500 miles wardriving';
+  String achievementMiles500Description(Object unit) {
+    return 'Drive 500 $unit wardriving';
+  }
 
   @override
   String get achievementCells50Title => 'Area Scout';

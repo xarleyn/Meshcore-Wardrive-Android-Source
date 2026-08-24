@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Changed
+
+- Distance achievements (🚗 🛣️ ✈️) now follow the selected distance unit in
+  both their descriptions and their unlock logic, without converting between
+  units: the thresholds stay 10/100/500, so 100 miles and 100 km unlock the
+  same badge depending on the setting.
+
 ### Fixed
 
 - Carpeater neighbour scans now store SNR with the same half-away-from-zero
