@@ -5,6 +5,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/models.dart';
 import '../../../services/map_lod_service.dart';
 import '../../../utils/community_coverage.dart';
+import 'sample_details_sheet.dart';
 
 enum RepeaterInfoAction { filter, showOnMap }
 
@@ -21,15 +22,24 @@ class SampleInfoDialog extends StatelessWidget {
   const SampleInfoDialog({
     required this.sample,
     required this.repeaterDisplay,
-    required this.ductingLabel,
-    required this.ductingColor,
+    required this.responses,
+    this.ductingLabel,
+    this.ductingColor,
+    this.resolveRepeaterName,
     super.key,
   });
 
   final Sample sample;
   final String repeaterDisplay;
+
+  /// Successful responses from the same ping burst, strongest first.
+  final List<Sample> responses;
+
   final String? ductingLabel;
   final Color? ductingColor;
+
+  /// Resolves a repeater node id to its known display name, if any.
+  final String? Function(String? nodeId)? resolveRepeaterName;
 
   @override
   Widget build(BuildContext context) {
@@ -108,6 +118,34 @@ class SampleInfoDialog extends StatelessWidget {
               ],
             ),
           ],
+          const SizedBox(height: 4),
+          Align(
+            alignment: Alignment.centerRight,
+            child: InkWell(
+              onTap: () => showSampleDetailsSheet(
+                context,
+                sample: sample,
+                responses: responses,
+                repeaterDisplay: repeaterDisplay,
+                ductingLabel: ductingLabel,
+                ductingColor: ductingColor,
+                resolveRepeaterName: resolveRepeaterName,
+              ),
+              borderRadius: BorderRadius.circular(4),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                child: Text(
+                  l10n.mapMoreDetails,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Theme.of(context).colorScheme.primary,
+                    decoration: TextDecoration.underline,
+                    decorationColor: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
       actions: [_CloseButton(label: l10n.mapClose)],

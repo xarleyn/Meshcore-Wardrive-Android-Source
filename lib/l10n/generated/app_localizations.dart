@@ -3386,6 +3386,60 @@ abstract class AppLocalizations {
   /// **'Response: '**
   String get mapResponseLabel;
 
+  /// Hyperlink on the sample dialog opening the detailed measurement sheet
+  ///
+  /// In en, this message translates to:
+  /// **'More details'**
+  String get mapMoreDetails;
+
+  /// Title of the detailed measurement bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Measurement details'**
+  String get mapSampleDetailsTitle;
+
+  /// Label before a sample geohash
+  ///
+  /// In en, this message translates to:
+  /// **'Geohash: '**
+  String get mapGeohashLabel;
+
+  /// Label before the companion radio device id
+  ///
+  /// In en, this message translates to:
+  /// **'Device: '**
+  String get mapDeviceLabel;
+
+  /// Label before the operator/device source name of a sample
+  ///
+  /// In en, this message translates to:
+  /// **'Source: '**
+  String get mapSourceLabel;
+
+  /// Header of the responder list in the detailed measurement sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Repeaters that responded ({count})'**
+  String mapRespondersTitle(int count);
+
+  /// Strongest RSSI across the responding repeaters
+  ///
+  /// In en, this message translates to:
+  /// **'Best signal: {value}'**
+  String mapBestSignal(String value);
+
+  /// Shown when a failed ping has no recorded responses
+  ///
+  /// In en, this message translates to:
+  /// **'No repeaters heard on this ping.'**
+  String get mapNoResponders;
+
+  /// Marks the tapped sample within the responder list
+  ///
+  /// In en, this message translates to:
+  /// **'This measurement'**
+  String get mapThisMeasurement;
+
   /// Label before ducting risk on sample info
   ///
   /// In en, this message translates to:

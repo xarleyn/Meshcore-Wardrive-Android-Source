@@ -1981,6 +1981,37 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mapResponseLabel => 'Ответ: ';
 
   @override
+  String get mapMoreDetails => 'Подробнее';
+
+  @override
+  String get mapSampleDetailsTitle => 'Подробности замера';
+
+  @override
+  String get mapGeohashLabel => 'Геохеш: ';
+
+  @override
+  String get mapDeviceLabel => 'Устройство: ';
+
+  @override
+  String get mapSourceLabel => 'Источник: ';
+
+  @override
+  String mapRespondersTitle(int count) {
+    return 'Ответившие репитеры ($count)';
+  }
+
+  @override
+  String mapBestSignal(String value) {
+    return 'Лучший сигнал: $value';
+  }
+
+  @override
+  String get mapNoResponders => 'На этот пинг не ответил ни один репитер.';
+
+  @override
+  String get mapThisMeasurement => 'Этот замер';
+
+  @override
   String get mapDuctingLabel => 'Волновод: ';
 
   @override

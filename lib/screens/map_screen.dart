@@ -27,6 +27,7 @@ import '../utils/session_map_view.dart';
 import '../utils/community_coverage.dart';
 import '../utils/bluetooth_scan.dart';
 import '../utils/sample_export.dart';
+import '../utils/ping_burst.dart';
 import '../utils/update_check.dart';
 import '../widgets/compass_calibration.dart';
 import '../widgets/bluetooth_device_picker_dialog.dart';
@@ -2602,7 +2603,9 @@ class _MapScreenState extends State<MapScreen> {
       context: context,
       builder: (context) => SampleInfoDialog(
         sample: sample,
+        responses: PingBurst.responsesFor(sample, _samples),
         repeaterDisplay: repeaterDisplay,
+        resolveRepeaterName: _getRepeaterName,
         ductingLabel: ductingRisk == null
             ? null
             : _localizedDuctingRisk(l10n, ductingRisk),

@@ -1951,6 +1951,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mapResponseLabel => 'Response: ';
 
   @override
+  String get mapMoreDetails => 'More details';
+
+  @override
+  String get mapSampleDetailsTitle => 'Measurement details';
+
+  @override
+  String get mapGeohashLabel => 'Geohash: ';
+
+  @override
+  String get mapDeviceLabel => 'Device: ';
+
+  @override
+  String get mapSourceLabel => 'Source: ';
+
+  @override
+  String mapRespondersTitle(int count) {
+    return 'Repeaters that responded ($count)';
+  }
+
+  @override
+  String mapBestSignal(String value) {
+    return 'Best signal: $value';
+  }
+
+  @override
+  String get mapNoResponders => 'No repeaters heard on this ping.';
+
+  @override
+  String get mapThisMeasurement => 'This measurement';
+
+  @override
   String get mapDuctingLabel => 'Ducting: ';
 
   @override

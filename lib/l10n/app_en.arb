@@ -2533,6 +2533,52 @@
   "@mapResponseLabel": {
     "description": "Label before ping response time"
   },
+  "mapMoreDetails": "More details",
+  "@mapMoreDetails": {
+    "description": "Hyperlink on the sample dialog opening the detailed measurement sheet"
+  },
+  "mapSampleDetailsTitle": "Measurement details",
+  "@mapSampleDetailsTitle": {
+    "description": "Title of the detailed measurement bottom sheet"
+  },
+  "mapGeohashLabel": "Geohash: ",
+  "@mapGeohashLabel": {
+    "description": "Label before a sample geohash"
+  },
+  "mapDeviceLabel": "Device: ",
+  "@mapDeviceLabel": {
+    "description": "Label before the companion radio device id"
+  },
+  "mapSourceLabel": "Source: ",
+  "@mapSourceLabel": {
+    "description": "Label before the operator/device source name of a sample"
+  },
+  "mapRespondersTitle": "Repeaters that responded ({count})",
+  "@mapRespondersTitle": {
+    "description": "Header of the responder list in the detailed measurement sheet",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapBestSignal": "Best signal: {value}",
+  "@mapBestSignal": {
+    "description": "Strongest RSSI across the responding repeaters",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "mapNoResponders": "No repeaters heard on this ping.",
+  "@mapNoResponders": {
+    "description": "Shown when a failed ping has no recorded responses"
+  },
+  "mapThisMeasurement": "This measurement",
+  "@mapThisMeasurement": {
+    "description": "Marks the tapped sample within the responder list"
+  },
   "mapDuctingLabel": "Ducting: ",
   "@mapDuctingLabel": {
     "description": "Label before ducting risk on sample info"
