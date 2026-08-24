@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:meshcore_wardrive/l10n/generated/app_localizations.dart';
 import 'package:meshcore_wardrive/models/location_quality_settings.dart';
+import 'package:meshcore_wardrive/models/models.dart';
 import 'package:meshcore_wardrive/screens/settings/sections/carpeater_section.dart';
 import 'package:meshcore_wardrive/screens/settings/sections/feedback_section.dart';
 import 'package:meshcore_wardrive/screens/settings/sections/location_quality_section.dart';
@@ -80,6 +81,58 @@ void main() {
     await tester.tap(find.byType(SwitchListTile));
 
     expect(enabled, isTrue);
+  });
+
+  testWidgets('carpeater target tile shows name and ID of the selection', (
+    tester,
+  ) async {
+    await _pumpCarpeaterSection(
+      tester,
+      repeaterId: 'BAD5DC49',
+      repeaters: [
+        Repeater(
+          id: 'BAD5DC49',
+          position: const LatLng(55.1, 32.2),
+          name: 'Hilltop',
+        ),
+      ],
+    );
+
+    expect(find.text('Hilltop'), findsOneWidget);
+    expect(find.text('BAD5DC49'), findsOneWidget);
+  });
+
+  testWidgets('carpeater target tile opens searchable picker and delegates', (
+    tester,
+  ) async {
+    String? pickedId;
+    final l10n = await _pumpCarpeaterSection(
+      tester,
+      repeaters: [
+        Repeater(
+          id: 'BAD5DC49',
+          position: const LatLng(55.1, 32.2),
+          name: 'Hilltop',
+        ),
+      ],
+      onRepeaterIdChanged: (value) => pickedId = value,
+    );
+
+    // Open the picker from the target repeater tile (the switch tile also
+    // contains a ListTile, so match the title instead of the tile type).
+    await tester.tap(find.text(l10n.settingsTargetRepeater));
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.settingsTargetRepeaterSearchHint), findsOneWidget);
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.text('Hilltop'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(pickedId, 'BAD5DC49');
   });
 
   testWidgets('map display section delegates typed setting changes', (
@@ -182,6 +235,37 @@ void main() {
 }
 
 LocationQualitySettings? currentSettings;
+
+Future<AppLocalizations> _pumpCarpeaterSection(
+  WidgetTester tester, {
+  String? repeaterId,
+  List<Repeater> repeaters = const [],
+  void Function(String? value)? onRepeaterIdChanged,
+}) {
+  return pumpWithL10n(
+    tester,
+    Builder(
+      builder: (context) => Scaffold(
+        body: ListView(
+          children: buildCarpeaterSettings(
+            context,
+            values: CarpeaterSettingsValues(
+              enabled: true,
+              repeaterId: repeaterId,
+              password: null,
+              interval: 30,
+              foundRepeaters: repeaters,
+            ),
+            onEnabledChanged: (_) {},
+            onRepeaterIdChanged: onRepeaterIdChanged ?? (_) {},
+            onPasswordChanged: (_) {},
+            onIntervalChanged: (_) {},
+          ),
+        ),
+      ),
+    ),
+  );
+}
 
 Future<AppLocalizations> _pumpLocationQualitySection(WidgetTester tester) {
   return pumpWithL10n(

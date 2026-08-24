@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../models/models.dart';
+import '../widgets/repeater_picker_dialog.dart';
 import '../widgets/settings_section_header.dart';
 import '../widgets/settings_text_input_dialog.dart';
 
@@ -12,12 +14,16 @@ class CarpeaterSettingsValues {
     required this.repeaterId,
     required this.password,
     required this.interval,
+    this.foundRepeaters = const [],
   });
 
   final bool enabled;
   final String? repeaterId;
   final String? password;
   final int interval;
+
+  /// Previously found repeaters offered by the target repeater picker.
+  final List<Repeater> foundRepeaters;
 }
 
 List<Widget> buildCarpeaterSettings(
@@ -47,20 +53,28 @@ List<Widget> buildCarpeaterSettings(
     if (values.enabled) ...[
       ListTile(
         title: Text(l10n.settingsTargetRepeater),
-        subtitle: Text(values.repeaterId ?? l10n.settingsNotSet),
+        subtitle: _targetRepeaterSubtitle(l10n, values),
         leading: const Icon(Icons.cell_tower),
         trailing: const Icon(Icons.edit, size: 20),
         onTap: () async {
-          final result = await showSettingsTextInputDialog(
+          final result = await showRepeaterPickerDialog(
             context: context,
-            title: l10n.settingsTargetRepeater,
-            initialValue: values.repeaterId ?? '',
-            labelText: l10n.settingsRepeaterIdPrefix,
-            hintText: l10n.settingsRepeaterIdHint,
-            textCapitalization: TextCapitalization.characters,
+            repeaters: values.foundRepeaters,
+            selectedId: values.repeaterId,
           );
-          if (result != null) {
-            await onRepeaterIdChanged(result.isEmpty ? null : result);
+          if (result == null || !context.mounted) return;
+          switch (result.action) {
+            case RepeaterPickAction.select:
+              await onRepeaterIdChanged(result.repeaterId);
+            case RepeaterPickAction.clear:
+              await onRepeaterIdChanged(null);
+            case RepeaterPickAction.manualEntry:
+              final manual = await _promptManualRepeaterId(
+                context,
+                l10n,
+                values.repeaterId,
+              );
+              await onRepeaterIdChanged(manual);
           }
         },
       ),
@@ -108,4 +122,57 @@ List<Widget> buildCarpeaterSettings(
       ),
     ],
   ];
+}
+
+Widget? _targetRepeaterSubtitle(
+  AppLocalizations l10n,
+  CarpeaterSettingsValues values,
+) {
+  final selectedId = values.repeaterId;
+  if (selectedId == null || selectedId.isEmpty) {
+    return Text(l10n.settingsNotSet);
+  }
+  final upperId = selectedId.toUpperCase();
+  Repeater? repeater;
+  for (final candidate in values.foundRepeaters) {
+    if (candidate.id.toUpperCase() == upperId) {
+      repeater = candidate;
+      break;
+    }
+  }
+  final name = repeater?.name;
+  final displayId = displayRepeaterId(selectedId);
+  if (name == null || name.isEmpty) {
+    return Text(displayId);
+  }
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Text(name),
+      Text(
+        displayId,
+        style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+      ),
+    ],
+  );
+}
+
+Future<String?> _promptManualRepeaterId(
+  BuildContext context,
+  AppLocalizations l10n,
+  String? initialValue,
+) async {
+  final result = await showSettingsTextInputDialog(
+    context: context,
+    title: l10n.settingsTargetRepeater,
+    initialValue: initialValue ?? '',
+    labelText: l10n.settingsRepeaterIdPrefix,
+    hintText: l10n.settingsRepeaterIdHint,
+    textCapitalization: TextCapitalization.characters,
+  );
+  if (result == null) return null;
+  final trimmed = result.trim();
+  if (trimmed.isEmpty) return null;
+  return trimmed.toUpperCase();
 }

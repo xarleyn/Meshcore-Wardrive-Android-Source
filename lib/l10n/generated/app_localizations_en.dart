@@ -354,6 +354,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsRepeaterIdHint => 'e.g., BAD5DC49';
 
   @override
+  String get settingsTargetRepeaterSearchHint => 'Search by name or ID';
+
+  @override
+  String get settingsEnterRepeaterManually => 'Enter manually…';
+
+  @override
   String get settingsAdminPassword => 'Admin Password';
 
   @override

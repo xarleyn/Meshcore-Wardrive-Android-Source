@@ -14,6 +14,7 @@ import 'meshcore_protocol.dart';
 import 'settings_service.dart';
 import '../models/models.dart';
 import '../utils/bluetooth_scan.dart';
+import '../utils/repeater_contacts.dart';
 
 const String _meshCoreServiceUuid = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
 const String _meshCoreRxUuid = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
@@ -350,6 +351,9 @@ class LoRaCompanionService {
   Completer<List<Repeater>>? _scanCompleter;
   final Map<String, Repeater> _knownRepeaters =
       {}; // Map of repeater ID -> location from internet map
+  // Advertised names of every repeater/room-server contact ever parsed
+  // (ID -> advName), including contacts without a known GPS position.
+  final Map<String, String> _repeaterContactNames = {};
 
   // Throttle contact lookups to avoid dumping full list repeatedly
   final Map<String, DateTime> _lastContactRequestAt = {}; // keyPrefix -> time
@@ -927,6 +931,15 @@ class LoRaCompanionService {
 
   List<Repeater> get discoveredRepeaters =>
       List.unmodifiable(_discoveredRepeaters);
+
+  /// Previously found repeater contacts: everything synced from the
+  /// companion radio's contact list or heard during wardriving. Contacts
+  /// without a known position appear as name-only stubs; positioned entries
+  /// win and live discoveries win over stale contact data.
+  List<Repeater> get knownRepeaterContacts => mergeRepeaterContacts(
+    nameOnly: _repeaterContactNames,
+    positioned: [..._knownRepeaters.values, ..._discoveredRepeaters],
+  );
 
   /// Match a 2-character hex prefix to full repeater ID(s)
   /// Returns the first matching repeater from known repeaters
@@ -1573,6 +1586,16 @@ class LoRaCompanionService {
     _debugLog.logInfo(
       'Contact: ${contact.advName ?? contact.publicKeyPrefix} (type: ${contact.advType})',
     );
+
+    // Remember every repeater/room-server contact by name so pickers can
+    // offer previously found repeaters even without a known position.
+    final advName = contact.advName;
+    final isRepeaterType =
+        contact.advType == ADV_TYPE_REPEATER ||
+        contact.advType == ADV_TYPE_ROOM_SERVER;
+    if (isRepeaterType && advName != null && advName.isNotEmpty) {
+      _repeaterContactNames[contact.publicKeyPrefix] = advName;
+    }
 
     // Only show repeaters (2) and room servers (3) on the map, and only if they have a position
     if (!contact.hasPosition ||

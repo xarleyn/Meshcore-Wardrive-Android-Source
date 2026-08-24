@@ -355,6 +355,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsRepeaterIdHint => 'напр., BAD5DC49';
 
   @override
+  String get settingsTargetRepeaterSearchHint => 'Поиск по имени или ID';
+
+  @override
+  String get settingsEnterRepeaterManually => 'Ввести вручную…';
+
+  @override
   String get settingsAdminPassword => 'Пароль администратора';
 
   @override

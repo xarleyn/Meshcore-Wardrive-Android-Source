@@ -103,6 +103,8 @@
   "settingsTargetRepeater": "Целевой репитер",
   "settingsRepeaterIdPrefix": "Префикс ID репитера",
   "settingsRepeaterIdHint": "напр., BAD5DC49",
+  "settingsTargetRepeaterSearchHint": "Поиск по имени или ID",
+  "settingsEnterRepeaterManually": "Ввести вручную…",
   "settingsAdminPassword": "Пароль администратора",
   "settingsPassword": "Пароль",
   "settingsRepeaterAdminPasswordHint": "Пароль администратора репитера",

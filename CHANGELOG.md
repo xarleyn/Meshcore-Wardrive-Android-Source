@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Added
+
+- Carpeater target repeater picker: Settings → Carpeater now opens a
+  searchable list of previously found repeaters instead of a bare text field.
+  Each row shows the repeater's advertised name together with its ID, search
+  matches either of them, the currently selected repeater is highlighted, and
+  manual ID entry remains available as a fallback.
+
 ### Changed
 
 - Distance achievements (🚗 🛣️ ✈️) now follow the selected distance unit in

@@ -285,6 +285,8 @@ extension _SettingsPageNavigation on _MapScreenState {
             repeaterId: _carpeaterRepeaterId,
             password: _carpeaterPassword,
             interval: _carpeaterInterval,
+            foundRepeaters:
+                _locationService.loraCompanion.knownRepeaterContacts,
           ),
           onEnabledChanged: (value) async {
             _updateMapState(() => _carpeaterEnabled = value);

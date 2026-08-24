@@ -716,6 +716,18 @@ abstract class AppLocalizations {
   /// **'e.g., BAD5DC49'**
   String get settingsRepeaterIdHint;
 
+  /// Search hint in the Carpeater target repeater picker
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name or ID'**
+  String get settingsTargetRepeaterSearchHint;
+
+  /// Action to type a Carpeater repeater ID by hand
+  ///
+  /// In en, this message translates to:
+  /// **'Enter manually…'**
+  String get settingsEnterRepeaterManually;
+
   /// Carpeater admin password tile and dialog title
   ///
   /// In en, this message translates to:

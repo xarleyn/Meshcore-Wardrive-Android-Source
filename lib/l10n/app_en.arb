@@ -420,6 +420,14 @@
   "@settingsRepeaterIdHint": {
     "description": "Hint for repeater ID prefix field"
   },
+  "settingsTargetRepeaterSearchHint": "Search by name or ID",
+  "@settingsTargetRepeaterSearchHint": {
+    "description": "Search hint in the Carpeater target repeater picker"
+  },
+  "settingsEnterRepeaterManually": "Enter manually…",
+  "@settingsEnterRepeaterManually": {
+    "description": "Action to type a Carpeater repeater ID by hand"
+  },
   "settingsAdminPassword": "Admin Password",
   "@settingsAdminPassword": {
     "description": "Carpeater admin password tile and dialog title"
