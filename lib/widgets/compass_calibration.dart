@@ -260,6 +260,10 @@ class _CompassFigureEightState extends State<CompassFigureEight>
         animation: _controller,
         builder: (context, _) {
           return CustomPaint(
+            // Without a child, CustomPaint collapses to Size.zero inside the
+            // loose width constraints of a Column, so give it an explicit size
+            // and let it fill the surrounding SizedBox(height: 160).
+            size: Size.infinite,
             painter: _FigureEightPainter(
               t: _controller.value * math.pi * 2,
               color: color,
