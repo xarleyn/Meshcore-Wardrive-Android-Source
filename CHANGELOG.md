@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Carpeater neighbour scans now store SNR with the same half-away-from-zero
+  rounding as discovery pings. The scan previously truncated negative SNR
+  toward zero (for example -1.75 dB was stored as -1 dB), which made weak
+  links look better than measured in saved samples and sound feedback.
+
 ## v1.0.43 - 2026-08-22
 
 ### Changed

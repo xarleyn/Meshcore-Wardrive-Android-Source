@@ -1476,10 +1476,10 @@ class LoRaCompanionService {
         return;
       }
 
-      final snrDb = controlData['snr'] as double;
-      // Persistence/UI models currently store whole-dB SNR. Keep the protocol
-      // parser lossless and round only at this explicit application boundary.
-      final snr = snrDb.round();
+      // Persistence/UI models store whole-dB SNR. Keep the protocol parser
+      // lossless and convert through the shared quarter-dB helper so this
+      // boundary matches every other sample source.
+      final snr = snrQuarterDbToWholeDb(controlData['snr'])!;
       final rssi = controlData['rssi'] as int;
       final payload = controlData['payload'] as Uint8List;
 

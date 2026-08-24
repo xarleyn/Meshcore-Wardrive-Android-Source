@@ -11,6 +11,7 @@ import '../models/models.dart';
 import '../models/location_quality_settings.dart';
 import 'database_service.dart';
 import 'lora_companion_service.dart';
+import 'meshcore_protocol.dart';
 import 'location_quality_filter.dart';
 import 'bad_fix_monitor.dart';
 import '../utils/geohash_utils.dart';
@@ -1634,7 +1635,7 @@ class LocationService {
       // Save one sample per neighbour
       for (final n in results) {
         final pubkey = n['pubkey'] as String?;
-        final snr = (n['snr'] as num?)?.toInt();
+        final snr = snrQuarterDbToWholeDb(n['snr']);
         final repeaterId = pubkey != null && pubkey.length >= 8
             ? pubkey.substring(0, 8)
             : pubkey;
@@ -1655,7 +1656,7 @@ class LocationService {
       _pingEventController.add('success');
       // Use best SNR from filtered results for sound quality
       final bestSnr = results
-          .map((n) => (n['snr'] as num?)?.toInt())
+          .map((n) => snrQuarterDbToWholeDb(n['snr']))
           .where((s) => s != null)
           .fold<int?>(null, (best, s) => best == null || s! > best ? s : best);
       _soundService.playForPingResult(success: true, snr: bestSnr);
