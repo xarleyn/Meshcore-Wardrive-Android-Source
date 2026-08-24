@@ -89,7 +89,14 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
                 // Achievement list
                 Expanded(
                   child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    // Keep the last item clear of the transparent Android
+                    // navigation bar in edge-to-edge mode.
+                    padding: EdgeInsets.fromLTRB(
+                      0,
+                      8,
+                      0,
+                      MediaQuery.paddingOf(context).bottom + 8,
+                    ),
                     itemCount: visible.length,
                     itemBuilder: (context, index) {
                       final a = visible[index];
