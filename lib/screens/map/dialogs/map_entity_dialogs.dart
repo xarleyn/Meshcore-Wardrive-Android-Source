@@ -119,31 +119,15 @@ class SampleInfoDialog extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 4),
-          Align(
-            alignment: Alignment.centerRight,
-            child: InkWell(
-              onTap: () => showSampleDetailsSheet(
-                context,
-                sample: sample,
-                responses: responses,
-                repeaterDisplay: repeaterDisplay,
-                ductingLabel: ductingLabel,
-                ductingColor: ductingColor,
-                resolveRepeaterName: resolveRepeaterName,
-              ),
-              borderRadius: BorderRadius.circular(4),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                child: Text(
-                  l10n.mapMoreDetails,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Theme.of(context).colorScheme.primary,
-                    decoration: TextDecoration.underline,
-                    decorationColor: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ),
+          _MoreDetailsLink(
+            onTap: () => showSampleDetailsSheet(
+              context,
+              sample: sample,
+              responses: responses,
+              repeaterDisplay: repeaterDisplay,
+              ductingLabel: ductingLabel,
+              ductingColor: ductingColor,
+              resolveRepeaterName: resolveRepeaterName,
             ),
           ),
         ],
@@ -153,10 +137,48 @@ class SampleInfoDialog extends StatelessWidget {
   }
 }
 
+/// Compact hyperlink-style action opening a detailed bottom sheet while
+/// keeping the hosting dialog small.
+class _MoreDetailsLink extends StatelessWidget {
+  const _MoreDetailsLink({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(4),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          child: Text(
+            AppLocalizations.of(context).mapMoreDetails,
+            style: TextStyle(
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.primary,
+              decoration: TextDecoration.underline,
+              decorationColor: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class SampleClusterInfoDialog extends StatelessWidget {
-  const SampleClusterInfoDialog({required this.cluster, super.key});
+  const SampleClusterInfoDialog({
+    required this.cluster,
+    this.resolveRepeaterName,
+    super.key,
+  });
 
   final SampleCluster cluster;
+
+  /// Resolves a repeater node id to its known display name, if any.
+  final String? Function(String? nodeId)? resolveRepeaterName;
 
   @override
   Widget build(BuildContext context) {
@@ -177,6 +199,16 @@ class SampleClusterInfoDialog extends StatelessWidget {
           Text(l10n.mapNewest(newestTimestamp)),
           const SizedBox(height: 8),
           Text(l10n.mapZoomForBreakdown),
+          const SizedBox(height: 4),
+          _MoreDetailsLink(
+            onTap: () => showMeasurementListSheet(
+              context,
+              title: l10n.mapMeasurementsTitle(cluster.samples.length),
+              samples: cluster.samples,
+              responderPool: cluster.samples,
+              resolveRepeaterName: resolveRepeaterName,
+            ),
+          ),
         ],
       ),
       actions: [_CloseButton(label: l10n.mapClose)],
@@ -284,9 +316,20 @@ class RepeaterListDialog extends StatelessWidget {
 }
 
 class CoverageInfoDialog extends StatelessWidget {
-  const CoverageInfoDialog({required this.coverage, super.key});
+  const CoverageInfoDialog({
+    required this.coverage,
+    this.cellSamples = const [],
+    this.resolveRepeaterName,
+    super.key,
+  });
 
   final Coverage coverage;
+
+  /// Ping measurements recorded inside this cell, newest first.
+  final List<Sample> cellSamples;
+
+  /// Resolves a repeater node id to its known display name, if any.
+  final String? Function(String? nodeId)? resolveRepeaterName;
 
   @override
   Widget build(BuildContext context) {
@@ -351,6 +394,16 @@ class CoverageInfoDialog extends StatelessWidget {
               expandValue: true,
             ),
           ],
+          const SizedBox(height: 4),
+          _MoreDetailsLink(
+            onTap: () => showMeasurementListSheet(
+              context,
+              title: l10n.mapMeasurementsTitle(cellSamples.length),
+              samples: cellSamples,
+              responderPool: cellSamples,
+              resolveRepeaterName: resolveRepeaterName,
+            ),
+          ),
         ],
       ),
       actions: [_CloseButton(label: l10n.mapClose)],

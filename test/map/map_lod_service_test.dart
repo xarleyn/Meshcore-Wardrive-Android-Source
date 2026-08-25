@@ -113,6 +113,8 @@ void main() {
       expect(result.single.failedCount, 1);
       expect(result.single.gpsOnlyCount, 1);
       expect(result.single.newestSample, same(newer));
+      // The cluster keeps every measurement so details can be listed.
+      expect(result.single.samples, unorderedEquals([older, newer, gpsOnly]));
     });
 
     test('keeps each sample at its GPS position when LOD is off', () {
@@ -138,9 +140,11 @@ void main() {
       expect(result.first.position, first.position);
       expect(result.first.sampleCount, 1);
       expect(result.first.successfulCount, 1);
+      expect(result.first.samples, [first]);
       expect(result.last.newestSample, same(second));
       expect(result.last.position, second.position);
       expect(result.last.failedCount, 1);
+      expect(result.last.samples, [second]);
     });
   });
 }

@@ -2619,7 +2619,10 @@ class _MapScreenState extends State<MapScreen> {
   void _showSampleClusterInfo(SampleCluster cluster) {
     showDialog<void>(
       context: context,
-      builder: (context) => SampleClusterInfoDialog(cluster: cluster),
+      builder: (context) => SampleClusterInfoDialog(
+        cluster: cluster,
+        resolveRepeaterName: _getRepeaterName,
+      ),
     );
   }
 
@@ -2649,8 +2652,35 @@ class _MapScreenState extends State<MapScreen> {
   void _showCoverageInfo(Coverage coverage) {
     showDialog(
       context: context,
-      builder: (context) => CoverageInfoDialog(coverage: coverage),
+      builder: (context) => CoverageInfoDialog(
+        coverage: coverage,
+        cellSamples: _coverageCellSamples(coverage.id),
+        resolveRepeaterName: _getRepeaterName,
+      ),
     );
+  }
+
+  /// Samples belonging to the coverage cell with [coverageId].
+  ///
+  /// Cell ids may be LOD-coarsened, so membership is decided by geohash
+  /// prefix: a sample's full-precision key always starts with every coarser
+  /// cell key that contains it.
+  List<Sample> _coverageCellSamples(String coverageId) {
+    final precision = coverageId.length;
+    final matches = _samples.where((sample) {
+      final hash = sample.geohash;
+      if (hash.length >= precision) {
+        return hash.substring(0, precision) == coverageId;
+      }
+      return GeohashUtils.coverageKey(
+            sample.position.latitude,
+            sample.position.longitude,
+            precision: precision,
+          ) ==
+          coverageId;
+    }).toList();
+    matches.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    return matches;
   }
 
   Future<void> _showRepeatersDialog() async {

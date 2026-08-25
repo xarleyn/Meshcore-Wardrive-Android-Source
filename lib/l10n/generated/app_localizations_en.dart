@@ -1988,6 +1988,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mapThisMeasurement => 'This measurement';
 
   @override
+  String mapMeasurementsTitle(int count) {
+    return 'Measurements ($count)';
+  }
+
+  @override
   String get mapDuctingLabel => 'Ducting: ';
 
   @override

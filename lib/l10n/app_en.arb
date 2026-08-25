@@ -2587,6 +2587,15 @@
   "@mapThisMeasurement": {
     "description": "Marks the tapped sample within the responder list"
   },
+  "mapMeasurementsTitle": "Measurements ({count})",
+  "@mapMeasurementsTitle": {
+    "description": "Title of the measurement list sheet opened from grouped-sample or coverage-cell dialogs",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "mapDuctingLabel": "Ducting: ",
   "@mapDuctingLabel": {
     "description": "Label before ducting risk on sample info"

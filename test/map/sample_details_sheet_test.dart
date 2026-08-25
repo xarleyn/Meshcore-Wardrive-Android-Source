@@ -125,4 +125,64 @@ void main() {
     expect(find.text(l10n.mapNoResponders), findsNothing);
     expect(find.text(l10n.mapStatusGpsOnly), findsOneWidget);
   });
+
+  testWidgets('measurement list sheet lists rows newest first and opens '
+      'per-measurement details', (tester) async {
+    final at = DateTime.utc(2026, 8, 13, 12);
+    final newer = _sample(
+      'gps',
+      timestamp: at.add(const Duration(hours: 1)),
+      path: null,
+      rssi: null,
+      pingSuccess: null,
+    );
+    final older = _sample('a', timestamp: at, path: 'AABBCCDD1122', rssi: -80);
+    final burstSibling = _sample(
+      'b',
+      timestamp: at.add(const Duration(milliseconds: 40)),
+      path: 'BBBBCCDD2211',
+      rssi: -75,
+    );
+    final l10n = await pumpWithL10n(
+      tester,
+      Scaffold(
+        body: Builder(
+          builder: (context) => MeasurementListSheet(
+            title: AppLocalizations.of(context).mapMeasurementsTitle(2),
+            samples: [older, newer],
+            responderPool: [older, burstSibling],
+            resolveRepeaterName: (nodeId) =>
+                nodeId == null ? null : 'Named $nodeId',
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(l10n.mapMeasurementsTitle(2)), findsOneWidget);
+    // Newest measurement is rendered first.
+    expect(
+      tester.getTopRight(find.text(l10n.mapStatusGpsOnly)).dy,
+      lessThan(tester.getTopRight(find.text('Named AABBCCDD1122')).dy),
+    );
+
+    // Tapping a row opens the full details sheet for that measurement with
+    // its responder burst.
+    await tester.tap(find.text('Named AABBCCDD1122'));
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.mapSampleDetailsTitle), findsOneWidget);
+    expect(find.text(l10n.mapRespondersTitle(2)), findsOneWidget);
+    expect(find.text(l10n.mapBestSignal('-75 dBm')), findsOneWidget);
+  });
+
+  testWidgets('empty measurement list shows the no-data note', (tester) async {
+    final l10n = await pumpWithL10n(
+      tester,
+      Scaffold(
+        body: MeasurementListSheet(title: 'Cell', samples: const []),
+      ),
+    );
+
+    expect(find.text(l10n.mapNoPingData), findsOneWidget);
+  });
 }

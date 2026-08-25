@@ -112,6 +112,7 @@ class MapLodService {
             failedCount: entry.value.failedCount,
             gpsOnlyCount: entry.value.gpsOnlyCount,
             newestSample: entry.value.newestSample!,
+            samples: List<Sample>.unmodifiable(entry.value.samples),
           ),
         )
         .toList(growable: false);
@@ -129,6 +130,7 @@ class MapLodService {
             failedCount: sample.pingSuccess == false ? 1 : 0,
             gpsOnlyCount: sample.pingSuccess == null ? 1 : 0,
             newestSample: sample,
+            samples: [sample],
           ),
         )
         .toList();
@@ -166,6 +168,9 @@ class SampleCluster {
   final int gpsOnlyCount;
   final Sample newestSample;
 
+  /// Every measurement in this cluster, so detail views can list them all.
+  final List<Sample> samples;
+
   const SampleCluster({
     required this.id,
     required this.position,
@@ -174,6 +179,7 @@ class SampleCluster {
     required this.failedCount,
     required this.gpsOnlyCount,
     required this.newestSample,
+    this.samples = const [],
   });
 }
 
@@ -191,9 +197,11 @@ class _SampleBucket {
   int failedCount = 0;
   int gpsOnlyCount = 0;
   Sample? newestSample;
+  final List<Sample> samples = [];
 
   void add(Sample sample) {
     sampleCount++;
+    samples.add(sample);
     if (sample.pingSuccess == true) {
       successfulCount++;
     } else if (sample.pingSuccess == false) {

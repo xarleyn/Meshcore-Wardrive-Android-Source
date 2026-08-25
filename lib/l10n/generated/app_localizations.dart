@@ -3452,6 +3452,12 @@ abstract class AppLocalizations {
   /// **'This measurement'**
   String get mapThisMeasurement;
 
+  /// Title of the measurement list sheet opened from grouped-sample or coverage-cell dialogs
+  ///
+  /// In en, this message translates to:
+  /// **'Measurements ({count})'**
+  String mapMeasurementsTitle(int count);
+
   /// Label before ducting risk on sample info
   ///
   /// In en, this message translates to:

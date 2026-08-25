@@ -2018,6 +2018,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mapThisMeasurement => 'Этот замер';
 
   @override
+  String mapMeasurementsTitle(int count) {
+    return 'Замеры ($count)';
+  }
+
+  @override
   String get mapDuctingLabel => 'Волновод: ';
 
   @override

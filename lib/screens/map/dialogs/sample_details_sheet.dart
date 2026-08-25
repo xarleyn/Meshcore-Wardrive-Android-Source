@@ -257,6 +257,189 @@ class _ResponderSection extends StatelessWidget {
   }
 }
 
+/// Opens a scrollable list of measurements with their signal levels.
+///
+/// Used by the grouped-samples and coverage-cell dialogs: every row opens the
+/// full [SampleDetailsSheet] for that measurement on top of the list.
+Future<void> showMeasurementListSheet(
+  BuildContext context, {
+  required String title,
+  required List<Sample> samples,
+  List<Sample> responderPool = const [],
+  String? Function(String? nodeId)? resolveRepeaterName,
+}) {
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    showDragHandle: true,
+    builder: (context) => SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+        ),
+        child: MeasurementListSheet(
+          title: title,
+          samples: samples,
+          responderPool: responderPool,
+          resolveRepeaterName: resolveRepeaterName,
+        ),
+      ),
+    ),
+  );
+}
+
+class MeasurementListSheet extends StatelessWidget {
+  const MeasurementListSheet({
+    required this.title,
+    required this.samples,
+    this.responderPool = const [],
+    this.resolveRepeaterName,
+    super.key,
+  });
+
+  final String title;
+
+  /// Measurements rendered newest first.
+  final List<Sample> samples;
+
+  /// Candidate samples used to reconstruct responder bursts when a row is
+  /// opened; defaults to nothing beyond each measurement itself.
+  final List<Sample> responderPool;
+
+  final String? Function(String? nodeId)? resolveRepeaterName;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final sorted = [...samples]
+      ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          if (sorted.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Center(
+                child: Text(l10n.mapNoPingData, style: _secondaryStyle),
+              ),
+            )
+          else
+            for (final sample in sorted)
+              _MeasurementTile(
+                sample: sample,
+                responderPool: responderPool,
+                resolveRepeaterName: resolveRepeaterName,
+              ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MeasurementTile extends StatelessWidget {
+  const _MeasurementTile({
+    required this.sample,
+    required this.responderPool,
+    this.resolveRepeaterName,
+  });
+
+  final Sample sample;
+  final List<Sample> responderPool;
+  final String? Function(String? nodeId)? resolveRepeaterName;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final timestamp = DateFormat.yMMMd(
+      Localizations.localeOf(context).toString(),
+    ).add_Hms().format(sample.timestamp);
+    final nodeId = sample.path;
+    final shortId = nodeId == null || nodeId.isEmpty
+        ? ''
+        : (nodeId.length > 8 ? nodeId.substring(0, 8) : nodeId).toUpperCase();
+    final metrics = [
+      if (sample.rssi != null) '${l10n.mapRssiLabel}${sample.rssi} dBm',
+      if (sample.snr != null) '${l10n.mapSnrLabel}${sample.snr} dB',
+      if (sample.responseTimeMs != null)
+        '${l10n.mapResponseLabel}${sample.responseTimeMs} ms',
+    ].join(' • ');
+    final titleText = nodeId != null && nodeId.isNotEmpty
+        ? resolveRepeaterName?.call(nodeId) ?? l10n.mapRepeaterFallback(shortId)
+        : sample.pingSuccess == false
+        ? l10n.mapStatusFailed
+        : l10n.mapStatusGpsOnly;
+
+    return InkWell(
+      onTap: () => showSampleDetailsSheet(
+        context,
+        sample: sample,
+        responses: PingBurst.responsesFor(sample, responderPool),
+        resolveRepeaterName: resolveRepeaterName,
+      ),
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Icon(
+                _statusIcon(sample),
+                size: 20,
+                color: _statusIconColor(sample),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(titleText),
+                  Text(timestamp, style: _secondaryStyle),
+                  if (metrics.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(metrics, style: _secondaryStyle),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Icon(
+                Icons.chevron_right,
+                size: 18,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static IconData _statusIcon(Sample sample) {
+    if (sample.pingSuccess == true) return rssiIcon(sample.rssi);
+    if (sample.pingSuccess == false) {
+      return Icons.signal_cellular_connected_no_internet_0_bar;
+    }
+    return Icons.location_on_outlined;
+  }
+
+  static Color _statusIconColor(Sample sample) {
+    if (sample.pingSuccess == true) return rssiColor(sample.rssi);
+    if (sample.pingSuccess == false) return Colors.red;
+    return Colors.blueGrey;
+  }
+}
+
 class _ResponderTile extends StatelessWidget {
   const _ResponderTile({
     required this.response,
@@ -291,9 +474,9 @@ class _ResponderTile extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: 2),
             child: Icon(
-              _signalIcon(response.rssi),
+              rssiIcon(response.rssi),
               size: 20,
-              color: _signalColor(context, response.rssi),
+              color: rssiColor(response.rssi),
             ),
           ),
           const SizedBox(width: 12),
@@ -320,20 +503,22 @@ class _ResponderTile extends StatelessWidget {
       ),
     );
   }
+}
 
-  static IconData _signalIcon(int? rssi) {
-    if (rssi == null) return Icons.signal_cellular_connected_no_internet_0_bar;
-    if (rssi >= -85) return Icons.signal_cellular_alt;
-    if (rssi >= -100) return Icons.signal_cellular_alt_2_bar;
-    return Icons.signal_cellular_alt_1_bar;
-  }
+/// Icon reflecting the reported RSSI strength.
+IconData rssiIcon(int? rssi) {
+  if (rssi == null) return Icons.signal_cellular_connected_no_internet_0_bar;
+  if (rssi >= -85) return Icons.signal_cellular_alt;
+  if (rssi >= -100) return Icons.signal_cellular_alt_2_bar;
+  return Icons.signal_cellular_alt_1_bar;
+}
 
-  static Color _signalColor(BuildContext context, int? rssi) {
-    if (rssi == null) return Colors.grey;
-    if (rssi >= -85) return Colors.green;
-    if (rssi >= -100) return Colors.orange;
-    return Colors.red;
-  }
+/// Color reflecting the reported RSSI strength.
+Color rssiColor(int? rssi) {
+  if (rssi == null) return Colors.grey;
+  if (rssi >= -85) return Colors.green;
+  if (rssi >= -100) return Colors.orange;
+  return Colors.red;
 }
 
 class _DetailRow extends StatelessWidget {
