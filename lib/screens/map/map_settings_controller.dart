@@ -10,6 +10,7 @@ class MapSettingsSnapshot {
     required this.showGpsSamples,
     required this.showCoverage,
     required this.mapLodEnabled,
+    required this.sampleGeohashGrouping,
     required this.showEdges,
     required this.showRepeaters,
     required this.colorMode,
@@ -55,6 +56,7 @@ class MapSettingsSnapshot {
   final bool showGpsSamples;
   final bool showCoverage;
   final bool mapLodEnabled;
+  final bool sampleGeohashGrouping;
   final bool showEdges;
   final bool showRepeaters;
   final String colorMode;
@@ -152,6 +154,7 @@ class MapSettingsController {
       showGpsSamples: await _settingsService.getShowGpsSamples(),
       showCoverage: await _settingsService.getShowCoverage(),
       mapLodEnabled: await _settingsService.getMapLodEnabled(),
+      sampleGeohashGrouping: await _settingsService.getSampleGeohashGrouping(),
       showEdges: await _settingsService.getShowEdges(),
       showRepeaters: await _settingsService.getShowRepeaters(),
       colorMode: await _settingsService.getColorMode(),

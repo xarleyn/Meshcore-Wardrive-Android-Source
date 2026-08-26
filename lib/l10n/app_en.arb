@@ -244,6 +244,14 @@
   "@settingsShowSamples": {
     "description": "Toggle to show sample markers"
   },
+  "settingsGroupSamplesByGeohash": "Group Samples by Geohash",
+  "@settingsGroupSamplesByGeohash": {
+    "description": "Toggle to merge every measurement in one geohash cell into a single sample marker"
+  },
+  "settingsGroupSamplesByGeohashSubtitle": "One marker per geohash cell at the average measurement position, at any zoom; tapping it lists every measurement inside",
+  "@settingsGroupSamplesByGeohashSubtitle": {
+    "description": "Subtitle for the geohash sample grouping toggle"
+  },
   "settingsShowEdges": "Show Edges",
   "@settingsShowEdges": {
     "description": "Toggle to show coverage edges"

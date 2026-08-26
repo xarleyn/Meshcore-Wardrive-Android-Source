@@ -85,9 +85,17 @@ class MapLodService {
     return uniqueEdges.values.toList(growable: false);
   }
 
+  /// Buckets samples by geohash prefix and returns one cluster per bucket.
+  ///
+  /// By default the marker sits at the bucket cell center, which keeps the
+  /// position stable while new measurements arrive. With [anchorAtCentroid]
+  /// the marker is placed at the average position of the member samples
+  /// instead, so grouped points stay close to where they were actually
+  /// recorded.
   static List<SampleCluster> aggregateSamples(
     Iterable<Sample> samples, {
     required int precision,
+    bool anchorAtCentroid = false,
   }) {
     final buckets = <String, _SampleBucket>{};
 
@@ -103,18 +111,21 @@ class MapLodService {
     }
 
     return buckets.entries
-        .map(
-          (entry) => SampleCluster(
+        .map((entry) {
+          final bucket = entry.value;
+          return SampleCluster(
             id: entry.key,
-            position: GeohashUtils.posFromHash(entry.key),
-            sampleCount: entry.value.sampleCount,
-            successfulCount: entry.value.successfulCount,
-            failedCount: entry.value.failedCount,
-            gpsOnlyCount: entry.value.gpsOnlyCount,
-            newestSample: entry.value.newestSample!,
-            samples: List<Sample>.unmodifiable(entry.value.samples),
-          ),
-        )
+            position: anchorAtCentroid
+                ? bucket.centroid
+                : GeohashUtils.posFromHash(entry.key),
+            sampleCount: bucket.sampleCount,
+            successfulCount: bucket.successfulCount,
+            failedCount: bucket.failedCount,
+            gpsOnlyCount: bucket.gpsOnlyCount,
+            newestSample: bucket.newestSample!,
+            samples: List<Sample>.unmodifiable(bucket.samples),
+          );
+        })
         .toList(growable: false);
   }
 
@@ -193,14 +204,22 @@ class _CoverageBucket {
 
 class _SampleBucket {
   int sampleCount = 0;
+  double latitudeSum = 0;
+  double longitudeSum = 0;
   int successfulCount = 0;
   int failedCount = 0;
   int gpsOnlyCount = 0;
   Sample? newestSample;
   final List<Sample> samples = [];
 
+  /// Average position of the member samples.
+  LatLng get centroid =>
+      LatLng(latitudeSum / sampleCount, longitudeSum / sampleCount);
+
   void add(Sample sample) {
     sampleCount++;
+    latitudeSum += sample.position.latitude;
+    longitudeSum += sample.position.longitude;
     samples.add(sample);
     if (sample.pingSuccess == true) {
       successfulCount++;

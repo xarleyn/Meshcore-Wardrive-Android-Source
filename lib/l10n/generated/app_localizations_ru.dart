@@ -203,6 +203,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsShowSamples => 'Показывать замеры';
 
   @override
+  String get settingsGroupSamplesByGeohash => 'Группировать замеры по geohash';
+
+  @override
+  String get settingsGroupSamplesByGeohashSubtitle =>
+      'Одна точка на ячейку geohash в среднем положении замеров на любом масштабе; тап открывает все замеры внутри';
+
+  @override
   String get settingsShowEdges => 'Показывать связи';
 
   @override

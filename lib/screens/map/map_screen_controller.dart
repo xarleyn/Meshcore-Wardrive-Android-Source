@@ -284,16 +284,23 @@ class MapScreenController {
   List<SampleCluster> sampleClusters({
     required double zoom,
     required bool lodEnabled,
+    required bool groupByGeohash,
     required bool showGpsSamples,
     required bool showSuccessfulOnly,
     required String? includeOnlyRepeaters,
   }) {
-    final precision = sampleLodPrecision(zoom: zoom, enabled: lodEnabled);
+    // Geohash grouping always buckets by the native sample key, so every
+    // measurement recorded inside one geohash cell shares one marker even
+    // while zoomed in and while low-zoom simplification stays off.
+    final precision = groupByGeohash
+        ? 8
+        : sampleLodPrecision(zoom: zoom, enabled: lodEnabled);
     final filterKey = [
       showGpsSamples,
       showSuccessfulOnly,
       includeOnlyRepeaters ?? '',
       lodEnabled,
+      groupByGeohash,
     ].join('|');
     if (identical(_clusterSamples, _samples) &&
         _clusterPrecision == precision &&
@@ -319,8 +326,12 @@ class MapScreenController {
     _clusterSamples = _samples;
     _clusterPrecision = precision;
     _clusterFilter = filterKey;
-    return _clusters = lodEnabled
-        ? MapLodService.aggregateSamples(filteredSamples, precision: precision)
+    return _clusters = lodEnabled || groupByGeohash
+        ? MapLodService.aggregateSamples(
+            filteredSamples,
+            precision: precision,
+            anchorAtCentroid: groupByGeohash,
+          )
         : MapLodService.individualSamples(filteredSamples);
   }
 

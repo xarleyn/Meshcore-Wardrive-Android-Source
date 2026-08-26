@@ -151,6 +151,7 @@ void main() {
                 showCoverage: false,
                 mapLodEnabled: false,
                 showSamples: false,
+                sampleGeohashGrouping: false,
                 showEdges: false,
                 showRepeaters: false,
                 showGpsSamples: false,
@@ -181,7 +182,9 @@ void main() {
     // The optimistic coverage toggle reports its own setting kind.
     changedSetting = null;
     changedValue = null;
-    await tester.tap(find.text(l10n.settingsOptimisticDisplay));
+    final optimisticToggle = find.text(l10n.settingsOptimisticDisplay);
+    await tester.scrollUntilVisible(optimisticToggle, 100);
+    await tester.tap(optimisticToggle);
 
     expect(changedSetting, MapDisplaySetting.optimisticDisplay);
     expect(changedValue, isTrue);

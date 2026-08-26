@@ -77,6 +77,7 @@ class SettingsService {
   static const String _mapThemeModeKey = 'map_theme_mode';
   static const String _appLocaleKey = 'app_locale';
   static const String _mapLodEnabledKey = 'map_lod_enabled';
+  static const String _sampleGeohashGroupingKey = 'map_sample_geohash_grouping';
   static const String _recentBluetoothDevicesKey = 'recent_bluetooth_devices';
   static const int _maxRecentBluetoothDevices = 8;
 
@@ -747,6 +748,18 @@ class SettingsService {
     await prefs.setBool(_mapLodEnabledKey, value);
   }
 
+  /// Whether every measurement inside one geohash cell collapses into a
+  /// single sample marker regardless of zoom.
+  Future<bool> getSampleGeohashGrouping() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_sampleGeohashGroupingKey) ?? false;
+  }
+
+  Future<void> setSampleGeohashGrouping(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_sampleGeohashGroupingKey, value);
+  }
+
   /// Get lock rotation north setting
   Future<bool> getLockRotationNorth() async {
     final prefs = await SharedPreferences.getInstance();
@@ -892,6 +905,7 @@ class SettingsService {
     _showSuccessfulOnlyKey,
     _optimisticDisplayKey,
     _mapLodEnabledKey,
+    _sampleGeohashGroupingKey,
     _linkLossAlertsKey,
     // Upload service keys
     'upload_api_url',

@@ -9,6 +9,7 @@ enum MapDisplaySetting {
   coverage,
   mapLod,
   samples,
+  sampleGeohashGrouping,
   edges,
   repeaters,
   gpsSamples,
@@ -25,6 +26,7 @@ class MapDisplaySettingsValues {
     required this.showCoverage,
     required this.mapLodEnabled,
     required this.showSamples,
+    required this.sampleGeohashGrouping,
     required this.showEdges,
     required this.showRepeaters,
     required this.showGpsSamples,
@@ -40,6 +42,7 @@ class MapDisplaySettingsValues {
   final bool showCoverage;
   final bool mapLodEnabled;
   final bool showSamples;
+  final bool sampleGeohashGrouping;
   final bool showEdges;
   final bool showRepeaters;
   final bool showGpsSamples;
@@ -80,6 +83,13 @@ List<Widget> buildMapDisplaySettings(
       title: Text(l10n.settingsShowSamples),
       value: values.showSamples,
       onChanged: (value) => onChanged(MapDisplaySetting.samples, value),
+    ),
+    SwitchListTile(
+      title: Text(l10n.settingsGroupSamplesByGeohash),
+      subtitle: Text(l10n.settingsGroupSamplesByGeohashSubtitle),
+      value: values.sampleGeohashGrouping,
+      onChanged: (value) =>
+          onChanged(MapDisplaySetting.sampleGeohashGrouping, value),
     ),
     SwitchListTile(
       title: Text(l10n.settingsShowEdges),

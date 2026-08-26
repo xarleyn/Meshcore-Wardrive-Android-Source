@@ -4,6 +4,12 @@
 
 ### Added
 
+- Geohash sample grouping (Settings → Map Display): when enabled, every
+  measurement recorded inside one geohash cell collapses into a single marker
+  placed at the average measurement position, regardless of zoom and
+  independently of the low-zoom simplification setting. Tapping such a marker
+  still opens the grouped-measurements dialog with the full list inside.
+  Off by default.
 - Optimistic coverage display (Settings → Map Display): when enabled, a cell
   with at least one successful ping is painted as good and its failed pings
   are ignored. The ping dates still matter — if the newest success is older

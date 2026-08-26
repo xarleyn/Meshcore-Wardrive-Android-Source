@@ -59,6 +59,8 @@
   "settingsSimplifyMapAtLowZoom": "Упрощать карту при малом масштабе",
   "settingsSimplifyMapAtLowZoomSubtitle": "Группировать покрытие и замеры по geohash при отдалении",
   "settingsShowSamples": "Показывать замеры",
+  "settingsGroupSamplesByGeohash": "Группировать замеры по geohash",
+  "settingsGroupSamplesByGeohashSubtitle": "Одна точка на ячейку geohash в среднем положении замеров на любом масштабе; тап открывает все замеры внутри",
   "settingsShowEdges": "Показывать связи",
   "settingsShowRepeaters": "Показывать репитеры",
   "settingsShowGpsSamples": "Показывать GPS-замеры",

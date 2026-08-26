@@ -168,6 +168,8 @@ class _MapScreenState extends State<MapScreen> {
       false; // Coverage stays green on any success, ignoring losses
   bool _showCoverage = true; // Show coverage boxes
   bool _mapLodEnabled = true; // Coarsen coverage/samples at low zoom
+  bool _sampleGeohashGrouping =
+      false; // Merge samples per geohash cell into one tappable marker
   bool _showEdges = true;
   bool _showRepeaters = true;
   bool _autoPingEnabled = false;
@@ -632,6 +634,7 @@ class _MapScreenState extends State<MapScreen> {
       _showGpsSamples = settings.showGpsSamples;
       _showCoverage = settings.showCoverage;
       _mapLodEnabled = settings.mapLodEnabled;
+      _sampleGeohashGrouping = settings.sampleGeohashGrouping;
       _showEdges = settings.showEdges;
       _showRepeaters = settings.showRepeaters;
       _colorMode = settings.colorMode;
@@ -1611,6 +1614,7 @@ class _MapScreenState extends State<MapScreen> {
     return _mapDataController.sampleClusters(
       zoom: _mapLodZoom,
       lodEnabled: _mapLodEnabled,
+      groupByGeohash: _sampleGeohashGrouping,
       showGpsSamples: _showGpsSamples,
       showSuccessfulOnly: _showSuccessfulOnly,
       includeOnlyRepeaters: _includeOnlyRepeaters,

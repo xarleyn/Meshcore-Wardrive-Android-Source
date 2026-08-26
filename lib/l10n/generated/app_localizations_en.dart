@@ -205,6 +205,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsShowSamples => 'Show Samples';
 
   @override
+  String get settingsGroupSamplesByGeohash => 'Group Samples by Geohash';
+
+  @override
+  String get settingsGroupSamplesByGeohashSubtitle =>
+      'One marker per geohash cell at the average measurement position, at any zoom; tapping it lists every measurement inside';
+
+  @override
   String get settingsShowEdges => 'Show Edges';
 
   @override

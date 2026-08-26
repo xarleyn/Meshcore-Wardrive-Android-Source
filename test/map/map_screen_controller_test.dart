@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:meshcore_wardrive/models/models.dart';
 import 'package:meshcore_wardrive/screens/map/map_screen_controller.dart';
+import 'package:meshcore_wardrive/services/map_lod_service.dart';
 import 'package:meshcore_wardrive/utils/session_map_view.dart';
 
 void main() {
@@ -148,6 +149,7 @@ void main() {
       final clusters = controller.sampleClusters(
         zoom: 16,
         lodEnabled: false,
+        groupByGeohash: false,
         showGpsSamples: false,
         showSuccessfulOnly: true,
         includeOnlyRepeaters: 'AABB',
@@ -241,6 +243,76 @@ void main() {
             controller.displaySamples(showSuccessfulOnly: true),
           ),
           isTrue,
+        );
+      },
+    );
+
+    test(
+      'geohash grouping merges same-cell samples even with LOD off',
+      () async {
+        final store = FakeMapDataStore([
+          Sample(
+            id: 'a',
+            position: const LatLng(55.7500, 37.6100),
+            timestamp: DateTime(2026, 8, 20),
+            geohash: 'ucftpv11',
+            path: 'AABBCCDDEEFF',
+            pingSuccess: true,
+          ),
+          Sample(
+            id: 'b',
+            position: const LatLng(55.7504, 37.6106),
+            timestamp: DateTime(2026, 8, 20, 0, 1),
+            geohash: 'ucftpv11',
+            path: 'AABBCCDDEEFF',
+            pingSuccess: false,
+          ),
+        ]);
+        final controller = MapScreenController(store: store);
+        await controller.refresh(
+          discoveredRepeaters: const [],
+          coveragePrecision: 7,
+        );
+
+        List<SampleCluster> clusters({
+          required bool lodEnabled,
+          required bool groupByGeohash,
+        }) => controller.sampleClusters(
+          zoom: 17,
+          lodEnabled: lodEnabled,
+          groupByGeohash: groupByGeohash,
+          showGpsSamples: true,
+          showSuccessfulOnly: false,
+          includeOnlyRepeaters: null,
+        );
+
+        // Without grouping every measurement keeps its own marker.
+        final individual = clusters(lodEnabled: false, groupByGeohash: false);
+        expect(individual, hasLength(2));
+        expect(individual.map((cluster) => cluster.newestSample.id).toSet(), {
+          'a',
+          'b',
+        });
+
+        // Grouping collapses the cell into one marker at the average position
+        // while keeping every measurement reachable for the details list.
+        final grouped = clusters(lodEnabled: false, groupByGeohash: true);
+        expect(grouped, hasLength(1));
+        expect(grouped.single.sampleCount, 2);
+        expect(grouped.single.position.latitude, closeTo(55.7502, 1e-9));
+        expect(grouped.single.position.longitude, closeTo(37.6103, 1e-9));
+        expect(
+          grouped.single.samples.map((sample) => sample.id),
+          unorderedEquals(['a', 'b']),
+        );
+
+        // LOD on (precision saturated to 8 anyway) groups into the same cell.
+        final lodOnGrouped = clusters(lodEnabled: true, groupByGeohash: true);
+        expect(lodOnGrouped, hasLength(1));
+        expect(lodOnGrouped.single.sampleCount, 2);
+        expect(
+          lodOnGrouped.single.samples.map((sample) => sample.id),
+          unorderedEquals(['a', 'b']),
         );
       },
     );

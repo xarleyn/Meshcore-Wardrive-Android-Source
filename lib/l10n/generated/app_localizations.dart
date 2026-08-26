@@ -452,6 +452,18 @@ abstract class AppLocalizations {
   /// **'Show Samples'**
   String get settingsShowSamples;
 
+  /// Toggle to merge every measurement in one geohash cell into a single sample marker
+  ///
+  /// In en, this message translates to:
+  /// **'Group Samples by Geohash'**
+  String get settingsGroupSamplesByGeohash;
+
+  /// Subtitle for the geohash sample grouping toggle
+  ///
+  /// In en, this message translates to:
+  /// **'One marker per geohash cell at the average measurement position, at any zoom; tapping it lists every measurement inside'**
+  String get settingsGroupSamplesByGeohashSubtitle;
+
   /// Toggle to show coverage edges
   ///
   /// In en, this message translates to:

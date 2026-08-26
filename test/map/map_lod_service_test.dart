@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:meshcore_wardrive/models/models.dart';
 import 'package:meshcore_wardrive/services/map_lod_service.dart';
+import 'package:meshcore_wardrive/utils/geohash_utils.dart';
 
 void main() {
   group('MapLodService', () {
@@ -116,6 +117,53 @@ void main() {
       // The cluster keeps every measurement so details can be listed.
       expect(result.single.samples, unorderedEquals([older, newer, gpsOnly]));
     });
+
+    test(
+      'anchors merged samples at the cell center unless a centroid is asked',
+      () {
+        final first = Sample(
+          id: 'a',
+          position: const LatLng(55.7500, 37.6100),
+          timestamp: DateTime.utc(2026, 1, 1),
+          geohash: 'ucftpv11',
+          pingSuccess: true,
+        );
+        final second = Sample(
+          id: 'b',
+          position: const LatLng(55.7520, 37.6140),
+          timestamp: DateTime.utc(2026, 1, 2),
+          geohash: 'ucftpv11',
+          pingSuccess: false,
+        );
+
+        final cellCentered = MapLodService.aggregateSamples([
+          first,
+          second,
+        ], precision: 8);
+        expect(cellCentered, hasLength(1));
+        final center = GeohashUtils.posFromHash('ucftpv11');
+        expect(
+          cellCentered.single.position.latitude,
+          closeTo(center.latitude, 1e-12),
+        );
+        expect(
+          cellCentered.single.position.longitude,
+          closeTo(center.longitude, 1e-12),
+        );
+
+        // Grouping mode places the shared marker at the average measurement
+        // position so it stays where the measurements were actually taken.
+        final averaged = MapLodService.aggregateSamples(
+          [first, second],
+          precision: 8,
+          anchorAtCentroid: true,
+        );
+        expect(averaged, hasLength(1));
+        expect(averaged.single.sampleCount, 2);
+        expect(averaged.single.position.latitude, closeTo(55.7510, 1e-9));
+        expect(averaged.single.position.longitude, closeTo(37.6120, 1e-9));
+      },
+    );
 
     test('keeps each sample at its GPS position when LOD is off', () {
       final first = Sample(

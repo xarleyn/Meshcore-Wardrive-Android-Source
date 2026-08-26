@@ -115,6 +115,7 @@ extension _SettingsPageNavigation on _MapScreenState {
             showCoverage: _showCoverage,
             mapLodEnabled: _mapLodEnabled,
             showSamples: _showSamples,
+            sampleGeohashGrouping: _sampleGeohashGrouping,
             showEdges: _showEdges,
             showRepeaters: _showRepeaters,
             showGpsSamples: _showGpsSamples,
@@ -646,6 +647,8 @@ extension _SettingsPageNavigation on _MapScreenState {
         _updateMapState(() => _mapLodEnabled = value);
       case MapDisplaySetting.samples:
         _updateMapState(() => _showSamples = value);
+      case MapDisplaySetting.sampleGeohashGrouping:
+        _updateMapState(() => _sampleGeohashGrouping = value);
       case MapDisplaySetting.edges:
         _updateMapState(() => _showEdges = value);
       case MapDisplaySetting.repeaters:
@@ -674,6 +677,8 @@ extension _SettingsPageNavigation on _MapScreenState {
         await _settingsService.setMapLodEnabled(value);
       case MapDisplaySetting.samples:
         await _settingsService.setShowSamples(value);
+      case MapDisplaySetting.sampleGeohashGrouping:
+        await _settingsService.setSampleGeohashGrouping(value);
       case MapDisplaySetting.edges:
         await _settingsService.setShowEdges(value);
       case MapDisplaySetting.repeaters:
