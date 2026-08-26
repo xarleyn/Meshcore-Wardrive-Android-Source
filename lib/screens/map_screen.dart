@@ -140,6 +140,12 @@ class _MapScreenState extends State<MapScreen> {
   late final MapScreenController _mapDataController;
   int get _sampleCount => _mapDataController.sampleCount;
   List<Sample> get _samples => _mapDataController.samples;
+
+  /// Samples visible under the "successful pings only" display filter; used
+  /// by every sample-derived layer such as the route trail and heatmap.
+  List<Sample> get _displaySamples => _mapDataController.displaySamples(
+    showSuccessfulOnly: _showSuccessfulOnly,
+  );
   AggregationResult? get _aggregationResult => _mapDataController.aggregation;
   List<Repeater> get _repeaters => _mapDataController.repeaters;
   SessionMapView get _sessionMapView => _mapDataController.sessionView;
@@ -1986,15 +1992,18 @@ class _MapScreenState extends State<MapScreen> {
               : null,
         ),
         if (_showRouteTrail)
-          RouteTrailLayer(samples: _samples, colorBlindMode: _colorBlindMode),
+          RouteTrailLayer(
+            samples: _displaySamples,
+            colorBlindMode: _colorBlindMode,
+          ),
         if (_showHeatmap)
           SampleHeatmapLayer(
-            samples: _samples,
+            samples: _displaySamples,
             reset: _heatmapRebuildStream.stream,
           ),
         if (_showPredictionRings)
           CoveragePredictionLayer(
-            samples: _samples,
+            samples: _displaySamples,
             repeaters: _repeaters,
             includeOnlyRepeaters: _includeOnlyRepeaters,
           ),
@@ -2041,6 +2050,7 @@ class _MapScreenState extends State<MapScreen> {
       zoom: _mapLodZoom,
       enabled: _mapLodEnabled,
       maxPrecision: _coveragePrecision,
+      successfulOnly: _showSuccessfulOnly,
     );
     return [
       CoverageLayer(
@@ -2090,6 +2100,7 @@ class _MapScreenState extends State<MapScreen> {
       zoom: _mapLodZoom,
       enabled: _mapLodEnabled,
       maxPrecision: _coveragePrecision,
+      successfulOnly: _showSuccessfulOnly,
     );
     return EdgeLayer(
       edges: lod.edges,

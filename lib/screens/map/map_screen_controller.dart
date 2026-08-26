@@ -77,6 +77,7 @@ class MapScreenController {
   AggregationResult? _lodAggregation;
   int? _lodPrecision;
   bool? _lodEnabled;
+  bool? _lodSuccessfulOnly;
   MapCoverageLod? _coverageLod;
 
   List<Sample>? _clusterSamples;
@@ -84,8 +85,32 @@ class MapScreenController {
   String? _clusterFilter;
   List<SampleCluster> _clusters = const [];
 
+  List<Sample>? _successfulOnlySamples;
+  List<Sample>? _successfulOnlySamplesSource;
+
   int get sampleCount => _sampleCount;
   List<Sample> get samples => _samples;
+
+  /// Samples the display filters let onto the map.
+  ///
+  /// With [showSuccessfulOnly] only successful pings remain, so every
+  /// sample-derived layer (route trail, heatmap, prediction rings) hides
+  /// failed pings and GPS-only samples just like the round sample markers do.
+  /// [samples] keeps returning the unfiltered snapshot for stats and export.
+  List<Sample> displaySamples({required bool showSuccessfulOnly}) {
+    if (!showSuccessfulOnly) return _samples;
+    final source = _samples;
+    if (_successfulOnlySamples != null &&
+        identical(_successfulOnlySamplesSource, source)) {
+      return _successfulOnlySamples!;
+    }
+    final filtered = List<Sample>.unmodifiable(
+      source.where((sample) => sample.pingSuccess == true),
+    );
+    _successfulOnlySamplesSource = source;
+    return _successfulOnlySamples = filtered;
+  }
+
   AggregationResult? get aggregation => _aggregation;
   List<Repeater> get repeaters => _repeaters;
   SessionMapView get sessionView => _sessionView;
@@ -201,6 +226,7 @@ class MapScreenController {
     required double zoom,
     required bool enabled,
     required int maxPrecision,
+    required bool successfulOnly,
   }) {
     final aggregation = _aggregation;
     final precision = coverageLodPrecision(
@@ -218,16 +244,25 @@ class MapScreenController {
     if (identical(_lodAggregation, aggregation) &&
         _lodPrecision == precision &&
         _lodEnabled == enabled &&
+        _lodSuccessfulOnly == successfulOnly &&
         _coverageLod != null) {
       return _coverageLod!;
     }
 
+    // "Successful pings only" also hides dead-zone squares whose every ping
+    // failed. A cell with at least one success has weighted received > 0 and
+    // keeps its color computed from the full ping history.
+    final visibleCoverages = successfulOnly
+        ? aggregation.coverages
+              .where((coverage) => coverage.received > 0)
+              .toList(growable: false)
+        : aggregation.coverages;
     final coverages = enabled
         ? MapLodService.aggregateCoverages(
-            aggregation.coverages,
+            visibleCoverages,
             precision: precision,
           )
-        : aggregation.coverages;
+        : visibleCoverages;
     final edges = enabled
         ? MapLodService.aggregateEdges(
             aggregation.edges,
@@ -238,6 +273,7 @@ class MapScreenController {
     _lodAggregation = aggregation;
     _lodPrecision = precision;
     _lodEnabled = enabled;
+    _lodSuccessfulOnly = successfulOnly;
     return _coverageLod = MapCoverageLod(
       precision: precision,
       coverages: coverages,
@@ -292,6 +328,7 @@ class MapScreenController {
     _lodAggregation = null;
     _lodPrecision = null;
     _lodEnabled = null;
+    _lodSuccessfulOnly = null;
     _coverageLod = null;
     _clusterSamples = null;
     _clusterPrecision = null;

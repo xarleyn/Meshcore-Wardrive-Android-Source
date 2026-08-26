@@ -25,6 +25,11 @@
 
 ### Fixed
 
+- "Show Successful Pings Only" now applies to every sample-derived layer, not
+  just the round sample markers. Coverage squares whose every ping failed are
+  hidden (cells with at least one success keep their color computed from the
+  full ping history), and the route trail and heatmap stop drawing failed
+  pings and GPS-only samples.
 - Carpeater neighbour scans now store SNR with the same half-away-from-zero
   rounding as discovery pings. The scan previously truncated negative SNR
   toward zero (for example -1.75 dB was stored as -1 dB), which made weak
