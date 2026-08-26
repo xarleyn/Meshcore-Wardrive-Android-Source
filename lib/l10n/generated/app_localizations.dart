@@ -3584,6 +3584,18 @@ abstract class AppLocalizations {
   /// **'Lost: '**
   String get mapLostLabel;
 
+  /// Title of the hint explaining freshness-weighted coverage counters
+  ///
+  /// In en, this message translates to:
+  /// **'How the cell counters work'**
+  String get mapCountersHintTitle;
+
+  /// Body of the hint explaining freshness-weighted coverage counters
+  ///
+  /// In en, this message translates to:
+  /// **'Cell counters weigh measurements by freshness: pings younger than a day count in full (×1.0), 1–7 days old at ×0.8, 1–4 weeks at ×0.5, older than a month at ×0.2. Results contradicted by several newer measurements lose extra weight. That is why these numbers can be fractional and may differ from the number of rows in the measurements list — outdated data counts less on the map. GPS-only records (no ping attempted) are not included in the counters.'**
+  String get mapCountersHintBody;
+
   /// Label before count of heard repeaters
   ///
   /// In en, this message translates to:

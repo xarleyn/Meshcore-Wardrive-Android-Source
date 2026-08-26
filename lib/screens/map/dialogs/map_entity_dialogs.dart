@@ -334,10 +334,17 @@ class CoverageInfoDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+
     final total = coverage.received + coverage.lost;
     final reliability = total > 0
         ? '${((coverage.received / total) * 100).toStringAsFixed(0)}%'
         : l10n.mapNoPingData;
+    // GPS-only records never enter received/lost (no ping was attempted), so
+    // they get their own neutral line and are counted from the same
+    // measurement list opened by the link below.
+    final gpsOnlyCount = cellSamples
+        .where((sample) => sample.pingSuccess == null)
+        .length;
     final prefixes =
         coverage.repeaters
             .map((id) => id.substring(0, id.length >= 4 ? 4 : id.length))
@@ -351,9 +358,15 @@ class CoverageInfoDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _LabelValue(
-            label: l10n.mapSamplesLabel,
-            value: total.toStringAsFixed(1),
+          Row(
+            children: [
+              _LabelValue(
+                label: l10n.mapSamplesLabel,
+                value: total.toStringAsFixed(1),
+              ),
+              const SizedBox(width: 6),
+              _CountersHintButton(onTap: () => _showCountersHint(context)),
+            ],
           ),
           const SizedBox(height: 8),
           _LabelValue(label: l10n.mapSuccessRateLabel, value: reliability),
@@ -377,6 +390,16 @@ class CoverageInfoDialog extends StatelessWidget {
             ),
             expandValue: true,
           ),
+          if (gpsOnlyCount > 0) ...[
+            const SizedBox(height: 4),
+            Text(
+              l10n.mapGpsOnlyCount(gpsOnlyCount),
+              style: const TextStyle(
+                color: Colors.blueGrey,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
           if (coverage.received > 0) ...[
             const SizedBox(height: 8),
             _LabelValue(
@@ -524,6 +547,59 @@ class _CloseButton extends StatelessWidget {
       child: Text(label),
     );
   }
+}
+
+/// Small "?" affordance next to the coverage cell counters. Opens a hint
+/// explaining why the counters are freshness-weighted and can be fractional,
+/// so they do not always match the raw rows in the measurements list.
+class _CountersHintButton extends StatelessWidget {
+  const _CountersHintButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: AppLocalizations.of(context).mapCountersHintTitle,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(2),
+          child: Icon(
+            Icons.help_outline,
+            size: 16,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+void _showCountersHint(BuildContext context) {
+  final l10n = AppLocalizations.of(context);
+  showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    builder: (sheetContext) => SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.mapCountersHintTitle,
+              style: Theme.of(sheetContext).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 12),
+            Text(l10n.mapCountersHintBody),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 const _secondaryStyle = TextStyle(fontSize: 12, color: Colors.grey);

@@ -72,6 +72,38 @@ void main() {
     expect(find.text(l10n.mapCoverageSquareInfo), findsOneWidget);
   });
 
+  testWidgets('coverage dialog shows neutral GPS-only count and counter hint', (
+    tester,
+  ) async {
+    final coverage = Coverage(
+      id: 'ucftpv1',
+      position: const LatLng(55.75, 37.62),
+      received: 3,
+      lost: 1,
+    );
+    final samples = [
+      _sample('a', path: 'AABBCCDD1122', rssi: -80, pingSuccess: true),
+      _sample('b', pingSuccess: false),
+      _sample('c', pingSuccess: null),
+      _sample('d', pingSuccess: null),
+    ];
+    final l10n = await pumpWithL10n(
+      tester,
+      Scaffold(
+        body: CoverageInfoDialog(coverage: coverage, cellSamples: samples),
+      ),
+    );
+
+    // GPS-only records get their own line, outside received/lost, so the
+    // success rate stays success-vs-failure only.
+    expect(find.text(l10n.mapGpsOnlyCount(2)), findsOneWidget);
+    expect(find.text('75%'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.help_outline));
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.mapCountersHintTitle), findsOneWidget);
+  });
+
   testWidgets('cluster dialog opens the measurement list sheet', (
     tester,
   ) async {

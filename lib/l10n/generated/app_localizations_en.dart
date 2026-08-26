@@ -2083,6 +2083,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mapLostLabel => 'Lost: ';
 
   @override
+  String get mapCountersHintTitle => 'How the cell counters work';
+
+  @override
+  String get mapCountersHintBody =>
+      'Cell counters weigh measurements by freshness: pings younger than a day count in full (×1.0), 1–7 days old at ×0.8, 1–4 weeks at ×0.5, older than a month at ×0.2. Results contradicted by several newer measurements lose extra weight. That is why these numbers can be fractional and may differ from the number of rows in the measurements list — outdated data counts less on the map. GPS-only records (no ping attempted) are not included in the counters.';
+
+  @override
   String get mapRepeatersHeard => 'Repeaters Heard: ';
 
   @override
