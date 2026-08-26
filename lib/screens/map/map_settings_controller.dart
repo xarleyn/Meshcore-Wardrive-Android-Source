@@ -39,6 +39,7 @@ class MapSettingsSnapshot {
     required this.keepScreenOn,
     required this.currentLocationMarkerStyle,
     required this.showSuccessfulOnly,
+    required this.optimisticDisplay,
     required this.compassCalibrationQuietUntil,
     required this.deadZoneAlertsEnabled,
     required this.newRepeaterAlertsEnabled,
@@ -83,6 +84,7 @@ class MapSettingsSnapshot {
   final bool keepScreenOn;
   final CurrentLocationMarkerStyle currentLocationMarkerStyle;
   final bool showSuccessfulOnly;
+  final bool optimisticDisplay;
   final DateTime? compassCalibrationQuietUntil;
   final bool deadZoneAlertsEnabled;
   final bool newRepeaterAlertsEnabled;
@@ -184,6 +186,7 @@ class MapSettingsController {
       currentLocationMarkerStyle: await _settingsService
           .getCurrentLocationMarkerStyle(),
       showSuccessfulOnly: await _settingsService.getShowSuccessfulOnly(),
+      optimisticDisplay: await _settingsService.getOptimisticDisplay(),
       compassCalibrationQuietUntil: await _settingsService
           .getCompassCalibrationQuietUntil(),
       deadZoneAlertsEnabled: await _settingsService.getDeadZoneAlertsEnabled(),

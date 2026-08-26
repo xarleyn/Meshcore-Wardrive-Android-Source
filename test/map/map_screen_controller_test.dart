@@ -79,6 +79,49 @@ void main() {
       expect(store.allSamplesReads, 1);
     });
 
+    test('flipping optimistic display re-aggregates coverage', () async {
+      final now = DateTime.now();
+      final store = FakeMapDataStore([
+        _sample('failure', now, pingSuccess: false),
+        _sample(
+          'success',
+          now.subtract(const Duration(days: 2)),
+          pingSuccess: true,
+        ),
+      ]);
+      final controller = MapScreenController(store: store);
+      final repeaters = const <Repeater>[];
+
+      await controller.refresh(
+        discoveredRepeaters: repeaters,
+        coveragePrecision: 7,
+        optimisticDisplay: false,
+      );
+      final pessimisticLost =
+          controller.aggregation?.coverages.single.lost ?? -1;
+      expect(pessimisticLost, greaterThan(0));
+
+      expect(
+        await controller.refresh(
+          discoveredRepeaters: repeaters,
+          coveragePrecision: 7,
+          optimisticDisplay: true,
+        ),
+        isTrue,
+      );
+      expect(controller.aggregation?.coverages.single.lost, 0);
+
+      // Same setting again changes nothing and keeps the cached snapshot.
+      expect(
+        await controller.refresh(
+          discoveredRepeaters: repeaters,
+          coveragePrecision: 7,
+          optimisticDisplay: true,
+        ),
+        isFalse,
+      );
+    });
+
     test('LOD and sample filter results are cached by their inputs', () async {
       final store = FakeMapDataStore([
         _sample('success', DateTime(2026, 8, 20), path: 'AABBCCDDEEFF'),

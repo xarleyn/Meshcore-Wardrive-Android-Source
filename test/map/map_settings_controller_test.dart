@@ -23,6 +23,7 @@ void main() {
         'carpeater_repeater_id': 'beef',
         'carpeater_interval_seconds': 45,
         'link_loss_alerts_enabled': false,
+        'optimistic_display': true,
       });
       final runtime = _FakeMapSettingsRuntime();
       final controller = MapSettingsController(
@@ -48,6 +49,7 @@ void main() {
       expect(snapshot.carpeaterRepeaterId, 'beef');
       expect(snapshot.carpeaterInterval, 45);
       expect(snapshot.linkLossAlertsEnabled, isFalse);
+      expect(snapshot.optimisticDisplay, isTrue);
       expect(runtime.applied, same(snapshot));
     },
   );
@@ -65,6 +67,7 @@ void main() {
     expect(snapshot.showSamples, isFalse);
     expect(snapshot.showCoverage, isTrue);
     expect(snapshot.mapLodEnabled, isTrue);
+    expect(snapshot.optimisticDisplay, isFalse);
     expect(snapshot.distanceUnit, 'km');
     expect(snapshot.mapThemeMode, MapThemeMode.system);
     expect(

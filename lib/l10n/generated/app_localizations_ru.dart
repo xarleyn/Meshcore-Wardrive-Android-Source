@@ -223,6 +223,13 @@ class AppLocalizationsRu extends AppLocalizations {
       'Скрывать неудачные пинги и GPS-замеры';
 
   @override
+  String get settingsOptimisticDisplay => 'Оптимистичное покрытие';
+
+  @override
+  String get settingsOptimisticDisplaySubtitle =>
+      'Считать ячейку хорошей, если хоть один пинг был успешным; успех старше месяца проигрывает более свежим неудачам';
+
+  @override
   String get settingsShowRouteTrail => 'Показывать трек маршрута';
 
   @override

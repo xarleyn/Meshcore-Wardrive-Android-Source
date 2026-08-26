@@ -119,6 +119,7 @@ extension _SettingsPageNavigation on _MapScreenState {
             showRepeaters: _showRepeaters,
             showGpsSamples: _showGpsSamples,
             showSuccessfulOnly: _showSuccessfulOnly,
+            optimisticDisplay: _optimisticDisplay,
             showRouteTrail: _showRouteTrail,
             communityCoverageAvailable: _communityCoverage != null,
             showCommunityCoverage: _showCommunityCoverage,
@@ -653,6 +654,8 @@ extension _SettingsPageNavigation on _MapScreenState {
         _updateMapState(() => _showGpsSamples = value);
       case MapDisplaySetting.successfulOnly:
         _updateMapState(() => _showSuccessfulOnly = value);
+      case MapDisplaySetting.optimisticDisplay:
+        _updateMapState(() => _optimisticDisplay = value);
       case MapDisplaySetting.routeTrail:
         _updateMapState(() => _showRouteTrail = value);
       case MapDisplaySetting.communityCoverage:
@@ -679,6 +682,11 @@ extension _SettingsPageNavigation on _MapScreenState {
         await _settingsService.setShowGpsSamples(value);
       case MapDisplaySetting.successfulOnly:
         await _settingsService.setShowSuccessfulOnly(value);
+      case MapDisplaySetting.optimisticDisplay:
+        await _settingsService.setOptimisticDisplay(value);
+        // Optimism changes the aggregated cell colors, so rebuild them now.
+        _mapDataController.invalidate();
+        await _loadSamples();
       case MapDisplaySetting.routeTrail:
         await _settingsService.setShowRouteTrail(value);
       case MapDisplaySetting.communityCoverage:

@@ -13,6 +13,7 @@ enum MapDisplaySetting {
   repeaters,
   gpsSamples,
   successfulOnly,
+  optimisticDisplay,
   routeTrail,
   communityCoverage,
   heatmap,
@@ -28,6 +29,7 @@ class MapDisplaySettingsValues {
     required this.showRepeaters,
     required this.showGpsSamples,
     required this.showSuccessfulOnly,
+    required this.optimisticDisplay,
     required this.showRouteTrail,
     required this.communityCoverageAvailable,
     required this.showCommunityCoverage,
@@ -42,6 +44,7 @@ class MapDisplaySettingsValues {
   final bool showRepeaters;
   final bool showGpsSamples;
   final bool showSuccessfulOnly;
+  final bool optimisticDisplay;
   final bool showRouteTrail;
   final bool communityCoverageAvailable;
   final bool showCommunityCoverage;
@@ -99,6 +102,13 @@ List<Widget> buildMapDisplaySettings(
       subtitle: Text(l10n.settingsShowSuccessfulPingsOnlySubtitle),
       value: values.showSuccessfulOnly,
       onChanged: (value) => onChanged(MapDisplaySetting.successfulOnly, value),
+    ),
+    SwitchListTile(
+      title: Text(l10n.settingsOptimisticDisplay),
+      subtitle: Text(l10n.settingsOptimisticDisplaySubtitle),
+      value: values.optimisticDisplay,
+      onChanged: (value) =>
+          onChanged(MapDisplaySetting.optimisticDisplay, value),
     ),
     SwitchListTile(
       title: Text(l10n.settingsShowRouteTrail),

@@ -140,7 +140,7 @@ void main() {
   ) async {
     MapDisplaySetting? changedSetting;
     bool? changedValue;
-    await pumpWithL10n(
+    final l10n = await pumpWithL10n(
       tester,
       Builder(
         builder: (context) => Scaffold(
@@ -155,6 +155,7 @@ void main() {
                 showRepeaters: false,
                 showGpsSamples: false,
                 showSuccessfulOnly: false,
+                optimisticDisplay: false,
                 showRouteTrail: false,
                 communityCoverageAvailable: false,
                 showCommunityCoverage: false,
@@ -175,6 +176,14 @@ void main() {
     await tester.tap(find.byType(SwitchListTile).first);
 
     expect(changedSetting, MapDisplaySetting.coverage);
+    expect(changedValue, isTrue);
+
+    // The optimistic coverage toggle reports its own setting kind.
+    changedSetting = null;
+    changedValue = null;
+    await tester.tap(find.text(l10n.settingsOptimisticDisplay));
+
+    expect(changedSetting, MapDisplaySetting.optimisticDisplay);
     expect(changedValue, isTrue);
   });
 

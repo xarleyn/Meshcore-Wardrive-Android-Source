@@ -70,6 +70,7 @@ class MapScreenController {
   int? _aggregatedSampleCount;
   String? _aggregatedRepeaterFingerprint;
   int? _aggregatedCoveragePrecision;
+  bool? _aggregatedOptimisticDisplay;
   bool _invalidated = true;
   int _refreshGeneration = 0;
 
@@ -93,6 +94,7 @@ class MapScreenController {
   Future<bool> refresh({
     required Iterable<Repeater> discoveredRepeaters,
     required int coveragePrecision,
+    bool optimisticDisplay = false,
     bool force = false,
   }) async {
     final generation = ++_refreshGeneration;
@@ -106,7 +108,8 @@ class MapScreenController {
         _invalidated ||
         count != _aggregatedSampleCount ||
         repeaterFingerprint != _aggregatedRepeaterFingerprint ||
-        coveragePrecision != _aggregatedCoveragePrecision;
+        coveragePrecision != _aggregatedCoveragePrecision ||
+        optimisticDisplay != _aggregatedOptimisticDisplay;
     _sampleCount = count;
     if (!needsAggregation) return false;
 
@@ -123,6 +126,7 @@ class MapScreenController {
       samples,
       repeaters,
       coveragePrecision: coveragePrecision,
+      optimisticDisplay: optimisticDisplay,
     );
     final repeaterMap = <String, Repeater>{
       for (final repeater in aggregation.repeaters) repeater.id: repeater,
@@ -135,6 +139,7 @@ class MapScreenController {
     _aggregatedSampleCount = count;
     _aggregatedRepeaterFingerprint = repeaterFingerprint;
     _aggregatedCoveragePrecision = coveragePrecision;
+    _aggregatedOptimisticDisplay = optimisticDisplay;
     _invalidated = false;
     _clearLodCaches();
     return true;

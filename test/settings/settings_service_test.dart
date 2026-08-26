@@ -161,6 +161,33 @@ void main() {
     });
   });
 
+  group('optimistic display setting', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('defaults to disabled', () async {
+      expect(await SettingsService().getOptimisticDisplay(), isFalse);
+    });
+
+    test('persists the selected value', () async {
+      final settings = SettingsService();
+
+      await settings.setOptimisticDisplay(true);
+
+      expect(await settings.getOptimisticDisplay(), isTrue);
+    });
+
+    test('includes optimistic display in settings backup', () async {
+      final settings = SettingsService();
+      await settings.setOptimisticDisplay(true);
+
+      final exported = await settings.exportSettings();
+
+      expect(exported['optimistic_display'], isTrue);
+    });
+  });
+
   group('battery saver setting', () {
     setUp(() {
       SharedPreferences.setMockInitialValues({});

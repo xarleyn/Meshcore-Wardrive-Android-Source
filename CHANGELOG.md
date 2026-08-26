@@ -4,6 +4,12 @@
 
 ### Added
 
+- Optimistic coverage display (Settings → Map Display): when enabled, a cell
+  with at least one successful ping is painted as good and its failed pings
+  are ignored. The ping dates still matter — if the newest success is older
+  than a month and failures were recorded after it, the failures win again
+  because the coverage most likely went dark. The setting participates in
+  settings export/import.
 - Carpeater target repeater picker: Settings → Carpeater now opens a
   searchable list of previously found repeaters instead of a bare text field.
   Each row shows the repeater's advertised name together with its ID, search

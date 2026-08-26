@@ -224,6 +224,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Hide failed pings and GPS-only samples';
 
   @override
+  String get settingsOptimisticDisplay => 'Optimistic Coverage';
+
+  @override
+  String get settingsOptimisticDisplaySubtitle =>
+      'Count a cell as good when any ping succeeded; a success older than a month loses to newer failures';
+
+  @override
   String get settingsShowRouteTrail => 'Show Route Trail';
 
   @override

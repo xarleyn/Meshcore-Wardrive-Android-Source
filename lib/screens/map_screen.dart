@@ -158,6 +158,8 @@ class _MapScreenState extends State<MapScreen> {
   bool _showSamples = false;
   bool _showGpsSamples = true; // Show GPS-only samples (null pingSuccess)
   bool _showSuccessfulOnly = false; // Show only samples with successful pings
+  bool _optimisticDisplay =
+      false; // Coverage stays green on any success, ignoring losses
   bool _showCoverage = true; // Show coverage boxes
   bool _mapLodEnabled = true; // Coarsen coverage/samples at low zoom
   bool _showEdges = true;
@@ -653,6 +655,7 @@ class _MapScreenState extends State<MapScreen> {
       _keepScreenOn = settings.keepScreenOn;
       _currentLocationMarkerStyle = settings.currentLocationMarkerStyle;
       _showSuccessfulOnly = settings.showSuccessfulOnly;
+      _optimisticDisplay = settings.optimisticDisplay;
       _compassCalibrationQuietUntil = settings.compassCalibrationQuietUntil;
       _deadZoneAlertsEnabled = settings.deadZoneAlertsEnabled;
       _newRepeaterAlertsEnabled = settings.newRepeaterAlertsEnabled;
@@ -788,6 +791,7 @@ class _MapScreenState extends State<MapScreen> {
     final dataChanged = await _mapDataController.refresh(
       discoveredRepeaters: discoveredRepeaters,
       coveragePrecision: _coveragePrecision,
+      optimisticDisplay: _optimisticDisplay,
     );
     if (!mounted) return;
 

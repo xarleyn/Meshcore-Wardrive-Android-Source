@@ -65,6 +65,8 @@
   "settingsShowGpsSamplesSubtitle": "Показывать синие маркеры только GPS",
   "settingsShowSuccessfulPingsOnly": "Только успешные пинги",
   "settingsShowSuccessfulPingsOnlySubtitle": "Скрывать неудачные пинги и GPS-замеры",
+  "settingsOptimisticDisplay": "Оптимистичное покрытие",
+  "settingsOptimisticDisplaySubtitle": "Считать ячейку хорошей, если хоть один пинг был успешным; успех старше месяца проигрывает более свежим неудачам",
   "settingsShowRouteTrail": "Показывать трек маршрута",
   "settingsShowRouteTrailSubtitle": "Рисовать пройденный путь на карте",
   "settingsCommunityCoverage": "Покрытие сообщества",

@@ -488,6 +488,18 @@ abstract class AppLocalizations {
   /// **'Hide failed pings and GPS-only samples'**
   String get settingsShowSuccessfulPingsOnlySubtitle;
 
+  /// Toggle to paint coverage cells green when any ping succeeded
+  ///
+  /// In en, this message translates to:
+  /// **'Optimistic Coverage'**
+  String get settingsOptimisticDisplay;
+
+  /// Subtitle for the optimistic coverage toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Count a cell as good when any ping succeeded; a success older than a month loses to newer failures'**
+  String get settingsOptimisticDisplaySubtitle;
+
   /// Toggle to draw the driven path
   ///
   /// In en, this message translates to:

@@ -69,6 +69,7 @@ class SettingsService {
   static const String _compassCalibrationQuietUntilKey =
       'compass_calibration_quiet_until_ms';
   static const String _showSuccessfulOnlyKey = 'show_successful_only';
+  static const String _optimisticDisplayKey = 'optimistic_display';
   static const String _deadZoneAlertsKey = 'dead_zone_alerts_enabled';
   static const String _newRepeaterAlertsKey = 'new_repeater_alerts_enabled';
   static const String _linkLossAlertsKey = 'link_loss_alerts_enabled';
@@ -723,6 +724,19 @@ class SettingsService {
     await prefs.setBool(_showSuccessfulOnlyKey, value);
   }
 
+  /// Whether coverage cells with at least one successful ping render as good,
+  /// ignoring failed pings unless the success went stale (see
+  /// [AggregationService.optimisticStalenessDays]).
+  Future<bool> getOptimisticDisplay() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_optimisticDisplayKey) ?? false;
+  }
+
+  Future<void> setOptimisticDisplay(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_optimisticDisplayKey, value);
+  }
+
   Future<bool> getMapLodEnabled() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_mapLodEnabledKey) ?? true;
@@ -876,6 +890,7 @@ class SettingsService {
     _batterySaverEnabledKey,
     _currentLocationMarkerStyleKey,
     _showSuccessfulOnlyKey,
+    _optimisticDisplayKey,
     _mapLodEnabledKey,
     _linkLossAlertsKey,
     // Upload service keys
