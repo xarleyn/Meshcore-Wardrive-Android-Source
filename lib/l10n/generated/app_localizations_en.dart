@@ -205,6 +205,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsShowSamples => 'Show Samples';
 
   @override
+  String get settingsFixedSampleMarkerSize => 'Fixed sample point size';
+
+  @override
+  String get settingsFixedSampleMarkerSizeSubtitle =>
+      'Use one size instead of sizing points automatically by the number of measurements';
+
+  @override
+  String settingsSampleMarkerSize(int size) {
+    return 'Point size: $size px';
+  }
+
+  @override
+  String settingsSampleMarkerSizeValue(int size) {
+    return '$size px';
+  }
+
+  @override
   String get settingsGroupSamplesByGeohash => 'Group Samples by Geohash';
 
   @override

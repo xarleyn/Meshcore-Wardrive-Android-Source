@@ -452,6 +452,30 @@ abstract class AppLocalizations {
   /// **'Show Samples'**
   String get settingsShowSamples;
 
+  /// Toggle to replace automatic sample point sizing with a fixed size
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed sample point size'**
+  String get settingsFixedSampleMarkerSize;
+
+  /// Explanation shown under the fixed sample point size toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Use one size instead of sizing points automatically by the number of measurements'**
+  String get settingsFixedSampleMarkerSizeSubtitle;
+
+  /// Title above the sample point size slider
+  ///
+  /// In en, this message translates to:
+  /// **'Point size: {size} px'**
+  String settingsSampleMarkerSize(int size);
+
+  /// Value label for the sample point size slider
+  ///
+  /// In en, this message translates to:
+  /// **'{size} px'**
+  String settingsSampleMarkerSizeValue(int size);
+
   /// Toggle to merge every measurement in one geohash cell into a single sample marker
   ///
   /// In en, this message translates to:

@@ -163,6 +163,8 @@ class _MapScreenState extends State<MapScreen> {
   String _colorMode = 'quality';
   bool _showSamples = false;
   bool _showGpsSamples = true; // Show GPS-only samples (null pingSuccess)
+  bool _fixedSampleMarkerSizeEnabled = false;
+  double _sampleMarkerRadius = SettingsService.defaultSampleMarkerRadius;
   bool _showSuccessfulOnly = false; // Show only samples with successful pings
   bool _optimisticDisplay =
       false; // Coverage stays green on any success, ignoring losses
@@ -632,6 +634,8 @@ class _MapScreenState extends State<MapScreen> {
     setState(() {
       _showSamples = settings.showSamples;
       _showGpsSamples = settings.showGpsSamples;
+      _fixedSampleMarkerSizeEnabled = settings.fixedSampleMarkerSizeEnabled;
+      _sampleMarkerRadius = settings.sampleMarkerRadius;
       _showCoverage = settings.showCoverage;
       _mapLodEnabled = settings.mapLodEnabled;
       _sampleGeohashGrouping = settings.sampleGeohashGrouping;
@@ -2083,6 +2087,7 @@ class _MapScreenState extends State<MapScreen> {
     return SampleClusterLayer(
       clusters: clusters,
       colorBlindMode: _colorBlindMode,
+      fixedRadius: _fixedSampleMarkerSizeEnabled ? _sampleMarkerRadius : null,
       hitNotifier: _sampleHitNotifier,
       onClusterTap: (cluster) {
         if (_deleteMode && cluster.sampleCount == 1) {

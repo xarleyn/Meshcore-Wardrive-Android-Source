@@ -151,6 +151,8 @@ void main() {
                 showCoverage: false,
                 mapLodEnabled: false,
                 showSamples: false,
+                fixedSampleMarkerSizeEnabled: false,
+                sampleMarkerRadius: 10,
                 sampleGeohashGrouping: false,
                 showEdges: false,
                 showRepeaters: false,
@@ -167,6 +169,8 @@ void main() {
                 changedSetting = setting;
                 changedValue = value;
               },
+              onSampleMarkerRadiusChanged: (_) {},
+              onSampleMarkerRadiusChangeEnd: (_) {},
               onClearCommunityCoverage: () {},
             ),
           ),
@@ -178,6 +182,10 @@ void main() {
 
     expect(changedSetting, MapDisplaySetting.coverage);
     expect(changedValue, isTrue);
+    expect(
+      find.byKey(const ValueKey('sample-marker-size-slider')),
+      findsNothing,
+    );
 
     // The optimistic coverage toggle reports its own setting kind.
     changedSetting = null;
@@ -188,6 +196,57 @@ void main() {
 
     expect(changedSetting, MapDisplaySetting.optimisticDisplay);
     expect(changedValue, isTrue);
+  });
+
+  testWidgets('fixed sample point size reveals and delegates the slider', (
+    tester,
+  ) async {
+    double? changedRadius;
+    double? savedRadius;
+    final l10n = await pumpWithL10n(
+      tester,
+      Builder(
+        builder: (context) => Scaffold(
+          body: ListView(
+            children: buildMapDisplaySettings(
+              context,
+              values: const MapDisplaySettingsValues(
+                showCoverage: false,
+                mapLodEnabled: false,
+                showSamples: true,
+                fixedSampleMarkerSizeEnabled: true,
+                sampleMarkerRadius: 10,
+                sampleGeohashGrouping: false,
+                showEdges: false,
+                showRepeaters: false,
+                showGpsSamples: false,
+                showSuccessfulOnly: false,
+                optimisticDisplay: false,
+                showRouteTrail: false,
+                communityCoverageAvailable: false,
+                showCommunityCoverage: false,
+                showHeatmap: false,
+                showPredictionRings: false,
+              ),
+              onChanged: (_, _) {},
+              onSampleMarkerRadiusChanged: (value) => changedRadius = value,
+              onSampleMarkerRadiusChangeEnd: (value) => savedRadius = value,
+              onClearCommunityCoverage: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(l10n.settingsSampleMarkerSize(20)), findsOneWidget);
+    final slider = tester.widget<Slider>(
+      find.byKey(const ValueKey('sample-marker-size-slider')),
+    );
+    slider.onChanged!(14);
+    slider.onChangeEnd!(14);
+
+    expect(changedRadius, 14);
+    expect(savedRadius, 14);
   });
 
   testWidgets('ping pause toggle hides the bad-fix threshold when off', (

@@ -3,12 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../services/settings_service.dart';
 import '../widgets/settings_section_header.dart';
 
 enum MapDisplaySetting {
   coverage,
   mapLod,
   samples,
+  fixedSampleMarkerSize,
   sampleGeohashGrouping,
   edges,
   repeaters,
@@ -26,6 +28,8 @@ class MapDisplaySettingsValues {
     required this.showCoverage,
     required this.mapLodEnabled,
     required this.showSamples,
+    required this.fixedSampleMarkerSizeEnabled,
+    required this.sampleMarkerRadius,
     required this.sampleGeohashGrouping,
     required this.showEdges,
     required this.showRepeaters,
@@ -42,6 +46,8 @@ class MapDisplaySettingsValues {
   final bool showCoverage;
   final bool mapLodEnabled;
   final bool showSamples;
+  final bool fixedSampleMarkerSizeEnabled;
+  final double sampleMarkerRadius;
   final bool sampleGeohashGrouping;
   final bool showEdges;
   final bool showRepeaters;
@@ -60,6 +66,8 @@ List<Widget> buildMapDisplaySettings(
   required MapDisplaySettingsValues values,
   required FutureOr<void> Function(MapDisplaySetting setting, bool value)
   onChanged,
+  required ValueChanged<double> onSampleMarkerRadiusChanged,
+  required FutureOr<void> Function(double value) onSampleMarkerRadiusChangeEnd,
   required FutureOr<void> Function() onClearCommunityCoverage,
 }) {
   final l10n = AppLocalizations.of(context);
@@ -84,6 +92,36 @@ List<Widget> buildMapDisplaySettings(
       value: values.showSamples,
       onChanged: (value) => onChanged(MapDisplaySetting.samples, value),
     ),
+    SwitchListTile(
+      title: Text(l10n.settingsFixedSampleMarkerSize),
+      subtitle: Text(l10n.settingsFixedSampleMarkerSizeSubtitle),
+      value: values.fixedSampleMarkerSizeEnabled,
+      onChanged: (value) =>
+          onChanged(MapDisplaySetting.fixedSampleMarkerSize, value),
+    ),
+    if (values.fixedSampleMarkerSizeEnabled)
+      ListTile(
+        title: Text(
+          l10n.settingsSampleMarkerSize(
+            (values.sampleMarkerRadius * 2).round(),
+          ),
+        ),
+        subtitle: Slider(
+          key: const ValueKey('sample-marker-size-slider'),
+          min: SettingsService.minSampleMarkerRadius,
+          max: SettingsService.maxSampleMarkerRadius,
+          divisions:
+              (SettingsService.maxSampleMarkerRadius -
+                      SettingsService.minSampleMarkerRadius)
+                  .round(),
+          label: l10n.settingsSampleMarkerSizeValue(
+            (values.sampleMarkerRadius * 2).round(),
+          ),
+          value: values.sampleMarkerRadius,
+          onChanged: onSampleMarkerRadiusChanged,
+          onChangeEnd: onSampleMarkerRadiusChangeEnd,
+        ),
+      ),
     SwitchListTile(
       title: Text(l10n.settingsGroupSamplesByGeohash),
       subtitle: Text(l10n.settingsGroupSamplesByGeohashSubtitle),

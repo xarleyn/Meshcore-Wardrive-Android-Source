@@ -161,6 +161,57 @@ void main() {
     });
   });
 
+  group('sample marker size setting', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('defaults to automatic sizing and a comfortable fixed size', () async {
+      final settings = SettingsService();
+
+      expect(await settings.getFixedSampleMarkerSizeEnabled(), isFalse);
+      expect(
+        await settings.getSampleMarkerRadius(),
+        SettingsService.defaultSampleMarkerRadius,
+      );
+    });
+
+    test('persists and exports the fixed size selection', () async {
+      final settings = SettingsService();
+
+      await settings.setFixedSampleMarkerSizeEnabled(true);
+      await settings.setSampleMarkerRadius(14);
+
+      expect(await settings.getFixedSampleMarkerSizeEnabled(), isTrue);
+      expect(await settings.getSampleMarkerRadius(), 14);
+      final exported = await settings.exportSettings();
+      expect(exported['fixed_sample_marker_size_enabled'], isTrue);
+      expect(exported['sample_marker_radius'], 14);
+
+      SharedPreferences.setMockInitialValues({});
+      await settings.importSettings(exported);
+      expect(await settings.getFixedSampleMarkerSizeEnabled(), isTrue);
+      expect(await settings.getSampleMarkerRadius(), 14);
+    });
+
+    test(
+      'ignores an invalid stored radius and rejects invalid writes',
+      () async {
+        SharedPreferences.setMockInitialValues({'sample_marker_radius': 100.0});
+        final settings = SettingsService();
+
+        expect(
+          await settings.getSampleMarkerRadius(),
+          SettingsService.defaultSampleMarkerRadius,
+        );
+        await expectLater(
+          settings.setSampleMarkerRadius(100),
+          throwsArgumentError,
+        );
+      },
+    );
+  });
+
   group('optimistic display setting', () {
     setUp(() {
       SharedPreferences.setMockInitialValues({});

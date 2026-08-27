@@ -4,6 +4,10 @@
 
 ### Added
 
+- Adjustable sample point size (Settings → Map Display): enable a fixed point
+  size to replace automatic sizing, then choose a diameter from 8 to 32 px.
+  The option is off by default and participates in settings export/import.
+
 - Geohash sample grouping (Settings → Map Display): when enabled, every
   measurement recorded inside one geohash cell collapses into a single marker
   placed at the average measurement position, regardless of zoom and

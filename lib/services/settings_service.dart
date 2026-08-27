@@ -13,6 +13,9 @@ enum MapThemeMode { system, light, dark }
 class SettingsService {
   static const String _showSamplesKey = 'show_samples';
   static const String _showGpsSamplesKey = 'show_gps_samples';
+  static const String _fixedSampleMarkerSizeEnabledKey =
+      'fixed_sample_marker_size_enabled';
+  static const String _sampleMarkerRadiusKey = 'sample_marker_radius';
   static const String _showCoverageKey = 'show_coverage';
   static const String _showEdgesKey = 'show_edges';
   static const String _showRepeatersKey = 'show_repeaters';
@@ -81,6 +84,10 @@ class SettingsService {
   static const String _recentBluetoothDevicesKey = 'recent_bluetooth_devices';
   static const int _maxRecentBluetoothDevices = 8;
 
+  static const double minSampleMarkerRadius = 4;
+  static const double maxSampleMarkerRadius = 16;
+  static const double defaultSampleMarkerRadius = 10;
+
   // Alert toggles
   Future<bool> getDeadZoneAlertsEnabled() async {
     final prefs = await SharedPreferences.getInstance();
@@ -140,6 +147,40 @@ class SettingsService {
   Future<void> setShowGpsSamples(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_showGpsSamplesKey, value);
+  }
+
+  /// Whether sample points use [getSampleMarkerRadius] instead of their
+  /// automatic size, which varies with the number of grouped measurements.
+  Future<bool> getFixedSampleMarkerSizeEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_fixedSampleMarkerSizeEnabledKey) ?? false;
+  }
+
+  Future<void> setFixedSampleMarkerSizeEnabled(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_fixedSampleMarkerSizeEnabledKey, value);
+  }
+
+  Future<double> getSampleMarkerRadius() async {
+    final prefs = await SharedPreferences.getInstance();
+    final value = prefs.getDouble(_sampleMarkerRadiusKey);
+    if (value == null ||
+        !value.isFinite ||
+        value < minSampleMarkerRadius ||
+        value > maxSampleMarkerRadius) {
+      return defaultSampleMarkerRadius;
+    }
+    return value;
+  }
+
+  Future<void> setSampleMarkerRadius(double value) async {
+    if (!value.isFinite ||
+        value < minSampleMarkerRadius ||
+        value > maxSampleMarkerRadius) {
+      throw ArgumentError.value(value, 'value', 'Unsupported marker radius');
+    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(_sampleMarkerRadiusKey, value);
   }
 
   Future<bool> getShowCoverage() async {
@@ -858,6 +899,8 @@ class SettingsService {
   static const List<String> _exportKeys = [
     _showSamplesKey,
     _showGpsSamplesKey,
+    _fixedSampleMarkerSizeEnabledKey,
+    _sampleMarkerRadiusKey,
     _showCoverageKey,
     _showEdgesKey,
     _showRepeatersKey,

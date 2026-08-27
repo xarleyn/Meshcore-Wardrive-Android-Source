@@ -115,6 +115,8 @@ extension _SettingsPageNavigation on _MapScreenState {
             showCoverage: _showCoverage,
             mapLodEnabled: _mapLodEnabled,
             showSamples: _showSamples,
+            fixedSampleMarkerSizeEnabled: _fixedSampleMarkerSizeEnabled,
+            sampleMarkerRadius: _sampleMarkerRadius,
             sampleGeohashGrouping: _sampleGeohashGrouping,
             showEdges: _showEdges,
             showRepeaters: _showRepeaters,
@@ -129,6 +131,11 @@ extension _SettingsPageNavigation on _MapScreenState {
           ),
           onChanged: (setting, value) =>
               _setMapDisplaySetting(setting, value, setPageState),
+          onSampleMarkerRadiusChanged: (value) {
+            _updateMapState(() => _sampleMarkerRadius = value);
+            setPageState(() {});
+          },
+          onSampleMarkerRadiusChangeEnd: _settingsService.setSampleMarkerRadius,
           onClearCommunityCoverage: () => _clearCommunityCoverage(setPageState),
         ),
       ),
@@ -647,6 +654,8 @@ extension _SettingsPageNavigation on _MapScreenState {
         _updateMapState(() => _mapLodEnabled = value);
       case MapDisplaySetting.samples:
         _updateMapState(() => _showSamples = value);
+      case MapDisplaySetting.fixedSampleMarkerSize:
+        _updateMapState(() => _fixedSampleMarkerSizeEnabled = value);
       case MapDisplaySetting.sampleGeohashGrouping:
         _updateMapState(() => _sampleGeohashGrouping = value);
       case MapDisplaySetting.edges:
@@ -677,6 +686,8 @@ extension _SettingsPageNavigation on _MapScreenState {
         await _settingsService.setMapLodEnabled(value);
       case MapDisplaySetting.samples:
         await _settingsService.setShowSamples(value);
+      case MapDisplaySetting.fixedSampleMarkerSize:
+        await _settingsService.setFixedSampleMarkerSizeEnabled(value);
       case MapDisplaySetting.sampleGeohashGrouping:
         await _settingsService.setSampleGeohashGrouping(value);
       case MapDisplaySetting.edges:

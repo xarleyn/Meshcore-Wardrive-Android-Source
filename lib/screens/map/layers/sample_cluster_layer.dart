@@ -10,6 +10,7 @@ class SampleClusterLayer extends StatelessWidget {
   const SampleClusterLayer({
     required this.clusters,
     required this.colorBlindMode,
+    this.fixedRadius,
     required this.hitNotifier,
     required this.onClusterTap,
     super.key,
@@ -17,6 +18,7 @@ class SampleClusterLayer extends StatelessWidget {
 
   final List<SampleCluster> clusters;
   final String colorBlindMode;
+  final double? fixedRadius;
   final LayerHitNotifier<SampleCluster> hitNotifier;
   final ValueChanged<SampleCluster> onClusterTap;
 
@@ -31,10 +33,9 @@ class SampleClusterLayer extends StatelessWidget {
               : cluster.failedCount > 0
               ? ColorBlindPalette.getFailureColor(colorBlindMode)
               : ColorBlindPalette.getGpsOnlyColor(colorBlindMode);
-          final radius = math.min(
-            9.0,
-            3.0 + math.log(cluster.sampleCount + 1) / math.ln2,
-          );
+          final radius =
+              fixedRadius ??
+              math.min(9.0, 3.0 + math.log(cluster.sampleCount + 1) / math.ln2);
           return CircleMarker<SampleCluster>(
             point: cluster.position,
             radius: radius,

@@ -8,6 +8,8 @@ class MapSettingsSnapshot {
   const MapSettingsSnapshot({
     required this.showSamples,
     required this.showGpsSamples,
+    required this.fixedSampleMarkerSizeEnabled,
+    required this.sampleMarkerRadius,
     required this.showCoverage,
     required this.mapLodEnabled,
     required this.sampleGeohashGrouping,
@@ -54,6 +56,8 @@ class MapSettingsSnapshot {
 
   final bool showSamples;
   final bool showGpsSamples;
+  final bool fixedSampleMarkerSizeEnabled;
+  final double sampleMarkerRadius;
   final bool showCoverage;
   final bool mapLodEnabled;
   final bool sampleGeohashGrouping;
@@ -152,6 +156,9 @@ class MapSettingsController {
     final settings = MapSettingsSnapshot(
       showSamples: await _settingsService.getShowSamples(),
       showGpsSamples: await _settingsService.getShowGpsSamples(),
+      fixedSampleMarkerSizeEnabled: await _settingsService
+          .getFixedSampleMarkerSizeEnabled(),
+      sampleMarkerRadius: await _settingsService.getSampleMarkerRadius(),
       showCoverage: await _settingsService.getShowCoverage(),
       mapLodEnabled: await _settingsService.getMapLodEnabled(),
       sampleGeohashGrouping: await _settingsService.getSampleGeohashGrouping(),

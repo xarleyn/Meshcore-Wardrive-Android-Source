@@ -244,6 +244,32 @@
   "@settingsShowSamples": {
     "description": "Toggle to show sample markers"
   },
+  "settingsFixedSampleMarkerSize": "Fixed sample point size",
+  "@settingsFixedSampleMarkerSize": {
+    "description": "Toggle to replace automatic sample point sizing with a fixed size"
+  },
+  "settingsFixedSampleMarkerSizeSubtitle": "Use one size instead of sizing points automatically by the number of measurements",
+  "@settingsFixedSampleMarkerSizeSubtitle": {
+    "description": "Explanation shown under the fixed sample point size toggle"
+  },
+  "settingsSampleMarkerSize": "Point size: {size} px",
+  "@settingsSampleMarkerSize": {
+    "description": "Title above the sample point size slider",
+    "placeholders": {
+      "size": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsSampleMarkerSizeValue": "{size} px",
+  "@settingsSampleMarkerSizeValue": {
+    "description": "Value label for the sample point size slider",
+    "placeholders": {
+      "size": {
+        "type": "int"
+      }
+    }
+  },
   "settingsGroupSamplesByGeohash": "Group Samples by Geohash",
   "@settingsGroupSamplesByGeohash": {
     "description": "Toggle to merge every measurement in one geohash cell into a single sample marker"

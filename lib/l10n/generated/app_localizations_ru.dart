@@ -203,6 +203,23 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsShowSamples => 'Показывать замеры';
 
   @override
+  String get settingsFixedSampleMarkerSize => 'Фиксированный размер точек';
+
+  @override
+  String get settingsFixedSampleMarkerSizeSubtitle =>
+      'Использовать один размер вместо автоматического, зависящего от количества замеров';
+
+  @override
+  String settingsSampleMarkerSize(int size) {
+    return 'Размер точки: $size пикс.';
+  }
+
+  @override
+  String settingsSampleMarkerSizeValue(int size) {
+    return '$size пикс.';
+  }
+
+  @override
   String get settingsGroupSamplesByGeohash => 'Группировать замеры по geohash';
 
   @override

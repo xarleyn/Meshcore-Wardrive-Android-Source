@@ -11,6 +11,8 @@ void main() {
     () async {
       SharedPreferences.setMockInitialValues({
         'show_samples': true,
+        'fixed_sample_marker_size_enabled': true,
+        'sample_marker_radius': 14.0,
         'ping_interval_meters': 1234.0,
         'ignored_repeater_prefix': 'abcd',
         'distance_unit': 'miles',
@@ -34,6 +36,8 @@ void main() {
       final snapshot = await controller.loadAndApply();
 
       expect(snapshot.showSamples, isTrue);
+      expect(snapshot.fixedSampleMarkerSizeEnabled, isTrue);
+      expect(snapshot.sampleMarkerRadius, 14);
       expect(snapshot.pingIntervalMeters, 1234);
       expect(snapshot.ignoredRepeaterPrefix, 'abcd');
       expect(snapshot.distanceUnit, 'miles');
@@ -65,6 +69,11 @@ void main() {
     final snapshot = await controller.loadAndApply();
 
     expect(snapshot.showSamples, isFalse);
+    expect(snapshot.fixedSampleMarkerSizeEnabled, isFalse);
+    expect(
+      snapshot.sampleMarkerRadius,
+      SettingsService.defaultSampleMarkerRadius,
+    );
     expect(snapshot.showCoverage, isTrue);
     expect(snapshot.mapLodEnabled, isTrue);
     expect(snapshot.optimisticDisplay, isFalse);
