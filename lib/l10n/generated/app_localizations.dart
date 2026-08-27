@@ -500,6 +500,30 @@ abstract class AppLocalizations {
   /// **'Show Repeaters'**
   String get settingsShowRepeaters;
 
+  /// Toggle to show privacy-zone overlays
+  ///
+  /// In en, this message translates to:
+  /// **'Show Privacy Zones'**
+  String get settingsShowPrivacyZones;
+
+  /// Subtitle for the privacy-zone overlay toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Show zone centers and data-exclusion radii on the map'**
+  String get settingsShowPrivacyZonesSubtitle;
+
+  /// Toggle to show GPS-exclusion-zone overlays
+  ///
+  /// In en, this message translates to:
+  /// **'Show GPS Exclusion Zones'**
+  String get settingsShowGpsExclusionZones;
+
+  /// Subtitle for the GPS-exclusion-zone overlay toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Show zone centers and GPS-rejection radii on the map'**
+  String get settingsShowGpsExclusionZonesSubtitle;
+
   /// Toggle to show GPS-only sample markers
   ///
   /// In en, this message translates to:
@@ -1469,7 +1493,7 @@ abstract class AppLocalizations {
   /// Explanation of impossible zones
   ///
   /// In en, this message translates to:
-  /// **'Places you cannot physically be. GPS inside a zone is discarded and the last valid position is kept. Zones are not shown on the map.'**
+  /// **'Places you cannot physically be. GPS inside a zone is discarded and the last valid position is kept. Their map overlay is controlled in Map Display.'**
   String get settingsImpossibleZonesBlurb;
 
   /// Tile and dialog title to add an impossible zone

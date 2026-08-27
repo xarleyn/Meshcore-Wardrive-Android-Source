@@ -15,6 +15,8 @@ class MapSettingsSnapshot {
     required this.sampleGeohashGrouping,
     required this.showEdges,
     required this.showRepeaters,
+    required this.showPrivacyZones,
+    required this.showGpsExclusionZones,
     required this.colorMode,
     required this.pingIntervalMeters,
     required this.coveragePrecision,
@@ -63,6 +65,8 @@ class MapSettingsSnapshot {
   final bool sampleGeohashGrouping;
   final bool showEdges;
   final bool showRepeaters;
+  final bool showPrivacyZones;
+  final bool showGpsExclusionZones;
   final String colorMode;
   final double pingIntervalMeters;
   final int coveragePrecision;
@@ -164,6 +168,8 @@ class MapSettingsController {
       sampleGeohashGrouping: await _settingsService.getSampleGeohashGrouping(),
       showEdges: await _settingsService.getShowEdges(),
       showRepeaters: await _settingsService.getShowRepeaters(),
+      showPrivacyZones: await _settingsService.getShowPrivacyZones(),
+      showGpsExclusionZones: await _settingsService.getShowGpsExclusionZones(),
       colorMode: await _settingsService.getColorMode(),
       pingIntervalMeters: await _settingsService.getPingInterval(),
       coveragePrecision: await _settingsService.getCoveragePrecision(),

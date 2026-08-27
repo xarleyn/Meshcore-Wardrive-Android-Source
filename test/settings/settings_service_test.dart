@@ -161,6 +161,40 @@ void main() {
     });
   });
 
+  group('map zone overlay settings', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test(
+      'preserves the existing privacy overlay and hides GPS zones',
+      () async {
+        final settings = SettingsService();
+
+        expect(await settings.getShowPrivacyZones(), isTrue);
+        expect(await settings.getShowGpsExclusionZones(), isFalse);
+      },
+    );
+
+    test('persists and exports both overlay selections', () async {
+      final settings = SettingsService();
+
+      await settings.setShowPrivacyZones(false);
+      await settings.setShowGpsExclusionZones(true);
+
+      expect(await settings.getShowPrivacyZones(), isFalse);
+      expect(await settings.getShowGpsExclusionZones(), isTrue);
+      final exported = await settings.exportSettings();
+      expect(exported['show_privacy_zones'], isFalse);
+      expect(exported['show_gps_exclusion_zones'], isTrue);
+
+      SharedPreferences.setMockInitialValues({});
+      await settings.importSettings(exported);
+      expect(await settings.getShowPrivacyZones(), isFalse);
+      expect(await settings.getShowGpsExclusionZones(), isTrue);
+    });
+  });
+
   group('sample marker size setting', () {
     setUp(() {
       SharedPreferences.setMockInitialValues({});

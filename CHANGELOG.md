@@ -4,6 +4,10 @@
 
 ### Added
 
+- Independent Map Display toggles for privacy zones and GPS exclusion zones.
+  Each enabled layer shows both the zone center and its configured radius;
+  both choices participate in settings export/import.
+
 - Adjustable sample point size (Settings → Map Display): enable a fixed point
   size to replace automatic sizing, then choose a diameter from 8 to 32 px.
   The option is off by default and participates in settings export/import.

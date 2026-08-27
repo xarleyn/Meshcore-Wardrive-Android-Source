@@ -235,6 +235,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsShowRepeaters => 'Show Repeaters';
 
   @override
+  String get settingsShowPrivacyZones => 'Show Privacy Zones';
+
+  @override
+  String get settingsShowPrivacyZonesSubtitle =>
+      'Show zone centers and data-exclusion radii on the map';
+
+  @override
+  String get settingsShowGpsExclusionZones => 'Show GPS Exclusion Zones';
+
+  @override
+  String get settingsShowGpsExclusionZonesSubtitle =>
+      'Show zone centers and GPS-rejection radii on the map';
+
+  @override
   String get settingsShowGpsSamples => 'Show GPS Samples';
 
   @override
@@ -785,7 +799,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsImpossibleZonesBlurb =>
-      'Places you cannot physically be. GPS inside a zone is discarded and the last valid position is kept. Zones are not shown on the map.';
+      'Places you cannot physically be. GPS inside a zone is discarded and the last valid position is kept. Their map overlay is controlled in Map Display.';
 
   @override
   String get settingsAddImpossibleZone => 'Add Impossible Zone';

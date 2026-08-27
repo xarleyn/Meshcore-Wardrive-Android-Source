@@ -120,6 +120,8 @@ extension _SettingsPageNavigation on _MapScreenState {
             sampleGeohashGrouping: _sampleGeohashGrouping,
             showEdges: _showEdges,
             showRepeaters: _showRepeaters,
+            showPrivacyZones: _showPrivacyZones,
+            showGpsExclusionZones: _showGpsExclusionZones,
             showGpsSamples: _showGpsSamples,
             showSuccessfulOnly: _showSuccessfulOnly,
             optimisticDisplay: _optimisticDisplay,
@@ -662,6 +664,10 @@ extension _SettingsPageNavigation on _MapScreenState {
         _updateMapState(() => _showEdges = value);
       case MapDisplaySetting.repeaters:
         _updateMapState(() => _showRepeaters = value);
+      case MapDisplaySetting.privacyZones:
+        _updateMapState(() => _showPrivacyZones = value);
+      case MapDisplaySetting.gpsExclusionZones:
+        _updateMapState(() => _showGpsExclusionZones = value);
       case MapDisplaySetting.gpsSamples:
         _updateMapState(() => _showGpsSamples = value);
       case MapDisplaySetting.successfulOnly:
@@ -694,6 +700,10 @@ extension _SettingsPageNavigation on _MapScreenState {
         await _settingsService.setShowEdges(value);
       case MapDisplaySetting.repeaters:
         await _settingsService.setShowRepeaters(value);
+      case MapDisplaySetting.privacyZones:
+        await _settingsService.setShowPrivacyZones(value);
+      case MapDisplaySetting.gpsExclusionZones:
+        await _settingsService.setShowGpsExclusionZones(value);
       case MapDisplaySetting.gpsSamples:
         await _settingsService.setShowGpsSamples(value);
       case MapDisplaySetting.successfulOnly:

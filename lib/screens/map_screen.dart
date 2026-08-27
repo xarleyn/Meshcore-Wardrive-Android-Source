@@ -37,7 +37,7 @@ import 'map/layers/community_coverage_layer.dart';
 import 'map/layers/current_position_layer.dart';
 import 'map/layers/edge_layer.dart';
 import 'map/layers/planned_marker_layer.dart';
-import 'map/layers/privacy_zone_layer.dart';
+import 'map/layers/zone_overlay_layer.dart';
 import 'map/layers/radio_position_layer.dart';
 import 'map/layers/repeater_layer.dart';
 import 'map/layers/route_trail_layer.dart';
@@ -174,6 +174,8 @@ class _MapScreenState extends State<MapScreen> {
       false; // Merge samples per geohash cell into one tappable marker
   bool _showEdges = true;
   bool _showRepeaters = true;
+  bool _showPrivacyZones = true;
+  bool _showGpsExclusionZones = false;
   bool _autoPingEnabled = false;
   String? _ignoredRepeaterPrefix;
   String?
@@ -641,6 +643,8 @@ class _MapScreenState extends State<MapScreen> {
       _sampleGeohashGrouping = settings.sampleGeohashGrouping;
       _showEdges = settings.showEdges;
       _showRepeaters = settings.showRepeaters;
+      _showPrivacyZones = settings.showPrivacyZones;
+      _showGpsExclusionZones = settings.showGpsExclusionZones;
       _colorMode = settings.colorMode;
       _pingIntervalMeters = settings.pingIntervalMeters;
       _coveragePrecision = settings.coveragePrecision;
@@ -2015,7 +2019,31 @@ class _MapScreenState extends State<MapScreen> {
             repeaters: _repeaters,
             includeOnlyRepeaters: _includeOnlyRepeaters,
           ),
-        PrivacyZoneLayer(zones: _privacyZones),
+        if (_showPrivacyZones)
+          ZoneOverlayLayer(
+            zones: [
+              for (final zone in _privacyZones)
+                ZoneOverlay(
+                  center: LatLng(
+                    (zone['lat'] as num).toDouble(),
+                    (zone['lon'] as num).toDouble(),
+                  ),
+                  radiusMeters: (zone['radius_meters'] as num).toDouble(),
+                ),
+            ],
+            color: Colors.blueGrey,
+          ),
+        if (_showGpsExclusionZones)
+          ZoneOverlayLayer(
+            zones: [
+              for (final zone in _impossibleZones)
+                ZoneOverlay(
+                  center: LatLng(zone.lat, zone.lon),
+                  radiusMeters: zone.radiusMeters,
+                ),
+            ],
+            color: Colors.deepOrange,
+          ),
         if (_showCommunityCoverage && _communityCoverage != null)
           CommunityCoverageLayer(
             rawCoverage: _communityCoverage!,

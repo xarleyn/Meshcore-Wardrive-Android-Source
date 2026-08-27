@@ -14,6 +14,8 @@ enum MapDisplaySetting {
   sampleGeohashGrouping,
   edges,
   repeaters,
+  privacyZones,
+  gpsExclusionZones,
   gpsSamples,
   successfulOnly,
   optimisticDisplay,
@@ -33,6 +35,8 @@ class MapDisplaySettingsValues {
     required this.sampleGeohashGrouping,
     required this.showEdges,
     required this.showRepeaters,
+    required this.showPrivacyZones,
+    required this.showGpsExclusionZones,
     required this.showGpsSamples,
     required this.showSuccessfulOnly,
     required this.optimisticDisplay,
@@ -51,6 +55,8 @@ class MapDisplaySettingsValues {
   final bool sampleGeohashGrouping;
   final bool showEdges;
   final bool showRepeaters;
+  final bool showPrivacyZones;
+  final bool showGpsExclusionZones;
   final bool showGpsSamples;
   final bool showSuccessfulOnly;
   final bool optimisticDisplay;
@@ -138,6 +144,19 @@ List<Widget> buildMapDisplaySettings(
       title: Text(l10n.settingsShowRepeaters),
       value: values.showRepeaters,
       onChanged: (value) => onChanged(MapDisplaySetting.repeaters, value),
+    ),
+    SwitchListTile(
+      title: Text(l10n.settingsShowPrivacyZones),
+      subtitle: Text(l10n.settingsShowPrivacyZonesSubtitle),
+      value: values.showPrivacyZones,
+      onChanged: (value) => onChanged(MapDisplaySetting.privacyZones, value),
+    ),
+    SwitchListTile(
+      title: Text(l10n.settingsShowGpsExclusionZones),
+      subtitle: Text(l10n.settingsShowGpsExclusionZonesSubtitle),
+      value: values.showGpsExclusionZones,
+      onChanged: (value) =>
+          onChanged(MapDisplaySetting.gpsExclusionZones, value),
     ),
     SwitchListTile(
       title: Text(l10n.settingsShowGpsSamples),

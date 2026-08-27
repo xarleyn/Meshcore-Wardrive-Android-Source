@@ -233,6 +233,20 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsShowRepeaters => 'Показывать репитеры';
 
   @override
+  String get settingsShowPrivacyZones => 'Показывать зоны приватности';
+
+  @override
+  String get settingsShowPrivacyZonesSubtitle =>
+      'Центры зон и радиусы исключения данных на карте';
+
+  @override
+  String get settingsShowGpsExclusionZones => 'Показывать зоны исключения GPS';
+
+  @override
+  String get settingsShowGpsExclusionZonesSubtitle =>
+      'Центры зон и радиусы отбрасывания GPS-позиций на карте';
+
+  @override
   String get settingsShowGpsSamples => 'Показывать GPS-замеры';
 
   @override
@@ -789,7 +803,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsImpossibleZonesBlurb =>
-      'Места, где вы физически не можете быть. GPS внутри зоны отбрасывается, сохраняется последняя достоверная позиция. Зоны на карте не показываются.';
+      'Места, где вы физически не можете быть. GPS внутри зоны отбрасывается, сохраняется последняя достоверная позиция. Отображение на карте настраивается в разделе «Отображение карты».';
 
   @override
   String get settingsAddImpossibleZone => 'Добавить зону исключения GPS';

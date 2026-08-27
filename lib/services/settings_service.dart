@@ -19,6 +19,8 @@ class SettingsService {
   static const String _showCoverageKey = 'show_coverage';
   static const String _showEdgesKey = 'show_edges';
   static const String _showRepeatersKey = 'show_repeaters';
+  static const String _showPrivacyZonesKey = 'show_privacy_zones';
+  static const String _showGpsExclusionZonesKey = 'show_gps_exclusion_zones';
   static const String _colorModeKey = 'color_mode';
   static const String _pingIntervalKey = 'ping_interval_meters';
   static const String _coveragePrecisionKey = 'coverage_precision';
@@ -147,6 +149,26 @@ class SettingsService {
   Future<void> setShowGpsSamples(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_showGpsSamplesKey, value);
+  }
+
+  Future<bool> getShowPrivacyZones() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_showPrivacyZonesKey) ?? true;
+  }
+
+  Future<void> setShowPrivacyZones(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_showPrivacyZonesKey, value);
+  }
+
+  Future<bool> getShowGpsExclusionZones() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_showGpsExclusionZonesKey) ?? false;
+  }
+
+  Future<void> setShowGpsExclusionZones(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_showGpsExclusionZonesKey, value);
   }
 
   /// Whether sample points use [getSampleMarkerRadius] instead of their
@@ -904,6 +926,8 @@ class SettingsService {
     _showCoverageKey,
     _showEdgesKey,
     _showRepeatersKey,
+    _showPrivacyZonesKey,
+    _showGpsExclusionZonesKey,
     _colorModeKey,
     _pingIntervalKey,
     _coveragePrecisionKey,

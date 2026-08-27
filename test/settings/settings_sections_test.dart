@@ -156,6 +156,8 @@ void main() {
                 sampleGeohashGrouping: false,
                 showEdges: false,
                 showRepeaters: false,
+                showPrivacyZones: false,
+                showGpsExclusionZones: false,
                 showGpsSamples: false,
                 showSuccessfulOnly: false,
                 optimisticDisplay: false,
@@ -196,6 +198,26 @@ void main() {
 
     expect(changedSetting, MapDisplaySetting.optimisticDisplay);
     expect(changedValue, isTrue);
+
+    for (final toggle in [
+      (
+        title: l10n.settingsShowPrivacyZones,
+        setting: MapDisplaySetting.privacyZones,
+      ),
+      (
+        title: l10n.settingsShowGpsExclusionZones,
+        setting: MapDisplaySetting.gpsExclusionZones,
+      ),
+    ]) {
+      changedSetting = null;
+      changedValue = null;
+      final title = find.text(toggle.title);
+      await tester.scrollUntilVisible(title, 100);
+      await tester.tap(title);
+
+      expect(changedSetting, toggle.setting);
+      expect(changedValue, isTrue);
+    }
   });
 
   testWidgets('fixed sample point size reveals and delegates the slider', (
@@ -219,6 +241,8 @@ void main() {
                 sampleGeohashGrouping: false,
                 showEdges: false,
                 showRepeaters: false,
+                showPrivacyZones: false,
+                showGpsExclusionZones: false,
                 showGpsSamples: false,
                 showSuccessfulOnly: false,
                 optimisticDisplay: false,

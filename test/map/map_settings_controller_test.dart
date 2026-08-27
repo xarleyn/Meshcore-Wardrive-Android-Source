@@ -11,6 +11,8 @@ void main() {
     () async {
       SharedPreferences.setMockInitialValues({
         'show_samples': true,
+        'show_privacy_zones': false,
+        'show_gps_exclusion_zones': true,
         'fixed_sample_marker_size_enabled': true,
         'sample_marker_radius': 14.0,
         'ping_interval_meters': 1234.0,
@@ -36,6 +38,8 @@ void main() {
       final snapshot = await controller.loadAndApply();
 
       expect(snapshot.showSamples, isTrue);
+      expect(snapshot.showPrivacyZones, isFalse);
+      expect(snapshot.showGpsExclusionZones, isTrue);
       expect(snapshot.fixedSampleMarkerSizeEnabled, isTrue);
       expect(snapshot.sampleMarkerRadius, 14);
       expect(snapshot.pingIntervalMeters, 1234);
@@ -75,6 +79,8 @@ void main() {
       SettingsService.defaultSampleMarkerRadius,
     );
     expect(snapshot.showCoverage, isTrue);
+    expect(snapshot.showPrivacyZones, isTrue);
+    expect(snapshot.showGpsExclusionZones, isFalse);
     expect(snapshot.mapLodEnabled, isTrue);
     expect(snapshot.optimisticDisplay, isFalse);
     expect(snapshot.distanceUnit, 'km');

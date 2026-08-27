@@ -286,6 +286,22 @@
   "@settingsShowRepeaters": {
     "description": "Toggle to show repeater markers"
   },
+  "settingsShowPrivacyZones": "Show Privacy Zones",
+  "@settingsShowPrivacyZones": {
+    "description": "Toggle to show privacy-zone overlays"
+  },
+  "settingsShowPrivacyZonesSubtitle": "Show zone centers and data-exclusion radii on the map",
+  "@settingsShowPrivacyZonesSubtitle": {
+    "description": "Subtitle for the privacy-zone overlay toggle"
+  },
+  "settingsShowGpsExclusionZones": "Show GPS Exclusion Zones",
+  "@settingsShowGpsExclusionZones": {
+    "description": "Toggle to show GPS-exclusion-zone overlays"
+  },
+  "settingsShowGpsExclusionZonesSubtitle": "Show zone centers and GPS-rejection radii on the map",
+  "@settingsShowGpsExclusionZonesSubtitle": {
+    "description": "Subtitle for the GPS-exclusion-zone overlay toggle"
+  },
   "settingsShowGpsSamples": "Show GPS Samples",
   "@settingsShowGpsSamples": {
     "description": "Toggle to show GPS-only sample markers"
@@ -973,7 +989,7 @@
   "@settingsRestoreDefaults": {
     "description": "Button to restore location quality defaults"
   },
-  "settingsImpossibleZonesBlurb": "Places you cannot physically be. GPS inside a zone is discarded and the last valid position is kept. Zones are not shown on the map.",
+  "settingsImpossibleZonesBlurb": "Places you cannot physically be. GPS inside a zone is discarded and the last valid position is kept. Their map overlay is controlled in Map Display.",
   "@settingsImpossibleZonesBlurb": {
     "description": "Explanation of impossible zones"
   },
