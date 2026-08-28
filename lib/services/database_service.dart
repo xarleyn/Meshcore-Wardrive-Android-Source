@@ -15,6 +15,9 @@ class DatabaseService {
   static Database? _database;
   static const String _databaseName = 'meshcore_wardrive.db';
   static const int _databaseVersion = 13;
+
+  /// Current schema version, exposed for backup validation.
+  static const int databaseVersion = _databaseVersion;
   static const String tableDuctingCache = 'ducting_cache';
 
   static const String tableSamples = 'samples';

@@ -1470,6 +1470,50 @@
   "@settingsImportSettingsSubtitle": {
     "description": "Subtitle for import settings"
   },
+  "settingsExportDatabase": "Export Database",
+  "@settingsExportDatabase": {
+    "description": "Tile to export the entire database as a backup file"
+  },
+  "settingsExportDatabaseSubtitle": "Save a full backup of all data (samples, sessions, markers, zones)",
+  "@settingsExportDatabaseSubtitle": {
+    "description": "Subtitle for export database"
+  },
+  "settingsImportDatabase": "Import Database",
+  "@settingsImportDatabase": {
+    "description": "Tile to restore the entire database from a backup file"
+  },
+  "settingsImportDatabaseSubtitle": "Restore the full database from a backup file",
+  "@settingsImportDatabaseSubtitle": {
+    "description": "Subtitle for import database"
+  },
+  "mapImportDatabaseConfirm": "This will REPLACE the entire database: samples, sessions, planned markers, privacy zones, exclusion zones, devices.\n\nApp settings are NOT affected. This cannot be undone.\n\nContinue?",
+  "@mapImportDatabaseConfirm": {
+    "description": "Confirmation body before replacing the whole database"
+  },
+  "settingsDatabaseExported": "Database backup saved",
+  "@settingsDatabaseExported": {
+    "description": "Snackbar after the database backup was saved"
+  },
+  "settingsDatabaseShareText": "MeshCore Wardrive database backup",
+  "@settingsDatabaseShareText": {
+    "description": "Share sheet text for a database backup"
+  },
+  "settingsDatabaseImported": "Database restored",
+  "@settingsDatabaseImported": {
+    "description": "Snackbar after a database backup was restored"
+  },
+  "settingsImportDatabaseStopTracking": "Stop tracking before importing the database",
+  "@settingsImportDatabaseStopTracking": {
+    "description": "Snackbar asking to stop tracking before a database import"
+  },
+  "settingsDatabaseInvalidFile": "The selected file is not a valid database backup",
+  "@settingsDatabaseInvalidFile": {
+    "description": "Snackbar when the picked file is not a database backup"
+  },
+  "settingsDatabaseNewerVersion": "This backup was created by a newer app version",
+  "@settingsDatabaseNewerVersion": {
+    "description": "Snackbar when the backup schema is newer than the app"
+  },
   "settingsRepeaterHealth": "Repeater Health",
   "@settingsRepeaterHealth": {
     "description": "Tile to open repeater health"

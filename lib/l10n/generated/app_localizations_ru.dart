@@ -1178,6 +1178,45 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsImportSettingsSubtitle => 'Загрузить настройки из файла';
 
   @override
+  String get settingsExportDatabase => 'Экспорт базы данных';
+
+  @override
+  String get settingsExportDatabaseSubtitle =>
+      'Сохранить полную копию всех данных (замеры, сессии, маркеры, зоны)';
+
+  @override
+  String get settingsImportDatabase => 'Импорт базы данных';
+
+  @override
+  String get settingsImportDatabaseSubtitle =>
+      'Восстановить базу целиком из файла копии';
+
+  @override
+  String get mapImportDatabaseConfirm =>
+      'Вся база данных будет ЗАМЕНЕНА: замеры, сессии, запланированные маркеры, зоны приватности, зоны исключения, устройства.\n\nНастройки приложения НЕ изменятся. Отменить это будет невозможно.\n\nПродолжить?';
+
+  @override
+  String get settingsDatabaseExported => 'Копия базы данных сохранена';
+
+  @override
+  String get settingsDatabaseShareText => 'Копия базы данных MeshCore Wardrive';
+
+  @override
+  String get settingsDatabaseImported => 'База данных восстановлена';
+
+  @override
+  String get settingsImportDatabaseStopTracking =>
+      'Остановите запись перед импортом базы данных';
+
+  @override
+  String get settingsDatabaseInvalidFile =>
+      'Выбранный файл не является копией базы данных';
+
+  @override
+  String get settingsDatabaseNewerVersion =>
+      'Копия создана более новой версией приложения';
+
+  @override
   String get settingsRepeaterHealth => 'Состояние репитеров';
 
   @override

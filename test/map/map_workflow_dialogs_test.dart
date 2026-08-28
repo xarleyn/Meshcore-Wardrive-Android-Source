@@ -93,4 +93,33 @@ void main() {
 
     expect(result, isTrue);
   });
+
+  testWidgets('import database confirmation dialog returns confirmation', (
+    tester,
+  ) async {
+    bool? result;
+    final l10n = await pumpWithL10n(
+      tester,
+      Scaffold(
+        body: Builder(
+          builder: (context) => TextButton(
+            onPressed: () async {
+              result = await showDialog<bool>(
+                context: context,
+                builder: (context) => const ImportDatabaseConfirmationDialog(),
+              );
+            },
+            child: const Text('Open'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.mapImport));
+    await tester.pumpAndSettle();
+
+    expect(result, isTrue);
+  });
 }

@@ -560,6 +560,8 @@ extension _SettingsPageNavigation on _MapScreenState {
           context,
           onExportSettings: _exportSettings,
           onImportSettings: _importSettings,
+          onExportDatabase: _exportDatabase,
+          onImportDatabase: _importDatabase,
         ),
       ),
       _SettingsCategory(

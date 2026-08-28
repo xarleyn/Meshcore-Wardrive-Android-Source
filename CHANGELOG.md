@@ -4,6 +4,15 @@
 
 ### Added
 
+- Full database backup (Settings → Backup): "Export Database" writes a
+  consistent copy of the entire SQLite database (samples, sessions, upload
+  tracking, planned markers, privacy zones, exclusion zones, devices) to a
+  file or the share sheet, and "Import Database" restores it back. The picked
+  file is validated (SQLite signature, expected schema, schema version) before
+  anything is replaced, the previous database is kept until the restored copy
+  reopens successfully, and backups from older app versions are upgraded
+  automatically. Tracking must be stopped before an import.
+
 - Independent Map Display toggles for privacy zones and GPS exclusion zones.
   Each enabled layer shows both the zone center and its configured radius;
   both choices participate in settings export/import.

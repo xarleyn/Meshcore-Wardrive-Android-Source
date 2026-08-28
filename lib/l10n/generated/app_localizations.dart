@@ -2084,6 +2084,72 @@ abstract class AppLocalizations {
   /// **'Load settings from file'**
   String get settingsImportSettingsSubtitle;
 
+  /// Tile to export the entire database as a backup file
+  ///
+  /// In en, this message translates to:
+  /// **'Export Database'**
+  String get settingsExportDatabase;
+
+  /// Subtitle for export database
+  ///
+  /// In en, this message translates to:
+  /// **'Save a full backup of all data (samples, sessions, markers, zones)'**
+  String get settingsExportDatabaseSubtitle;
+
+  /// Tile to restore the entire database from a backup file
+  ///
+  /// In en, this message translates to:
+  /// **'Import Database'**
+  String get settingsImportDatabase;
+
+  /// Subtitle for import database
+  ///
+  /// In en, this message translates to:
+  /// **'Restore the full database from a backup file'**
+  String get settingsImportDatabaseSubtitle;
+
+  /// Confirmation body before replacing the whole database
+  ///
+  /// In en, this message translates to:
+  /// **'This will REPLACE the entire database: samples, sessions, planned markers, privacy zones, exclusion zones, devices.\n\nApp settings are NOT affected. This cannot be undone.\n\nContinue?'**
+  String get mapImportDatabaseConfirm;
+
+  /// Snackbar after the database backup was saved
+  ///
+  /// In en, this message translates to:
+  /// **'Database backup saved'**
+  String get settingsDatabaseExported;
+
+  /// Share sheet text for a database backup
+  ///
+  /// In en, this message translates to:
+  /// **'MeshCore Wardrive database backup'**
+  String get settingsDatabaseShareText;
+
+  /// Snackbar after a database backup was restored
+  ///
+  /// In en, this message translates to:
+  /// **'Database restored'**
+  String get settingsDatabaseImported;
+
+  /// Snackbar asking to stop tracking before a database import
+  ///
+  /// In en, this message translates to:
+  /// **'Stop tracking before importing the database'**
+  String get settingsImportDatabaseStopTracking;
+
+  /// Snackbar when the picked file is not a database backup
+  ///
+  /// In en, this message translates to:
+  /// **'The selected file is not a valid database backup'**
+  String get settingsDatabaseInvalidFile;
+
+  /// Snackbar when the backup schema is newer than the app
+  ///
+  /// In en, this message translates to:
+  /// **'This backup was created by a newer app version'**
+  String get settingsDatabaseNewerVersion;
+
   /// Tile to open repeater health
   ///
   /// In en, this message translates to:

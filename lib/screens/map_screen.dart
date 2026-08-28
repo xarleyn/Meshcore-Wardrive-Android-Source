@@ -14,6 +14,7 @@ import '../models/location_quality_settings.dart';
 import '../models/impossible_zone.dart';
 import '../services/location_service.dart';
 import '../services/aggregation_service.dart';
+import '../services/database_backup_service.dart';
 import '../services/map_lod_service.dart';
 import '../services/lora_companion_service.dart';
 import '../services/database_service.dart';
@@ -125,6 +126,7 @@ class _MapScreenState extends State<MapScreen> {
 
   final LocationService _locationService = LocationService();
   final DatabaseService _databaseService = DatabaseService();
+  final DatabaseBackupService _databaseBackupService = DatabaseBackupService();
   final MapController _mapController = MapController();
   final UploadService _uploadService = UploadService();
   final SettingsService _settingsService = SettingsService();
@@ -1385,6 +1387,109 @@ class _MapScreenState extends State<MapScreen> {
       _showSnackBar(
         AppLocalizations.of(context).mapInvalidSettingsFile(e.message),
       );
+    } catch (e) {
+      if (!mounted) return;
+      _showSnackBar(AppLocalizations.of(context).mapImportFailed('$e'));
+    }
+  }
+
+  Future<void> _exportDatabase() async {
+    try {
+      final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+      final fileName = 'meshcore_backup_$timestamp.db';
+
+      if (!mounted) return;
+      final choice = await showDialog<ExportDestination>(
+        context: context,
+        builder: (context) => ExportDestinationDialog(
+          title: AppLocalizations.of(context).settingsExportDatabase,
+        ),
+      );
+
+      if (choice == null) return;
+
+      if (choice == ExportDestination.save) {
+        final bytes = await _databaseBackupService.exportSnapshotBytes();
+        if (!mounted) return;
+        await FilePicker.platform.saveFile(
+          dialogTitle: AppLocalizations.of(context).mapSaveExport,
+          fileName: fileName,
+          type: FileType.custom,
+          allowedExtensions: ['db'],
+          bytes: bytes,
+        );
+        if (!mounted) return;
+        _showSnackBar(AppLocalizations.of(context).settingsDatabaseExported);
+      } else if (choice == ExportDestination.share) {
+        final dir = await getApplicationDocumentsDirectory();
+        final file = await _databaseBackupService.exportToShareFile(
+          dir,
+          fileName,
+        );
+        if (!mounted) return;
+        await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile(file.path)],
+            subject: AppLocalizations.of(context).settingsExportDatabase,
+            text: AppLocalizations.of(context).settingsDatabaseShareText,
+          ),
+        );
+        if (!mounted) return;
+        _showSnackBar(AppLocalizations.of(context).mapExportShared);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      _showSnackBar(AppLocalizations.of(context).mapExportFailed('$e'));
+    }
+  }
+
+  Future<void> _importDatabase() async {
+    final l10n = AppLocalizations.of(context);
+    if (_isTracking) {
+      _showSnackBar(l10n.settingsImportDatabaseStopTracking);
+      return;
+    }
+
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['db'],
+      );
+
+      if (result == null || result.files.isEmpty) return;
+      final backupPath = result.files.single.path;
+      if (backupPath == null) return;
+
+      // Validate before destroying anything.
+      await _databaseBackupService.validateBackupFile(backupPath);
+
+      if (!mounted) return;
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => const ImportDatabaseConfirmationDialog(),
+      );
+      if (confirmed != true) return;
+
+      await _databaseBackupService.restoreFromFile(backupPath);
+
+      // Reload everything that is derived from the database.
+      _updateMapState(() => _sessionMapView = const SessionMapView.all());
+      _mapDataController.invalidate();
+      await _loadSamples();
+      await _loadMarkers();
+      await _loadPrivacyZones();
+      await _loadImpossibleZones();
+
+      if (!mounted) return;
+      _showSnackBar(AppLocalizations.of(context).settingsDatabaseImported);
+    } on DatabaseBackupException catch (e) {
+      if (!mounted) return;
+      _showSnackBar(switch (e.error) {
+        DatabaseBackupValidationError.newerVersion => AppLocalizations.of(
+          context,
+        ).settingsDatabaseNewerVersion,
+        _ => AppLocalizations.of(context).settingsDatabaseInvalidFile,
+      });
     } catch (e) {
       if (!mounted) return;
       _showSnackBar(AppLocalizations.of(context).mapImportFailed('$e'));

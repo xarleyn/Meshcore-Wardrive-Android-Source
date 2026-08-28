@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:meshcore_wardrive/l10n/generated/app_localizations.dart';
 import 'package:meshcore_wardrive/models/location_quality_settings.dart';
 import 'package:meshcore_wardrive/models/models.dart';
+import 'package:meshcore_wardrive/screens/settings/sections/backup_section.dart';
 import 'package:meshcore_wardrive/screens/settings/sections/carpeater_section.dart';
 import 'package:meshcore_wardrive/screens/settings/sections/feedback_section.dart';
 import 'package:meshcore_wardrive/screens/settings/sections/location_quality_section.dart';
@@ -133,6 +134,45 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(pickedId, 'BAD5DC49');
+  });
+
+  testWidgets('backup section delegates export and import actions', (
+    tester,
+  ) async {
+    var exportSettings = 0;
+    var importSettings = 0;
+    var exportDatabase = 0;
+    var importDatabase = 0;
+    final l10n = await pumpWithL10n(
+      tester,
+      Builder(
+        builder: (context) => Scaffold(
+          body: ListView(
+            children: buildBackupSettings(
+              context,
+              onExportSettings: () => exportSettings++,
+              onImportSettings: () => importSettings++,
+              onExportDatabase: () => exportDatabase++,
+              onImportDatabase: () => importDatabase++,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text(l10n.settingsExportDatabase));
+    await tester.tap(find.text(l10n.settingsImportDatabase));
+
+    expect(exportDatabase, 1);
+    expect(importDatabase, 1);
+    expect(exportSettings, 0);
+    expect(importSettings, 0);
+
+    await tester.tap(find.text(l10n.settingsExportSettings));
+    await tester.tap(find.text(l10n.settingsImportSettings));
+
+    expect(exportSettings, 1);
+    expect(importSettings, 1);
   });
 
   testWidgets('map display section delegates typed setting changes', (

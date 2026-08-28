@@ -1163,6 +1163,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsImportSettingsSubtitle => 'Load settings from file';
 
   @override
+  String get settingsExportDatabase => 'Export Database';
+
+  @override
+  String get settingsExportDatabaseSubtitle =>
+      'Save a full backup of all data (samples, sessions, markers, zones)';
+
+  @override
+  String get settingsImportDatabase => 'Import Database';
+
+  @override
+  String get settingsImportDatabaseSubtitle =>
+      'Restore the full database from a backup file';
+
+  @override
+  String get mapImportDatabaseConfirm =>
+      'This will REPLACE the entire database: samples, sessions, planned markers, privacy zones, exclusion zones, devices.\n\nApp settings are NOT affected. This cannot be undone.\n\nContinue?';
+
+  @override
+  String get settingsDatabaseExported => 'Database backup saved';
+
+  @override
+  String get settingsDatabaseShareText => 'MeshCore Wardrive database backup';
+
+  @override
+  String get settingsDatabaseImported => 'Database restored';
+
+  @override
+  String get settingsImportDatabaseStopTracking =>
+      'Stop tracking before importing the database';
+
+  @override
+  String get settingsDatabaseInvalidFile =>
+      'The selected file is not a valid database backup';
+
+  @override
+  String get settingsDatabaseNewerVersion =>
+      'This backup was created by a newer app version';
+
+  @override
   String get settingsRepeaterHealth => 'Repeater Health';
 
   @override
