@@ -20,6 +20,7 @@ import '../services/lora_companion_service.dart';
 import '../services/database_service.dart';
 import '../services/upload_service.dart';
 import '../services/settings_service.dart';
+import '../services/screenshot_service.dart';
 import '../utils/geohash_utils.dart';
 import '../utils/initial_map_camera.dart';
 import '../utils/compass_calibration.dart';
@@ -68,7 +69,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:saver_gallery/saver_gallery.dart';
 import 'package:flutter_map_cache/flutter_map_cache.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:dio_cache_interceptor_file_store/dio_cache_interceptor_file_store.dart';
@@ -131,6 +131,7 @@ class _MapScreenState extends State<MapScreen> {
   final UploadService _uploadService = UploadService();
   final SettingsService _settingsService = SettingsService();
   final ScreenshotController _screenshotController = ScreenshotController();
+  final ScreenshotService _screenshotService = const ScreenshotService();
   final AndroidTrackingSettingsService _androidTrackingSettings =
       AndroidTrackingSettingsService();
   final MapRuntimeBindings _runtimeBindings = MapRuntimeBindings();
@@ -1865,15 +1866,12 @@ class _MapScreenState extends State<MapScreen> {
       // Save to gallery
       final String fileName =
           'meshcore_wardrive_${DateTime.now().millisecondsSinceEpoch}.png';
-      final result = await SaverGallery.saveImage(
+      final saved = await _screenshotService.saveToGallery(
         imageBytes,
-        quality: 100,
-        fileName: fileName,
-        androidRelativePath: 'MeshCore',
-        skipIfExists: false,
+        fileName,
       );
 
-      if (result.isSuccess) {
+      if (saved) {
         if (!mounted) return;
         _showSnackBar(AppLocalizations.of(context).mapScreenshotSavedToGallery);
 
