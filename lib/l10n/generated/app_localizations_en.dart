@@ -859,19 +859,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLabelHintAirport => 'e.g., Airport';
 
   @override
-  String get settingsRadius => 'Radius:';
-
-  @override
-  String get settingsRadius500m => '500m (~0.3 mi)';
-
-  @override
-  String get settingsRadius1km => '1 km (~0.6 mi)';
-
-  @override
-  String get settingsRadius2km => '2 km (~1.2 mi)';
-
-  @override
-  String get settingsRadius5km => '5 km (~3 mi)';
+  String get settingsRadiusMeters => 'Radius, m';
 
   @override
   String get settingsAddZone => 'Add Zone';

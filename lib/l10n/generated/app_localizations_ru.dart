@@ -867,19 +867,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsLabelHintAirport => 'напр., Аэропорт';
 
   @override
-  String get settingsRadius => 'Радиус:';
-
-  @override
-  String get settingsRadius500m => '500m (~0,3 mi)';
-
-  @override
-  String get settingsRadius1km => '1 km (~0,6 mi)';
-
-  @override
-  String get settingsRadius2km => '2 km (~1,2 mi)';
-
-  @override
-  String get settingsRadius5km => '5 km (~3 mi)';
+  String get settingsRadiusMeters => 'Радиус, м';
 
   @override
   String get settingsAddZone => 'Добавить зону';

@@ -1059,25 +1059,9 @@
   "@settingsLabelHintAirport": {
     "description": "Hint for optional zone label"
   },
-  "settingsRadius": "Radius:",
-  "@settingsRadius": {
-    "description": "Radius picker label"
-  },
-  "settingsRadius500m": "500m (~0.3 mi)",
-  "@settingsRadius500m": {
-    "description": "500 meter zone radius option"
-  },
-  "settingsRadius1km": "1 km (~0.6 mi)",
-  "@settingsRadius1km": {
-    "description": "1 kilometer zone radius option"
-  },
-  "settingsRadius2km": "2 km (~1.2 mi)",
-  "@settingsRadius2km": {
-    "description": "2 kilometer zone radius option"
-  },
-  "settingsRadius5km": "5 km (~3 mi)",
-  "@settingsRadius5km": {
-    "description": "5 kilometer zone radius option"
+  "settingsRadiusMeters": "Radius, m",
+  "@settingsRadiusMeters": {
+    "description": "Zone radius input field label in meters"
   },
   "settingsAddZone": "Add Zone",
   "@settingsAddZone": {

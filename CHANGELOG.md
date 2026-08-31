@@ -41,6 +41,11 @@
 
 ### Changed
 
+- The privacy-zone and GPS-exclusion ("impossible zone") dialogs now let you
+  pick any radius between 50 m and 10 km with a slider, and an editable meters
+  field replaces the fixed 500 m / 1 km / 2 km / 5 km choices. The slider and
+  the field stay in sync, and typed values outside the range are clamped.
+
 - Distance achievements (🚗 🛣️ ✈️) now follow the selected distance unit in
   both their descriptions and their unlock logic, without converting between
   units: the thresholds stay 10/100/500, so 100 miles and 100 km unlock the

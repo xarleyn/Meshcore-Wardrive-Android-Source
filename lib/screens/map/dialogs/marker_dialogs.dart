@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -269,71 +270,97 @@ class _AddCircularZoneDialog<T> extends StatefulWidget {
 }
 
 class _AddCircularZoneDialogState<T> extends State<_AddCircularZoneDialog<T>> {
+  static const double minRadiusMeters = 50;
+  static const double maxRadiusMeters = 10000;
+  static const double _radiusStepMeters = 50;
+
   final _labelController = TextEditingController();
+  final _radiusController = TextEditingController(text: '1000');
   double _selectedRadius = 1000;
 
   @override
   void dispose() {
     _labelController.dispose();
+    _radiusController.dispose();
     super.dispose();
+  }
+
+  void _onRadiusChanged(String value) {
+    final meters = double.tryParse(value);
+    if (meters == null) return;
+    setState(() {
+      _selectedRadius = meters.clamp(minRadiusMeters, maxRadiusMeters);
+    });
+  }
+
+  void _onSliderChanged(double value) {
+    setState(() {
+      _selectedRadius = value;
+      _radiusController.text = value.toStringAsFixed(0);
+    });
+  }
+
+  void _normalizeRadiusText(String value) {
+    final text = _selectedRadius.toStringAsFixed(0);
+    if (_radiusController.text != text) {
+      _radiusController.text = text;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final radiusOptions = [
-      (label: l10n.settingsRadius500m, meters: 500.0),
-      (label: l10n.settingsRadius1km, meters: 1000.0),
-      (label: l10n.settingsRadius2km, meters: 2000.0),
-      (label: l10n.settingsRadius5km, meters: 5000.0),
-    ];
 
     return AlertDialog(
       title: Text(widget.title),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.settingsAddImpossibleZoneCenter(
-              widget.center.latitude.toStringAsFixed(5),
-              widget.center.longitude.toStringAsFixed(5),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.settingsAddImpossibleZoneCenter(
+                widget.center.latitude.toStringAsFixed(5),
+                widget.center.longitude.toStringAsFixed(5),
+              ),
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
-          ),
-          const SizedBox(height: 8),
-          Text(widget.blurb, style: const TextStyle(fontSize: 12)),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _labelController,
-            decoration: InputDecoration(
-              labelText: l10n.settingsLabelOptional,
-              hintText: widget.labelHint,
+            const SizedBox(height: 8),
+            Text(widget.blurb, style: const TextStyle(fontSize: 12)),
+            const SizedBox(height: 12),
+            TextField(
+              key: const Key('zone_dialog_label'),
+              controller: _labelController,
+              decoration: InputDecoration(
+                labelText: l10n.settingsLabelOptional,
+                hintText: widget.labelHint,
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            l10n.settingsRadius,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-          ),
-          RadioGroup<double>(
-            groupValue: _selectedRadius,
-            onChanged: (value) {
-              if (value != null) setState(() => _selectedRadius = value);
-            },
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (final option in radiusOptions)
-                  RadioListTile<double>(
-                    title: Text(option.label),
-                    value: option.meters,
-                    dense: true,
-                  ),
-              ],
+            const SizedBox(height: 12),
+            TextField(
+              key: const Key('zone_dialog_radius'),
+              controller: _radiusController,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              decoration: InputDecoration(
+                labelText: l10n.settingsRadiusMeters,
+                suffixText: 'm',
+              ),
+              onChanged: _onRadiusChanged,
+              onSubmitted: _normalizeRadiusText,
             ),
-          ),
-        ],
+            Slider(
+              value: _selectedRadius,
+              min: minRadiusMeters,
+              max: maxRadiusMeters,
+              divisions:
+                  ((maxRadiusMeters - minRadiusMeters) / _radiusStepMeters)
+                      .round(),
+              label: '${_selectedRadius.toStringAsFixed(0)} m',
+              onChanged: _onSliderChanged,
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(
@@ -342,6 +369,7 @@ class _AddCircularZoneDialogState<T> extends State<_AddCircularZoneDialog<T>> {
         ),
         TextButton(
           onPressed: () {
+            _normalizeRadiusText(_radiusController.text);
             final label = _labelController.text.trim();
             Navigator.pop(
               context,

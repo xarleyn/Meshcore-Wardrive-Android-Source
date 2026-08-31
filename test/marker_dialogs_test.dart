@@ -93,9 +93,8 @@ void main() {
 
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), 'Home');
-    await tester.tap(find.text(l10n.settingsRadius2km));
-    await tester.pump();
+    await tester.enterText(find.byKey(const Key('zone_dialog_label')), 'Home');
+    await tester.enterText(find.byKey(const Key('zone_dialog_radius')), '2000');
     await tester.tap(find.text(l10n.settingsAddZone));
     await tester.pumpAndSettle();
 
@@ -127,14 +126,94 @@ void main() {
 
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), 'Airport');
-    await tester.tap(find.text(l10n.settingsRadius5km));
-    await tester.pump();
+    await tester.enterText(
+      find.byKey(const Key('zone_dialog_label')),
+      'Airport',
+    );
+    await tester.enterText(find.byKey(const Key('zone_dialog_radius')), '5000');
     await tester.tap(find.text(l10n.settingsAddZone));
     await tester.pumpAndSettle();
 
     expect(result?.center, center);
     expect(result?.radiusMeters, 5000);
     expect(result?.label, 'Airport');
+  });
+
+  testWidgets('zone dialog clamps the typed radius to the allowed range', (
+    tester,
+  ) async {
+    PrivacyZoneDraft? result;
+    final l10n = await pumpWithL10n(
+      tester,
+      Scaffold(
+        body: Builder(
+          builder: (context) => TextButton(
+            onPressed: () async {
+              result = await showDialog<PrivacyZoneDraft>(
+                context: context,
+                builder: (context) =>
+                    const AddPrivacyZoneDialog(center: LatLng(55.75, 37.62)),
+              );
+            },
+            child: const Text('Open'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('zone_dialog_radius')),
+      '99999',
+    );
+    await tester.pump();
+
+    final slider = tester.widget<Slider>(find.byType(Slider));
+    expect(slider.value, 10000);
+
+    await tester.tap(find.text(l10n.settingsAddZone));
+    await tester.pumpAndSettle();
+
+    expect(result?.radiusMeters, 10000);
+  });
+
+  testWidgets('zone dialog slider updates the radius text field', (
+    tester,
+  ) async {
+    await pumpWithL10n(
+      tester,
+      Scaffold(
+        body: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => showDialog<PrivacyZoneDraft>(
+              context: context,
+              builder: (context) =>
+                  const AddPrivacyZoneDialog(center: LatLng(55.75, 37.62)),
+            ),
+            child: const Text('Open'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const Key('zone_dialog_radius')))
+          .controller!
+          .text,
+      '1000',
+    );
+
+    await tester.drag(find.byType(Slider), const Offset(200, 0));
+    await tester.pumpAndSettle();
+
+    final text = tester
+        .widget<TextField>(find.byKey(const Key('zone_dialog_radius')))
+        .controller!
+        .text;
+    expect(int.parse(text), greaterThan(1000));
   });
 }

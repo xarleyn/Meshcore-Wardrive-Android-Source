@@ -1568,35 +1568,11 @@ abstract class AppLocalizations {
   /// **'e.g., Airport'**
   String get settingsLabelHintAirport;
 
-  /// Radius picker label
+  /// Zone radius input field label in meters
   ///
   /// In en, this message translates to:
-  /// **'Radius:'**
-  String get settingsRadius;
-
-  /// 500 meter zone radius option
-  ///
-  /// In en, this message translates to:
-  /// **'500m (~0.3 mi)'**
-  String get settingsRadius500m;
-
-  /// 1 kilometer zone radius option
-  ///
-  /// In en, this message translates to:
-  /// **'1 km (~0.6 mi)'**
-  String get settingsRadius1km;
-
-  /// 2 kilometer zone radius option
-  ///
-  /// In en, this message translates to:
-  /// **'2 km (~1.2 mi)'**
-  String get settingsRadius2km;
-
-  /// 5 kilometer zone radius option
-  ///
-  /// In en, this message translates to:
-  /// **'5 km (~3 mi)'**
-  String get settingsRadius5km;
+  /// **'Radius, m'**
+  String get settingsRadiusMeters;
 
   /// Confirm adding an impossible zone
   ///
