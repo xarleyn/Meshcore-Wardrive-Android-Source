@@ -73,8 +73,8 @@ flutter run
 ### Building Release APK
 
 Configure the stable signing key once, then use the release script. It
-increments Android's build number and the `-xarleyn.N` fork revision while
-keeping the displayed version synchronized:
+bumps the base fork version and Android's build number (for example
+`1.0.44-x` to `1.0.45-x`) while keeping the displayed version synchronized:
 
 ```powershell
 .\tool\build_release.ps1

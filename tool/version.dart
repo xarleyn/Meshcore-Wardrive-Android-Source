@@ -4,9 +4,7 @@ const _pubspecPath = 'pubspec.yaml';
 const _appVersionPath = 'lib/constants/app_version.dart';
 const _maxAndroidVersionCode = 2100000000;
 
-final RegExp _versionNamePattern = RegExp(
-  r'^(\d+\.\d+\.\d+)-xarleyn\.([1-9]\d*)$',
-);
+final RegExp _versionNamePattern = RegExp(r'^(\d+)\.(\d+)\.(\d+)-x$');
 final RegExp _pubspecVersionPattern = RegExp(
   r'^version:\s*([^\s+]+)\+(\d+)\s*$',
   multiLine: true,
@@ -27,7 +25,7 @@ ProjectVersion parsePubspecVersion(String contents) {
   final match = _pubspecVersionPattern.firstMatch(contents);
   if (match == null) {
     throw const FormatException(
-      'Expected a top-level version in the form version: 1.2.3+4.',
+      'Expected a top-level version in the form version: 1.2.3-x+4.',
     );
   }
 
@@ -41,7 +39,7 @@ void validateVersion(String name, int buildNumber) {
   if (!_versionNamePattern.hasMatch(name)) {
     throw FormatException(
       'Invalid version name "$name". Expected the fork version format, for '
-      'example 1.2.3-xarleyn.1.',
+      'example 1.2.3-x.',
     );
   }
   if (buildNumber < 1 || buildNumber > _maxAndroidVersionCode) {
@@ -54,14 +52,16 @@ void validateVersion(String name, int buildNumber) {
   }
 }
 
+/// Returns the next fork release name by bumping the base patch version, for
+/// example 1.0.44-x to 1.0.45-x.
 String nextForkVersionName(String currentName) {
   final match = _versionNamePattern.firstMatch(currentName);
   if (match == null) {
     validateVersion(currentName, 1);
     throw StateError('Unreachable version validation state.');
   }
-  final revision = int.parse(match.group(2)!);
-  return '${match.group(1)}-xarleyn.${revision + 1}';
+  final patch = int.parse(match.group(3)!) + 1;
+  return '${match.group(1)!}.${match.group(2)!}.$patch-x';
 }
 
 String replacePubspecVersion(String contents, ProjectVersion version) {

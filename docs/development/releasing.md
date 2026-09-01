@@ -10,7 +10,7 @@ Application settings and the SQLite database surviving installation are a
 reliable sign that Android performed an in-place update. Uninstalling the app
 deletes that private application data.
 
-The package ID changed once at `v1.0.44-xarleyn.1`. That release is a fresh
+The package ID changed once at `v1.0.44-x`. That release is a fresh
 installation, not an in-place update of `mintylinux.meshcore.wardrive`; no data
 migration is implemented. All later releases must retain the new package ID.
 
@@ -49,16 +49,14 @@ From PowerShell at the repository root, run:
 .\tool\build_release.ps1
 ```
 
-The script increments the fork revision and Android build number, for example
-`1.0.44-xarleyn.1+47` to `1.0.44-xarleyn.2+48`, synchronizes the in-app version
-constant, and builds the release APK. If the build fails, it restores both
-version files.
+The script bumps the base version and Android build number, for example
+`1.0.44-x+47` to `1.0.45-x+48`, synchronizes the in-app version constant, and
+builds the release APK. If the build fails, it restores both version files.
 
-When adopting a new upstream base version, reset the fork revision to `.1`.
-The build number is still incremented automatically:
+To adopt a specific version name, pass it explicitly:
 
 ```powershell
-.\tool\build_release.ps1 -VersionName 1.0.45-xarleyn.1
+.\tool\build_release.ps1 -VersionName 1.0.45-x
 ```
 
 To produce per-architecture APKs, add `-SplitPerAbi`.
@@ -69,12 +67,13 @@ The lower-level cross-platform version commands are:
 . .\.toolchain\env.ps1
 dart run tool/version.dart check
 dart run tool/version.dart sync
-dart run tool/version.dart bump 1.0.45-xarleyn.1
+dart run tool/version.dart bump 1.0.45-x
 ```
 
-The version tool rejects names without the required `-xarleyn.N` suffix and
-rejects zero or invalid Android build numbers. The `bump` command without a
-version name increments both the fork revision and `versionCode`.
+The version tool rejects names without the required `-x` suffix and rejects
+zero or invalid Android build numbers. The `bump` command without a version
+name increments the base patch version and `versionCode`, for example
+`1.0.44-x+47` to `1.0.45-x+48`.
 
 Commit `pubspec.yaml` and `lib/constants/app_version.dart` together after a
 successful release build. Never commit `android/key.properties`, a keystore,
@@ -127,7 +126,7 @@ Copy the value shown as `SHA256` into `ANDROID_CERT_SHA256`.
 2. Open **Actions → Release APK → Run workflow**.
 3. Optionally mark the GitHub Release as a pre-release.
 4. The workflow creates tag `v{versionName}` (for example
-   `v1.0.44-xarleyn.1`) and attaches
+   `v1.0.44-x`) and attaches
    `meshcore-wardrive-xarleyn-{versionName}-{versionCode}.apk`.
 
 If that tag or release already exists, the workflow fails so you can bump the
@@ -142,7 +141,8 @@ build; it does not publish releases.
 Before publication, validate on a device that:
 
 - the original app, the fork release, and the fork debug build can coexist;
-- upgrading from one `-xarleyn.N` release to the next preserves fork data;
+- upgrading from one fork release (`-x` suffix) to the next preserves fork
+  data;
 - USB, Bluetooth LE, foreground location, notifications, and the widget work;
 - MIUI Security Space and battery/autostart settings are configured for the new
   package independently.

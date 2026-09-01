@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.0.44-x - 2026-09-01
 
 ### Breaking change
 
@@ -64,9 +64,10 @@
   same badge depending on the setting.
 - Debug builds now use `io.github.xarleyn.meshcore.wardrive.debug`, allowing a
   debug and signed release build of the fork to coexist.
-- Fork releases use `base-xarleyn.N` version names. The update checker compares
-  both the base version and fork revision, ignores downgrades, and selects the
-  newest compatible tag from multiple GitHub releases.
+- Fork releases use `base-x` version names such as `1.0.44-x`. The update
+  checker compares base versions, prefers fork builds over legacy tags
+  without the suffix, ignores downgrades, and selects the newest compatible
+  tag from multiple GitHub releases.
 - The release workflow verifies package ID, version name, increasing version
   code, APK signature, release tag, and asset name before publication.
 

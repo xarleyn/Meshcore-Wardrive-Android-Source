@@ -1,5 +1,5 @@
 param(
-    [ValidatePattern('^\d+\.\d+\.\d+-xarleyn\.[1-9]\d*$')]
+    [ValidatePattern('^\d+\.\d+\.\d+-x$')]
     [string]$VersionName,
 
     [switch]$SplitPerAbi

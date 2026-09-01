@@ -19,7 +19,7 @@
 
 ### Important: fresh fork identity
 
-Starting with `v1.0.44-xarleyn.1`, this fork uses the Android package ID
+Starting with `v1.0.44-x`, this fork uses the Android package ID
 `io.github.xarleyn.meshcore.wardrive`. The original application and older fork
 builds used `mintylinux.meshcore.wardrive`, so Android treats this release as a
 different application. Both applications can be installed at the same time.
@@ -73,7 +73,7 @@ On first launch, grant these permissions:
 - Make sure you have enough storage space (need ~100MB free)
 - For an update, make sure the APK has the same application ID and signing
   certificate as the installed app, and a higher build number
-- `v1.0.44-xarleyn.1` is a fresh install and does not replace a build using
+- `v1.0.44-x` is a fresh install and does not replace a build using
   `mintylinux.meshcore.wardrive`
 - Restart your device and try again
 

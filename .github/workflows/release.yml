@@ -44,12 +44,12 @@ jobs:
         run: |
           set -euo pipefail
           raw="$(sed -nE 's/^version:[[:space:]]*//p' pubspec.yaml | head -n1 | tr -d '\r')"
-          if [[ ! "$raw" =~ ^([0-9]+\.[0-9]+\.[0-9]+-xarleyn\.([1-9][0-9]*))\+([1-9][0-9]*)$ ]]; then
+          if [[ ! "$raw" =~ ^([0-9]+\.[0-9]+\.[0-9]+-x)\+([1-9][0-9]*)$ ]]; then
             echo "Unexpected pubspec version format: $raw" >&2
             exit 1
           fi
           version_name="${BASH_REMATCH[1]}"
-          version_code="${BASH_REMATCH[3]}"
+          version_code="${BASH_REMATCH[2]}"
           tag="v${version_name}"
           asset_name="meshcore-wardrive-xarleyn-${version_name}-${version_code}.apk"
           {

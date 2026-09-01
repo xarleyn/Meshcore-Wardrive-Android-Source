@@ -12,9 +12,7 @@ const String updateCheckApiUrl =
 const String updateCheckReleasesUrl =
     'https://github.com/xarleyn/Meshcore-Wardrive-Android-Source/releases';
 
-final RegExp _releaseVersionPattern = RegExp(
-  r'(\d+)\.(\d+)\.(\d+)(?:-xarleyn\.([1-9]\d*))?$',
-);
+final RegExp _releaseVersionPattern = RegExp(r'(\d+)\.(\d+)\.(\d+)(-x)?$');
 
 class ReleaseVersion implements Comparable<ReleaseVersion> {
   const ReleaseVersion({
@@ -22,7 +20,7 @@ class ReleaseVersion implements Comparable<ReleaseVersion> {
     required this.major,
     required this.minor,
     required this.patch,
-    required this.forkRevision,
+    required this.forkSuffix,
   });
 
   final String name;
@@ -30,8 +28,9 @@ class ReleaseVersion implements Comparable<ReleaseVersion> {
   final int minor;
   final int patch;
 
-  /// Legacy release tags without a fork suffix are revision zero.
-  final int forkRevision;
+  /// Legacy release tags without the `-x` fork suffix rank below fork builds
+  /// of the same base version.
+  final bool forkSuffix;
 
   static ReleaseVersion? fromTag(String tagName) {
     final match = _releaseVersionPattern.firstMatch(tagName);
@@ -41,7 +40,7 @@ class ReleaseVersion implements Comparable<ReleaseVersion> {
       major: int.parse(match.group(1)!),
       minor: int.parse(match.group(2)!),
       patch: int.parse(match.group(3)!),
-      forkRevision: int.tryParse(match.group(4) ?? '') ?? 0,
+      forkSuffix: match.group(4) != null,
     );
   }
 
@@ -51,7 +50,7 @@ class ReleaseVersion implements Comparable<ReleaseVersion> {
       major.compareTo(other.major),
       minor.compareTo(other.minor),
       patch.compareTo(other.patch),
-      forkRevision.compareTo(other.forkRevision),
+      (forkSuffix ? 1 : 0).compareTo(other.forkSuffix ? 1 : 0),
     ]) {
       if (comparison != 0) return comparison;
     }

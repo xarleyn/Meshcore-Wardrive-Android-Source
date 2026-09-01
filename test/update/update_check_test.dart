@@ -3,16 +3,13 @@ import 'package:meshcore_wardrive/utils/update_check.dart';
 
 void main() {
   group('versionFromReleaseTag', () {
-    test('parses a plain version tag', () {
+    test('parses a fork-suffixed version tag', () {
+      expect(versionFromReleaseTag('v1.0.44-x'), '1.0.44-x');
+    });
+
+    test('parses a plain legacy version tag', () {
       expect(versionFromReleaseTag('1.0.43'), '1.0.43');
-    });
-
-    test('parses a v-prefixed tag', () {
       expect(versionFromReleaseTag('v1.0.43'), '1.0.43');
-    });
-
-    test('preserves the fork revision', () {
-      expect(versionFromReleaseTag('v1.0.44-xarleyn.1'), '1.0.44-xarleyn.1');
     });
 
     test('parses a repository-prefixed tag', () {
@@ -27,7 +24,7 @@ void main() {
       expect(versionFromReleaseTag(''), isNull);
       expect(versionFromReleaseTag('build-42'), isNull);
       expect(versionFromReleaseTag('release-2.10-beta'), isNull);
-      expect(versionFromReleaseTag('v1.0.44-xarleyn.0'), isNull);
+      expect(versionFromReleaseTag('v1.0.44-xarleyn.1'), isNull);
     });
   });
 
@@ -35,38 +32,35 @@ void main() {
     test('selects the highest version from unordered release tags', () {
       expect(
         latestVersionFromReleaseTags([
-          'v1.0.44-xarleyn.1',
+          'v1.0.44-x',
           'nightly',
           'v1.0.43',
-          'v1.0.45-xarleyn.1',
-          'v1.0.44-xarleyn.2',
+          'v1.0.45-x',
+          'v1.0.46-x',
         ]),
-        '1.0.45-xarleyn.1',
+        '1.0.46-x',
       );
     });
 
-    test('recognizes a newer fork revision', () {
-      expect(isNewerAppVersion('1.0.44-xarleyn.2', '1.0.44-xarleyn.1'), isTrue);
+    test('prefers a fork suffix over a plain tag with the same base', () {
+      expect(
+        latestVersionFromReleaseTags(['v1.0.44', 'v1.0.44-x']),
+        '1.0.44-x',
+      );
     });
 
-    test('recognizes a newer upstream base version', () {
-      expect(isNewerAppVersion('1.0.45-xarleyn.1', '1.0.44-xarleyn.9'), isTrue);
+    test('recognizes a newer fork base version', () {
+      expect(isNewerAppVersion('1.0.45-x', '1.0.44-x'), isTrue);
     });
 
     test('does not report an equal or older release as an update', () {
-      expect(
-        isNewerAppVersion('1.0.44-xarleyn.1', '1.0.44-xarleyn.1'),
-        isFalse,
-      );
-      expect(
-        isNewerAppVersion('1.0.44-xarleyn.1', '1.0.45-xarleyn.1'),
-        isFalse,
-      );
+      expect(isNewerAppVersion('1.0.44-x', '1.0.44-x'), isFalse);
+      expect(isNewerAppVersion('1.0.44-x', '1.0.45-x'), isFalse);
     });
 
-    test('supports legacy tags as fork revision zero', () {
-      expect(isNewerAppVersion('1.0.44-xarleyn.1', '1.0.44'), isTrue);
-      expect(isNewerAppVersion('1.0.43', '1.0.44-xarleyn.1'), isFalse);
+    test('supports legacy tags without the fork suffix', () {
+      expect(isNewerAppVersion('1.0.44-x', '1.0.44'), isTrue);
+      expect(isNewerAppVersion('1.0.43', '1.0.44-x'), isFalse);
     });
   });
 
