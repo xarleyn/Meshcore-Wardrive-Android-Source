@@ -710,7 +710,8 @@ contract:7-8 пересечение намеренное («specification tests�
   реально они в `docs/assets/screenshots/`.
 - `android/.gitignore` игнорирует `gradle-wrapper.jar`, `/gradlew`,
   `/gradlew.bat`, поэтому совет AGENTS.md:70 (`gradlew.bat --stop`) не
-  сработает на свежем клоне до первой сборки — уточнить формулировку.
+  сработает на свежем клоне до первой сборки — уточнить формулировку
+  (исправлено в этой ветке: примечание добавлено в AGENTS.md).
 
 **Мелкий мусор:**
 
@@ -718,7 +719,9 @@ contract:7-8 пересечение намеренное («specification tests�
   которых в репо нет и не будет (игнорируются `.gitignore:41-45`).
 - `AGENTS.md:100-101` — «existing secure-storage abstraction» не существует
   в коде (креды в `shared_preferences` через `SettingsService`);
-  формулировку поправить вместе с §3.7/§3.8.
+  формулировка исправлена в этой ветке: AGENTS.md теперь требует платформенный
+  secure storage и запрещает plaintext-prefs и экспорт для креденшелов —
+  фикс §3.7 (пароль Carpeater) стал обязательным по конвенции.
 - `docs/getting-started.md:29` — «grant Storage permissions» устарело:
   приложение не запрашивает storage в рантайме.
 - Остатки MQTT: no-op `disconnectMqtt()` (`lora_companion_service.dart:1907-1908`),
