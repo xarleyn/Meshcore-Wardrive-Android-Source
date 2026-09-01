@@ -5,6 +5,13 @@ import '../utils/geohash_utils.dart';
 import '../utils/color_blind_palette.dart';
 
 class AggregationService {
+  /// Optimistic display: how old the newest successful ping may be before a
+  /// newer failed ping outranks it again.
+  ///
+  /// A month-old "green" record next to a fresh failure most likely means the
+  /// cell went dark, so staleness older than this is treated as lost.
+  static const int optimisticStalenessDays = 30;
+
   /// Normalizes full public keys and their displayed prefixes to the same key.
   static String repeaterLookupKey(String nodeId) {
     final normalizedId = nodeId.toUpperCase();
@@ -15,10 +22,14 @@ class AggregationService {
 
   /// Build indexes from samples and repeaters
   /// @param coveragePrecision: Geohash precision for coverage squares (4-8, default 6)
+  /// @param optimisticDisplay: when true, cells with at least one successful
+  ///   ping ignore failed pings unless the newest success is stale (older than
+  ///   [optimisticStalenessDays] days) and a failure was recorded after it.
   static AggregationResult buildIndexes(
     List<Sample> samples,
     List<Repeater> repeaters, {
     int coveragePrecision = 6,
+    bool optimisticDisplay = false,
   }) {
     final Map<String, Coverage> hashToCoverage = {};
     final Map<String, Map<String, dynamic>> idToRepeaters = {};
@@ -70,6 +81,11 @@ class AggregationService {
 
       final coverage = hashToCoverage[coverageHash]!;
 
+      // Newest timestamps per outcome. Samples are sorted newest first, so
+      // the first hit of each kind below is already the freshest one.
+      DateTime? newestSuccessAt;
+      DateTime? newestFailureAt;
+
       // Process samples with time-based weighting
       // Newer samples get more weight, contradicting old samples are discounted
       for (int i = 0; i < samplesInArea.length; i++) {
@@ -77,6 +93,15 @@ class AggregationService {
 
         // Skip GPS-only samples (pingSuccess == null)
         if (sample.pingSuccess == null) continue;
+
+        // Samples are sorted newest first, so these stick with the freshest
+        // outcome of each kind.
+        if (newestSuccessAt == null && sample.pingSuccess == true) {
+          newestSuccessAt = sample.timestamp;
+        }
+        if (newestFailureAt == null && sample.pingSuccess == false) {
+          newestFailureAt = sample.timestamp;
+        }
 
         // Calculate age-based weight (newer = more weight)
         final ageInDays = GeohashUtils.ageInDays(sample.timestamp);
@@ -145,6 +170,20 @@ class AggregationService {
           coverage.updated = sample.timestamp;
         }
       }
+
+      // Optimistic display: a single successful ping makes the whole cell
+      // good, unless the success went stale and failures came after it.
+      // Prefer the undiscounted last-received time, falling back to the raw
+      // newest success when every success was discounted as contradicted.
+      final latestSuccess = coverage.lastReceived ?? newestSuccessAt;
+      if (optimisticDisplay &&
+          coverage.received > 0 &&
+          optimisticIgnoreFailures(
+            newestSuccessAt: latestSuccess,
+            newestFailureAt: newestFailureAt,
+          )) {
+        coverage.lost = 0;
+      }
     }
 
     // Build edges from coverage to repeaters that actually responded
@@ -180,6 +219,27 @@ class AggregationService {
       topRepeaters: topRepeaters.take(15).toList(),
       repeaters: repeaters,
     );
+  }
+
+  /// Whether failed pings of a cell may be ignored under optimistic display.
+  ///
+  /// Failures are ignored whenever there is a successful ping and either:
+  /// - no failed ping was recorded in the cell at all, or
+  /// - the newest failure is not newer than the newest success, or
+  /// - the newest success is still fresh (at most
+  ///   [optimisticStalenessDays] days old).
+  ///
+  /// A stale success (older than [optimisticStalenessDays]) followed by newer
+  /// failures is not trusted: those failures are more relevant.
+  static bool optimisticIgnoreFailures({
+    required DateTime? newestSuccessAt,
+    required DateTime? newestFailureAt,
+  }) {
+    if (newestFailureAt == null) return true;
+    if (newestSuccessAt == null) return false;
+    if (!newestFailureAt.isAfter(newestSuccessAt)) return true;
+    final successAgeDays = GeohashUtils.ageInDays(newestSuccessAt);
+    return successAgeDays <= optimisticStalenessDays;
   }
 
   /// Get coverage color based on received count

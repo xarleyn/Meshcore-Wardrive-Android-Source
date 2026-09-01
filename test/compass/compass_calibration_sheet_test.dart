@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meshcore_wardrive/widgets/compass_calibration.dart';
@@ -108,6 +109,41 @@ void main() {
 
     expect(find.text(l10n.compassSheetTitle), findsNothing);
     expect(result, isTrue);
+  });
+
+  testWidgets('figure-8 graphic fills the sheet instead of collapsing', (
+    tester,
+  ) async {
+    final events = StreamController<CompassEvent>.broadcast();
+    addTearDown(events.close);
+
+    await pumpWithL10n(
+      tester,
+      Scaffold(
+        body: Builder(
+          builder: (context) => TextButton(
+            onPressed: () =>
+                showCompassCalibrationSheet(context, events: events.stream),
+            child: const Text('Open'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    final renderPaint = tester.renderObject<RenderCustomPaint>(
+      find.descendant(
+        of: find.byType(CompassFigureEight),
+        matching: find.byType(CustomPaint),
+      ),
+    );
+    // Regression: without an explicit size the CustomPaint collapsed to
+    // Size.zero inside the Column's loose constraints and drew nothing.
+    expect(renderPaint.size.height, 160);
+    expect(renderPaint.size.width, greaterThan(200));
   });
 
   testWidgets('skip dismisses the sheet without completing', (tester) async {

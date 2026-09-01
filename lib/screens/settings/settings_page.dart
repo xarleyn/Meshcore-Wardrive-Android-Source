@@ -115,10 +115,16 @@ extension _SettingsPageNavigation on _MapScreenState {
             showCoverage: _showCoverage,
             mapLodEnabled: _mapLodEnabled,
             showSamples: _showSamples,
+            fixedSampleMarkerSizeEnabled: _fixedSampleMarkerSizeEnabled,
+            sampleMarkerRadius: _sampleMarkerRadius,
+            sampleGeohashGrouping: _sampleGeohashGrouping,
             showEdges: _showEdges,
             showRepeaters: _showRepeaters,
+            showPrivacyZones: _showPrivacyZones,
+            showGpsExclusionZones: _showGpsExclusionZones,
             showGpsSamples: _showGpsSamples,
             showSuccessfulOnly: _showSuccessfulOnly,
+            optimisticDisplay: _optimisticDisplay,
             showRouteTrail: _showRouteTrail,
             communityCoverageAvailable: _communityCoverage != null,
             showCommunityCoverage: _showCommunityCoverage,
@@ -127,6 +133,11 @@ extension _SettingsPageNavigation on _MapScreenState {
           ),
           onChanged: (setting, value) =>
               _setMapDisplaySetting(setting, value, setPageState),
+          onSampleMarkerRadiusChanged: (value) {
+            _updateMapState(() => _sampleMarkerRadius = value);
+            setPageState(() {});
+          },
+          onSampleMarkerRadiusChangeEnd: _settingsService.setSampleMarkerRadius,
           onClearCommunityCoverage: () => _clearCommunityCoverage(setPageState),
         ),
       ),
@@ -285,6 +296,8 @@ extension _SettingsPageNavigation on _MapScreenState {
             repeaterId: _carpeaterRepeaterId,
             password: _carpeaterPassword,
             interval: _carpeaterInterval,
+            foundRepeaters:
+                _locationService.loraCompanion.knownRepeaterContacts,
           ),
           onEnabledChanged: (value) async {
             _updateMapState(() => _carpeaterEnabled = value);
@@ -643,14 +656,24 @@ extension _SettingsPageNavigation on _MapScreenState {
         _updateMapState(() => _mapLodEnabled = value);
       case MapDisplaySetting.samples:
         _updateMapState(() => _showSamples = value);
+      case MapDisplaySetting.fixedSampleMarkerSize:
+        _updateMapState(() => _fixedSampleMarkerSizeEnabled = value);
+      case MapDisplaySetting.sampleGeohashGrouping:
+        _updateMapState(() => _sampleGeohashGrouping = value);
       case MapDisplaySetting.edges:
         _updateMapState(() => _showEdges = value);
       case MapDisplaySetting.repeaters:
         _updateMapState(() => _showRepeaters = value);
+      case MapDisplaySetting.privacyZones:
+        _updateMapState(() => _showPrivacyZones = value);
+      case MapDisplaySetting.gpsExclusionZones:
+        _updateMapState(() => _showGpsExclusionZones = value);
       case MapDisplaySetting.gpsSamples:
         _updateMapState(() => _showGpsSamples = value);
       case MapDisplaySetting.successfulOnly:
         _updateMapState(() => _showSuccessfulOnly = value);
+      case MapDisplaySetting.optimisticDisplay:
+        _updateMapState(() => _optimisticDisplay = value);
       case MapDisplaySetting.routeTrail:
         _updateMapState(() => _showRouteTrail = value);
       case MapDisplaySetting.communityCoverage:
@@ -669,14 +692,27 @@ extension _SettingsPageNavigation on _MapScreenState {
         await _settingsService.setMapLodEnabled(value);
       case MapDisplaySetting.samples:
         await _settingsService.setShowSamples(value);
+      case MapDisplaySetting.fixedSampleMarkerSize:
+        await _settingsService.setFixedSampleMarkerSizeEnabled(value);
+      case MapDisplaySetting.sampleGeohashGrouping:
+        await _settingsService.setSampleGeohashGrouping(value);
       case MapDisplaySetting.edges:
         await _settingsService.setShowEdges(value);
       case MapDisplaySetting.repeaters:
         await _settingsService.setShowRepeaters(value);
+      case MapDisplaySetting.privacyZones:
+        await _settingsService.setShowPrivacyZones(value);
+      case MapDisplaySetting.gpsExclusionZones:
+        await _settingsService.setShowGpsExclusionZones(value);
       case MapDisplaySetting.gpsSamples:
         await _settingsService.setShowGpsSamples(value);
       case MapDisplaySetting.successfulOnly:
         await _settingsService.setShowSuccessfulOnly(value);
+      case MapDisplaySetting.optimisticDisplay:
+        await _settingsService.setOptimisticDisplay(value);
+        // Optimism changes the aggregated cell colors, so rebuild them now.
+        _mapDataController.invalidate();
+        await _loadSamples();
       case MapDisplaySetting.routeTrail:
         await _settingsService.setShowRouteTrail(value);
       case MapDisplaySetting.communityCoverage:

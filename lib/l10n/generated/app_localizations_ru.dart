@@ -203,10 +203,48 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settingsShowSamples => 'Показывать замеры';
 
   @override
+  String get settingsFixedSampleMarkerSize => 'Фиксированный размер точек';
+
+  @override
+  String get settingsFixedSampleMarkerSizeSubtitle =>
+      'Использовать один размер вместо автоматического, зависящего от количества замеров';
+
+  @override
+  String settingsSampleMarkerSize(int size) {
+    return 'Размер точки: $size пикс.';
+  }
+
+  @override
+  String settingsSampleMarkerSizeValue(int size) {
+    return '$size пикс.';
+  }
+
+  @override
+  String get settingsGroupSamplesByGeohash => 'Группировать замеры по geohash';
+
+  @override
+  String get settingsGroupSamplesByGeohashSubtitle =>
+      'Одна точка на ячейку geohash в среднем положении замеров на любом масштабе; тап открывает все замеры внутри';
+
+  @override
   String get settingsShowEdges => 'Показывать связи';
 
   @override
   String get settingsShowRepeaters => 'Показывать репитеры';
+
+  @override
+  String get settingsShowPrivacyZones => 'Показывать зоны приватности';
+
+  @override
+  String get settingsShowPrivacyZonesSubtitle =>
+      'Центры зон и радиусы исключения данных на карте';
+
+  @override
+  String get settingsShowGpsExclusionZones => 'Показывать зоны исключения GPS';
+
+  @override
+  String get settingsShowGpsExclusionZonesSubtitle =>
+      'Центры зон и радиусы отбрасывания GPS-позиций на карте';
 
   @override
   String get settingsShowGpsSamples => 'Показывать GPS-замеры';
@@ -221,6 +259,13 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get settingsShowSuccessfulPingsOnlySubtitle =>
       'Скрывать неудачные пинги и GPS-замеры';
+
+  @override
+  String get settingsOptimisticDisplay => 'Оптимистичное покрытие';
+
+  @override
+  String get settingsOptimisticDisplaySubtitle =>
+      'Считать ячейку хорошей, если хоть один пинг был успешным; успех старше месяца проигрывает более свежим неудачам';
 
   @override
   String get settingsShowRouteTrail => 'Показывать трек маршрута';
@@ -353,6 +398,12 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsRepeaterIdHint => 'напр., BAD5DC49';
+
+  @override
+  String get settingsTargetRepeaterSearchHint => 'Поиск по имени или ID';
+
+  @override
+  String get settingsEnterRepeaterManually => 'Ввести вручную…';
 
   @override
   String get settingsAdminPassword => 'Пароль администратора';
@@ -752,7 +803,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsImpossibleZonesBlurb =>
-      'Места, где вы физически не можете быть. GPS внутри зоны отбрасывается, сохраняется последняя достоверная позиция. Зоны на карте не показываются.';
+      'Места, где вы физически не можете быть. GPS внутри зоны отбрасывается, сохраняется последняя достоверная позиция. Отображение на карте настраивается в разделе «Отображение карты».';
 
   @override
   String get settingsAddImpossibleZone => 'Добавить зону исключения GPS';
@@ -1981,6 +2032,42 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mapResponseLabel => 'Ответ: ';
 
   @override
+  String get mapMoreDetails => 'Подробнее';
+
+  @override
+  String get mapSampleDetailsTitle => 'Подробности замера';
+
+  @override
+  String get mapGeohashLabel => 'Геохеш: ';
+
+  @override
+  String get mapDeviceLabel => 'Устройство: ';
+
+  @override
+  String get mapSourceLabel => 'Источник: ';
+
+  @override
+  String mapRespondersTitle(int count) {
+    return 'Ответившие репитеры ($count)';
+  }
+
+  @override
+  String mapBestSignal(String value) {
+    return 'Лучший сигнал: $value';
+  }
+
+  @override
+  String get mapNoResponders => 'На этот пинг не ответил ни один репитер.';
+
+  @override
+  String get mapThisMeasurement => 'Этот замер';
+
+  @override
+  String mapMeasurementsTitle(int count) {
+    return 'Замеры ($count)';
+  }
+
+  @override
   String get mapDuctingLabel => 'Волновод: ';
 
   @override
@@ -2064,6 +2151,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get mapLostLabel => 'Потеряно: ';
+
+  @override
+  String get mapCountersHintTitle => 'Как считаются счётчики ячейки';
+
+  @override
+  String get mapCountersHintBody =>
+      'Счётчики ячейки учитывают свежесть замеров: пинги моложе суток весят как целые (×1.0), от суток до недели — ×0.8, от недели до месяца — ×0.5, старше месяца — ×0.2. Замеры, которым противоречат несколько более новых, дополнительно теряют вес. Поэтому числа могут быть дробными и не совпадать с количеством строк в списке замеров — так устаревшие данные меньше влияют на карту. Записи «Только GPS» (пинг не отправлялся) в счётчики не входят.';
 
   @override
   String get mapRepeatersHeard => 'Слышны репитеры: ';
@@ -3305,25 +3399,34 @@ class AppLocalizationsRu extends AppLocalizations {
   String get achievementRepeaters50Description => 'Найдите 50 репитеров';
 
   @override
+  String get achievementDistanceUnitMiles => 'миль';
+
+  @override
+  String get achievementDistanceUnitKm => 'км';
+
+  @override
   String get achievementMiles10Title => 'Дорожный воин';
 
   @override
-  String get achievementMiles10Description =>
-      'Проедьте 10 миль в режиме вардрайва';
+  String achievementMiles10Description(Object unit) {
+    return 'Проедьте 10 $unit в режиме вардрайва';
+  }
 
   @override
   String get achievementMiles100Title => 'Герой трассы';
 
   @override
-  String get achievementMiles100Description =>
-      'Проедьте 100 миль в режиме вардрайва';
+  String achievementMiles100Description(Object unit) {
+    return 'Проедьте 100 $unit в режиме вардрайва';
+  }
 
   @override
   String get achievementMiles500Title => 'Кросс-кантри';
 
   @override
-  String get achievementMiles500Description =>
-      'Проедьте 500 миль в режиме вардрайва';
+  String achievementMiles500Description(Object unit) {
+    return 'Проедьте 500 $unit в режиме вардрайва';
+  }
 
   @override
   String get achievementCells50Title => 'Разведчик территории';

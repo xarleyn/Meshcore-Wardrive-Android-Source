@@ -205,10 +205,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsShowSamples => 'Show Samples';
 
   @override
+  String get settingsFixedSampleMarkerSize => 'Fixed sample point size';
+
+  @override
+  String get settingsFixedSampleMarkerSizeSubtitle =>
+      'Use one size instead of sizing points automatically by the number of measurements';
+
+  @override
+  String settingsSampleMarkerSize(int size) {
+    return 'Point size: $size px';
+  }
+
+  @override
+  String settingsSampleMarkerSizeValue(int size) {
+    return '$size px';
+  }
+
+  @override
+  String get settingsGroupSamplesByGeohash => 'Group Samples by Geohash';
+
+  @override
+  String get settingsGroupSamplesByGeohashSubtitle =>
+      'One marker per geohash cell at the average measurement position, at any zoom; tapping it lists every measurement inside';
+
+  @override
   String get settingsShowEdges => 'Show Edges';
 
   @override
   String get settingsShowRepeaters => 'Show Repeaters';
+
+  @override
+  String get settingsShowPrivacyZones => 'Show Privacy Zones';
+
+  @override
+  String get settingsShowPrivacyZonesSubtitle =>
+      'Show zone centers and data-exclusion radii on the map';
+
+  @override
+  String get settingsShowGpsExclusionZones => 'Show GPS Exclusion Zones';
+
+  @override
+  String get settingsShowGpsExclusionZonesSubtitle =>
+      'Show zone centers and GPS-rejection radii on the map';
 
   @override
   String get settingsShowGpsSamples => 'Show GPS Samples';
@@ -222,6 +260,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsShowSuccessfulPingsOnlySubtitle =>
       'Hide failed pings and GPS-only samples';
+
+  @override
+  String get settingsOptimisticDisplay => 'Optimistic Coverage';
+
+  @override
+  String get settingsOptimisticDisplaySubtitle =>
+      'Count a cell as good when any ping succeeded; a success older than a month loses to newer failures';
 
   @override
   String get settingsShowRouteTrail => 'Show Route Trail';
@@ -352,6 +397,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsRepeaterIdHint => 'e.g., BAD5DC49';
+
+  @override
+  String get settingsTargetRepeaterSearchHint => 'Search by name or ID';
+
+  @override
+  String get settingsEnterRepeaterManually => 'Enter manually…';
 
   @override
   String get settingsAdminPassword => 'Admin Password';
@@ -748,7 +799,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsImpossibleZonesBlurb =>
-      'Places you cannot physically be. GPS inside a zone is discarded and the last valid position is kept. Zones are not shown on the map.';
+      'Places you cannot physically be. GPS inside a zone is discarded and the last valid position is kept. Their map overlay is controlled in Map Display.';
 
   @override
   String get settingsAddImpossibleZone => 'Add Impossible Zone';
@@ -1951,6 +2002,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mapResponseLabel => 'Response: ';
 
   @override
+  String get mapMoreDetails => 'More details';
+
+  @override
+  String get mapSampleDetailsTitle => 'Measurement details';
+
+  @override
+  String get mapGeohashLabel => 'Geohash: ';
+
+  @override
+  String get mapDeviceLabel => 'Device: ';
+
+  @override
+  String get mapSourceLabel => 'Source: ';
+
+  @override
+  String mapRespondersTitle(int count) {
+    return 'Repeaters that responded ($count)';
+  }
+
+  @override
+  String mapBestSignal(String value) {
+    return 'Best signal: $value';
+  }
+
+  @override
+  String get mapNoResponders => 'No repeaters heard on this ping.';
+
+  @override
+  String get mapThisMeasurement => 'This measurement';
+
+  @override
+  String mapMeasurementsTitle(int count) {
+    return 'Measurements ($count)';
+  }
+
+  @override
   String get mapDuctingLabel => 'Ducting: ';
 
   @override
@@ -2032,6 +2119,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mapLostLabel => 'Lost: ';
+
+  @override
+  String get mapCountersHintTitle => 'How the cell counters work';
+
+  @override
+  String get mapCountersHintBody =>
+      'Cell counters weigh measurements by freshness: pings younger than a day count in full (×1.0), 1–7 days old at ×0.8, 1–4 weeks at ×0.5, older than a month at ×0.2. Results contradicted by several newer measurements lose extra weight. That is why these numbers can be fractional and may differ from the number of rows in the measurements list — outdated data counts less on the map. GPS-only records (no ping attempted) are not included in the counters.';
 
   @override
   String get mapRepeatersHeard => 'Repeaters Heard: ';
@@ -3253,22 +3347,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get achievementRepeaters50Description => 'Discover 50 repeaters';
 
   @override
+  String get achievementDistanceUnitMiles => 'miles';
+
+  @override
+  String get achievementDistanceUnitKm => 'km';
+
+  @override
   String get achievementMiles10Title => 'Road Warrior';
 
   @override
-  String get achievementMiles10Description => 'Drive 10 miles wardriving';
+  String achievementMiles10Description(Object unit) {
+    return 'Drive 10 $unit wardriving';
+  }
 
   @override
   String get achievementMiles100Title => 'Highway Hero';
 
   @override
-  String get achievementMiles100Description => 'Drive 100 miles wardriving';
+  String achievementMiles100Description(Object unit) {
+    return 'Drive 100 $unit wardriving';
+  }
 
   @override
   String get achievementMiles500Title => 'Cross Country';
 
   @override
-  String get achievementMiles500Description => 'Drive 500 miles wardriving';
+  String achievementMiles500Description(Object unit) {
+    return 'Drive 500 $unit wardriving';
+  }
 
   @override
   String get achievementCells50Title => 'Area Scout';

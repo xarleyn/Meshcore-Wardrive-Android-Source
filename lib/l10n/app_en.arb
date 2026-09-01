@@ -244,6 +244,40 @@
   "@settingsShowSamples": {
     "description": "Toggle to show sample markers"
   },
+  "settingsFixedSampleMarkerSize": "Fixed sample point size",
+  "@settingsFixedSampleMarkerSize": {
+    "description": "Toggle to replace automatic sample point sizing with a fixed size"
+  },
+  "settingsFixedSampleMarkerSizeSubtitle": "Use one size instead of sizing points automatically by the number of measurements",
+  "@settingsFixedSampleMarkerSizeSubtitle": {
+    "description": "Explanation shown under the fixed sample point size toggle"
+  },
+  "settingsSampleMarkerSize": "Point size: {size} px",
+  "@settingsSampleMarkerSize": {
+    "description": "Title above the sample point size slider",
+    "placeholders": {
+      "size": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsSampleMarkerSizeValue": "{size} px",
+  "@settingsSampleMarkerSizeValue": {
+    "description": "Value label for the sample point size slider",
+    "placeholders": {
+      "size": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsGroupSamplesByGeohash": "Group Samples by Geohash",
+  "@settingsGroupSamplesByGeohash": {
+    "description": "Toggle to merge every measurement in one geohash cell into a single sample marker"
+  },
+  "settingsGroupSamplesByGeohashSubtitle": "One marker per geohash cell at the average measurement position, at any zoom; tapping it lists every measurement inside",
+  "@settingsGroupSamplesByGeohashSubtitle": {
+    "description": "Subtitle for the geohash sample grouping toggle"
+  },
   "settingsShowEdges": "Show Edges",
   "@settingsShowEdges": {
     "description": "Toggle to show coverage edges"
@@ -251,6 +285,22 @@
   "settingsShowRepeaters": "Show Repeaters",
   "@settingsShowRepeaters": {
     "description": "Toggle to show repeater markers"
+  },
+  "settingsShowPrivacyZones": "Show Privacy Zones",
+  "@settingsShowPrivacyZones": {
+    "description": "Toggle to show privacy-zone overlays"
+  },
+  "settingsShowPrivacyZonesSubtitle": "Show zone centers and data-exclusion radii on the map",
+  "@settingsShowPrivacyZonesSubtitle": {
+    "description": "Subtitle for the privacy-zone overlay toggle"
+  },
+  "settingsShowGpsExclusionZones": "Show GPS Exclusion Zones",
+  "@settingsShowGpsExclusionZones": {
+    "description": "Toggle to show GPS-exclusion-zone overlays"
+  },
+  "settingsShowGpsExclusionZonesSubtitle": "Show zone centers and GPS-rejection radii on the map",
+  "@settingsShowGpsExclusionZonesSubtitle": {
+    "description": "Subtitle for the GPS-exclusion-zone overlay toggle"
   },
   "settingsShowGpsSamples": "Show GPS Samples",
   "@settingsShowGpsSamples": {
@@ -267,6 +317,14 @@
   "settingsShowSuccessfulPingsOnlySubtitle": "Hide failed pings and GPS-only samples",
   "@settingsShowSuccessfulPingsOnlySubtitle": {
     "description": "Subtitle for successful-pings-only toggle"
+  },
+  "settingsOptimisticDisplay": "Optimistic Coverage",
+  "@settingsOptimisticDisplay": {
+    "description": "Toggle to paint coverage cells green when any ping succeeded"
+  },
+  "settingsOptimisticDisplaySubtitle": "Count a cell as good when any ping succeeded; a success older than a month loses to newer failures",
+  "@settingsOptimisticDisplaySubtitle": {
+    "description": "Subtitle for the optimistic coverage toggle"
   },
   "settingsShowRouteTrail": "Show Route Trail",
   "@settingsShowRouteTrail": {
@@ -419,6 +477,14 @@
   "settingsRepeaterIdHint": "e.g., BAD5DC49",
   "@settingsRepeaterIdHint": {
     "description": "Hint for repeater ID prefix field"
+  },
+  "settingsTargetRepeaterSearchHint": "Search by name or ID",
+  "@settingsTargetRepeaterSearchHint": {
+    "description": "Search hint in the Carpeater target repeater picker"
+  },
+  "settingsEnterRepeaterManually": "Enter manually…",
+  "@settingsEnterRepeaterManually": {
+    "description": "Action to type a Carpeater repeater ID by hand"
   },
   "settingsAdminPassword": "Admin Password",
   "@settingsAdminPassword": {
@@ -923,7 +989,7 @@
   "@settingsRestoreDefaults": {
     "description": "Button to restore location quality defaults"
   },
-  "settingsImpossibleZonesBlurb": "Places you cannot physically be. GPS inside a zone is discarded and the last valid position is kept. Zones are not shown on the map.",
+  "settingsImpossibleZonesBlurb": "Places you cannot physically be. GPS inside a zone is discarded and the last valid position is kept. Their map overlay is controlled in Map Display.",
   "@settingsImpossibleZonesBlurb": {
     "description": "Explanation of impossible zones"
   },
@@ -2533,6 +2599,61 @@
   "@mapResponseLabel": {
     "description": "Label before ping response time"
   },
+  "mapMoreDetails": "More details",
+  "@mapMoreDetails": {
+    "description": "Hyperlink on the sample dialog opening the detailed measurement sheet"
+  },
+  "mapSampleDetailsTitle": "Measurement details",
+  "@mapSampleDetailsTitle": {
+    "description": "Title of the detailed measurement bottom sheet"
+  },
+  "mapGeohashLabel": "Geohash: ",
+  "@mapGeohashLabel": {
+    "description": "Label before a sample geohash"
+  },
+  "mapDeviceLabel": "Device: ",
+  "@mapDeviceLabel": {
+    "description": "Label before the companion radio device id"
+  },
+  "mapSourceLabel": "Source: ",
+  "@mapSourceLabel": {
+    "description": "Label before the operator/device source name of a sample"
+  },
+  "mapRespondersTitle": "Repeaters that responded ({count})",
+  "@mapRespondersTitle": {
+    "description": "Header of the responder list in the detailed measurement sheet",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "mapBestSignal": "Best signal: {value}",
+  "@mapBestSignal": {
+    "description": "Strongest RSSI across the responding repeaters",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "mapNoResponders": "No repeaters heard on this ping.",
+  "@mapNoResponders": {
+    "description": "Shown when a failed ping has no recorded responses"
+  },
+  "mapThisMeasurement": "This measurement",
+  "@mapThisMeasurement": {
+    "description": "Marks the tapped sample within the responder list"
+  },
+  "mapMeasurementsTitle": "Measurements ({count})",
+  "@mapMeasurementsTitle": {
+    "description": "Title of the measurement list sheet opened from grouped-sample or coverage-cell dialogs",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "mapDuctingLabel": "Ducting: ",
   "@mapDuctingLabel": {
     "description": "Label before ducting risk on sample info"
@@ -2658,6 +2779,14 @@
   "mapLostLabel": "Lost: ",
   "@mapLostLabel": {
     "description": "Label before lost ping count"
+  },
+  "mapCountersHintTitle": "How the cell counters work",
+  "@mapCountersHintTitle": {
+    "description": "Title of the hint explaining freshness-weighted coverage counters"
+  },
+  "mapCountersHintBody": "Cell counters weigh measurements by freshness: pings younger than a day count in full (×1.0), 1–7 days old at ×0.8, 1–4 weeks at ×0.5, older than a month at ×0.2. Results contradicted by several newer measurements lose extra weight. That is why these numbers can be fractional and may differ from the number of rows in the measurements list — outdated data counts less on the map. GPS-only records (no ping attempted) are not included in the counters.",
+  "@mapCountersHintBody": {
+    "description": "Body of the hint explaining freshness-weighted coverage counters"
   },
   "mapRepeatersHeard": "Repeaters Heard: ",
   "@mapRepeatersHeard": {
@@ -4484,29 +4613,46 @@
   "@achievementRepeaters50Description": {
     "description": "Description for the repeaters_50 achievement"
   },
+  "achievementDistanceUnitMiles": "miles",
+  "@achievementDistanceUnitMiles": {
+    "description": "Word for miles used in distance achievement descriptions when the distance unit setting is miles"
+  },
+  "achievementDistanceUnitKm": "km",
+  "@achievementDistanceUnitKm": {
+    "description": "Word for kilometers used in distance achievement descriptions when the distance unit setting is kilometers"
+  },
   "achievementMiles10Title": "Road Warrior",
   "@achievementMiles10Title": {
     "description": "Title for the miles_10 achievement"
   },
-  "achievementMiles10Description": "Drive 10 miles wardriving",
+  "achievementMiles10Description": "Drive 10 {unit} wardriving",
   "@achievementMiles10Description": {
-    "description": "Description for the miles_10 achievement"
+    "description": "Description for the miles_10 achievement; {unit} follows the selected distance unit without conversion",
+    "placeholders": {
+      "unit": {}
+    }
   },
   "achievementMiles100Title": "Highway Hero",
   "@achievementMiles100Title": {
     "description": "Title for the miles_100 achievement"
   },
-  "achievementMiles100Description": "Drive 100 miles wardriving",
+  "achievementMiles100Description": "Drive 100 {unit} wardriving",
   "@achievementMiles100Description": {
-    "description": "Description for the miles_100 achievement"
+    "description": "Description for the miles_100 achievement; {unit} follows the selected distance unit without conversion",
+    "placeholders": {
+      "unit": {}
+    }
   },
   "achievementMiles500Title": "Cross Country",
   "@achievementMiles500Title": {
     "description": "Title for the miles_500 achievement"
   },
-  "achievementMiles500Description": "Drive 500 miles wardriving",
+  "achievementMiles500Description": "Drive 500 {unit} wardriving",
   "@achievementMiles500Description": {
-    "description": "Description for the miles_500 achievement"
+    "description": "Description for the miles_500 achievement; {unit} follows the selected distance unit without conversion",
+    "placeholders": {
+      "unit": {}
+    }
   },
   "achievementCells50Title": "Area Scout",
   "@achievementCells50Title": {

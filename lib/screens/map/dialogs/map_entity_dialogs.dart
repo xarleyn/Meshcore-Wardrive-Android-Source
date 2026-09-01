@@ -5,6 +5,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/models.dart';
 import '../../../services/map_lod_service.dart';
 import '../../../utils/community_coverage.dart';
+import 'sample_details_sheet.dart';
 
 enum RepeaterInfoAction { filter, showOnMap }
 
@@ -21,15 +22,24 @@ class SampleInfoDialog extends StatelessWidget {
   const SampleInfoDialog({
     required this.sample,
     required this.repeaterDisplay,
-    required this.ductingLabel,
-    required this.ductingColor,
+    required this.responses,
+    this.ductingLabel,
+    this.ductingColor,
+    this.resolveRepeaterName,
     super.key,
   });
 
   final Sample sample;
   final String repeaterDisplay;
+
+  /// Successful responses from the same ping burst, strongest first.
+  final List<Sample> responses;
+
   final String? ductingLabel;
   final Color? ductingColor;
+
+  /// Resolves a repeater node id to its known display name, if any.
+  final String? Function(String? nodeId)? resolveRepeaterName;
 
   @override
   Widget build(BuildContext context) {
@@ -108,6 +118,18 @@ class SampleInfoDialog extends StatelessWidget {
               ],
             ),
           ],
+          const SizedBox(height: 4),
+          _MoreDetailsLink(
+            onTap: () => showSampleDetailsSheet(
+              context,
+              sample: sample,
+              responses: responses,
+              repeaterDisplay: repeaterDisplay,
+              ductingLabel: ductingLabel,
+              ductingColor: ductingColor,
+              resolveRepeaterName: resolveRepeaterName,
+            ),
+          ),
         ],
       ),
       actions: [_CloseButton(label: l10n.mapClose)],
@@ -115,10 +137,48 @@ class SampleInfoDialog extends StatelessWidget {
   }
 }
 
+/// Compact hyperlink-style action opening a detailed bottom sheet while
+/// keeping the hosting dialog small.
+class _MoreDetailsLink extends StatelessWidget {
+  const _MoreDetailsLink({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(4),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          child: Text(
+            AppLocalizations.of(context).mapMoreDetails,
+            style: TextStyle(
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.primary,
+              decoration: TextDecoration.underline,
+              decorationColor: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class SampleClusterInfoDialog extends StatelessWidget {
-  const SampleClusterInfoDialog({required this.cluster, super.key});
+  const SampleClusterInfoDialog({
+    required this.cluster,
+    this.resolveRepeaterName,
+    super.key,
+  });
 
   final SampleCluster cluster;
+
+  /// Resolves a repeater node id to its known display name, if any.
+  final String? Function(String? nodeId)? resolveRepeaterName;
 
   @override
   Widget build(BuildContext context) {
@@ -139,6 +199,16 @@ class SampleClusterInfoDialog extends StatelessWidget {
           Text(l10n.mapNewest(newestTimestamp)),
           const SizedBox(height: 8),
           Text(l10n.mapZoomForBreakdown),
+          const SizedBox(height: 4),
+          _MoreDetailsLink(
+            onTap: () => showMeasurementListSheet(
+              context,
+              title: l10n.mapMeasurementsTitle(cluster.samples.length),
+              samples: cluster.samples,
+              responderPool: cluster.samples,
+              resolveRepeaterName: resolveRepeaterName,
+            ),
+          ),
         ],
       ),
       actions: [_CloseButton(label: l10n.mapClose)],
@@ -246,17 +316,35 @@ class RepeaterListDialog extends StatelessWidget {
 }
 
 class CoverageInfoDialog extends StatelessWidget {
-  const CoverageInfoDialog({required this.coverage, super.key});
+  const CoverageInfoDialog({
+    required this.coverage,
+    this.cellSamples = const [],
+    this.resolveRepeaterName,
+    super.key,
+  });
 
   final Coverage coverage;
+
+  /// Ping measurements recorded inside this cell, newest first.
+  final List<Sample> cellSamples;
+
+  /// Resolves a repeater node id to its known display name, if any.
+  final String? Function(String? nodeId)? resolveRepeaterName;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+
     final total = coverage.received + coverage.lost;
     final reliability = total > 0
         ? '${((coverage.received / total) * 100).toStringAsFixed(0)}%'
         : l10n.mapNoPingData;
+    // GPS-only records never enter received/lost (no ping was attempted), so
+    // they get their own neutral line and are counted from the same
+    // measurement list opened by the link below.
+    final gpsOnlyCount = cellSamples
+        .where((sample) => sample.pingSuccess == null)
+        .length;
     final prefixes =
         coverage.repeaters
             .map((id) => id.substring(0, id.length >= 4 ? 4 : id.length))
@@ -270,9 +358,15 @@ class CoverageInfoDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _LabelValue(
-            label: l10n.mapSamplesLabel,
-            value: total.toStringAsFixed(1),
+          Row(
+            children: [
+              _LabelValue(
+                label: l10n.mapSamplesLabel,
+                value: total.toStringAsFixed(1),
+              ),
+              const SizedBox(width: 6),
+              _CountersHintButton(onTap: () => _showCountersHint(context)),
+            ],
           ),
           const SizedBox(height: 8),
           _LabelValue(label: l10n.mapSuccessRateLabel, value: reliability),
@@ -296,6 +390,16 @@ class CoverageInfoDialog extends StatelessWidget {
             ),
             expandValue: true,
           ),
+          if (gpsOnlyCount > 0) ...[
+            const SizedBox(height: 4),
+            Text(
+              l10n.mapGpsOnlyCount(gpsOnlyCount),
+              style: const TextStyle(
+                color: Colors.blueGrey,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
           if (coverage.received > 0) ...[
             const SizedBox(height: 8),
             _LabelValue(
@@ -313,6 +417,16 @@ class CoverageInfoDialog extends StatelessWidget {
               expandValue: true,
             ),
           ],
+          const SizedBox(height: 4),
+          _MoreDetailsLink(
+            onTap: () => showMeasurementListSheet(
+              context,
+              title: l10n.mapMeasurementsTitle(cellSamples.length),
+              samples: cellSamples,
+              responderPool: cellSamples,
+              resolveRepeaterName: resolveRepeaterName,
+            ),
+          ),
         ],
       ),
       actions: [_CloseButton(label: l10n.mapClose)],
@@ -433,6 +547,59 @@ class _CloseButton extends StatelessWidget {
       child: Text(label),
     );
   }
+}
+
+/// Small "?" affordance next to the coverage cell counters. Opens a hint
+/// explaining why the counters are freshness-weighted and can be fractional,
+/// so they do not always match the raw rows in the measurements list.
+class _CountersHintButton extends StatelessWidget {
+  const _CountersHintButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: AppLocalizations.of(context).mapCountersHintTitle,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(2),
+          child: Icon(
+            Icons.help_outline,
+            size: 16,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+void _showCountersHint(BuildContext context) {
+  final l10n = AppLocalizations.of(context);
+  showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    builder: (sheetContext) => SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.mapCountersHintTitle,
+              style: Theme.of(sheetContext).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 12),
+            Text(l10n.mapCountersHintBody),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 const _secondaryStyle = TextStyle(fontSize: 12, color: Colors.grey);

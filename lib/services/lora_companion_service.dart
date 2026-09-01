@@ -1,12 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:pointycastle/export.dart';
 import 'package:usb_serial/usb_serial.dart';
 
 import 'debug_log_service.dart';
@@ -14,6 +11,7 @@ import 'meshcore_protocol.dart';
 import 'settings_service.dart';
 import '../models/models.dart';
 import '../utils/bluetooth_scan.dart';
+import '../utils/repeater_contacts.dart';
 
 const String _meshCoreServiceUuid = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
 const String _meshCoreRxUuid = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
@@ -345,11 +343,12 @@ class LoRaCompanionService {
       []; // Repeaters that have echoed during wardriving
   final Map<String, Repeater> _repeaterContactCache =
       {}; // All known repeater contacts (from scan)
-  final Map<String, int> _nodeTypes =
-      {}; // Map of node ID -> advType (1=companion, 2=repeater, 3=room)
   Completer<List<Repeater>>? _scanCompleter;
   final Map<String, Repeater> _knownRepeaters =
       {}; // Map of repeater ID -> location from internet map
+  // Advertised names of every repeater/room-server contact ever parsed
+  // (ID -> advName), including contacts without a known GPS position.
+  final Map<String, String> _repeaterContactNames = {};
 
   // Throttle contact lookups to avoid dumping full list repeatedly
   final Map<String, DateTime> _lastContactRequestAt = {}; // keyPrefix -> time
@@ -380,8 +379,6 @@ class LoRaCompanionService {
     _newRepeaterAlertsEnabled = enabled;
   }
 
-  // Secure storage
-  final _secureStorage = const FlutterSecureStorage();
   final _debugLog = DebugLogService();
   final _protocol = MeshCoreProtocol();
 
@@ -445,14 +442,6 @@ class LoRaCompanionService {
         .where((s) => s.isNotEmpty);
     final upper = nodeId.toUpperCase();
     return prefixes.any((prefix) => upper.startsWith(prefix));
-  }
-
-  /// Check if a node ID is a companion device (not a repeater)
-  /// Uses cached node type from contact info (advType: 1=companion, 2=repeater, 3=room)
-  bool _isCompanionNode(String nodeId) {
-    final nodeType = _nodeTypes[nodeId];
-    if (nodeType == null) return false; // Unknown type, allow it
-    return nodeType == ADV_TYPE_CHAT; // Type 1 = companion/chat device
   }
 
   /// Get device name for display (from BT device)
@@ -928,6 +917,15 @@ class LoRaCompanionService {
   List<Repeater> get discoveredRepeaters =>
       List.unmodifiable(_discoveredRepeaters);
 
+  /// Previously found repeater contacts: everything synced from the
+  /// companion radio's contact list or heard during wardriving. Contacts
+  /// without a known position appear as name-only stubs; positioned entries
+  /// win and live discoveries win over stale contact data.
+  List<Repeater> get knownRepeaterContacts => mergeRepeaterContacts(
+    nameOnly: _repeaterContactNames,
+    positioned: [..._knownRepeaters.values, ..._discoveredRepeaters],
+  );
+
   /// Match a 2-character hex prefix to full repeater ID(s)
   /// Returns the first matching repeater from known repeaters
   String? matchRepeaterPrefix(String prefix) {
@@ -973,109 +971,6 @@ class LoRaCompanionService {
   }
 
   // Internet map API methods removed - MQTT dependencies
-
-  /// Parse repeater information from LoRa device output
-  void _parseRepeaterLine(String line) {
-    try {
-      // Skip empty lines and common noise
-      if (line.trim().isEmpty || line.length < 5) return;
-
-      // Try to parse node information
-      // Common formats:
-      // Meshtastic: "Node: !1a2b3c4d Name: Repeater1 Lat: 47.123 Lon: -122.456 SNR: 8.5 dB"
-      // MeshCore: Different formats - we'll try to detect patterns
-
-      // Look for hex IDs (common in mesh networks)
-      final hexIdMatch = RegExp(r'([0-9a-fA-F]{4,16})').firstMatch(line);
-
-      // Look for coordinates in any format
-      double? lat;
-      double? lon;
-
-      // Try various coordinate formats
-      final patterns = [
-        RegExp(
-          r'lat[:\s=]*(-?\d+\.\d+)[,\s]+lon[:\s=]*(-?\d+\.\d+)',
-          caseSensitive: false,
-        ),
-        RegExp(r'\(\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*\)'),
-        RegExp(r'(-?\d+\.\d{4,})\s*,\s*(-?\d+\.\d{4,})'),
-      ];
-
-      for (final pattern in patterns) {
-        final match = pattern.firstMatch(line);
-        if (match != null) {
-          lat = double.tryParse(match.group(1)!);
-          lon = double.tryParse(match.group(2)!);
-          if (lat != null && lon != null) break;
-        }
-      }
-
-      // If we found coordinates, try to extract other info
-      if (lat != null && lon != null) {
-        // Use hex ID if found, or generate from line
-        String nodeId = hexIdMatch?.group(1) ?? line.hashCode.toRadixString(16);
-
-        // Try to extract name
-        String? name;
-        final namePatterns = [
-          RegExp(r'[Nn]ame[:\s]+([A-Za-z0-9_-]+)'),
-          RegExp(r'!\w+\s+([A-Za-z0-9_-]+)'),
-        ];
-
-        for (final pattern in namePatterns) {
-          final match = pattern.firstMatch(line);
-          if (match != null) {
-            name = match.group(1);
-            break;
-          }
-        }
-
-        // Extract SNR
-        int? snr;
-        final snrMatch = RegExp(r'[Ss][Nn][Rr][:\s=]*(-?\d+(?:\.\d+)?)')
-            .firstMatch(line);
-        if (snrMatch != null) {
-          snr = double.tryParse(snrMatch.group(1)!)?.toInt();
-        }
-
-        // Extract RSSI
-        int? rssi;
-        final rssiMatch = RegExp(r'[Rr][Ss][Ss][Ii][:\s=]*(-?\d+)')
-            .firstMatch(line);
-        if (rssiMatch != null) {
-          rssi = int.tryParse(rssiMatch.group(1)!);
-        }
-
-        final repeater = Repeater(
-          id: nodeId,
-          position: LatLng(lat, lon),
-          name: name,
-          snr: snr,
-          rssi: rssi,
-          timestamp: DateTime.now(),
-        );
-
-        // Avoid duplicates based on position (within 10 meters)
-        final isDuplicate = _discoveredRepeaters.any(
-          (r) =>
-              (r.position.latitude - lat!).abs() < 0.0001 &&
-              (r.position.longitude - lon!).abs() < 0.0001,
-        );
-
-        if (!isDuplicate) {
-          _discoveredRepeaters.add(repeater);
-          _debugLog.logInfo('✅ Found: ${name ?? nodeId} at ($lat, $lon)');
-          debugPrint(
-            '✅ Found repeater: ${name ?? nodeId} at ($lat, $lon), SNR: $snr',
-          );
-        }
-      }
-    } catch (e) {
-      // Don't spam logs with parse errors, just debug output
-      debugPrint('Parse error on line: $line - $e');
-    }
-  }
 
   // ============================================================================
   // DEVICE INFO
@@ -1277,16 +1172,6 @@ class LoRaCompanionService {
     }
   }
 
-  /// Send command/data to LoRa device
-  Future<void> _sendToDevice(String data) async {
-    if (_connectionType == ConnectionType.bluetooth &&
-        _txCharacteristic != null) {
-      await _txCharacteristic!.write(utf8.encode(data));
-    } else if (_connectionType == ConnectionType.usb && _usbPort != null) {
-      await _usbPort!.write(Uint8List.fromList(utf8.encode(data)));
-    }
-  }
-
   /// Handle binary data from LoRa device
   void _handleDeviceData(Uint8List data) {
     try {
@@ -1476,10 +1361,10 @@ class LoRaCompanionService {
         return;
       }
 
-      final snrDb = controlData['snr'] as double;
-      // Persistence/UI models currently store whole-dB SNR. Keep the protocol
-      // parser lossless and round only at this explicit application boundary.
-      final snr = snrDb.round();
+      // Persistence/UI models store whole-dB SNR. Keep the protocol parser
+      // lossless and convert through the shared quarter-dB helper so this
+      // boundary matches every other sample source.
+      final snr = snrQuarterDbToWholeDb(controlData['snr'])!;
       final rssi = controlData['rssi'] as int;
       final payload = controlData['payload'] as Uint8List;
 
@@ -1562,9 +1447,6 @@ class LoRaCompanionService {
     // Clear from pending
     _pendingContactRequests.remove(contact.publicKeyHex);
 
-    // Store node type for filtering
-    _nodeTypes[contact.publicKeyPrefix] = contact.advType;
-
     // Cache full public key for Carpeater mode
     _contactPubKeyCache[contact.publicKeyPrefix] = Uint8List.fromList(
       contact.publicKey,
@@ -1573,6 +1455,16 @@ class LoRaCompanionService {
     _debugLog.logInfo(
       'Contact: ${contact.advName ?? contact.publicKeyPrefix} (type: ${contact.advType})',
     );
+
+    // Remember every repeater/room-server contact by name so pickers can
+    // offer previously found repeaters even without a known position.
+    final advName = contact.advName;
+    final isRepeaterType =
+        contact.advType == ADV_TYPE_REPEATER ||
+        contact.advType == ADV_TYPE_ROOM_SERVER;
+    if (isRepeaterType && advName != null && advName.isNotEmpty) {
+      _repeaterContactNames[contact.publicKeyPrefix] = advName;
+    }
 
     // Only show repeaters (2) and room servers (3) on the map, and only if they have a position
     if (!contact.hasPosition ||
@@ -1740,56 +1632,6 @@ class LoRaCompanionService {
     }
   }
 
-  /// Process a complete line from LoRa device (legacy text mode)
-  void _processDeviceLine(String line) {
-    _debugLog.logLoRa(line);
-    debugPrint('LoRa device: $line');
-
-    // Try to parse battery percentage from device messages
-    // Common formats:
-    // - "Battery: 85%"
-    // - "Batt=85%"
-    // - "bat:85"
-    final batteryRegex = RegExp(
-      r'(?:battery|batt?|pwr)[:\s=]+?(\d+)',
-      caseSensitive: false,
-    );
-    final match = batteryRegex.firstMatch(line);
-    if (match != null) {
-      final percent = int.tryParse(match.group(1)!);
-      if (percent != null && percent >= 0 && percent <= 100) {
-        _batteryPercent = percent;
-        _batteryController.add(_batteryPercent);
-        debugPrint('Battery from device message: $percent%');
-      }
-    }
-
-    // Parse repeater/node information if we're scanning
-    if (_scanCompleter != null && !_scanCompleter!.isCompleted) {
-      _parseRepeaterLine(line);
-    }
-  }
-
-  /// Decrypt AES-ECB encrypted channel message
-  Uint8List? _decryptChannelMessage(Uint8List encrypted, Uint8List key) {
-    try {
-      if (encrypted.length % 16 != 0) return null; // Must be block-aligned
-
-      final cipher = AESEngine();
-      cipher.init(false, KeyParameter(key));
-
-      final decrypted = Uint8List(encrypted.length);
-      for (int i = 0; i < encrypted.length; i += 16) {
-        cipher.processBlock(encrypted, i, decrypted, i);
-      }
-
-      return decrypted;
-    } catch (e) {
-      debugPrint('Decryption error: $e');
-      return null;
-    }
-  }
-
   // ============================================================================
   // BATTERY MONITORING
   // ============================================================================
@@ -1824,19 +1666,6 @@ class LoRaCompanionService {
     _batteryCharacteristic = null;
     _batteryPercent = null;
     _batteryController.add(null);
-  }
-
-  // ============================================================================
-  // UTILITIES
-  // ============================================================================
-
-  String _generateId() {
-    final random = Random();
-    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-    return List.generate(
-      8,
-      (index) => chars[random.nextInt(chars.length)],
-    ).join();
   }
 
   // ============================================================================

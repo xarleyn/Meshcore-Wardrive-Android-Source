@@ -8,10 +8,15 @@ class MapSettingsSnapshot {
   const MapSettingsSnapshot({
     required this.showSamples,
     required this.showGpsSamples,
+    required this.fixedSampleMarkerSizeEnabled,
+    required this.sampleMarkerRadius,
     required this.showCoverage,
     required this.mapLodEnabled,
+    required this.sampleGeohashGrouping,
     required this.showEdges,
     required this.showRepeaters,
+    required this.showPrivacyZones,
+    required this.showGpsExclusionZones,
     required this.colorMode,
     required this.pingIntervalMeters,
     required this.coveragePrecision,
@@ -39,6 +44,7 @@ class MapSettingsSnapshot {
     required this.keepScreenOn,
     required this.currentLocationMarkerStyle,
     required this.showSuccessfulOnly,
+    required this.optimisticDisplay,
     required this.compassCalibrationQuietUntil,
     required this.deadZoneAlertsEnabled,
     required this.newRepeaterAlertsEnabled,
@@ -52,10 +58,15 @@ class MapSettingsSnapshot {
 
   final bool showSamples;
   final bool showGpsSamples;
+  final bool fixedSampleMarkerSizeEnabled;
+  final double sampleMarkerRadius;
   final bool showCoverage;
   final bool mapLodEnabled;
+  final bool sampleGeohashGrouping;
   final bool showEdges;
   final bool showRepeaters;
+  final bool showPrivacyZones;
+  final bool showGpsExclusionZones;
   final String colorMode;
   final double pingIntervalMeters;
   final int coveragePrecision;
@@ -83,6 +94,7 @@ class MapSettingsSnapshot {
   final bool keepScreenOn;
   final CurrentLocationMarkerStyle currentLocationMarkerStyle;
   final bool showSuccessfulOnly;
+  final bool optimisticDisplay;
   final DateTime? compassCalibrationQuietUntil;
   final bool deadZoneAlertsEnabled;
   final bool newRepeaterAlertsEnabled;
@@ -148,10 +160,16 @@ class MapSettingsController {
     final settings = MapSettingsSnapshot(
       showSamples: await _settingsService.getShowSamples(),
       showGpsSamples: await _settingsService.getShowGpsSamples(),
+      fixedSampleMarkerSizeEnabled: await _settingsService
+          .getFixedSampleMarkerSizeEnabled(),
+      sampleMarkerRadius: await _settingsService.getSampleMarkerRadius(),
       showCoverage: await _settingsService.getShowCoverage(),
       mapLodEnabled: await _settingsService.getMapLodEnabled(),
+      sampleGeohashGrouping: await _settingsService.getSampleGeohashGrouping(),
       showEdges: await _settingsService.getShowEdges(),
       showRepeaters: await _settingsService.getShowRepeaters(),
+      showPrivacyZones: await _settingsService.getShowPrivacyZones(),
+      showGpsExclusionZones: await _settingsService.getShowGpsExclusionZones(),
       colorMode: await _settingsService.getColorMode(),
       pingIntervalMeters: await _settingsService.getPingInterval(),
       coveragePrecision: await _settingsService.getCoveragePrecision(),
@@ -184,6 +202,7 @@ class MapSettingsController {
       currentLocationMarkerStyle: await _settingsService
           .getCurrentLocationMarkerStyle(),
       showSuccessfulOnly: await _settingsService.getShowSuccessfulOnly(),
+      optimisticDisplay: await _settingsService.getOptimisticDisplay(),
       compassCalibrationQuietUntil: await _settingsService
           .getCompassCalibrationQuietUntil(),
       deadZoneAlertsEnabled: await _settingsService.getDeadZoneAlertsEnabled(),

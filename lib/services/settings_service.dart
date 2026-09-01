@@ -13,9 +13,14 @@ enum MapThemeMode { system, light, dark }
 class SettingsService {
   static const String _showSamplesKey = 'show_samples';
   static const String _showGpsSamplesKey = 'show_gps_samples';
+  static const String _fixedSampleMarkerSizeEnabledKey =
+      'fixed_sample_marker_size_enabled';
+  static const String _sampleMarkerRadiusKey = 'sample_marker_radius';
   static const String _showCoverageKey = 'show_coverage';
   static const String _showEdgesKey = 'show_edges';
   static const String _showRepeatersKey = 'show_repeaters';
+  static const String _showPrivacyZonesKey = 'show_privacy_zones';
+  static const String _showGpsExclusionZonesKey = 'show_gps_exclusion_zones';
   static const String _colorModeKey = 'color_mode';
   static const String _pingIntervalKey = 'ping_interval_meters';
   static const String _coveragePrecisionKey = 'coverage_precision';
@@ -69,6 +74,7 @@ class SettingsService {
   static const String _compassCalibrationQuietUntilKey =
       'compass_calibration_quiet_until_ms';
   static const String _showSuccessfulOnlyKey = 'show_successful_only';
+  static const String _optimisticDisplayKey = 'optimistic_display';
   static const String _deadZoneAlertsKey = 'dead_zone_alerts_enabled';
   static const String _newRepeaterAlertsKey = 'new_repeater_alerts_enabled';
   static const String _linkLossAlertsKey = 'link_loss_alerts_enabled';
@@ -76,8 +82,13 @@ class SettingsService {
   static const String _mapThemeModeKey = 'map_theme_mode';
   static const String _appLocaleKey = 'app_locale';
   static const String _mapLodEnabledKey = 'map_lod_enabled';
+  static const String _sampleGeohashGroupingKey = 'map_sample_geohash_grouping';
   static const String _recentBluetoothDevicesKey = 'recent_bluetooth_devices';
   static const int _maxRecentBluetoothDevices = 8;
+
+  static const double minSampleMarkerRadius = 4;
+  static const double maxSampleMarkerRadius = 16;
+  static const double defaultSampleMarkerRadius = 10;
 
   // Alert toggles
   Future<bool> getDeadZoneAlertsEnabled() async {
@@ -138,6 +149,60 @@ class SettingsService {
   Future<void> setShowGpsSamples(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_showGpsSamplesKey, value);
+  }
+
+  Future<bool> getShowPrivacyZones() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_showPrivacyZonesKey) ?? true;
+  }
+
+  Future<void> setShowPrivacyZones(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_showPrivacyZonesKey, value);
+  }
+
+  Future<bool> getShowGpsExclusionZones() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_showGpsExclusionZonesKey) ?? false;
+  }
+
+  Future<void> setShowGpsExclusionZones(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_showGpsExclusionZonesKey, value);
+  }
+
+  /// Whether sample points use [getSampleMarkerRadius] instead of their
+  /// automatic size, which varies with the number of grouped measurements.
+  Future<bool> getFixedSampleMarkerSizeEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_fixedSampleMarkerSizeEnabledKey) ?? false;
+  }
+
+  Future<void> setFixedSampleMarkerSizeEnabled(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_fixedSampleMarkerSizeEnabledKey, value);
+  }
+
+  Future<double> getSampleMarkerRadius() async {
+    final prefs = await SharedPreferences.getInstance();
+    final value = prefs.getDouble(_sampleMarkerRadiusKey);
+    if (value == null ||
+        !value.isFinite ||
+        value < minSampleMarkerRadius ||
+        value > maxSampleMarkerRadius) {
+      return defaultSampleMarkerRadius;
+    }
+    return value;
+  }
+
+  Future<void> setSampleMarkerRadius(double value) async {
+    if (!value.isFinite ||
+        value < minSampleMarkerRadius ||
+        value > maxSampleMarkerRadius) {
+      throw ArgumentError.value(value, 'value', 'Unsupported marker radius');
+    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(_sampleMarkerRadiusKey, value);
   }
 
   Future<bool> getShowCoverage() async {
@@ -723,6 +788,19 @@ class SettingsService {
     await prefs.setBool(_showSuccessfulOnlyKey, value);
   }
 
+  /// Whether coverage cells with at least one successful ping render as good,
+  /// ignoring failed pings unless the success went stale (see
+  /// [AggregationService.optimisticStalenessDays]).
+  Future<bool> getOptimisticDisplay() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_optimisticDisplayKey) ?? false;
+  }
+
+  Future<void> setOptimisticDisplay(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_optimisticDisplayKey, value);
+  }
+
   Future<bool> getMapLodEnabled() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_mapLodEnabledKey) ?? true;
@@ -731,6 +809,18 @@ class SettingsService {
   Future<void> setMapLodEnabled(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_mapLodEnabledKey, value);
+  }
+
+  /// Whether every measurement inside one geohash cell collapses into a
+  /// single sample marker regardless of zoom.
+  Future<bool> getSampleGeohashGrouping() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_sampleGeohashGroupingKey) ?? false;
+  }
+
+  Future<void> setSampleGeohashGrouping(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_sampleGeohashGroupingKey, value);
   }
 
   /// Get lock rotation north setting
@@ -831,9 +921,13 @@ class SettingsService {
   static const List<String> _exportKeys = [
     _showSamplesKey,
     _showGpsSamplesKey,
+    _fixedSampleMarkerSizeEnabledKey,
+    _sampleMarkerRadiusKey,
     _showCoverageKey,
     _showEdgesKey,
     _showRepeatersKey,
+    _showPrivacyZonesKey,
+    _showGpsExclusionZonesKey,
     _colorModeKey,
     _pingIntervalKey,
     _coveragePrecisionKey,
@@ -876,7 +970,9 @@ class SettingsService {
     _batterySaverEnabledKey,
     _currentLocationMarkerStyleKey,
     _showSuccessfulOnlyKey,
+    _optimisticDisplayKey,
     _mapLodEnabledKey,
+    _sampleGeohashGroupingKey,
     _linkLossAlertsKey,
     // Upload service keys
     'upload_api_url',

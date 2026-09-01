@@ -3,16 +3,22 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../services/settings_service.dart';
 import '../widgets/settings_section_header.dart';
 
 enum MapDisplaySetting {
   coverage,
   mapLod,
   samples,
+  fixedSampleMarkerSize,
+  sampleGeohashGrouping,
   edges,
   repeaters,
+  privacyZones,
+  gpsExclusionZones,
   gpsSamples,
   successfulOnly,
+  optimisticDisplay,
   routeTrail,
   communityCoverage,
   heatmap,
@@ -24,10 +30,16 @@ class MapDisplaySettingsValues {
     required this.showCoverage,
     required this.mapLodEnabled,
     required this.showSamples,
+    required this.fixedSampleMarkerSizeEnabled,
+    required this.sampleMarkerRadius,
+    required this.sampleGeohashGrouping,
     required this.showEdges,
     required this.showRepeaters,
+    required this.showPrivacyZones,
+    required this.showGpsExclusionZones,
     required this.showGpsSamples,
     required this.showSuccessfulOnly,
+    required this.optimisticDisplay,
     required this.showRouteTrail,
     required this.communityCoverageAvailable,
     required this.showCommunityCoverage,
@@ -38,10 +50,16 @@ class MapDisplaySettingsValues {
   final bool showCoverage;
   final bool mapLodEnabled;
   final bool showSamples;
+  final bool fixedSampleMarkerSizeEnabled;
+  final double sampleMarkerRadius;
+  final bool sampleGeohashGrouping;
   final bool showEdges;
   final bool showRepeaters;
+  final bool showPrivacyZones;
+  final bool showGpsExclusionZones;
   final bool showGpsSamples;
   final bool showSuccessfulOnly;
+  final bool optimisticDisplay;
   final bool showRouteTrail;
   final bool communityCoverageAvailable;
   final bool showCommunityCoverage;
@@ -54,6 +72,8 @@ List<Widget> buildMapDisplaySettings(
   required MapDisplaySettingsValues values,
   required FutureOr<void> Function(MapDisplaySetting setting, bool value)
   onChanged,
+  required ValueChanged<double> onSampleMarkerRadiusChanged,
+  required FutureOr<void> Function(double value) onSampleMarkerRadiusChangeEnd,
   required FutureOr<void> Function() onClearCommunityCoverage,
 }) {
   final l10n = AppLocalizations.of(context);
@@ -79,6 +99,43 @@ List<Widget> buildMapDisplaySettings(
       onChanged: (value) => onChanged(MapDisplaySetting.samples, value),
     ),
     SwitchListTile(
+      title: Text(l10n.settingsFixedSampleMarkerSize),
+      subtitle: Text(l10n.settingsFixedSampleMarkerSizeSubtitle),
+      value: values.fixedSampleMarkerSizeEnabled,
+      onChanged: (value) =>
+          onChanged(MapDisplaySetting.fixedSampleMarkerSize, value),
+    ),
+    if (values.fixedSampleMarkerSizeEnabled)
+      ListTile(
+        title: Text(
+          l10n.settingsSampleMarkerSize(
+            (values.sampleMarkerRadius * 2).round(),
+          ),
+        ),
+        subtitle: Slider(
+          key: const ValueKey('sample-marker-size-slider'),
+          min: SettingsService.minSampleMarkerRadius,
+          max: SettingsService.maxSampleMarkerRadius,
+          divisions:
+              (SettingsService.maxSampleMarkerRadius -
+                      SettingsService.minSampleMarkerRadius)
+                  .round(),
+          label: l10n.settingsSampleMarkerSizeValue(
+            (values.sampleMarkerRadius * 2).round(),
+          ),
+          value: values.sampleMarkerRadius,
+          onChanged: onSampleMarkerRadiusChanged,
+          onChangeEnd: onSampleMarkerRadiusChangeEnd,
+        ),
+      ),
+    SwitchListTile(
+      title: Text(l10n.settingsGroupSamplesByGeohash),
+      subtitle: Text(l10n.settingsGroupSamplesByGeohashSubtitle),
+      value: values.sampleGeohashGrouping,
+      onChanged: (value) =>
+          onChanged(MapDisplaySetting.sampleGeohashGrouping, value),
+    ),
+    SwitchListTile(
       title: Text(l10n.settingsShowEdges),
       value: values.showEdges,
       onChanged: (value) => onChanged(MapDisplaySetting.edges, value),
@@ -87,6 +144,19 @@ List<Widget> buildMapDisplaySettings(
       title: Text(l10n.settingsShowRepeaters),
       value: values.showRepeaters,
       onChanged: (value) => onChanged(MapDisplaySetting.repeaters, value),
+    ),
+    SwitchListTile(
+      title: Text(l10n.settingsShowPrivacyZones),
+      subtitle: Text(l10n.settingsShowPrivacyZonesSubtitle),
+      value: values.showPrivacyZones,
+      onChanged: (value) => onChanged(MapDisplaySetting.privacyZones, value),
+    ),
+    SwitchListTile(
+      title: Text(l10n.settingsShowGpsExclusionZones),
+      subtitle: Text(l10n.settingsShowGpsExclusionZonesSubtitle),
+      value: values.showGpsExclusionZones,
+      onChanged: (value) =>
+          onChanged(MapDisplaySetting.gpsExclusionZones, value),
     ),
     SwitchListTile(
       title: Text(l10n.settingsShowGpsSamples),
@@ -99,6 +169,13 @@ List<Widget> buildMapDisplaySettings(
       subtitle: Text(l10n.settingsShowSuccessfulPingsOnlySubtitle),
       value: values.showSuccessfulOnly,
       onChanged: (value) => onChanged(MapDisplaySetting.successfulOnly, value),
+    ),
+    SwitchListTile(
+      title: Text(l10n.settingsOptimisticDisplay),
+      subtitle: Text(l10n.settingsOptimisticDisplaySubtitle),
+      value: values.optimisticDisplay,
+      onChanged: (value) =>
+          onChanged(MapDisplaySetting.optimisticDisplay, value),
     ),
     SwitchListTile(
       title: Text(l10n.settingsShowRouteTrail),

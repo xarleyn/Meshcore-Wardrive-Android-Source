@@ -27,6 +27,7 @@ import '../utils/session_map_view.dart';
 import '../utils/community_coverage.dart';
 import '../utils/bluetooth_scan.dart';
 import '../utils/sample_export.dart';
+import '../utils/ping_burst.dart';
 import '../utils/update_check.dart';
 import '../widgets/compass_calibration.dart';
 import '../widgets/bluetooth_device_picker_dialog.dart';
@@ -36,7 +37,7 @@ import 'map/layers/community_coverage_layer.dart';
 import 'map/layers/current_position_layer.dart';
 import 'map/layers/edge_layer.dart';
 import 'map/layers/planned_marker_layer.dart';
-import 'map/layers/privacy_zone_layer.dart';
+import 'map/layers/zone_overlay_layer.dart';
 import 'map/layers/radio_position_layer.dart';
 import 'map/layers/repeater_layer.dart';
 import 'map/layers/route_trail_layer.dart';
@@ -139,6 +140,12 @@ class _MapScreenState extends State<MapScreen> {
   late final MapScreenController _mapDataController;
   int get _sampleCount => _mapDataController.sampleCount;
   List<Sample> get _samples => _mapDataController.samples;
+
+  /// Samples visible under the "successful pings only" display filter; used
+  /// by every sample-derived layer such as the route trail and heatmap.
+  List<Sample> get _displaySamples => _mapDataController.displaySamples(
+    showSuccessfulOnly: _showSuccessfulOnly,
+  );
   AggregationResult? get _aggregationResult => _mapDataController.aggregation;
   List<Repeater> get _repeaters => _mapDataController.repeaters;
   SessionMapView get _sessionMapView => _mapDataController.sessionView;
@@ -156,11 +163,19 @@ class _MapScreenState extends State<MapScreen> {
   String _colorMode = 'quality';
   bool _showSamples = false;
   bool _showGpsSamples = true; // Show GPS-only samples (null pingSuccess)
+  bool _fixedSampleMarkerSizeEnabled = false;
+  double _sampleMarkerRadius = SettingsService.defaultSampleMarkerRadius;
   bool _showSuccessfulOnly = false; // Show only samples with successful pings
+  bool _optimisticDisplay =
+      false; // Coverage stays green on any success, ignoring losses
   bool _showCoverage = true; // Show coverage boxes
   bool _mapLodEnabled = true; // Coarsen coverage/samples at low zoom
+  bool _sampleGeohashGrouping =
+      false; // Merge samples per geohash cell into one tappable marker
   bool _showEdges = true;
   bool _showRepeaters = true;
+  bool _showPrivacyZones = true;
+  bool _showGpsExclusionZones = false;
   bool _autoPingEnabled = false;
   String? _ignoredRepeaterPrefix;
   String?
@@ -621,10 +636,15 @@ class _MapScreenState extends State<MapScreen> {
     setState(() {
       _showSamples = settings.showSamples;
       _showGpsSamples = settings.showGpsSamples;
+      _fixedSampleMarkerSizeEnabled = settings.fixedSampleMarkerSizeEnabled;
+      _sampleMarkerRadius = settings.sampleMarkerRadius;
       _showCoverage = settings.showCoverage;
       _mapLodEnabled = settings.mapLodEnabled;
+      _sampleGeohashGrouping = settings.sampleGeohashGrouping;
       _showEdges = settings.showEdges;
       _showRepeaters = settings.showRepeaters;
+      _showPrivacyZones = settings.showPrivacyZones;
+      _showGpsExclusionZones = settings.showGpsExclusionZones;
       _colorMode = settings.colorMode;
       _pingIntervalMeters = settings.pingIntervalMeters;
       _coveragePrecision = settings.coveragePrecision;
@@ -652,6 +672,7 @@ class _MapScreenState extends State<MapScreen> {
       _keepScreenOn = settings.keepScreenOn;
       _currentLocationMarkerStyle = settings.currentLocationMarkerStyle;
       _showSuccessfulOnly = settings.showSuccessfulOnly;
+      _optimisticDisplay = settings.optimisticDisplay;
       _compassCalibrationQuietUntil = settings.compassCalibrationQuietUntil;
       _deadZoneAlertsEnabled = settings.deadZoneAlertsEnabled;
       _newRepeaterAlertsEnabled = settings.newRepeaterAlertsEnabled;
@@ -787,6 +808,7 @@ class _MapScreenState extends State<MapScreen> {
     final dataChanged = await _mapDataController.refresh(
       discoveredRepeaters: discoveredRepeaters,
       coveragePrecision: _coveragePrecision,
+      optimisticDisplay: _optimisticDisplay,
     );
     if (!mounted) return;
 
@@ -1600,6 +1622,7 @@ class _MapScreenState extends State<MapScreen> {
     return _mapDataController.sampleClusters(
       zoom: _mapLodZoom,
       lodEnabled: _mapLodEnabled,
+      groupByGeohash: _sampleGeohashGrouping,
       showGpsSamples: _showGpsSamples,
       showSuccessfulOnly: _showSuccessfulOnly,
       includeOnlyRepeaters: _includeOnlyRepeaters,
@@ -1984,19 +2007,46 @@ class _MapScreenState extends State<MapScreen> {
               : null,
         ),
         if (_showRouteTrail)
-          RouteTrailLayer(samples: _samples, colorBlindMode: _colorBlindMode),
+          RouteTrailLayer(
+            samples: _displaySamples,
+            colorBlindMode: _colorBlindMode,
+          ),
         if (_showHeatmap)
           SampleHeatmapLayer(
-            samples: _samples,
+            samples: _displaySamples,
             reset: _heatmapRebuildStream.stream,
           ),
         if (_showPredictionRings)
           CoveragePredictionLayer(
-            samples: _samples,
+            samples: _displaySamples,
             repeaters: _repeaters,
             includeOnlyRepeaters: _includeOnlyRepeaters,
           ),
-        PrivacyZoneLayer(zones: _privacyZones),
+        if (_showPrivacyZones)
+          ZoneOverlayLayer(
+            zones: [
+              for (final zone in _privacyZones)
+                ZoneOverlay(
+                  center: LatLng(
+                    (zone['lat'] as num).toDouble(),
+                    (zone['lon'] as num).toDouble(),
+                  ),
+                  radiusMeters: (zone['radius_meters'] as num).toDouble(),
+                ),
+            ],
+            color: Colors.blueGrey,
+          ),
+        if (_showGpsExclusionZones)
+          ZoneOverlayLayer(
+            zones: [
+              for (final zone in _impossibleZones)
+                ZoneOverlay(
+                  center: LatLng(zone.lat, zone.lon),
+                  radiusMeters: zone.radiusMeters,
+                ),
+            ],
+            color: Colors.deepOrange,
+          ),
         if (_showCommunityCoverage && _communityCoverage != null)
           CommunityCoverageLayer(
             rawCoverage: _communityCoverage!,
@@ -2039,6 +2089,7 @@ class _MapScreenState extends State<MapScreen> {
       zoom: _mapLodZoom,
       enabled: _mapLodEnabled,
       maxPrecision: _coveragePrecision,
+      successfulOnly: _showSuccessfulOnly,
     );
     return [
       CoverageLayer(
@@ -2067,6 +2118,7 @@ class _MapScreenState extends State<MapScreen> {
     return SampleClusterLayer(
       clusters: clusters,
       colorBlindMode: _colorBlindMode,
+      fixedRadius: _fixedSampleMarkerSizeEnabled ? _sampleMarkerRadius : null,
       hitNotifier: _sampleHitNotifier,
       onClusterTap: (cluster) {
         if (_deleteMode && cluster.sampleCount == 1) {
@@ -2088,6 +2140,7 @@ class _MapScreenState extends State<MapScreen> {
       zoom: _mapLodZoom,
       enabled: _mapLodEnabled,
       maxPrecision: _coveragePrecision,
+      successfulOnly: _showSuccessfulOnly,
     );
     return EdgeLayer(
       edges: lod.edges,
@@ -2605,7 +2658,9 @@ class _MapScreenState extends State<MapScreen> {
       context: context,
       builder: (context) => SampleInfoDialog(
         sample: sample,
+        responses: PingBurst.responsesFor(sample, _samples),
         repeaterDisplay: repeaterDisplay,
+        resolveRepeaterName: _getRepeaterName,
         ductingLabel: ductingRisk == null
             ? null
             : _localizedDuctingRisk(l10n, ductingRisk),
@@ -2619,7 +2674,10 @@ class _MapScreenState extends State<MapScreen> {
   void _showSampleClusterInfo(SampleCluster cluster) {
     showDialog<void>(
       context: context,
-      builder: (context) => SampleClusterInfoDialog(cluster: cluster),
+      builder: (context) => SampleClusterInfoDialog(
+        cluster: cluster,
+        resolveRepeaterName: _getRepeaterName,
+      ),
     );
   }
 
@@ -2649,8 +2707,35 @@ class _MapScreenState extends State<MapScreen> {
   void _showCoverageInfo(Coverage coverage) {
     showDialog(
       context: context,
-      builder: (context) => CoverageInfoDialog(coverage: coverage),
+      builder: (context) => CoverageInfoDialog(
+        coverage: coverage,
+        cellSamples: _coverageCellSamples(coverage.id),
+        resolveRepeaterName: _getRepeaterName,
+      ),
     );
+  }
+
+  /// Samples belonging to the coverage cell with [coverageId].
+  ///
+  /// Cell ids may be LOD-coarsened, so membership is decided by geohash
+  /// prefix: a sample's full-precision key always starts with every coarser
+  /// cell key that contains it.
+  List<Sample> _coverageCellSamples(String coverageId) {
+    final precision = coverageId.length;
+    final matches = _samples.where((sample) {
+      final hash = sample.geohash;
+      if (hash.length >= precision) {
+        return hash.substring(0, precision) == coverageId;
+      }
+      return GeohashUtils.coverageKey(
+            sample.position.latitude,
+            sample.position.longitude,
+            precision: precision,
+          ) ==
+          coverageId;
+    }).toList();
+    matches.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    return matches;
   }
 
   Future<void> _showRepeatersDialog() async {

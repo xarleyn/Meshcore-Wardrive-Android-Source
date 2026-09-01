@@ -1,6 +1,6 @@
 # Changelog
 
-## v1.0.44-xarleyn.1 - 2026-08-22
+## Unreleased
 
 ### Breaking change
 
@@ -11,8 +11,40 @@
   settings, and requires permissions, background/MIUI settings, device access,
   widgets, offline maps, and credentials to be configured again.
 
+### Added
+
+- Independent Map Display toggles for privacy zones and GPS exclusion zones.
+  Each enabled layer shows both the zone center and its configured radius;
+  both choices participate in settings export/import.
+
+- Adjustable sample point size (Settings → Map Display): enable a fixed point
+  size to replace automatic sizing, then choose a diameter from 8 to 32 px.
+  The option is off by default and participates in settings export/import.
+
+- Geohash sample grouping (Settings → Map Display): when enabled, every
+  measurement recorded inside one geohash cell collapses into a single marker
+  placed at the average measurement position, regardless of zoom and
+  independently of the low-zoom simplification setting. Tapping such a marker
+  still opens the grouped-measurements dialog with the full list inside.
+  Off by default.
+- Optimistic coverage display (Settings → Map Display): when enabled, a cell
+  with at least one successful ping is painted as good and its failed pings
+  are ignored. The ping dates still matter — if the newest success is older
+  than a month and failures were recorded after it, the failures win again
+  because the coverage most likely went dark. The setting participates in
+  settings export/import.
+- Carpeater target repeater picker: Settings → Carpeater now opens a
+  searchable list of previously found repeaters instead of a bare text field.
+  Each row shows the repeater's advertised name together with its ID, search
+  matches either of them, the currently selected repeater is highlighted, and
+  manual ID entry remains available as a fallback.
+
 ### Changed
 
+- Distance achievements (🚗 🛣️ ✈️) now follow the selected distance unit in
+  both their descriptions and their unlock logic, without converting between
+  units: the thresholds stay 10/100/500, so 100 miles and 100 km unlock the
+  same badge depending on the setting.
 - Debug builds now use `io.github.xarleyn.meshcore.wardrive.debug`, allowing a
   debug and signed release build of the fork to coexist.
 - Fork releases use `base-xarleyn.N` version names. The update checker compares
@@ -20,6 +52,18 @@
   newest compatible tag from multiple GitHub releases.
 - The release workflow verifies package ID, version name, increasing version
   code, APK signature, release tag, and asset name before publication.
+
+### Fixed
+
+- "Show Successful Pings Only" now applies to every sample-derived layer, not
+  just the round sample markers. Coverage squares whose every ping failed are
+  hidden (cells with at least one success keep their color computed from the
+  full ping history), and the route trail and heatmap stop drawing failed
+  pings and GPS-only samples.
+- Carpeater neighbour scans now store SNR with the same half-away-from-zero
+  rounding as discovery pings. The scan previously truncated negative SNR
+  toward zero (for example -1.75 dB was stored as -1 dB), which made weak
+  links look better than measured in saved samples and sound feedback.
 
 ## v1.0.43 - 2026-08-22
 

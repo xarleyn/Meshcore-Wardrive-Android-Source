@@ -170,6 +170,17 @@ const int REQ_TYPE_GET_OWNER_INFO = 0x07;
 // Repeater response for login
 const int RESP_SERVER_LOGIN_OK = 0;
 
+/// Convert a firmware-reported quarter-dB SNR into the whole-dB integer used
+/// by persistence and UI models.
+///
+/// Companion radios report SNR multiplied by 4 in a signed byte, so the
+/// protocol parsers return lossless quarter-dB values. Every stored sample
+/// must go through this single conversion point so a discovery response and
+/// a Carpeater neighbour scan with identical raw radio values produce
+/// identical stored dB. Rounds halfway cases away from zero (e.g. -2.75 dB
+/// rounds to -3, matching [num.round]).
+int? snrQuarterDbToWholeDb(num? rawSnr) => rawSnr?.round();
+
 class MeshCoreFrame {
   final int code;
   final Uint8List data;

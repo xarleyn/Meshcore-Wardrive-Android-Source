@@ -452,6 +452,42 @@ abstract class AppLocalizations {
   /// **'Show Samples'**
   String get settingsShowSamples;
 
+  /// Toggle to replace automatic sample point sizing with a fixed size
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed sample point size'**
+  String get settingsFixedSampleMarkerSize;
+
+  /// Explanation shown under the fixed sample point size toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Use one size instead of sizing points automatically by the number of measurements'**
+  String get settingsFixedSampleMarkerSizeSubtitle;
+
+  /// Title above the sample point size slider
+  ///
+  /// In en, this message translates to:
+  /// **'Point size: {size} px'**
+  String settingsSampleMarkerSize(int size);
+
+  /// Value label for the sample point size slider
+  ///
+  /// In en, this message translates to:
+  /// **'{size} px'**
+  String settingsSampleMarkerSizeValue(int size);
+
+  /// Toggle to merge every measurement in one geohash cell into a single sample marker
+  ///
+  /// In en, this message translates to:
+  /// **'Group Samples by Geohash'**
+  String get settingsGroupSamplesByGeohash;
+
+  /// Subtitle for the geohash sample grouping toggle
+  ///
+  /// In en, this message translates to:
+  /// **'One marker per geohash cell at the average measurement position, at any zoom; tapping it lists every measurement inside'**
+  String get settingsGroupSamplesByGeohashSubtitle;
+
   /// Toggle to show coverage edges
   ///
   /// In en, this message translates to:
@@ -463,6 +499,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Show Repeaters'**
   String get settingsShowRepeaters;
+
+  /// Toggle to show privacy-zone overlays
+  ///
+  /// In en, this message translates to:
+  /// **'Show Privacy Zones'**
+  String get settingsShowPrivacyZones;
+
+  /// Subtitle for the privacy-zone overlay toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Show zone centers and data-exclusion radii on the map'**
+  String get settingsShowPrivacyZonesSubtitle;
+
+  /// Toggle to show GPS-exclusion-zone overlays
+  ///
+  /// In en, this message translates to:
+  /// **'Show GPS Exclusion Zones'**
+  String get settingsShowGpsExclusionZones;
+
+  /// Subtitle for the GPS-exclusion-zone overlay toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Show zone centers and GPS-rejection radii on the map'**
+  String get settingsShowGpsExclusionZonesSubtitle;
 
   /// Toggle to show GPS-only sample markers
   ///
@@ -487,6 +547,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hide failed pings and GPS-only samples'**
   String get settingsShowSuccessfulPingsOnlySubtitle;
+
+  /// Toggle to paint coverage cells green when any ping succeeded
+  ///
+  /// In en, this message translates to:
+  /// **'Optimistic Coverage'**
+  String get settingsOptimisticDisplay;
+
+  /// Subtitle for the optimistic coverage toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Count a cell as good when any ping succeeded; a success older than a month loses to newer failures'**
+  String get settingsOptimisticDisplaySubtitle;
 
   /// Toggle to draw the driven path
   ///
@@ -715,6 +787,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'e.g., BAD5DC49'**
   String get settingsRepeaterIdHint;
+
+  /// Search hint in the Carpeater target repeater picker
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name or ID'**
+  String get settingsTargetRepeaterSearchHint;
+
+  /// Action to type a Carpeater repeater ID by hand
+  ///
+  /// In en, this message translates to:
+  /// **'Enter manually…'**
+  String get settingsEnterRepeaterManually;
 
   /// Carpeater admin password tile and dialog title
   ///
@@ -1409,7 +1493,7 @@ abstract class AppLocalizations {
   /// Explanation of impossible zones
   ///
   /// In en, this message translates to:
-  /// **'Places you cannot physically be. GPS inside a zone is discarded and the last valid position is kept. Zones are not shown on the map.'**
+  /// **'Places you cannot physically be. GPS inside a zone is discarded and the last valid position is kept. Their map overlay is controlled in Map Display.'**
   String get settingsImpossibleZonesBlurb;
 
   /// Tile and dialog title to add an impossible zone
@@ -3386,6 +3470,66 @@ abstract class AppLocalizations {
   /// **'Response: '**
   String get mapResponseLabel;
 
+  /// Hyperlink on the sample dialog opening the detailed measurement sheet
+  ///
+  /// In en, this message translates to:
+  /// **'More details'**
+  String get mapMoreDetails;
+
+  /// Title of the detailed measurement bottom sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Measurement details'**
+  String get mapSampleDetailsTitle;
+
+  /// Label before a sample geohash
+  ///
+  /// In en, this message translates to:
+  /// **'Geohash: '**
+  String get mapGeohashLabel;
+
+  /// Label before the companion radio device id
+  ///
+  /// In en, this message translates to:
+  /// **'Device: '**
+  String get mapDeviceLabel;
+
+  /// Label before the operator/device source name of a sample
+  ///
+  /// In en, this message translates to:
+  /// **'Source: '**
+  String get mapSourceLabel;
+
+  /// Header of the responder list in the detailed measurement sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Repeaters that responded ({count})'**
+  String mapRespondersTitle(int count);
+
+  /// Strongest RSSI across the responding repeaters
+  ///
+  /// In en, this message translates to:
+  /// **'Best signal: {value}'**
+  String mapBestSignal(String value);
+
+  /// Shown when a failed ping has no recorded responses
+  ///
+  /// In en, this message translates to:
+  /// **'No repeaters heard on this ping.'**
+  String get mapNoResponders;
+
+  /// Marks the tapped sample within the responder list
+  ///
+  /// In en, this message translates to:
+  /// **'This measurement'**
+  String get mapThisMeasurement;
+
+  /// Title of the measurement list sheet opened from grouped-sample or coverage-cell dialogs
+  ///
+  /// In en, this message translates to:
+  /// **'Measurements ({count})'**
+  String mapMeasurementsTitle(int count);
+
   /// Label before ducting risk on sample info
   ///
   /// In en, this message translates to:
@@ -3499,6 +3643,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Lost: '**
   String get mapLostLabel;
+
+  /// Title of the hint explaining freshness-weighted coverage counters
+  ///
+  /// In en, this message translates to:
+  /// **'How the cell counters work'**
+  String get mapCountersHintTitle;
+
+  /// Body of the hint explaining freshness-weighted coverage counters
+  ///
+  /// In en, this message translates to:
+  /// **'Cell counters weigh measurements by freshness: pings younger than a day count in full (×1.0), 1–7 days old at ×0.8, 1–4 weeks at ×0.5, older than a month at ×0.2. Results contradicted by several newer measurements lose extra weight. That is why these numbers can be fractional and may differ from the number of rows in the measurements list — outdated data counts less on the map. GPS-only records (no ping attempted) are not included in the counters.'**
+  String get mapCountersHintBody;
 
   /// Label before count of heard repeaters
   ///
@@ -5416,17 +5572,29 @@ abstract class AppLocalizations {
   /// **'Discover 50 repeaters'**
   String get achievementRepeaters50Description;
 
+  /// Word for miles used in distance achievement descriptions when the distance unit setting is miles
+  ///
+  /// In en, this message translates to:
+  /// **'miles'**
+  String get achievementDistanceUnitMiles;
+
+  /// Word for kilometers used in distance achievement descriptions when the distance unit setting is kilometers
+  ///
+  /// In en, this message translates to:
+  /// **'km'**
+  String get achievementDistanceUnitKm;
+
   /// Title for the miles_10 achievement
   ///
   /// In en, this message translates to:
   /// **'Road Warrior'**
   String get achievementMiles10Title;
 
-  /// Description for the miles_10 achievement
+  /// Description for the miles_10 achievement; {unit} follows the selected distance unit without conversion
   ///
   /// In en, this message translates to:
-  /// **'Drive 10 miles wardriving'**
-  String get achievementMiles10Description;
+  /// **'Drive 10 {unit} wardriving'**
+  String achievementMiles10Description(Object unit);
 
   /// Title for the miles_100 achievement
   ///
@@ -5434,11 +5602,11 @@ abstract class AppLocalizations {
   /// **'Highway Hero'**
   String get achievementMiles100Title;
 
-  /// Description for the miles_100 achievement
+  /// Description for the miles_100 achievement; {unit} follows the selected distance unit without conversion
   ///
   /// In en, this message translates to:
-  /// **'Drive 100 miles wardriving'**
-  String get achievementMiles100Description;
+  /// **'Drive 100 {unit} wardriving'**
+  String achievementMiles100Description(Object unit);
 
   /// Title for the miles_500 achievement
   ///
@@ -5446,11 +5614,11 @@ abstract class AppLocalizations {
   /// **'Cross Country'**
   String get achievementMiles500Title;
 
-  /// Description for the miles_500 achievement
+  /// Description for the miles_500 achievement; {unit} follows the selected distance unit without conversion
   ///
   /// In en, this message translates to:
-  /// **'Drive 500 miles wardriving'**
-  String get achievementMiles500Description;
+  /// **'Drive 500 {unit} wardriving'**
+  String achievementMiles500Description(Object unit);
 
   /// Title for the cells_50 achievement
   ///

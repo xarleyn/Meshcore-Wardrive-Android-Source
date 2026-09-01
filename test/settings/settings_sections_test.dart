@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:meshcore_wardrive/l10n/generated/app_localizations.dart';
 import 'package:meshcore_wardrive/models/location_quality_settings.dart';
+import 'package:meshcore_wardrive/models/models.dart';
 import 'package:meshcore_wardrive/screens/settings/sections/carpeater_section.dart';
 import 'package:meshcore_wardrive/screens/settings/sections/feedback_section.dart';
 import 'package:meshcore_wardrive/screens/settings/sections/location_quality_section.dart';
@@ -82,12 +83,64 @@ void main() {
     expect(enabled, isTrue);
   });
 
+  testWidgets('carpeater target tile shows name and ID of the selection', (
+    tester,
+  ) async {
+    await _pumpCarpeaterSection(
+      tester,
+      repeaterId: 'BAD5DC49',
+      repeaters: [
+        Repeater(
+          id: 'BAD5DC49',
+          position: const LatLng(55.1, 32.2),
+          name: 'Hilltop',
+        ),
+      ],
+    );
+
+    expect(find.text('Hilltop'), findsOneWidget);
+    expect(find.text('BAD5DC49'), findsOneWidget);
+  });
+
+  testWidgets('carpeater target tile opens searchable picker and delegates', (
+    tester,
+  ) async {
+    String? pickedId;
+    final l10n = await _pumpCarpeaterSection(
+      tester,
+      repeaters: [
+        Repeater(
+          id: 'BAD5DC49',
+          position: const LatLng(55.1, 32.2),
+          name: 'Hilltop',
+        ),
+      ],
+      onRepeaterIdChanged: (value) => pickedId = value,
+    );
+
+    // Open the picker from the target repeater tile (the switch tile also
+    // contains a ListTile, so match the title instead of the tile type).
+    await tester.tap(find.text(l10n.settingsTargetRepeater));
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.settingsTargetRepeaterSearchHint), findsOneWidget);
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.text('Hilltop'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(pickedId, 'BAD5DC49');
+  });
+
   testWidgets('map display section delegates typed setting changes', (
     tester,
   ) async {
     MapDisplaySetting? changedSetting;
     bool? changedValue;
-    await pumpWithL10n(
+    final l10n = await pumpWithL10n(
       tester,
       Builder(
         builder: (context) => Scaffold(
@@ -98,10 +151,16 @@ void main() {
                 showCoverage: false,
                 mapLodEnabled: false,
                 showSamples: false,
+                fixedSampleMarkerSizeEnabled: false,
+                sampleMarkerRadius: 10,
+                sampleGeohashGrouping: false,
                 showEdges: false,
                 showRepeaters: false,
+                showPrivacyZones: false,
+                showGpsExclusionZones: false,
                 showGpsSamples: false,
                 showSuccessfulOnly: false,
+                optimisticDisplay: false,
                 showRouteTrail: false,
                 communityCoverageAvailable: false,
                 showCommunityCoverage: false,
@@ -112,6 +171,8 @@ void main() {
                 changedSetting = setting;
                 changedValue = value;
               },
+              onSampleMarkerRadiusChanged: (_) {},
+              onSampleMarkerRadiusChangeEnd: (_) {},
               onClearCommunityCoverage: () {},
             ),
           ),
@@ -123,6 +184,93 @@ void main() {
 
     expect(changedSetting, MapDisplaySetting.coverage);
     expect(changedValue, isTrue);
+    expect(
+      find.byKey(const ValueKey('sample-marker-size-slider')),
+      findsNothing,
+    );
+
+    // The optimistic coverage toggle reports its own setting kind.
+    changedSetting = null;
+    changedValue = null;
+    final optimisticToggle = find.text(l10n.settingsOptimisticDisplay);
+    await tester.scrollUntilVisible(optimisticToggle, 100);
+    await tester.tap(optimisticToggle);
+
+    expect(changedSetting, MapDisplaySetting.optimisticDisplay);
+    expect(changedValue, isTrue);
+
+    for (final toggle in [
+      (
+        title: l10n.settingsShowPrivacyZones,
+        setting: MapDisplaySetting.privacyZones,
+      ),
+      (
+        title: l10n.settingsShowGpsExclusionZones,
+        setting: MapDisplaySetting.gpsExclusionZones,
+      ),
+    ]) {
+      changedSetting = null;
+      changedValue = null;
+      final title = find.text(toggle.title);
+      await tester.scrollUntilVisible(title, 100);
+      await tester.tap(title);
+
+      expect(changedSetting, toggle.setting);
+      expect(changedValue, isTrue);
+    }
+  });
+
+  testWidgets('fixed sample point size reveals and delegates the slider', (
+    tester,
+  ) async {
+    double? changedRadius;
+    double? savedRadius;
+    final l10n = await pumpWithL10n(
+      tester,
+      Builder(
+        builder: (context) => Scaffold(
+          body: ListView(
+            children: buildMapDisplaySettings(
+              context,
+              values: const MapDisplaySettingsValues(
+                showCoverage: false,
+                mapLodEnabled: false,
+                showSamples: true,
+                fixedSampleMarkerSizeEnabled: true,
+                sampleMarkerRadius: 10,
+                sampleGeohashGrouping: false,
+                showEdges: false,
+                showRepeaters: false,
+                showPrivacyZones: false,
+                showGpsExclusionZones: false,
+                showGpsSamples: false,
+                showSuccessfulOnly: false,
+                optimisticDisplay: false,
+                showRouteTrail: false,
+                communityCoverageAvailable: false,
+                showCommunityCoverage: false,
+                showHeatmap: false,
+                showPredictionRings: false,
+              ),
+              onChanged: (_, _) {},
+              onSampleMarkerRadiusChanged: (value) => changedRadius = value,
+              onSampleMarkerRadiusChangeEnd: (value) => savedRadius = value,
+              onClearCommunityCoverage: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(l10n.settingsSampleMarkerSize(20)), findsOneWidget);
+    final slider = tester.widget<Slider>(
+      find.byKey(const ValueKey('sample-marker-size-slider')),
+    );
+    slider.onChanged!(14);
+    slider.onChangeEnd!(14);
+
+    expect(changedRadius, 14);
+    expect(savedRadius, 14);
   });
 
   testWidgets('ping pause toggle hides the bad-fix threshold when off', (
@@ -182,6 +330,37 @@ void main() {
 }
 
 LocationQualitySettings? currentSettings;
+
+Future<AppLocalizations> _pumpCarpeaterSection(
+  WidgetTester tester, {
+  String? repeaterId,
+  List<Repeater> repeaters = const [],
+  void Function(String? value)? onRepeaterIdChanged,
+}) {
+  return pumpWithL10n(
+    tester,
+    Builder(
+      builder: (context) => Scaffold(
+        body: ListView(
+          children: buildCarpeaterSettings(
+            context,
+            values: CarpeaterSettingsValues(
+              enabled: true,
+              repeaterId: repeaterId,
+              password: null,
+              interval: 30,
+              foundRepeaters: repeaters,
+            ),
+            onEnabledChanged: (_) {},
+            onRepeaterIdChanged: onRepeaterIdChanged ?? (_) {},
+            onPasswordChanged: (_) {},
+            onIntervalChanged: (_) {},
+          ),
+        ),
+      ),
+    ),
+  );
+}
 
 Future<AppLocalizations> _pumpLocationQualitySection(WidgetTester tester) {
   return pumpWithL10n(
