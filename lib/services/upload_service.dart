@@ -148,102 +148,24 @@ class UploadService {
         return UploadResult(success: true, message: 'No new samples to upload');
       }
 
-      final samplesJson = _samplesToJson(samples, repeaterNames: repeaterNames);
+      final result = await _uploadSamplesToEndpoint(
+        apiUrl,
+        samples,
+        repeaterNames: repeaterNames,
+        onProgress: onProgress,
+      );
 
-      debugPrint('Uploading ${samplesJson.length} samples in batches...');
-
-      // Split into batches of 100 samples each
-      const batchSize = 100;
-      final totalBatches = (samplesJson.length / batchSize).ceil();
-      int totalCells = 0;
-
-      for (int i = 0; i < totalBatches; i++) {
-        final start = i * batchSize;
-        final end = (start + batchSize < samplesJson.length)
-            ? start + batchSize
-            : samplesJson.length;
-        final batch = samplesJson.sublist(start, end);
-
-        // Report progress
-        if (onProgress != null) {
-          onProgress(i + 1, totalBatches);
-        }
-
-        debugPrint(
-          'Uploading batch ${i + 1}/$totalBatches (${batch.length} samples)',
-        );
-
-        // Try up to 2 times (original + 1 retry)
-        bool success = false;
-        http.Response? response;
-        String? error;
-
-        for (int attempt = 0; attempt < 2; attempt++) {
-          try {
-            response = await http
-                .post(
-                  Uri.parse(apiUrl),
-                  headers: {'Content-Type': 'application/json'},
-                  body: jsonEncode({'samples': batch}),
-                )
-                .timeout(const Duration(seconds: 60));
-
-            if (response.statusCode == 200) {
-              success = true;
-              final responseData = jsonDecode(response.body);
-              totalCells = responseData['totalCells'] ?? totalCells;
-              break; // Success, exit retry loop
-            } else {
-              error = 'Server error: ${response.statusCode}';
-              if (attempt == 0) {
-                debugPrint(
-                  'Batch ${i + 1} failed with ${response.statusCode}, retrying...',
-                );
-                await Future.delayed(const Duration(seconds: 2));
-              }
-            }
-          } catch (e) {
-            error = e.toString();
-            if (attempt == 0) {
-              debugPrint('Batch ${i + 1} failed: $e, retrying...');
-              await Future.delayed(const Duration(seconds: 2));
-            }
-          }
-        }
-
-        if (!success) {
-          return UploadResult(
-            success: false,
-            message: 'Failed at batch ${i + 1}/$totalBatches: $error',
-          );
-        }
-      }
-
-      // All batches successful
-      await _setLastUploadTime(DateTime.now());
-
-      // Mark ALL samples (including GPS-only) as uploaded so they don't get re-queried
-      final allSampleIds = allSamples.map((s) => s.id).toList();
-      if (isDefault) {
+      // Mark ALL samples (including GPS-only) as uploaded so they don't get
+      // re-queried.
+      if (result.success && isDefault) {
+        final allSampleIds = allSamples.map((s) => s.id).toList();
         await _db.markSamplesAsUploaded(allSampleIds);
       }
 
-      return UploadResult(
-        success: true,
-        message: 'Upload Complete',
-        uploadedCount: samples.length,
-        totalCount: totalCells,
-      );
+      return result;
     } catch (e) {
       return UploadResult(success: false, message: 'Upload failed: $e');
     }
-  }
-
-  /// Upload only samples since last upload (deprecated - use uploadAllSamples instead)
-  Future<UploadResult> uploadNewSamples({
-    Map<String, String>? repeaterNames,
-  }) async {
-    return uploadAllSamples(repeaterNames: repeaterNames);
   }
 
   /// Download community coverage data from a map endpoint.
