@@ -68,6 +68,9 @@ app.*.map.json
 # Local AI tooling
 .aider*
 
+# Local scratch scripts and data exports
+/tmp/
+
 # Environment files may contain secrets
 .env
 .env.*
