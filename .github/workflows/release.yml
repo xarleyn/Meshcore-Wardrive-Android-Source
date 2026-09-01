@@ -61,6 +61,34 @@ jobs:
           } >> "$GITHUB_OUTPUT"
           echo "Publishing ${raw} as ${tag} (${asset_name})"
 
+      - name: Extract release notes from CHANGELOG
+        id: notes
+        env:
+          VERSION_NAME: ${{ steps.version.outputs.version_name }}
+          ASSET_NAME: ${{ steps.version.outputs.asset_name }}
+        run: |
+          set -euo pipefail
+          section_file="$RUNNER_TEMP/changelog-section.md"
+          # Matches the heading line "## v{VERSION_NAME} - date" exactly
+          # (every CHANGELOG heading has a space after the version).
+          awk -v title="## v${VERSION_NAME} " '
+            index($0, title) == 1 { found = 1; next }
+            found && /^## / { exit }
+            found { print }
+          ' CHANGELOG.md > "$section_file"
+          if [[ ! -s "$section_file" ]]; then
+            echo "No CHANGELOG.md section found for v${VERSION_NAME}." >&2
+            echo "Add a '## v${VERSION_NAME} - date' section describing this release first." >&2
+            exit 1
+          fi
+          notes_file="$RUNNER_TEMP/release-notes.md"
+          {
+            cat "$section_file"
+            printf '\n---\n\n**APK:** `%s`\n' "$ASSET_NAME"
+          } > "$notes_file"
+          echo "notes_file=${notes_file}" >> "$GITHUB_OUTPUT"
+          cat "$notes_file"
+
       - name: Ensure versionCode increases
         env:
           GH_TOKEN: ${{ github.token }}
@@ -184,15 +212,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.version.outputs.tag }}
-          VERSION_NAME: ${{ steps.version.outputs.version_name }}
-          VERSION_CODE: ${{ steps.version.outputs.version_code }}
           ASSET_NAME: ${{ steps.version.outputs.asset_name }}
+          NOTES_FILE: ${{ steps.notes.outputs.notes_file }}
           PRERELEASE: ${{ inputs.prerelease }}
         run: |
           set -euo pipefail
           args=(gh release create "$TAG" "$ASSET_NAME"
             --title "$TAG"
-            --notes "Signed release APK for ${VERSION_NAME} (versionCode ${VERSION_CODE})."
+            --notes-file "$NOTES_FILE"
             --target "${{ github.sha }}"
           )
           if [[ "$PRERELEASE" == "true" ]]; then

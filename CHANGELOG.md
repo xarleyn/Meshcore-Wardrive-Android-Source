@@ -69,7 +69,8 @@
   without the suffix, ignores downgrades, and selects the newest compatible
   tag from multiple GitHub releases.
 - The release workflow verifies package ID, version name, increasing version
-  code, APK signature, release tag, and asset name before publication.
+  code, APK signature, release tag, and asset name before publication, and
+  fills the GitHub release description from the matching CHANGELOG section.
 
 ### Fixed
 

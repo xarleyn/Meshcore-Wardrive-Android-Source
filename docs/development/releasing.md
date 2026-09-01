@@ -128,6 +128,10 @@ Copy the value shown as `SHA256` into `ANDROID_CERT_SHA256`.
 4. The workflow creates tag `v{versionName}` (for example
    `v1.0.44-x`) and attaches
    `meshcore-wardrive-xarleyn-{versionName}-{versionCode}.apk`.
+5. The release description is filled automatically from the matching
+   `## v{versionName} - date` section of `CHANGELOG.md`, followed by the APK
+   asset name. The workflow fails before building when that section is
+   missing, so keep the changelog entry for the released version up to date.
 
 If that tag or release already exists, the workflow fails so you can bump the
 version first. It also fails when the version suffix, package ID, version code,
