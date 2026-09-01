@@ -196,6 +196,9 @@ jobs:
           expected_cert="$(printf '%s' "$EXPECTED_CERT_SHA256" | tr -d ':[:space:]' | tr '[:upper:]' '[:lower:]')"
           if [[ -z "$actual_cert" || "$actual_cert" != "$expected_cert" ]]; then
             echo "APK signer SHA-256 does not match ANDROID_CERT_SHA256." >&2
+            # The APK certificate digest is public (extractable from the APK),
+            # so printing it here is safe and speeds up secret debugging.
+            echo "APK certificate SHA-256: ${actual_cert:-<none>}" >&2
             exit 1
           fi
 
