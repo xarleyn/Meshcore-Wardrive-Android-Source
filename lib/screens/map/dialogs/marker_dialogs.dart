@@ -208,6 +208,83 @@ class PlannedMarkerInfoDialog extends StatelessWidget {
   }
 }
 
+/// Shows the add-zone dialog over the map with map-preview support.
+///
+/// The dialog can be collapsed to a small bar at the bottom of the screen so
+/// the zone circle [radius] can be previewed on the map underneath. Every
+/// radius change is reported through [onPreviewRadius] (`null` is never
+/// reported; the caller clears the preview when the future completes).
+Future<T?> showAddZoneDialog<T>({
+  required BuildContext context,
+  required LatLng center,
+  required String title,
+  required String blurb,
+  required String labelHint,
+  required T Function(double radiusMeters, String? label) createDraft,
+  ValueChanged<double?>? onPreviewRadius,
+}) {
+  final collapsed = ValueNotifier<bool>(false);
+  final route = _ZoneDialogRoute<T>(
+    collapsed: collapsed,
+    pageBuilder: (context) => _AddCircularZoneDialog<T>(
+      center: center,
+      title: title,
+      blurb: blurb,
+      labelHint: labelHint,
+      createDraft: createDraft,
+      collapsed: collapsed,
+      onPreviewRadius: onPreviewRadius,
+    ),
+  );
+  return Navigator.of(context, rootNavigator: true).push(route);
+}
+
+/// A dialog route whose modal barrier is removed while the dialog is
+/// collapsed, so the map below stays visible and interactive for previewing.
+class _ZoneDialogRoute<T> extends PopupRoute<T> {
+  _ZoneDialogRoute({required this.pageBuilder, required this.collapsed});
+
+  final WidgetBuilder pageBuilder;
+  final ValueNotifier<bool> collapsed;
+
+  @override
+  Color? get barrierColor => Colors.black54;
+
+  @override
+  bool get barrierDismissible => false;
+
+  @override
+  String? get barrierLabel => 'Add zone dialog';
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 200);
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
+    return pageBuilder(context);
+  }
+
+  @override
+  Widget buildModalBarrier() {
+    return ValueListenableBuilder<bool>(
+      valueListenable: collapsed,
+      child: super.buildModalBarrier(),
+      builder: (context, isCollapsed, barrier) =>
+          isCollapsed ? const SizedBox.shrink() : barrier!,
+    );
+  }
+
+  @override
+  void dispose() {
+    collapsed.dispose();
+    super.dispose();
+  }
+}
+
 class AddPrivacyZoneDialog extends StatelessWidget {
   const AddPrivacyZoneDialog({required this.center, super.key});
 
@@ -256,6 +333,8 @@ class _AddCircularZoneDialog<T> extends StatefulWidget {
     required this.blurb,
     required this.labelHint,
     required this.createDraft,
+    this.collapsed,
+    this.onPreviewRadius,
   });
 
   final LatLng center;
@@ -263,6 +342,10 @@ class _AddCircularZoneDialog<T> extends StatefulWidget {
   final String blurb;
   final String labelHint;
   final T Function(double radiusMeters, String? label) createDraft;
+
+  /// Provided only when the dialog runs in the collapsible map-preview flow.
+  final ValueNotifier<bool>? collapsed;
+  final ValueChanged<double?>? onPreviewRadius;
 
   @override
   State<_AddCircularZoneDialog<T>> createState() =>
@@ -278,11 +361,27 @@ class _AddCircularZoneDialogState<T> extends State<_AddCircularZoneDialog<T>> {
   final _radiusController = TextEditingController(text: '1000');
   double _selectedRadius = 1000;
 
+  bool get _collapsed => widget.collapsed?.value ?? false;
+
   @override
   void dispose() {
     _labelController.dispose();
     _radiusController.dispose();
     super.dispose();
+  }
+
+  void _notifyPreview() {
+    widget.onPreviewRadius?.call(_selectedRadius);
+  }
+
+  void _setCollapsed(bool value) {
+    final collapsed = widget.collapsed;
+    if (collapsed == null || collapsed.value == value) return;
+    if (value) {
+      FocusManager.instance.primaryFocus?.unfocus();
+      _notifyPreview();
+    }
+    setState(() => collapsed.value = value);
   }
 
   void _onRadiusChanged(String value) {
@@ -291,6 +390,7 @@ class _AddCircularZoneDialogState<T> extends State<_AddCircularZoneDialog<T>> {
     setState(() {
       _selectedRadius = meters.clamp(minRadiusMeters, maxRadiusMeters);
     });
+    _notifyPreview();
   }
 
   void _onSliderChanged(double value) {
@@ -298,6 +398,7 @@ class _AddCircularZoneDialogState<T> extends State<_AddCircularZoneDialog<T>> {
       _selectedRadius = value;
       _radiusController.text = value.toStringAsFixed(0);
     });
+    _notifyPreview();
   }
 
   void _normalizeRadiusText(String value) {
@@ -307,10 +408,52 @@ class _AddCircularZoneDialogState<T> extends State<_AddCircularZoneDialog<T>> {
     }
   }
 
+  void _submit() {
+    _normalizeRadiusText(_radiusController.text);
+    final label = _labelController.text.trim();
+    Navigator.pop(
+      context,
+      widget.createDraft(_selectedRadius, label.isEmpty ? null : label),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final collapsedNotifier = widget.collapsed;
+    if (collapsedNotifier == null) {
+      // Standalone dialog (no map preview support requested).
+      return Dialog(child: _buildForm(l10n));
+    }
 
+    final collapsed = collapsedNotifier.value;
+    return SafeArea(
+      child: Stack(
+        children: [
+          // Expanded form; hidden while the preview bar is shown.
+          Offstage(
+            offstage: collapsed,
+            child: Dialog(child: _buildForm(l10n)),
+          ),
+          // Collapsed preview bar at the bottom of the screen.
+          IgnorePointer(
+            ignoring: !collapsed,
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 200),
+              opacity: collapsed ? 1 : 0,
+              child: AnimatedScale(
+                duration: const Duration(milliseconds: 200),
+                scale: collapsed ? 1 : 0.9,
+                child: _buildPreviewBar(l10n),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildForm(AppLocalizations l10n) {
     return AlertDialog(
       title: Text(widget.title),
       content: SingleChildScrollView(
@@ -359,6 +502,19 @@ class _AddCircularZoneDialogState<T> extends State<_AddCircularZoneDialog<T>> {
               label: '${_selectedRadius.toStringAsFixed(0)} m',
               onChanged: _onSliderChanged,
             ),
+            if (widget.collapsed != null)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
+                  key: const Key('zone_dialog_preview'),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  onPressed: () => _setCollapsed(true),
+                  child: Text(l10n.mapZonePreview),
+                ),
+              ),
           ],
         ),
       ),
@@ -367,18 +523,65 @@ class _AddCircularZoneDialogState<T> extends State<_AddCircularZoneDialog<T>> {
           onPressed: () => Navigator.pop(context),
           child: Text(l10n.settingsCancel),
         ),
-        TextButton(
-          onPressed: () {
-            _normalizeRadiusText(_radiusController.text);
-            final label = _labelController.text.trim();
-            Navigator.pop(
-              context,
-              widget.createDraft(_selectedRadius, label.isEmpty ? null : label),
-            );
-          },
-          child: Text(l10n.settingsAddZone),
-        ),
+        TextButton(onPressed: _submit, child: Text(l10n.settingsAddZone)),
       ],
+    );
+  }
+
+  Widget _buildPreviewBar(AppLocalizations l10n) {
+    final theme = Theme.of(context);
+    return Align(
+      key: const Key('zone_preview_bar'),
+      alignment: Alignment.bottomCenter,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        child: Material(
+          elevation: 8,
+          borderRadius: BorderRadius.circular(28),
+          color: theme.colorScheme.surfaceContainerHighest,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 6, 8, 6),
+            child: Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 4,
+              runSpacing: 0,
+              children: [
+                Icon(
+                  Icons.visibility_outlined,
+                  size: 18,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  l10n.mapZonePreviewActive,
+                  style: theme.textTheme.bodySmall,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '${_selectedRadius.toStringAsFixed(0)} m',
+                  style: theme.textTheme.titleSmall,
+                ),
+                TextButton(
+                  key: const Key('zone_preview_resume'),
+                  onPressed: () => _setCollapsed(false),
+                  child: Text(l10n.mapZonePreviewEdit),
+                ),
+                TextButton(
+                  key: const Key('zone_preview_confirm'),
+                  onPressed: _submit,
+                  child: Text(l10n.settingsAddZone),
+                ),
+                IconButton(
+                  key: const Key('zone_preview_cancel'),
+                  tooltip: l10n.settingsCancel,
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

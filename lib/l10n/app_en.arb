@@ -2113,6 +2113,18 @@
   "@mapAddPrivacyZone": {
     "description": "Title of the add-privacy-zone dialog"
   },
+  "mapZonePreview": "Preview on map",
+  "@mapZonePreview": {
+    "description": "Hyperlink button in zone dialogs that collapses the dialog and previews the zone circle on the map"
+  },
+  "mapZonePreviewActive": "Zone preview",
+  "@mapZonePreviewActive": {
+    "description": "Label of the collapsed bar shown while a zone circle is previewed on the map"
+  },
+  "mapZonePreviewEdit": "Edit",
+  "@mapZonePreviewEdit": {
+    "description": "Button on the collapsed zone preview bar to reopen the zone dialog"
+  },
   "mapPrivacyZoneBlurb": "Data inside this zone will be excluded from uploads and exports.",
   "@mapPrivacyZoneBlurb": {
     "description": "Explanation in the add-privacy-zone dialog"

@@ -2894,6 +2894,24 @@ abstract class AppLocalizations {
   /// **'Add Privacy Zone'**
   String get mapAddPrivacyZone;
 
+  /// Hyperlink button in zone dialogs that collapses the dialog and previews the zone circle on the map
+  ///
+  /// In en, this message translates to:
+  /// **'Preview on map'**
+  String get mapZonePreview;
+
+  /// Label of the collapsed bar shown while a zone circle is previewed on the map
+  ///
+  /// In en, this message translates to:
+  /// **'Zone preview'**
+  String get mapZonePreviewActive;
+
+  /// Button on the collapsed zone preview bar to reopen the zone dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get mapZonePreviewEdit;
+
   /// Explanation in the add-privacy-zone dialog
   ///
   /// In en, this message translates to:

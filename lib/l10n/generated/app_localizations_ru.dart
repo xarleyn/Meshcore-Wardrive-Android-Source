@@ -1683,6 +1683,15 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mapAddPrivacyZone => 'Добавить зону приватности';
 
   @override
+  String get mapZonePreview => 'Предпросмотр на карте';
+
+  @override
+  String get mapZonePreviewActive => 'Предпросмотр зоны';
+
+  @override
+  String get mapZonePreviewEdit => 'Изменить';
+
+  @override
   String get mapPrivacyZoneBlurb =>
       'Данные внутри этой зоны будут исключены из отправок и экспорта.';
 

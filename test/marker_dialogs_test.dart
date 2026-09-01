@@ -216,4 +216,60 @@ void main() {
         .text;
     expect(int.parse(text), greaterThan(1000));
   });
+
+  testWidgets('zone dialog collapses to a preview bar and reports radius', (
+    tester,
+  ) async {
+    PrivacyZoneDraft? result;
+    final previewed = <double?>[];
+    await pumpWithL10n(
+      tester,
+      Scaffold(
+        body: Builder(
+          builder: (context) => TextButton(
+            onPressed: () async {
+              result = await showAddZoneDialog<PrivacyZoneDraft>(
+                context: context,
+                center: const LatLng(55.75, 37.62),
+                title: 'Zone',
+                blurb: 'Blurb',
+                labelHint: 'Hint',
+                onPreviewRadius: previewed.add,
+                createDraft: (radiusMeters, label) =>
+                    PrivacyZoneDraft(radiusMeters: radiusMeters, label: label),
+              );
+            },
+            child: const Text('Open'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+
+    // Collapse: the form hides and the preview bar shows the current radius.
+    await tester.tap(find.byKey(const Key('zone_dialog_preview')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('zone_preview_bar')), findsOneWidget);
+    expect(find.byKey(const Key('zone_dialog_radius')), findsNothing);
+    expect(previewed.last, 1000);
+
+    // Resume editing: radius changes are reported for the live preview.
+    await tester.tap(find.byKey(const Key('zone_preview_resume')));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('zone_dialog_radius')), '2500');
+    await tester.pump();
+    expect(previewed.last, 2500);
+
+    // Collapse again and confirm straight from the preview bar.
+    await tester.tap(find.byKey(const Key('zone_dialog_preview')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('zone_preview_confirm')));
+    await tester.pumpAndSettle();
+
+    expect(result?.radiusMeters, 2500);
+    expect(result?.label, isNull);
+    expect(previewed.last, 2500);
+  });
 }

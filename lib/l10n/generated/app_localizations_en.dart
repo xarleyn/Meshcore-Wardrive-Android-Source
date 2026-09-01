@@ -1657,6 +1657,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mapAddPrivacyZone => 'Add Privacy Zone';
 
   @override
+  String get mapZonePreview => 'Preview on map';
+
+  @override
+  String get mapZonePreviewActive => 'Zone preview';
+
+  @override
+  String get mapZonePreviewEdit => 'Edit';
+
+  @override
   String get mapPrivacyZoneBlurb =>
       'Data inside this zone will be excluded from uploads and exports.';
 

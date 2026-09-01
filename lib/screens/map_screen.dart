@@ -292,6 +292,9 @@ class _MapScreenState extends State<MapScreen> {
   List<Map<String, dynamic>> _privacyZones = [];
   List<ImpossibleZone> _impossibleZones = [];
 
+  // Zone circle previewed on the map while the add-zone dialog is collapsed.
+  ({LatLng center, double radiusMeters, Color color})? _zonePreview;
+
   // Battery saver mode
   bool _batterySaverActive = false;
   bool _batterySaverEnabled = true;
@@ -1596,10 +1599,21 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _addPrivacyZone(LatLng center) async {
     final l10n = AppLocalizations.of(context);
-    final draft = await showDialog<PrivacyZoneDraft>(
+    final draft = await showAddZoneDialog<PrivacyZoneDraft>(
       context: context,
-      builder: (context) => AddPrivacyZoneDialog(center: center),
+      center: center,
+      title: l10n.mapAddPrivacyZone,
+      blurb: l10n.mapPrivacyZoneBlurb,
+      labelHint: l10n.mapPrivacyZoneHint,
+      onPreviewRadius: (radiusMeters) => _updateMapState(() {
+        _zonePreview = radiusMeters == null
+            ? null
+            : (center: center, radiusMeters: radiusMeters, color: Colors.blue);
+      }),
+      createDraft: (radiusMeters, label) =>
+          PrivacyZoneDraft(radiusMeters: radiusMeters, label: label),
     );
+    _updateMapState(() => _zonePreview = null);
 
     if (draft != null) {
       await _databaseService.addPrivacyZone(
@@ -1616,10 +1630,28 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _addImpossibleZone(LatLng center) async {
     final l10n = AppLocalizations.of(context);
-    final draft = await showDialog<ImpossibleZoneDraft>(
+    final draft = await showAddZoneDialog<ImpossibleZoneDraft>(
       context: context,
-      builder: (context) => AddImpossibleZoneDialog(center: center),
+      center: center,
+      title: l10n.settingsAddImpossibleZone,
+      blurb: l10n.settingsAddImpossibleZoneBlurb,
+      labelHint: l10n.settingsLabelHintAirport,
+      onPreviewRadius: (radiusMeters) => _updateMapState(() {
+        _zonePreview = radiusMeters == null
+            ? null
+            : (
+                center: center,
+                radiusMeters: radiusMeters,
+                color: Colors.orange,
+              );
+      }),
+      createDraft: (radiusMeters, label) => ImpossibleZoneDraft(
+        center: center,
+        radiusMeters: radiusMeters,
+        label: label,
+      ),
     );
+    _updateMapState(() => _zonePreview = null);
 
     if (draft == null) return;
     await _databaseService.addImpossibleZone(
@@ -2146,6 +2178,16 @@ class _MapScreenState extends State<MapScreen> {
                 ),
             ],
             color: Colors.deepOrange,
+          ),
+        if (_zonePreview != null)
+          ZoneOverlayLayer(
+            zones: [
+              ZoneOverlay(
+                center: _zonePreview!.center,
+                radiusMeters: _zonePreview!.radiusMeters,
+              ),
+            ],
+            color: _zonePreview!.color,
           ),
         if (_showCommunityCoverage && _communityCoverage != null)
           CommunityCoverageLayer(
