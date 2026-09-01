@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/app_locale.dart';
@@ -11,7 +12,49 @@ enum CurrentLocationMarkerStyle { circle, arrow }
 
 enum MapThemeMode { system, light, dark }
 
+/// Minimal read/write/delete boundary over platform secure storage.
+///
+/// Isolates the device storage boundary so tests can substitute an in-memory
+/// fake instead of touching the real keychain/keystore (AGENTS.md: "Isolate
+/// device and network boundaries so they can be faked").
+abstract class SecureCredentialsStore {
+  Future<String?> read(String key);
+
+  Future<void> write(String key, String value);
+
+  Future<void> delete(String key);
+}
+
+/// Default [SecureCredentialsStore] backed by [FlutterSecureStorage].
+///
+/// Android keeps the plugin v10 defaults (KeyStore-wrapped AES-GCM with
+/// `resetOnError` and automatic cipher migration). The legacy
+/// `encryptedSharedPreferences` flag is deprecated and ignored by the plugin
+/// since v10, so it is intentionally left unset.
+class FlutterSecureCredentialsStore implements SecureCredentialsStore {
+  const FlutterSecureCredentialsStore();
+
+  static const FlutterSecureStorage _storage = FlutterSecureStorage(
+    aOptions: AndroidOptions(),
+  );
+
+  @override
+  Future<String?> read(String key) => _storage.read(key: key);
+
+  @override
+  Future<void> write(String key, String value) =>
+      _storage.write(key: key, value: value);
+
+  @override
+  Future<void> delete(String key) => _storage.delete(key: key);
+}
+
 class SettingsService {
+  SettingsService({SecureCredentialsStore? credentialsStore})
+    : _credentials = credentialsStore ?? const FlutterSecureCredentialsStore();
+
+  final SecureCredentialsStore _credentials;
+
   static const String _showSamplesKey = 'show_samples';
   static const String _showGpsSamplesKey = 'show_gps_samples';
   static const String _fixedSampleMarkerSizeEnabledKey =
@@ -64,6 +107,9 @@ class SettingsService {
   static const String _pingTimeIntervalKey = 'ping_time_interval_seconds';
   static const String _carpeaterEnabledKey = 'carpeater_enabled';
   static const String _carpeaterRepeaterIdKey = 'carpeater_repeater_id';
+  // Carpeater password: the value lives in secure storage. This key doubles
+  // as the secure-storage key and as the legacy plaintext prefs key that the
+  // one-time migration moves out of SharedPreferences.
   static const String _carpeaterPasswordKey = 'carpeater_password';
   static const String _carpeaterIntervalKey = 'carpeater_interval_seconds';
   static const String _deviceNameKey = 'device_name';
@@ -697,18 +743,43 @@ class SettingsService {
     }
   }
 
+  /// Carpeater admin password, stored only in platform secure storage —
+  /// never in plaintext prefs, never in settings export/import.
+  ///
+  /// Reads transparently migrate a legacy plaintext value from
+  /// SharedPreferences (read-old → write-secure → remove-old), so an update
+  /// over an existing installation keeps the saved password. If the secure
+  /// write fails the legacy value stays in place and is still returned; the
+  /// next read retries the migration, which makes it idempotent.
   Future<String?> getCarpeaterPassword() async {
+    final secureValue = await _credentials.read(_carpeaterPasswordKey);
+    if (secureValue != null) {
+      return secureValue;
+    }
     final prefs = await _prefs;
-    return prefs.getString(_carpeaterPasswordKey);
+    final legacyValue = prefs.getString(_carpeaterPasswordKey);
+    if (legacyValue == null || legacyValue.isEmpty) {
+      return null;
+    }
+    try {
+      await _credentials.write(_carpeaterPasswordKey, legacyValue);
+      await prefs.remove(_carpeaterPasswordKey);
+    } catch (_) {
+      // Migration failed: keep the legacy copy so the credential is not lost.
+    }
+    return legacyValue;
   }
 
   Future<void> setCarpeaterPassword(String? value) async {
-    final prefs = await _prefs;
     if (value == null || value.isEmpty) {
-      await prefs.remove(_carpeaterPasswordKey);
+      await _credentials.delete(_carpeaterPasswordKey);
     } else {
-      await prefs.setString(_carpeaterPasswordKey, value);
+      await _credentials.write(_carpeaterPasswordKey, value);
     }
+    // Drop any pre-migration plaintext copy once the secure value is in
+    // place; a failure above leaves it untouched so nothing is lost.
+    final prefs = await _prefs;
+    await prefs.remove(_carpeaterPasswordKey);
   }
 
   Future<int> getCarpeaterInterval() async {
@@ -981,7 +1052,10 @@ class SettingsService {
     _pingTimeIntervalKey,
     _carpeaterEnabledKey,
     _carpeaterRepeaterIdKey,
-    _carpeaterPasswordKey,
+    // _carpeaterPasswordKey is intentionally absent: the Carpeater password
+    // lives in secure storage only and must never enter settings exports.
+    // importSettings iterates this same list, so legacy export files that
+    // still carry the key are skipped automatically.
     _carpeaterIntervalKey,
     _deviceNameKey,
     _lockRotationKey,

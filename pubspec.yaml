@@ -29,8 +29,6 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  cupertino_icons: ^1.0.9
-
   # Map and location
   # flutter_map 8 and flutter_map_cache 2 need a heatmap plugin that still
   # only supports flutter_map 7.
@@ -66,7 +64,6 @@ dependencies:
   # 11 needs API 37.
   flutter_secure_storage: ^10.0.0
   shared_preferences: ^2.5.5
-  pointycastle: ^4.0.0
 
   # Utilities and export
   intl: any
