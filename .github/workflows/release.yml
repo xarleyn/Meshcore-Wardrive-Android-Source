@@ -32,6 +32,9 @@ jobs:
           distribution: temurin
           java-version: "17"
 
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -166,7 +169,7 @@ jobs:
         run: dart run tool/version.dart check
 
       - name: Build release APK
-        run: flutter build apk --release
+        run: flutter build apk --release --no-pub
 
       - name: Verify release APK identity and signature
         env:
