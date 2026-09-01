@@ -22,7 +22,7 @@ class SoundService {
   SoundService._();
 
   static const _channel = MethodChannel(
-    'mintylinux.meshcore.wardrive/feedback',
+    'io.github.xarleyn.meshcore.wardrive/feedback',
   );
   final SettingsService _settings = SettingsService();
   bool _enabled = true;

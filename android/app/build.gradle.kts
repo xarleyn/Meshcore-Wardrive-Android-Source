@@ -47,7 +47,7 @@ if (releaseTaskRequested) {
 }
 
 android {
-    namespace = "mintylinux.meshcore.wardrive"
+    namespace = "io.github.xarleyn.meshcore.wardrive"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -57,7 +57,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "mintylinux.meshcore.wardrive"
+        applicationId = "io.github.xarleyn.meshcore.wardrive"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -74,6 +74,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+        }
         release {
             signingConfig = signingConfigs.getByName("release")
         }

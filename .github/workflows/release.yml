@@ -44,14 +44,14 @@ jobs:
         run: |
           set -euo pipefail
           raw="$(sed -nE 's/^version:[[:space:]]*//p' pubspec.yaml | head -n1 | tr -d '\r')"
-          if [[ ! "$raw" =~ ^([0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?)\+([0-9]+)$ ]]; then
+          if [[ ! "$raw" =~ ^([0-9]+\.[0-9]+\.[0-9]+-xarleyn\.([1-9][0-9]*))\+([1-9][0-9]*)$ ]]; then
             echo "Unexpected pubspec version format: $raw" >&2
             exit 1
           fi
           version_name="${BASH_REMATCH[1]}"
           version_code="${BASH_REMATCH[3]}"
           tag="v${version_name}"
-          asset_name="meshcore-wardrive-${version_name}-${version_code}.apk"
+          asset_name="meshcore-wardrive-xarleyn-${version_name}-${version_code}.apk"
           {
             echo "raw=${raw}"
             echo "version_name=${version_name}"
@@ -60,6 +60,27 @@ jobs:
             echo "asset_name=${asset_name}"
           } >> "$GITHUB_OUTPUT"
           echo "Publishing ${raw} as ${tag} (${asset_name})"
+
+      - name: Ensure versionCode increases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION_CODE: ${{ steps.version.outputs.version_code }}
+        run: |
+          set -euo pipefail
+          max_published_code=0
+          while IFS= read -r asset_name; do
+            if [[ "$asset_name" =~ -([0-9]+)\.apk$ ]] &&
+               (( BASH_REMATCH[1] > max_published_code )); then
+              max_published_code="${BASH_REMATCH[1]}"
+            fi
+          done < <(
+            gh api --paginate "repos/${GITHUB_REPOSITORY}/releases?per_page=100" \
+              --jq '.[].assets[].name'
+          )
+          if (( VERSION_CODE <= max_published_code )); then
+            echo "versionCode ${VERSION_CODE} must exceed published ${max_published_code}." >&2
+            exit 1
+          fi
 
       - name: Ensure release tag is free
         env:
@@ -118,6 +139,37 @@ jobs:
 
       - name: Build release APK
         run: flutter build apk --release
+
+      - name: Verify release APK identity and signature
+        env:
+          EXPECTED_CERT_SHA256: ${{ secrets.ANDROID_CERT_SHA256 }}
+          VERSION_NAME: ${{ steps.version.outputs.version_name }}
+          VERSION_CODE: ${{ steps.version.outputs.version_code }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$EXPECTED_CERT_SHA256" ]]; then
+            echo "Missing secret ANDROID_CERT_SHA256" >&2
+            exit 1
+          fi
+          apk="build/app/outputs/flutter-apk/app-release.apk"
+          build_tools="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n1)"
+          aapt="$build_tools/aapt"
+          apksigner="$build_tools/apksigner"
+          test -x "$aapt"
+          test -x "$apksigner"
+
+          badging="$($aapt dump badging "$apk" | head -n1)"
+          [[ "$badging" == *"name='io.github.xarleyn.meshcore.wardrive'"* ]]
+          [[ "$badging" == *"versionCode='${VERSION_CODE}'"* ]]
+          [[ "$badging" == *"versionName='${VERSION_NAME}'"* ]]
+
+          "$apksigner" verify --verbose "$apk"
+          actual_cert="$($apksigner verify --print-certs "$apk" | sed -nE 's/^Signer #1 certificate SHA-256 digest: (.*)$/\1/p' | head -n1 | tr -d ':[:space:]' | tr '[:upper:]' '[:lower:]')"
+          expected_cert="$(printf '%s' "$EXPECTED_CERT_SHA256" | tr -d ':[:space:]' | tr '[:upper:]' '[:lower:]')"
+          if [[ -z "$actual_cert" || "$actual_cert" != "$expected_cert" ]]; then
+            echo "APK signer SHA-256 does not match ANDROID_CERT_SHA256." >&2
+            exit 1
+          fi
 
       - name: Prepare release asset
         env:

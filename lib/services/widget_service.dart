@@ -8,7 +8,7 @@ import 'settings_service.dart';
 /// Wraps HomeWidget calls to push app state to the Android home screen widget.
 class WidgetService {
   static const String _androidWidgetName = 'WardriveWidgetProvider';
-  static const String _appGroupId = 'mintylinux.meshcore.wardrive';
+  static const String _appGroupId = 'io.github.xarleyn.meshcore.wardrive';
 
   static Future<void> initialize() async {
     await HomeWidget.setAppGroupId(_appGroupId);

@@ -15,6 +15,11 @@ List<Widget> buildAboutSettings(
       title: l10n.settingsSectionAbout,
       icon: Icons.info_outline,
     ),
+    const ListTile(
+      title: Text('xarleyn fork'),
+      subtitle: Text('io.github.xarleyn.meshcore.wardrive'),
+      leading: Icon(Icons.call_split),
+    ),
     ListTile(
       title: Text(l10n.settingsCheckForUpdates),
       subtitle: Text(l10n.settingsAboutCurrentVersion(version)),

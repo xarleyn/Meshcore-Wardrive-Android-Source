@@ -17,6 +17,18 @@
 3. Wait for installation to complete
 4. Tap **Open** or find the app in your app drawer
 
+### Important: fresh fork identity
+
+Starting with `v1.0.44-xarleyn.1`, this fork uses the Android package ID
+`io.github.xarleyn.meshcore.wardrive`. The original application and older fork
+builds used `mintylinux.meshcore.wardrive`, so Android treats this release as a
+different application. Both applications can be installed at the same time.
+
+There is no automatic data migration. The new fork starts with an empty
+database and default settings; data in the old package is not available to it.
+Treat old measurements and settings as lost for this transition. Uninstalling
+the old package permanently deletes its private data.
+
 ### Step 4: Grant Permissions
 On first launch, grant these permissions:
 - **Location** (Always) - Required for GPS tracking
@@ -61,6 +73,8 @@ On first launch, grant these permissions:
 - Make sure you have enough storage space (need ~100MB free)
 - For an update, make sure the APK has the same application ID and signing
   certificate as the installed app, and a higher build number
+- `v1.0.44-xarleyn.1` is a fresh install and does not replace a build using
+  `mintylinux.meshcore.wardrive`
 - Restart your device and try again
 
 ### Permissions denied
@@ -74,7 +88,9 @@ On first launch, grant these permissions:
 
 ## Updating
 
-To update to a new version:
+For updates between releases that already use
+`io.github.xarleyn.meshcore.wardrive`:
+
 1. Download the new APK
 2. Install over the existing app (data will be preserved)
 
@@ -82,6 +98,12 @@ Do not uninstall first unless you intentionally want a clean installation.
 Uninstalling deletes the app's settings and collected wardrive data. If Android
 rejects the update because its signing certificate differs, export or back up
 important data before uninstalling the old app.
+
+The one-time change from `mintylinux.meshcore.wardrive` to
+`io.github.xarleyn.meshcore.wardrive` is not an update. After installing the
+new fork, grant permissions again and reconfigure background location, battery
+optimization/MIUI autostart, Bluetooth or USB access, widgets, offline maps,
+and any stored credentials. No migration from the old package is provided.
 
 ## Uninstalling
 

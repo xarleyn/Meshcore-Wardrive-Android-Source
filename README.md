@@ -6,7 +6,11 @@ companion radio over USB or Bluetooth, and displays coverage on a Flutter map.
 
 ## 📥 Download Pre-built APK
 
-**Latest Release:** [Download from Releases Repository](https://github.com/mintylinux/Meshcore-Wardrive-Android)
+**Latest Release:** [Download the xarleyn fork](https://github.com/xarleyn/Meshcore-Wardrive-Android-Source/releases)
+
+The fork uses Android package ID `io.github.xarleyn.meshcore.wardrive`, so it
+can coexist with the original app. The first fork-identity release is a clean
+installation and does not migrate data from `mintylinux.meshcore.wardrive`.
 
 ## 🚀 Features
 
@@ -47,8 +51,8 @@ companion radio over USB or Bluetooth, and displays coverage on a Flutter map.
 
 1. Clone this repository:
 ```bash
-git clone https://github.com/mintylinux/Meshcore-Wardrive-Android-Source.git
-cd meshcore_wardrive
+git clone https://github.com/xarleyn/Meshcore-Wardrive-Android-Source.git
+cd Meshcore-Wardrive-Android-Source
 ```
 
 2. Install dependencies:
@@ -69,7 +73,8 @@ flutter run
 ### Building Release APK
 
 Configure the stable signing key once, then use the release script. It
-increments Android's build number and keeps the displayed version synchronized:
+increments Android's build number and the `-xarleyn.N` fork revision while
+keeping the displayed version synchronized:
 
 ```powershell
 .\tool\build_release.ps1

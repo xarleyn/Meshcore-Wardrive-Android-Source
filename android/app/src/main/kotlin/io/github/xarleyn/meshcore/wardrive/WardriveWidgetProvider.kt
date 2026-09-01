@@ -1,4 +1,4 @@
-package mintylinux.meshcore.wardrive
+package io.github.xarleyn.meshcore.wardrive
 
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
