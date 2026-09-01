@@ -192,21 +192,15 @@ jobs:
           [[ "$badging" == *"versionName='${VERSION_NAME}'"* ]]
 
           "$apksigner" verify --verbose "$apk"
-          # Captured raw (stderr merged) so an apksigner output format change
-          # can be diagnosed from the run log instead of a silent empty parse.
+          # Captured with stderr merged and non-fatal so a changed apksigner
+          # output format reports a clear mismatch instead of aborting early.
           certs_out="$("$apksigner" verify --print-certs "$apk" 2>&1)" || true
           actual_cert="$(printf '%s\n' "$certs_out" \
-            | sed -nE 's/^[^:]*certificate SHA-256 digest:[[:space:]]*//p' \
+            | sed -nE 's/^.*certificate SHA-256 digest:[[:space:]]*//p' \
             | head -n1 | tr -d ':[:space:]' | tr '[:upper:]' '[:lower:]')"
           expected_cert="$(printf '%s' "$EXPECTED_CERT_SHA256" | tr -d ':[:space:]' | tr '[:upper:]' '[:lower:]')"
           if [[ -z "$actual_cert" || "$actual_cert" != "$expected_cert" ]]; then
             echo "APK signer SHA-256 does not match ANDROID_CERT_SHA256." >&2
-            # The APK certificate digest is public (extractable from the APK),
-            # so printing it here is safe and speeds up secret debugging.
-            echo "APK certificate SHA-256: ${actual_cert:-<none>}" >&2
-            echo "--- raw apksigner --print-certs output ---" >&2
-            printf '%s\n' "$certs_out" >&2
-            echo "--- end raw output ---" >&2
             exit 1
           fi
 
