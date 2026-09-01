@@ -12,7 +12,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 class DatabaseService {
-  static Database? _database;
+  static Future<Database>? _databaseFuture;
   static const String _databaseName = 'meshcore_wardrive.db';
   static const int _databaseVersion = 13;
 
@@ -28,10 +28,19 @@ class DatabaseService {
   static const String tableImpossibleZones = 'impossible_zones';
   static const String tableDevices = 'devices';
 
-  Future<Database> get database async {
-    if (_database != null) return _database!;
-    _database = await _initDatabase();
-    return _database!;
+  /// Lazily opened database. The opening future itself is memoized so that
+  /// concurrent first callers share a single [openDatabase] call instead of
+  /// racing to open the same file twice.
+  Future<Database> get database => _databaseFuture ??= _openDatabase();
+
+  Future<Database> _openDatabase() async {
+    try {
+      return await _initDatabase();
+    } catch (_) {
+      // Do not cache a failed open so a later call can retry.
+      _databaseFuture = null;
+      rethrow;
+    }
   }
 
   Future<Database> _initDatabase() async {
@@ -559,38 +568,48 @@ class DatabaseService {
     return {'samples': samplesImported, 'sessions': sessionsImported};
   }
 
-  /// Import samples from JSON (skips duplicates by ID)
+  /// Import samples from JSON atomically (skips duplicates by ID).
+  ///
+  /// Rows are normalized up front, then applied inside a single transaction
+  /// via a batch: either the whole import lands or, on failure, nothing does.
+  /// [ConflictAlgorithm.ignore] drops rows whose primary key already exists.
+  /// The returned count is the row delta measured inside the transaction,
+  /// which is more reliable than the batch result.
   Future<int> importSamples(List<Map<String, dynamic>> jsonData) async {
     final db = await database;
-    int importedCount = 0;
 
+    // Validate/normalize before opening the transaction so a malformed row is
+    // skipped instead of aborting the whole import.
+    final samples = <Sample>[];
     for (final json in jsonData) {
       try {
-        final sample = Sample.fromJson(json);
-
-        // Check if sample with this ID already exists
-        final existing = await db.query(
-          tableSamples,
-          where: 'id = ?',
-          whereArgs: [sample.id],
-          limit: 1,
-        );
-
-        if (existing.isEmpty) {
-          await db.insert(
-            tableSamples,
-            sample.toMap(),
-            conflictAlgorithm: ConflictAlgorithm.ignore,
-          );
-          importedCount++;
-        }
+        samples.add(Sample.fromJson(json));
       } catch (e) {
         debugPrint('Error importing sample: $e');
         // Skip invalid samples
       }
     }
+    if (samples.isEmpty) return 0;
 
-    return importedCount;
+    return db.transaction<int>((txn) async {
+      Future<int> countOf(String query) async =>
+          Sqflite.firstIntValue(await txn.rawQuery(query)) ?? 0;
+
+      final countBefore = await countOf('SELECT COUNT(*) FROM $tableSamples');
+
+      final batch = txn.batch();
+      for (final sample in samples) {
+        batch.insert(
+          tableSamples,
+          sample.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.ignore,
+        );
+      }
+      await batch.commit(noResult: true);
+
+      final countAfter = await countOf('SELECT COUNT(*) FROM $tableSamples');
+      return countAfter - countBefore;
+    });
   }
 
   /// Create a new session, returns the session ID
@@ -623,6 +642,9 @@ class DatabaseService {
     await db.delete(tableSessions, where: 'id = ?', whereArgs: [id]);
   }
 
+  /// Coerces a SQLite aggregate value (int, double, or null) to a non-null int.
+  static int _sqlInt(Object? value) => (value as num?)?.toInt() ?? 0;
+
   /// Get sample counts for a session's time range
   Future<Map<String, int>> getSessionSampleCounts(
     DateTime start,
@@ -632,23 +654,22 @@ class DatabaseService {
     final startMs = start.millisecondsSinceEpoch;
     final endMs = end.millisecondsSinceEpoch;
 
-    final totalResult = await db.rawQuery(
-      'SELECT COUNT(*) FROM $tableSamples WHERE timestamp >= ? AND timestamp <= ?',
+    // One aggregate scan instead of three COUNT queries. SUM over an empty
+    // set yields NULL, which [_sqlInt] maps to 0 exactly like the old COUNTs.
+    final row = (await db.rawQuery(
+      'SELECT '
+      'COUNT(*) AS total, '
+      'SUM(CASE WHEN pingSuccess IS NOT NULL THEN 1 ELSE 0 END) AS pings, '
+      'SUM(CASE WHEN pingSuccess = 1 THEN 1 ELSE 0 END) AS successes '
+      'FROM $tableSamples '
+      'WHERE timestamp >= ? AND timestamp <= ?',
       [startMs, endMs],
-    );
-    final pingResult = await db.rawQuery(
-      'SELECT COUNT(*) FROM $tableSamples WHERE timestamp >= ? AND timestamp <= ? AND pingSuccess IS NOT NULL',
-      [startMs, endMs],
-    );
-    final successResult = await db.rawQuery(
-      'SELECT COUNT(*) FROM $tableSamples WHERE timestamp >= ? AND timestamp <= ? AND pingSuccess = 1',
-      [startMs, endMs],
-    );
+    )).first;
 
     return {
-      'total': Sqflite.firstIntValue(totalResult) ?? 0,
-      'pings': Sqflite.firstIntValue(pingResult) ?? 0,
-      'successes': Sqflite.firstIntValue(successResult) ?? 0,
+      'total': _sqlInt(row['total']),
+      'pings': _sqlInt(row['pings']),
+      'successes': _sqlInt(row['successes']),
     };
   }
 
@@ -748,54 +769,37 @@ class DatabaseService {
   /// Get per-device stats from samples tagged with device_id
   Future<Map<String, dynamic>> getDeviceStats(String publicKey) async {
     final db = await database;
-    final total =
-        Sqflite.firstIntValue(
-          await db.rawQuery(
-            'SELECT COUNT(*) FROM $tableSamples WHERE device_id = ? AND pingSuccess IS NOT NULL',
-            [publicKey],
-          ),
-        ) ??
-        0;
-    final successes =
-        Sqflite.firstIntValue(
-          await db.rawQuery(
-            'SELECT COUNT(*) FROM $tableSamples WHERE device_id = ? AND pingSuccess = 1',
-            [publicKey],
-          ),
-        ) ??
-        0;
-    final failures = total - successes;
-    final cells =
-        Sqflite.firstIntValue(
-          await db.rawQuery(
-            'SELECT COUNT(DISTINCT substr(geohash, 1, 6)) FROM $tableSamples WHERE device_id = ? AND pingSuccess IS NOT NULL',
-            [publicKey],
-          ),
-        ) ??
-        0;
 
-    final avgResp = await db.rawQuery(
-      'SELECT AVG(response_time_ms) as avg_resp FROM $tableSamples WHERE device_id = ? AND response_time_ms IS NOT NULL',
+    // Single aggregate scan instead of five queries. Conditional CASE
+    // aggregates keep each metric's original filter, and AVG ignores NULL,
+    // so CASE branches without ELSE exclude rows exactly like the old WHEREs.
+    final row = (await db.rawQuery(
+      '''
+      SELECT
+        SUM(CASE WHEN pingSuccess IS NOT NULL THEN 1 ELSE 0 END) AS total_pings,
+        SUM(CASE WHEN pingSuccess = 1 THEN 1 ELSE 0 END) AS successes,
+        COUNT(DISTINCT CASE WHEN pingSuccess IS NOT NULL THEN substr(geohash, 1, 6) END) AS unique_cells,
+        AVG(CASE WHEN response_time_ms IS NOT NULL THEN response_time_ms END) AS avg_resp,
+        AVG(CASE WHEN pingSuccess = 1 THEN snr END) AS avg_snr,
+        AVG(CASE WHEN pingSuccess = 1 THEN rssi END) AS avg_rssi
+      FROM $tableSamples
+      WHERE device_id = ?
+      ''',
       [publicKey],
-    );
-    final avgResponseMs = (avgResp.first['avg_resp'] as num?)?.toDouble();
+    )).first;
 
-    final avgSignal = await db.rawQuery(
-      'SELECT AVG(snr) as avg_snr, AVG(rssi) as avg_rssi FROM $tableSamples WHERE device_id = ? AND pingSuccess = 1',
-      [publicKey],
-    );
-    final avgSnr = (avgSignal.first['avg_snr'] as num?)?.toDouble();
-    final avgRssi = (avgSignal.first['avg_rssi'] as num?)?.toDouble();
+    final total = _sqlInt(row['total_pings']);
+    final successes = _sqlInt(row['successes']);
 
     return {
       'totalPings': total,
       'successes': successes,
-      'failures': failures,
+      'failures': total - successes,
       'successRate': total > 0 ? successes / total : 0.0,
-      'uniqueCells': cells,
-      'avgResponseMs': avgResponseMs,
-      'avgSnr': avgSnr,
-      'avgRssi': avgRssi,
+      'uniqueCells': _sqlInt(row['unique_cells']),
+      'avgResponseMs': (row['avg_resp'] as num?)?.toDouble(),
+      'avgSnr': (row['avg_snr'] as num?)?.toDouble(),
+      'avgRssi': (row['avg_rssi'] as num?)?.toDouble(),
     };
   }
 
@@ -890,17 +894,41 @@ class DatabaseService {
     await db.delete(tablePrivacyZones, where: 'id = ?', whereArgs: [id]);
   }
 
+  /// Planar distance approximation in meters between a point and a zone
+  /// center (111320 meters per degree of latitude, longitude scaled by the
+  /// point's latitude). Good enough for the small radii of privacy zones.
+  static double _distanceToZoneMeters(
+    double lat,
+    double lon,
+    double zoneLat,
+    double zoneLon,
+  ) {
+    final dlat = (lat - zoneLat) * 111320; // meters per degree lat
+    final dlon = (lon - zoneLon) * 111320 * cos(lat * 3.14159 / 180);
+    return sqrt(dlat * dlat + dlon * dlon);
+  }
+
+  /// Whether the point falls inside the given privacy-zone row.
+  static bool _isInsidePrivacyZone(
+    Map<String, dynamic> zone,
+    double lat,
+    double lon,
+  ) {
+    return _distanceToZoneMeters(
+          lat,
+          lon,
+          zone['lat'] as double,
+          zone['lon'] as double,
+        ) <=
+        (zone['radius_meters'] as double);
+  }
+
   /// Check if a lat/lon point falls inside any privacy zone
   /// Uses haversine approximation (good enough for small radii)
   Future<bool> isInPrivacyZone(double lat, double lon) async {
     final zones = await getAllPrivacyZones();
     for (final zone in zones) {
-      final dlat =
-          (lat - (zone['lat'] as double)) * 111320; // meters per degree lat
-      final dlon =
-          (lon - (zone['lon'] as double)) * 111320 * cos(lat * 3.14159 / 180);
-      final dist = sqrt(dlat * dlat + dlon * dlon);
-      if (dist <= (zone['radius_meters'] as double)) return true;
+      if (_isInsidePrivacyZone(zone, lat, lon)) return true;
     }
     return false;
   }
@@ -912,13 +940,13 @@ class DatabaseService {
 
     return samples.where((s) {
       for (final zone in zones) {
-        final dlat = (s.position.latitude - (zone['lat'] as double)) * 111320;
-        final dlon =
-            (s.position.longitude - (zone['lon'] as double)) *
-            111320 *
-            cos(s.position.latitude * 3.14159 / 180);
-        final dist = sqrt(dlat * dlat + dlon * dlon);
-        if (dist <= (zone['radius_meters'] as double)) return false;
+        if (_isInsidePrivacyZone(
+          zone,
+          s.position.latitude,
+          s.position.longitude,
+        )) {
+          return false;
+        }
       }
       return true;
     }).toList();
@@ -965,6 +993,6 @@ class DatabaseService {
   Future<void> close() async {
     final db = await database;
     await db.close();
-    _database = null;
+    _databaseFuture = null;
   }
 }

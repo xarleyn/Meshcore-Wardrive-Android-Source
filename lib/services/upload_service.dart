@@ -23,13 +23,17 @@ class UploadService {
         norm(url) == norm(defaultGlobalApiUrl);
   }
 
-  static const String _apiUrlKey = 'upload_api_url';
-  static const String _autoUploadKey = 'auto_upload_enabled';
-  static const String _lastUploadKey = 'last_upload_timestamp';
-  static const String _uploadEndpointsKey =
+  /// Preference keys shared with [SettingsService] for settings export and
+  /// import. Keep the string values stable: existing installs persist them
+  /// verbatim, and the settings backup references these same constants.
+  static const String apiUrlKey = 'upload_api_url';
+  static const String autoUploadKey = 'auto_upload_enabled';
+  static const String uploadEndpointsKey =
       'upload_endpoints'; // JSON list of endpoints
-  static const String _selectedEndpointsKey =
+  static const String selectedEndpointsKey =
       'selected_endpoints'; // JSON list of selected endpoint names
+
+  static const String _lastUploadKey = 'last_upload_timestamp';
 
   static const String defaultEndpointName = 'Meshcoretel';
   static const String defaultRuApiUrl =
@@ -86,22 +90,22 @@ class UploadService {
 
   Future<String> getApiUrl() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_apiUrlKey) ?? defaultApiUrl;
+    return prefs.getString(apiUrlKey) ?? defaultApiUrl;
   }
 
   Future<void> setApiUrl(String url) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_apiUrlKey, url);
+    await prefs.setString(apiUrlKey, url);
   }
 
   Future<bool> isAutoUploadEnabled() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_autoUploadKey) ?? false;
+    return prefs.getBool(autoUploadKey) ?? false;
   }
 
   Future<void> setAutoUploadEnabled(bool enabled) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_autoUploadKey, enabled);
+    await prefs.setBool(autoUploadKey, enabled);
   }
 
   Future<DateTime?> getLastUploadTime() async {
@@ -371,7 +375,7 @@ class UploadService {
   /// Get list of configured upload endpoints
   Future<List<UploadEndpoint>> getUploadEndpoints() async {
     final prefs = await SharedPreferences.getInstance();
-    final json = prefs.getString(_uploadEndpointsKey);
+    final json = prefs.getString(uploadEndpointsKey);
 
     if (json == null || json.isEmpty) {
       // Return default endpoint
@@ -388,13 +392,13 @@ class UploadService {
   Future<void> setUploadEndpoints(List<UploadEndpoint> endpoints) async {
     final prefs = await SharedPreferences.getInstance();
     final json = jsonEncode(endpoints.map((e) => e.toJson()).toList());
-    await prefs.setString(_uploadEndpointsKey, json);
+    await prefs.setString(uploadEndpointsKey, json);
   }
 
   /// Get list of selected endpoint names (for multi-upload)
   Future<List<String>> getSelectedEndpoints() async {
     final prefs = await SharedPreferences.getInstance();
-    final json = prefs.getString(_selectedEndpointsKey);
+    final json = prefs.getString(selectedEndpointsKey);
 
     if (json == null || json.isEmpty) {
       return [defaultEndpointName];
@@ -405,7 +409,7 @@ class UploadService {
 
     // Preserve selection for installs that stored the old implicit name but
     // never saved a custom endpoint list.
-    if (!prefs.containsKey(_uploadEndpointsKey) && names.contains('Default')) {
+    if (!prefs.containsKey(uploadEndpointsKey) && names.contains('Default')) {
       return names
           .map((name) => name == 'Default' ? defaultEndpointName : name)
           .toList();
@@ -417,7 +421,7 @@ class UploadService {
   Future<void> setSelectedEndpoints(List<String> names) async {
     final prefs = await SharedPreferences.getInstance();
     final json = jsonEncode(names);
-    await prefs.setString(_selectedEndpointsKey, json);
+    await prefs.setString(selectedEndpointsKey, json);
   }
 
   /// Upload to all selected endpoints
