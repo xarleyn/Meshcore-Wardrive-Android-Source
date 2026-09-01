@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import '../tool/version.dart';
+import '../../tool/version.dart';
 
 void main() {
   group('version tool', () {

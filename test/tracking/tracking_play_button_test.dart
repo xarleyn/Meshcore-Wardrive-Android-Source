@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meshcore_wardrive/widgets/tracking_play_button.dart';
 
-import 'helpers/l10n_harness.dart';
+import '../helpers/l10n_harness.dart';
 
 void main() {
   testWidgets(
