@@ -1455,10 +1455,11 @@ class _MapScreenState extends State<MapScreen> {
     }
 
     try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['db'],
-      );
+      // FileType.custom with ['db'] is unusable on Android: '.db' has no MIME
+      // mapping there, so the picker greys the backup out and it cannot be
+      // selected. Accept any file instead and rely on validateBackupFile
+      // below to reject non-backup contents with a clear error.
+      final result = await FilePicker.platform.pickFiles(type: FileType.any);
 
       if (result == null || result.files.isEmpty) return;
       final backupPath = result.files.single.path;
