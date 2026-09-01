@@ -1,4 +1,4 @@
-package mintylinux.meshcore.wardrive
+package io.github.xarleyn.meshcore.wardrive
 
 import android.Manifest
 import android.content.Context
@@ -24,10 +24,10 @@ import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
     private val TAG = "MeshcoreFeedback"
-    private val CHANNEL = "mintylinux.meshcore.wardrive/feedback"
-    private val WIFI_CHANNEL = "mintylinux.meshcore.wardrive/wifi_location"
+    private val CHANNEL = "io.github.xarleyn.meshcore.wardrive/feedback"
+    private val WIFI_CHANNEL = "io.github.xarleyn.meshcore.wardrive/wifi_location"
     private val TRACKING_SETTINGS_CHANNEL =
-        "mintylinux.meshcore.wardrive/tracking_settings"
+        "io.github.xarleyn.meshcore.wardrive/tracking_settings"
     private var toneGenerator: ToneGenerator? = null
 
     private fun getVibrator(): Vibrator {

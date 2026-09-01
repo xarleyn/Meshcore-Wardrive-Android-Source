@@ -5,7 +5,7 @@ const _appVersionPath = 'lib/constants/app_version.dart';
 const _maxAndroidVersionCode = 2100000000;
 
 final RegExp _versionNamePattern = RegExp(
-  r'^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$',
+  r'^(\d+\.\d+\.\d+)-xarleyn\.([1-9]\d*)$',
 );
 final RegExp _pubspecVersionPattern = RegExp(
   r'^version:\s*([^\s+]+)\+(\d+)\s*$',
@@ -40,8 +40,8 @@ ProjectVersion parsePubspecVersion(String contents) {
 void validateVersion(String name, int buildNumber) {
   if (!_versionNamePattern.hasMatch(name)) {
     throw FormatException(
-      'Invalid version name "$name". Expected semantic versioning, for '
-      'example 1.2.3 or 1.2.3-beta.1.',
+      'Invalid version name "$name". Expected the fork version format, for '
+      'example 1.2.3-xarleyn.1.',
     );
   }
   if (buildNumber < 1 || buildNumber > _maxAndroidVersionCode) {
@@ -52,6 +52,16 @@ void validateVersion(String name, int buildNumber) {
       'buildNumber',
     );
   }
+}
+
+String nextForkVersionName(String currentName) {
+  final match = _versionNamePattern.firstMatch(currentName);
+  if (match == null) {
+    validateVersion(currentName, 1);
+    throw StateError('Unreachable version validation state.');
+  }
+  final revision = int.parse(match.group(2)!);
+  return '${match.group(1)}-xarleyn.${revision + 1}';
 }
 
 String replacePubspecVersion(String contents, ProjectVersion version) {
@@ -121,7 +131,9 @@ void main(List<String> arguments) {
         );
         stdout.writeln('Synchronized app version: $current');
       case 'bump':
-        final nextName = arguments.length == 2 ? arguments[1] : current.name;
+        final nextName = arguments.length == 2
+            ? arguments[1]
+            : nextForkVersionName(current.name);
         final next = ProjectVersion(nextName, current.buildNumber + 1);
         validateVersion(next.name, next.buildNumber);
         pubspecFile.writeAsStringSync(

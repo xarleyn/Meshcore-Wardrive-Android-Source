@@ -1775,14 +1775,17 @@ class _MapScreenState extends State<MapScreen> {
 
       if (response.statusCode == 200) {
         final releases = jsonDecode(response.body) as List<dynamic>;
-        final latestVersion = releases.isEmpty
-            ? null
-            : versionFromReleaseTag(releases.first['tag_name'].toString());
+        final latestVersion = latestVersionFromReleaseTags(
+          releases
+              .whereType<Map<String, dynamic>>()
+              .map((release) => release['tag_name'])
+              .whereType<String>(),
+        );
 
         if (!mounted) return;
         if (latestVersion == null) {
           _showSnackBar(AppLocalizations.of(context).mapCouldNotCheckUpdates);
-        } else if (latestVersion == appVersion) {
+        } else if (!isNewerAppVersion(latestVersion, appVersion)) {
           _showSnackBar(AppLocalizations.of(context).mapOnLatestVersion);
         } else {
           final shouldDownload = await showDialog<bool>(
@@ -2133,7 +2136,7 @@ class _MapScreenState extends State<MapScreen> {
               ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
               : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
           subdomains: isDarkMode ? const ['a', 'b', 'c', 'd'] : const [],
-          userAgentPackageName: 'com.meshcore.wardrive',
+          userAgentPackageName: 'io.github.xarleyn.meshcore.wardrive',
           tileProvider: _tileCacheStore != null
               ? CachedTileProvider(store: _tileCacheStore!)
               : null,
