@@ -43,9 +43,7 @@ void main() {
 
     expect(toneCalls.length, 2);
     expect(
-      toneCalls.every(
-        (call) => call['tone'] == AndroidTones.TONE_CDMA_ABBR_ALERT,
-      ),
+      toneCalls.every((call) => call['tone'] == AndroidTones.toneCdmaAbbrAlert),
       isTrue,
     );
     expect(vibrateCalls.length, 2);

@@ -3,13 +3,21 @@ import 'package:flutter/services.dart';
 
 import 'settings_service.dart';
 
-/// Android ToneGenerator tone constants
+/// Android ToneGenerator tone constants.
+///
+/// Names mirror the `ToneGenerator.TONE_*` constants from the Android SDK
+/// (lowerCamelCase per Dart style): [tonePropBeep] is
+/// `ToneGenerator.TONE_PROP_BEEP`, [tonePropAck] is
+/// `ToneGenerator.TONE_PROP_ACK`, [tonePropNack] is
+/// `ToneGenerator.TONE_PROP_NACK`, [toneCdmaAbbrAlert] is
+/// `ToneGenerator.TONE_CDMA_ABBR_ALERT`, and [toneCdmaMedL] is
+/// `ToneGenerator.TONE_CDMA_MED_L`.
 class AndroidTones {
-  static const int TONE_PROP_BEEP = 36;
-  static const int TONE_PROP_ACK = 37;
-  static const int TONE_PROP_NACK = 38;
-  static const int TONE_CDMA_ABBR_ALERT = 97;
-  static const int TONE_CDMA_MED_L = 76;
+  static const int tonePropBeep = 36;
+  static const int tonePropAck = 37;
+  static const int tonePropNack = 38;
+  static const int toneCdmaAbbrAlert = 97;
+  static const int toneCdmaMedL = 76;
 }
 
 /// Sound and vibration feedback service for wardrive events.
@@ -78,7 +86,7 @@ class SoundService {
       await _vibrate(durationMs: 150, amplitude: 180);
     }
     if (_enabled) {
-      await _playTone(AndroidTones.TONE_PROP_BEEP, durationMs: 100);
+      await _playTone(AndroidTones.tonePropBeep, durationMs: 100);
     }
   }
 
@@ -88,7 +96,7 @@ class SoundService {
       await _vibrate(durationMs: 200, amplitude: 255);
     }
     if (_enabled) {
-      await _playTone(AndroidTones.TONE_PROP_ACK, durationMs: 200);
+      await _playTone(AndroidTones.tonePropAck, durationMs: 200);
     }
   }
 
@@ -98,7 +106,7 @@ class SoundService {
       await _vibrate(durationMs: 150, amplitude: 200);
     }
     if (_enabled) {
-      await _playTone(AndroidTones.TONE_CDMA_MED_L, durationMs: 150);
+      await _playTone(AndroidTones.toneCdmaMedL, durationMs: 150);
     }
   }
 
@@ -108,7 +116,7 @@ class SoundService {
       await _vibrate(durationMs: 400, amplitude: 255);
     }
     if (_enabled) {
-      await _playTone(AndroidTones.TONE_PROP_NACK, durationMs: 300);
+      await _playTone(AndroidTones.tonePropNack, durationMs: 300);
     }
   }
 
@@ -121,9 +129,9 @@ class SoundService {
       await _vibrate(durationMs: 200, amplitude: 255);
     }
     if (_enabled) {
-      await _playTone(AndroidTones.TONE_CDMA_ABBR_ALERT, durationMs: 250);
+      await _playTone(AndroidTones.toneCdmaAbbrAlert, durationMs: 250);
       await Future<void>.delayed(const Duration(milliseconds: 180));
-      await _playTone(AndroidTones.TONE_CDMA_ABBR_ALERT, durationMs: 250);
+      await _playTone(AndroidTones.toneCdmaAbbrAlert, durationMs: 250);
     }
     if (_vibrationEnabled) {
       await Future<void>.delayed(const Duration(milliseconds: 120));

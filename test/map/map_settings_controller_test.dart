@@ -31,7 +31,9 @@ void main() {
       });
       final runtime = _FakeMapSettingsRuntime();
       final controller = MapSettingsController(
-        settingsService: SettingsService(),
+        settingsService: SettingsService(
+          credentialsStore: _FakeCredentialsStore(),
+        ),
         runtime: runtime,
       );
 
@@ -66,7 +68,9 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     final runtime = _FakeMapSettingsRuntime();
     final controller = MapSettingsController(
-      settingsService: SettingsService(),
+      settingsService: SettingsService(
+        credentialsStore: _FakeCredentialsStore(),
+      ),
       runtime: runtime,
     );
 
@@ -100,5 +104,24 @@ class _FakeMapSettingsRuntime implements MapSettingsRuntime {
   @override
   Future<void> apply(MapSettingsSnapshot settings) async {
     applied = settings;
+  }
+}
+
+/// In-memory credentials store so the controller tests never touch the real
+/// secure-storage plugin channel.
+class _FakeCredentialsStore implements SecureCredentialsStore {
+  final _values = <String, String>{};
+
+  @override
+  Future<String?> read(String key) async => _values[key];
+
+  @override
+  Future<void> write(String key, String value) async {
+    _values[key] = value;
+  }
+
+  @override
+  Future<void> delete(String key) async {
+    _values.remove(key);
   }
 }

@@ -745,7 +745,7 @@ class _RepeaterDetailScreen extends StatelessWidget {
         maxY: 1.0,
         barTouchData: BarTouchData(
           touchTooltipData: BarTouchTooltipData(
-            getTooltipItem: (group, _, rod, __) {
+            getTooltipItem: (group, _, rod, _) {
               if (group.x >= weeks.length) return null;
               final week = weeks[group.x];
               final count = week.value.length;

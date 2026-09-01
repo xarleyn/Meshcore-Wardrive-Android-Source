@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meshcore_wardrive/utils/discovery_timeout_options.dart';
+import 'package:meshcore_wardrive/widgets/discovery_timeout_options.dart';
 
 void main() {
   test('includes the 5s timeout used in Settings', () {
