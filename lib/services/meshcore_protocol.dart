@@ -421,31 +421,17 @@ class MeshCoreProtocol {
 
       if (data.length >= offset + 4) {
         // Last advert timestamp (4 bytes, uint32 LE)
-        lastAdvert =
-            data[offset] |
-            (data[offset + 1] << 8) |
-            (data[offset + 2] << 16) |
-            (data[offset + 3] << 24);
+        lastAdvert = _readUint32LE(data, offset);
         offset += 4;
       }
 
       if (data.length >= offset + 8) {
         // Latitude (4 bytes, int32 LE, * 1E6)
-        final latInt =
-            data[offset] |
-            (data[offset + 1] << 8) |
-            (data[offset + 2] << 16) |
-            (data[offset + 3] << 24);
-        advLat = _int32ToSigned(latInt) / 1000000.0;
+        advLat = _readInt32LE(data, offset) / 1000000.0;
         offset += 4;
 
         // Longitude (4 bytes, int32 LE, * 1E6)
-        final lonInt =
-            data[offset] |
-            (data[offset + 1] << 8) |
-            (data[offset + 2] << 16) |
-            (data[offset + 3] << 24);
-        advLon = _int32ToSigned(lonInt) / 1000000.0;
+        advLon = _readInt32LE(data, offset) / 1000000.0;
         offset += 4;
       }
 
@@ -622,6 +608,12 @@ class MeshCoreProtocol {
   int _readInt32LE(Uint8List data, int offset) =>
       _int32ToSigned(_readUint32LE(data, offset));
 
+  /// Read one byte as a signed (two's complement) value.
+  int _readInt8(Uint8List data, int offset) {
+    final value = data[offset];
+    return value > 127 ? value - 256 : value;
+  }
+
   /// Create CMD_GET_CHANNEL command to query channel at specific index
   Uint8List createGetChannelPayload(int channelIdx) {
     _checkChannelIndex(channelIdx);
@@ -743,122 +735,6 @@ class MeshCoreProtocol {
     return payload.toBytes();
   }
 
-  /// Parse PUSH_CODE_LOG_RX_DATA (0x88) - raw radio log frame
-  /// Format: [SNR] [RSSI] [raw_packet_bytes...]
-  /// Raw packet format: [header(1)] [transport_codes(4)-optional] [path_len(1)] [path(path_len)] [payload...]
-  /// SNR is multiplied by 4 in firmware, RSSI is raw value
-  /// Returns map with 'snr', 'rssi', and parsed packet data if available
-  Map<String, dynamic>? parseRawLogFrame(Uint8List data) {
-    try {
-      if (data.length < 2) {
-        debugPrint('⚠️ Raw log frame too short: ${data.length} bytes');
-        return null;
-      }
-
-      // SNR at byte 0 (scaled by 4x in firmware)
-      var snrRaw = data[0];
-      if (snrRaw > 127) snrRaw -= 256;
-      final snr = snrRaw / 4.0;
-
-      // RSSI at byte 1 (raw value)
-      int rssi = data[1];
-      if (rssi > 127) rssi -= 256; // Convert to signed byte
-
-      debugPrint(
-        '📻 Raw log frame: SNR=$snr (raw=$snrRaw), RSSI=$rssi, total=${data.length} bytes',
-      );
-
-      // Parse raw MeshCore packet structure
-      // Frame is: [SNR][RSSI][raw_packet...]
-      // Raw packet is: [header][transport_codes?][pathLen][path...][payload...]
-      String? repeater;
-      Uint8List? repeaterKey;
-
-      if (data.length > 4) {
-        // Need at least SNR+RSSI+header+pathLen
-        int offset = 2; // Skip SNR/RSSI
-
-        // Parse packet header
-        final header = data[offset++];
-        final routeType = header & 0x03;
-        final hasTransportCodes = routeType == 0x00 || routeType == 0x03;
-
-        // Skip transport codes if present (4 bytes)
-        if (hasTransportCodes) {
-          if (data.length < offset + 4) {
-            debugPrint('  Not enough data for transport codes');
-            return {
-              'snr': snr,
-              'rssi': rssi,
-              'sender': null,
-              'repeater': null,
-              'repeaterKey': null,
-            };
-          }
-          offset += 4;
-        }
-
-        // Read path_len (signed byte)
-        if (data.length <= offset) {
-          debugPrint('  No pathLen byte');
-          return {
-            'snr': snr,
-            'rssi': rssi,
-            'sender': null,
-            'repeater': null,
-            'repeaterKey': null,
-          };
-        }
-
-        int pathLen = data[offset++];
-        // Convert unsigned byte to signed
-        if (pathLen > 127) pathLen -= 256;
-        debugPrint(
-          '  header=0x${header.toRadixString(16)}, routeType=$routeType, hasTransport=$hasTransportCodes, pathLen=$pathLen',
-        );
-
-        // IMPORTANT: Flood packets with built-up paths store 1-byte prefixes per hop!
-        // Direct packets (routeType=0x02) have full 32-byte keys per hop
-        // Get LAST hop in path (most recent repeater)
-        if (pathLen > 0 && routeType == 0x01) {
-          // ROUTE_TYPE_FLOOD
-          if (data.length >= offset + pathLen) {
-            // Extract last byte from path (last repeater's 1-byte prefix)
-            final lastHopByte = data[offset + pathLen - 1];
-            repeater = lastHopByte
-                .toRadixString(16)
-                .padLeft(2, '0')
-                .toUpperCase();
-            debugPrint(
-              '  🎯 FLOOD packet with path! Last hop ($pathLen hops): $repeater',
-            );
-          } else {
-            debugPrint(
-              '  Path exists but data too short: pathLen=$pathLen, available=${data.length - offset}',
-            );
-          }
-        } else if (pathLen > 0 && routeType == 0x02) {
-          // ROUTE_TYPE_DIRECT
-          // Direct routes have full 32-byte keys (not used in wardrive typically)
-          debugPrint('  Direct route with full keys (pathLen=$pathLen)');
-        } else if (pathLen == 0 || pathLen < 0) {
-          debugPrint('  Zero-hop packet (direct/flood with no path built)');
-        }
-      }
-
-      return {
-        'snr': snr,
-        'rssi': rssi,
-        'sender': null, // Not extracting sender from encrypted payload, use repeater instead
-        'repeater': repeater,
-        'repeaterKey': repeaterKey,
-      };
-    } catch (e) {
-      debugPrint('Error parsing raw log frame: $e');
-      return null;
-    }
-  }
-
   /// Parse PUSH_CODE_RAW_DATA (0x84).
   ///
   /// This is an arbitrary radio payload, not a delivery ACK. The companion
@@ -866,10 +742,8 @@ class MeshCoreProtocol {
   Map<String, dynamic>? parseRawDataPush(Uint8List data) {
     if (data.length < 3) return null;
 
-    var snrRaw = data[0];
-    if (snrRaw > 127) snrRaw -= 256;
-    var rssi = data[1];
-    if (rssi > 127) rssi -= 256;
+    final snrRaw = _readInt8(data, 0);
+    final rssi = _readInt8(data, 1);
     return {
       'snr': snrRaw / 4.0,
       'rssi': rssi,
@@ -887,8 +761,8 @@ class MeshCoreProtocol {
     double? snr;
     if (version3) {
       if (data.length < 10) return null;
-      var snrRaw = data[offset++];
-      if (snrRaw > 127) snrRaw -= 256;
+      final snrRaw = _readInt8(data, offset);
+      offset++;
       snr = snrRaw / 4.0;
       offset += 2; // reserved
     } else if (data.length < 7) {
@@ -920,8 +794,7 @@ class MeshCoreProtocol {
   Map<String, dynamic>? parseChannelDataFrame(Uint8List data) {
     if (data.length < 8) return null;
 
-    var snrRaw = data[0];
-    if (snrRaw > 127) snrRaw -= 256;
+    final snrRaw = _readInt8(data, 0);
     final dataLength = data[7];
     if (data.length < 8 + dataLength) return null;
 
@@ -976,13 +849,13 @@ class MeshCoreProtocol {
       int offset = 0;
 
       // SNR at byte 0 (scaled by 4x)
-      int snrRaw = data[offset++];
-      if (snrRaw > 127) snrRaw -= 256; // Convert to signed
+      final snrRaw = _readInt8(data, offset);
+      offset++;
       final snr = snrRaw / 4.0;
 
       // RSSI at byte 1 (signed)
-      int rssi = data[offset++];
-      if (rssi > 127) rssi -= 256;
+      final rssi = _readInt8(data, offset);
+      offset++;
 
       // Path length at byte 2
       final pathLen = data[offset++];
@@ -1031,8 +904,8 @@ class MeshCoreProtocol {
       }
 
       // SNR at byte 1 (already scaled by 4, signed)
-      int snrRaw = payload[offset++];
-      if (snrRaw > 127) snrRaw -= 256;
+      final snrRaw = _readInt8(payload, offset);
+      offset++;
       final snr = snrRaw / 4.0;
 
       // Tag: 4 bytes (little-endian uint32)
@@ -1040,11 +913,7 @@ class MeshCoreProtocol {
         debugPrint('⚠️ Discovery response: not enough data for tag');
         return null;
       }
-      final tag =
-          payload[offset] |
-          (payload[offset + 1] << 8) |
-          (payload[offset + 2] << 16) |
-          (payload[offset + 3] << 24);
+      final tag = _readUint32LE(payload, offset);
       offset += 4;
 
       // Public key: exactly 8 or 32 bytes (depends on prefix_only in request).
@@ -1177,11 +1046,7 @@ class MeshCoreProtocol {
       int permissions = 0;
       int? firmwareVersion;
       if (data.length >= 13) {
-        serverTimestamp =
-            data[offset] |
-            (data[offset + 1] << 8) |
-            (data[offset + 2] << 16) |
-            (data[offset + 3] << 24);
+        serverTimestamp = _readUint32LE(data, offset);
         offset += 4;
         permissions = data[offset++];
         firmwareVersion = data[offset++];
@@ -1229,11 +1094,7 @@ class MeshCoreProtocol {
       if (data.length < 9) return null;
       int offset = 0;
       offset++; // reserved
-      final tag =
-          data[offset] |
-          (data[offset + 1] << 8) |
-          (data[offset + 2] << 16) |
-          (data[offset + 3] << 24);
+      final tag = _readUint32LE(data, offset);
       offset += 4;
       final totalCount = data[offset] | (data[offset + 1] << 8);
       offset += 2;
@@ -1252,14 +1113,10 @@ class MeshCoreProtocol {
             .join('')
             .toUpperCase();
         offset += pubkeyPrefixLength;
-        final heardSecondsAgo =
-            data[offset] |
-            (data[offset + 1] << 8) |
-            (data[offset + 2] << 16) |
-            (data[offset + 3] << 24);
+        final heardSecondsAgo = _readUint32LE(data, offset);
         offset += 4;
-        int snrRaw = data[offset++];
-        if (snrRaw > 127) snrRaw -= 256;
+        final snrRaw = _readInt8(data, offset);
+        offset++;
         final snr = snrRaw / 4.0;
         neighbours.add({
           'pubkey': pubkey,
