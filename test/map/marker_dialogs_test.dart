@@ -3,32 +3,21 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:meshcore_wardrive/screens/map/dialogs/marker_dialogs.dart';
 
-import '../helpers/l10n_harness.dart';
+import '../helpers/pump_dialog.dart';
 
 void main() {
   testWidgets('map long press sheet returns the selected typed action', (
     tester,
   ) async {
     MapLongPressAction? result;
-    final l10n = await pumpWithL10n(
-      tester,
-      Scaffold(
-        body: Builder(
-          builder: (context) => TextButton(
-            onPressed: () async {
-              result = await showModalBottomSheet<MapLongPressAction>(
-                context: context,
-                builder: (context) => const MapLongPressActionSheet(),
-              );
-            },
-            child: const Text('Open'),
-          ),
-        ),
-      ),
-    );
+    final l10n = await pumpDialog(tester, (context) async {
+      result = await showModalBottomSheet<MapLongPressAction>(
+        context: context,
+        builder: (context) => const MapLongPressActionSheet(),
+      );
+    });
 
-    await tester.tap(find.text('Open'));
-    await tester.pumpAndSettle();
+    await openDialog(tester);
     await tester.tap(find.text(l10n.settingsAddImpossibleZone));
     await tester.pumpAndSettle();
 
@@ -39,30 +28,19 @@ void main() {
     tester,
   ) async {
     PlannedMarkerAction? result;
-    final l10n = await pumpWithL10n(
-      tester,
-      Scaffold(
-        body: Builder(
-          builder: (context) => TextButton(
-            onPressed: () async {
-              result = await showDialog<PlannedMarkerAction>(
-                context: context,
-                builder: (context) => PlannedMarkerInfoDialog(
-                  latitude: 55.75,
-                  longitude: 37.62,
-                  createdAt: DateTime(2026, 8, 20),
-                  label: 'Future repeater',
-                ),
-              );
-            },
-            child: const Text('Open'),
-          ),
+    final l10n = await pumpDialog(tester, (context) async {
+      result = await showDialog<PlannedMarkerAction>(
+        context: context,
+        builder: (context) => PlannedMarkerInfoDialog(
+          latitude: 55.75,
+          longitude: 37.62,
+          createdAt: DateTime(2026, 8, 20),
+          label: 'Future repeater',
         ),
-      ),
-    );
+      );
+    });
 
-    await tester.tap(find.text('Open'));
-    await tester.pumpAndSettle();
+    await openDialog(tester);
     await tester.tap(find.text(l10n.mapDelete));
     await tester.pumpAndSettle();
 
@@ -73,26 +51,15 @@ void main() {
     tester,
   ) async {
     PrivacyZoneDraft? result;
-    final l10n = await pumpWithL10n(
-      tester,
-      Scaffold(
-        body: Builder(
-          builder: (context) => TextButton(
-            onPressed: () async {
-              result = await showDialog<PrivacyZoneDraft>(
-                context: context,
-                builder: (context) =>
-                    const AddPrivacyZoneDialog(center: LatLng(55.75, 37.62)),
-              );
-            },
-            child: const Text('Open'),
-          ),
-        ),
-      ),
-    );
+    final l10n = await pumpDialog(tester, (context) async {
+      result = await showDialog<PrivacyZoneDraft>(
+        context: context,
+        builder: (context) =>
+            const AddPrivacyZoneDialog(center: LatLng(55.75, 37.62)),
+      );
+    });
 
-    await tester.tap(find.text('Open'));
-    await tester.pumpAndSettle();
+    await openDialog(tester);
     await tester.enterText(find.byKey(const Key('zone_dialog_label')), 'Home');
     await tester.enterText(find.byKey(const Key('zone_dialog_radius')), '2000');
     await tester.tap(find.text(l10n.settingsAddZone));
@@ -107,25 +74,14 @@ void main() {
   ) async {
     ImpossibleZoneDraft? result;
     final center = LatLng(55.75, 37.62);
-    final l10n = await pumpWithL10n(
-      tester,
-      Scaffold(
-        body: Builder(
-          builder: (context) => TextButton(
-            onPressed: () async {
-              result = await showDialog<ImpossibleZoneDraft>(
-                context: context,
-                builder: (context) => AddImpossibleZoneDialog(center: center),
-              );
-            },
-            child: const Text('Open'),
-          ),
-        ),
-      ),
-    );
+    final l10n = await pumpDialog(tester, (context) async {
+      result = await showDialog<ImpossibleZoneDraft>(
+        context: context,
+        builder: (context) => AddImpossibleZoneDialog(center: center),
+      );
+    });
 
-    await tester.tap(find.text('Open'));
-    await tester.pumpAndSettle();
+    await openDialog(tester);
     await tester.enterText(
       find.byKey(const Key('zone_dialog_label')),
       'Airport',
@@ -143,26 +99,15 @@ void main() {
     tester,
   ) async {
     PrivacyZoneDraft? result;
-    final l10n = await pumpWithL10n(
-      tester,
-      Scaffold(
-        body: Builder(
-          builder: (context) => TextButton(
-            onPressed: () async {
-              result = await showDialog<PrivacyZoneDraft>(
-                context: context,
-                builder: (context) =>
-                    const AddPrivacyZoneDialog(center: LatLng(55.75, 37.62)),
-              );
-            },
-            child: const Text('Open'),
-          ),
-        ),
-      ),
-    );
+    final l10n = await pumpDialog(tester, (context) async {
+      result = await showDialog<PrivacyZoneDraft>(
+        context: context,
+        builder: (context) =>
+            const AddPrivacyZoneDialog(center: LatLng(55.75, 37.62)),
+      );
+    });
 
-    await tester.tap(find.text('Open'));
-    await tester.pumpAndSettle();
+    await openDialog(tester);
     await tester.enterText(
       find.byKey(const Key('zone_dialog_radius')),
       '99999',
@@ -181,24 +126,15 @@ void main() {
   testWidgets('zone dialog slider updates the radius text field', (
     tester,
   ) async {
-    await pumpWithL10n(
-      tester,
-      Scaffold(
-        body: Builder(
-          builder: (context) => TextButton(
-            onPressed: () => showDialog<PrivacyZoneDraft>(
-              context: context,
-              builder: (context) =>
-                  const AddPrivacyZoneDialog(center: LatLng(55.75, 37.62)),
-            ),
-            child: const Text('Open'),
-          ),
-        ),
-      ),
-    );
+    await pumpDialog(tester, (context) {
+      return showDialog<PrivacyZoneDraft>(
+        context: context,
+        builder: (context) =>
+            const AddPrivacyZoneDialog(center: LatLng(55.75, 37.62)),
+      );
+    });
 
-    await tester.tap(find.text('Open'));
-    await tester.pumpAndSettle();
+    await openDialog(tester);
     expect(
       tester
           .widget<TextField>(find.byKey(const Key('zone_dialog_radius')))
@@ -222,31 +158,20 @@ void main() {
   ) async {
     PrivacyZoneDraft? result;
     final previewed = <double?>[];
-    await pumpWithL10n(
-      tester,
-      Scaffold(
-        body: Builder(
-          builder: (context) => TextButton(
-            onPressed: () async {
-              result = await showAddZoneDialog<PrivacyZoneDraft>(
-                context: context,
-                center: const LatLng(55.75, 37.62),
-                title: 'Zone',
-                blurb: 'Blurb',
-                labelHint: 'Hint',
-                onPreviewRadius: previewed.add,
-                createDraft: (radiusMeters, label) =>
-                    PrivacyZoneDraft(radiusMeters: radiusMeters, label: label),
-              );
-            },
-            child: const Text('Open'),
-          ),
-        ),
-      ),
-    );
+    await pumpDialog(tester, (context) async {
+      result = await showAddZoneDialog<PrivacyZoneDraft>(
+        context: context,
+        center: const LatLng(55.75, 37.62),
+        title: 'Zone',
+        blurb: 'Blurb',
+        labelHint: 'Hint',
+        onPreviewRadius: previewed.add,
+        createDraft: (radiusMeters, label) =>
+            PrivacyZoneDraft(radiusMeters: radiusMeters, label: label),
+      );
+    });
 
-    await tester.tap(find.text('Open'));
-    await tester.pumpAndSettle();
+    await openDialog(tester);
 
     // Collapse: the form hides and the preview bar shows the current radius.
     await tester.tap(find.byKey(const Key('zone_dialog_preview')));
@@ -274,28 +199,19 @@ void main() {
   });
 
   testWidgets('collapsible zone dialog stays content-sized', (tester) async {
-    await pumpWithL10n(
-      tester,
-      Scaffold(
-        body: Builder(
-          builder: (context) => TextButton(
-            onPressed: () => showAddZoneDialog<PrivacyZoneDraft>(
-              context: context,
-              center: const LatLng(55.75, 37.62),
-              title: 'Zone',
-              blurb: 'Blurb',
-              labelHint: 'Hint',
-              createDraft: (radiusMeters, label) =>
-                  PrivacyZoneDraft(radiusMeters: radiusMeters, label: label),
-            ),
-            child: const Text('Open'),
-          ),
-        ),
-      ),
-    );
+    await pumpDialog(tester, (context) {
+      return showAddZoneDialog<PrivacyZoneDraft>(
+        context: context,
+        center: const LatLng(55.75, 37.62),
+        title: 'Zone',
+        blurb: 'Blurb',
+        labelHint: 'Hint',
+        createDraft: (radiusMeters, label) =>
+            PrivacyZoneDraft(radiusMeters: radiusMeters, label: label),
+      );
+    });
 
-    await tester.tap(find.text('Open'));
-    await tester.pumpAndSettle();
+    await openDialog(tester);
 
     // Exactly one dialog card, and it must keep its intrinsic height instead
     // of filling the whole inset area (default 800x600 surface minus the
