@@ -272,4 +272,38 @@ void main() {
     expect(result?.label, isNull);
     expect(previewed.last, 2500);
   });
+
+  testWidgets('collapsible zone dialog stays content-sized', (tester) async {
+    await pumpWithL10n(
+      tester,
+      Scaffold(
+        body: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => showAddZoneDialog<PrivacyZoneDraft>(
+              context: context,
+              center: const LatLng(55.75, 37.62),
+              title: 'Zone',
+              blurb: 'Blurb',
+              labelHint: 'Hint',
+              createDraft: (radiusMeters, label) =>
+                  PrivacyZoneDraft(radiusMeters: radiusMeters, label: label),
+            ),
+            child: const Text('Open'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+
+    // Exactly one dialog card, and it must keep its intrinsic height instead
+    // of filling the whole inset area (default 800x600 surface minus the
+    // 24px vertical dialog insets).
+    final cards = find.byWidgetPredicate(
+      (widget) => widget is Material && widget.type == MaterialType.card,
+    );
+    expect(cards, findsOneWidget);
+    expect(tester.getSize(cards).height, lessThan(600 - 24 * 2));
+  });
 }

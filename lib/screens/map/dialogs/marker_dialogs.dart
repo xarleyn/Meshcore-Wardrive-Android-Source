@@ -361,8 +361,6 @@ class _AddCircularZoneDialogState<T> extends State<_AddCircularZoneDialog<T>> {
   final _radiusController = TextEditingController(text: '1000');
   double _selectedRadius = 1000;
 
-  bool get _collapsed => widget.collapsed?.value ?? false;
-
   @override
   void dispose() {
     _labelController.dispose();
@@ -422,19 +420,18 @@ class _AddCircularZoneDialogState<T> extends State<_AddCircularZoneDialog<T>> {
     final l10n = AppLocalizations.of(context);
     final collapsedNotifier = widget.collapsed;
     if (collapsedNotifier == null) {
-      // Standalone dialog (no map preview support requested).
-      return Dialog(child: _buildForm(l10n));
+      // Standalone dialog (no map preview support requested). The AlertDialog
+      // renders itself as a centered, content-sized dialog.
+      return _buildForm(l10n);
     }
 
     final collapsed = collapsedNotifier.value;
     return SafeArea(
       child: Stack(
         children: [
-          // Expanded form; hidden while the preview bar is shown.
-          Offstage(
-            offstage: collapsed,
-            child: Dialog(child: _buildForm(l10n)),
-          ),
+          // Expanded form; hidden while the preview bar is shown. The
+          // AlertDialog centers and sizes itself, exactly like showDialog.
+          Offstage(offstage: collapsed, child: _buildForm(l10n)),
           // Collapsed preview bar at the bottom of the screen.
           IgnorePointer(
             ignoring: !collapsed,
