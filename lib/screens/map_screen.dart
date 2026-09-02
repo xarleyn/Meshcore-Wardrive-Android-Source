@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -28,7 +27,6 @@ import '../utils/heading_utils.dart';
 import '../utils/session_map_view.dart';
 import '../utils/community_coverage.dart';
 import '../utils/bluetooth_scan.dart';
-import '../utils/sample_export.dart';
 import '../utils/ping_burst.dart';
 import '../widgets/compass_calibration.dart';
 import '../widgets/bluetooth_device_picker_dialog.dart';
@@ -53,6 +51,7 @@ import 'map/dialogs/marker_dialogs.dart';
 import 'map/dialogs/offline_tile_dialogs.dart';
 import 'map/dialogs/update_flow.dart';
 import 'map/dialogs/upload_endpoint_dialog.dart';
+import 'map/data_io.dart';
 import 'map/map_runtime_bindings.dart';
 import 'map/map_screen_controller.dart';
 import 'map/map_settings_controller.dart';
@@ -64,7 +63,6 @@ import '../services/widget_service.dart';
 
 import 'package:usb_serial/usb_serial.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:flutter_map_cache/flutter_map_cache.dart';
@@ -1132,372 +1130,40 @@ class _MapScreenState extends State<MapScreen> {
     return onOpen();
   }
 
-  Future<void> _clearData() async {
-    final l10n = AppLocalizations.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => ClearMapHistoryDialog(sampleCount: _sampleCount),
-    );
+  /// Data I/O facade with the screen's services and reload hooks injected.
+  MapDataIo get _dataIo => MapDataIo(
+    context: context,
+    onShowSnackBar: _showSnackBar,
+    locationService: _locationService,
+    databaseService: _databaseService,
+    databaseBackupService: _databaseBackupService,
+    settingsService: _settingsService,
+    isTracking: () => _isTracking,
+    sampleCount: () => _sampleCount,
+    repeaters: () => _repeaters,
+    invalidateCaches: _mapDataController.invalidate,
+    loadSamples: _loadSamples,
+    loadSettings: _loadSettings,
+    onDatabaseRestored: () =>
+        _updateMapState(() => _sessionMapView = const SessionMapView.all()),
+    loadMarkers: _loadMarkers,
+    loadPrivacyZones: _loadPrivacyZones,
+    loadImpossibleZones: _loadImpossibleZones,
+  );
 
-    if (confirmed == true) {
-      await _locationService.clearAllSamples();
-      await _loadSamples();
-      _showSnackBar(l10n.mapDeletedSamples(_sampleCount));
-    }
-  }
+  Future<void> _clearData() => _dataIo.clearData();
 
-  Future<void> _exportData() async {
-    // Ask user for export format
-    final format = await showDialog<SampleExportFormat>(
-      context: context,
-      builder: (context) => const SampleExportFormatDialog(),
-    );
+  Future<void> _exportData() => _dataIo.exportData();
 
-    if (format == null) return;
+  Future<void> _importData() => _dataIo.importData();
 
-    // Ask save or share
-    if (!mounted) return;
-    final choice = await showDialog<ExportDestination>(
-      context: context,
-      builder: (context) => ExportDestinationDialog(
-        title: AppLocalizations.of(context).mapExportAs(format.displayName),
-      ),
-    );
+  Future<void> _exportSettings() => _dataIo.exportSettings();
 
-    if (choice == null) return;
+  Future<void> _importSettings() => _dataIo.importSettings();
 
-    try {
-      final samples = await _locationService.getAllSamples();
-      final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-      String content;
-      String fileName;
-      String extension;
+  Future<void> _exportDatabase() => _dataIo.exportDatabase();
 
-      switch (format) {
-        case SampleExportFormat.csv:
-          content = SampleExport.buildCsv(samples);
-          extension = 'csv';
-          fileName = 'meshcore_export_$timestamp.csv';
-          break;
-        case SampleExportFormat.gpx:
-          content = SampleExport.buildGpx(samples);
-          extension = 'gpx';
-          fileName = 'meshcore_export_$timestamp.gpx';
-          break;
-        case SampleExportFormat.kml:
-          content = SampleExport.buildKml(samples);
-          extension = 'kml';
-          fileName = 'meshcore_export_$timestamp.kml';
-          break;
-        case SampleExportFormat.json:
-          // Include discovered repeater contacts in the export
-          final repeaterJsonList = _repeaters
-              .where(
-                (r) =>
-                    r.position.latitude != 0.0 || r.position.longitude != 0.0,
-              )
-              .map((r) => r.toJson())
-              .toList();
-          final data = await _databaseService.exportAllData(
-            repeaters: repeaterJsonList,
-          );
-          content = jsonEncode(data);
-          extension = 'json';
-          fileName = 'meshcore_export_$timestamp.json';
-      }
-
-      if (choice == ExportDestination.save) {
-        if (!mounted) return;
-        await FilePicker.platform.saveFile(
-          dialogTitle: AppLocalizations.of(context).mapSaveExport,
-          fileName: fileName,
-          type: FileType.custom,
-          allowedExtensions: [extension],
-          bytes: utf8.encode(content),
-        );
-        if (!mounted) return;
-        _showSnackBar(
-          AppLocalizations.of(context)
-              .mapExportedSamples(samples.length, format.displayName),
-        );
-      } else if (choice == ExportDestination.share) {
-        final directory = await getExternalStorageDirectory();
-        final file = File('${directory!.path}/$fileName');
-        await file.writeAsString(content);
-
-        if (!mounted) return;
-        await SharePlus.instance.share(
-          ShareParams(
-            files: [XFile(file.path)],
-            subject: AppLocalizations.of(context).mapExportShareSubject,
-            text: AppLocalizations.of(context)
-                .mapExportShareText(samples.length),
-          ),
-        );
-        if (!mounted) return;
-        _showSnackBar(AppLocalizations.of(context).mapExportShared);
-      }
-    } catch (e) {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapExportFailed('$e'));
-    }
-  }
-
-  Future<void> _importData() async {
-    try {
-      // Pick JSON file(s) — allow multiple for community merge
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['json'],
-        allowMultiple: true,
-      );
-
-      if (result == null || result.files.isEmpty) return;
-
-      int totalSamplesImported = 0;
-      int totalSessionsImported = 0;
-      final Set<String> sources = {};
-
-      for (final pickedFile in result.files) {
-        if (pickedFile.path == null) continue;
-        final file = File(pickedFile.path!);
-        final jsonString = await file.readAsString();
-        final dynamic jsonData = jsonDecode(jsonString);
-
-        // Use unified import that handles both old (array) and new (object) formats
-        final counts = await _databaseService.importAllData(jsonData);
-        totalSamplesImported += counts['samples'] ?? 0;
-        totalSessionsImported += counts['sessions'] ?? 0;
-
-        // Extract sources for display
-        if (jsonData is Map<String, dynamic> &&
-            jsonData.containsKey('samples')) {
-          for (final s in (jsonData['samples'] as List<dynamic>)) {
-            final map = s as Map<String, dynamic>;
-            if (map['source'] != null) sources.add(map['source'] as String);
-          }
-        } else if (jsonData is List) {
-          for (final s in jsonData) {
-            final map = s as Map<String, dynamic>;
-            if (map['source'] != null) sources.add(map['source'] as String);
-          }
-        }
-      }
-
-      // Reload map
-      _mapDataController.invalidate();
-      await _loadSamples();
-
-      if (!mounted) return;
-      final l10n = AppLocalizations.of(context);
-      final sessionLabel = totalSessionsImported > 0
-          ? l10n.mapImportedSessionsSuffix(totalSessionsImported)
-          : '';
-      final sourceLabel = sources.isNotEmpty
-          ? l10n.mapImportedFromSources(sources.join(', '))
-          : '';
-      _showSnackBar(
-        '${l10n.mapImportedSamples(totalSamplesImported)}$sessionLabel$sourceLabel',
-      );
-    } catch (e) {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapImportFailed('$e'));
-    }
-  }
-
-  Future<void> _exportSettings() async {
-    try {
-      final jsonString = await _settingsService.exportSettingsJson();
-      final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-      final fileName = 'meshcore_settings_$timestamp.json';
-
-      // Ask save or share
-      if (!mounted) return;
-      final choice = await showDialog<ExportDestination>(
-        context: context,
-        builder: (context) => ExportDestinationDialog(
-          title: AppLocalizations.of(context).settingsExportSettings,
-        ),
-      );
-
-      if (choice == null) return;
-
-      if (choice == ExportDestination.save) {
-        if (!mounted) return;
-        await FilePicker.platform.saveFile(
-          dialogTitle: AppLocalizations.of(context).mapSaveSettings,
-          fileName: fileName,
-          type: FileType.custom,
-          allowedExtensions: ['json'],
-          bytes: utf8.encode(jsonString),
-        );
-        if (!mounted) return;
-        _showSnackBar(AppLocalizations.of(context).mapSettingsExported);
-      } else if (choice == ExportDestination.share) {
-        final dir = await getApplicationDocumentsDirectory();
-        final file = File('${dir.path}/$fileName');
-        await file.writeAsString(jsonString);
-        if (!mounted) return;
-        await SharePlus.instance.share(
-          ShareParams(
-            files: [XFile(file.path)],
-            text: AppLocalizations.of(context).mapSettingsShareText,
-          ),
-        );
-      }
-    } catch (e) {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapExportFailed('$e'));
-    }
-  }
-
-  Future<void> _importSettings() async {
-    try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['json'],
-      );
-
-      if (result == null || result.files.isEmpty) return;
-      final pickedFile = result.files.single;
-
-      final file = File(pickedFile.path!);
-      final jsonString = await file.readAsString();
-
-      // Show confirmation dialog
-      if (!mounted) return;
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (context) => const ImportSettingsConfirmationDialog(),
-      );
-
-      if (confirmed != true) return;
-
-      final applied = await _settingsService.importSettingsJson(jsonString);
-
-      // Reload settings to apply changes
-      await _loadSettings();
-      _mapDataController.invalidate();
-      await _loadSamples();
-
-      if (!mounted) return;
-      _showSnackBar(
-        AppLocalizations.of(context).mapImportedSettingsCount(applied),
-      );
-    } on FormatException catch (e) {
-      if (!mounted) return;
-      _showSnackBar(
-        AppLocalizations.of(context).mapInvalidSettingsFile(e.message),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapImportFailed('$e'));
-    }
-  }
-
-  Future<void> _exportDatabase() async {
-    try {
-      final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-      final fileName = 'meshcore_backup_$timestamp.db';
-
-      if (!mounted) return;
-      final choice = await showDialog<ExportDestination>(
-        context: context,
-        builder: (context) => ExportDestinationDialog(
-          title: AppLocalizations.of(context).settingsExportDatabase,
-        ),
-      );
-
-      if (choice == null) return;
-
-      if (choice == ExportDestination.save) {
-        final bytes = await _databaseBackupService.exportSnapshotBytes();
-        if (!mounted) return;
-        await FilePicker.platform.saveFile(
-          dialogTitle: AppLocalizations.of(context).mapSaveExport,
-          fileName: fileName,
-          type: FileType.custom,
-          allowedExtensions: ['db'],
-          bytes: bytes,
-        );
-        if (!mounted) return;
-        _showSnackBar(AppLocalizations.of(context).settingsDatabaseExported);
-      } else if (choice == ExportDestination.share) {
-        final dir = await getApplicationDocumentsDirectory();
-        final file = await _databaseBackupService.exportToShareFile(
-          dir,
-          fileName,
-        );
-        if (!mounted) return;
-        await SharePlus.instance.share(
-          ShareParams(
-            files: [XFile(file.path)],
-            subject: AppLocalizations.of(context).settingsExportDatabase,
-            text: AppLocalizations.of(context).settingsDatabaseShareText,
-          ),
-        );
-        if (!mounted) return;
-        _showSnackBar(AppLocalizations.of(context).mapExportShared);
-      }
-    } catch (e) {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapExportFailed('$e'));
-    }
-  }
-
-  Future<void> _importDatabase() async {
-    final l10n = AppLocalizations.of(context);
-    if (_isTracking) {
-      _showSnackBar(l10n.settingsImportDatabaseStopTracking);
-      return;
-    }
-
-    try {
-      // FileType.custom with ['db'] is unusable on Android: '.db' has no MIME
-      // mapping there, so the picker greys the backup out and it cannot be
-      // selected. Accept any file instead and rely on validateBackupFile
-      // below to reject non-backup contents with a clear error.
-      final result = await FilePicker.platform.pickFiles(type: FileType.any);
-
-      if (result == null || result.files.isEmpty) return;
-      final backupPath = result.files.single.path;
-      if (backupPath == null) return;
-
-      // Validate before destroying anything.
-      await _databaseBackupService.validateBackupFile(backupPath);
-
-      if (!mounted) return;
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (context) => const ImportDatabaseConfirmationDialog(),
-      );
-      if (confirmed != true) return;
-
-      await _databaseBackupService.restoreFromFile(backupPath);
-
-      // Reload everything that is derived from the database.
-      _updateMapState(() => _sessionMapView = const SessionMapView.all());
-      _mapDataController.invalidate();
-      await _loadSamples();
-      await _loadMarkers();
-      await _loadPrivacyZones();
-      await _loadImpossibleZones();
-
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).settingsDatabaseImported);
-    } on DatabaseBackupException catch (e) {
-      if (!mounted) return;
-      _showSnackBar(switch (e.error) {
-        DatabaseBackupValidationError.newerVersion => AppLocalizations.of(
-          context,
-        ).settingsDatabaseNewerVersion,
-        _ => AppLocalizations.of(context).settingsDatabaseInvalidFile,
-      });
-    } catch (e) {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapImportFailed('$e'));
-    }
-  }
+  Future<void> _importDatabase() => _dataIo.importDatabase();
 
   // ============================================================================
   // PLANNED MARKERS
