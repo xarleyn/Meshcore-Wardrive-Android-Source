@@ -26,6 +26,7 @@ import '../utils/compass_calibration.dart';
 import '../utils/heading_utils.dart';
 import '../utils/session_map_view.dart';
 import '../utils/community_coverage.dart';
+import '../utils/ducting_presentation.dart';
 import '../utils/ping_burst.dart';
 import '../widgets/compass_calibration.dart';
 import 'map/layers/coverage_prediction_layer.dart';
@@ -40,11 +41,11 @@ import 'map/layers/repeater_layer.dart';
 import 'map/layers/route_trail_layer.dart';
 import 'map/layers/sample_cluster_layer.dart';
 import 'map/layers/sample_heatmap_layer.dart';
-import 'map/dialogs/appearance_dialogs.dart';
 import 'map/dialogs/coverage_tools_dialogs.dart';
 import 'map/dialogs/map_entity_dialogs.dart';
 import 'map/dialogs/map_workflow_dialogs.dart';
 import 'map/dialogs/marker_dialogs.dart';
+import 'map/dialogs/theme_flows.dart';
 import 'map/dialogs/update_flow.dart';
 import 'map/dialogs/upload_flows.dart';
 import 'map/connection_flow.dart';
@@ -71,9 +72,7 @@ import 'dart:typed_data';
 import 'debug_log_screen.dart';
 import 'debug_diagnostics_screen.dart';
 import 'session_history_screen.dart';
-import '../main.dart';
 import '../l10n/achievement_l10n.dart';
-import '../l10n/app_locale.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../constants/app_version.dart';
 import '../services/ducting_service.dart';
@@ -1514,11 +1513,11 @@ class _MapScreenState extends State<MapScreen> {
                 carpeaterState: _carpeaterState,
                 ductingLabel:
                     _showDucting && _currentDuctingRisk != DuctingRisk.unknown
-                    ? _localizedDuctingRisk(l10n, _currentDuctingRisk)
+                    ? localizedDuctingRisk(l10n, _currentDuctingRisk)
                     : null,
                 ductingColor:
                     _showDucting && _currentDuctingRisk != DuctingRisk.unknown
-                    ? _getDuctingColor(_currentDuctingRisk)
+                    ? ductingRiskColor(_currentDuctingRisk)
                     : null,
                 batterySaverActive: _batterySaverActive,
                 onConnect: _showConnectionDialog,
@@ -1954,32 +1953,6 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _disconnectLoRa() => _connectionFlow.disconnectLoRa();
 
-  String _localizedDuctingRisk(AppLocalizations l10n, String risk) {
-    switch (risk) {
-      case DuctingRisk.none:
-        return l10n.settingsNone;
-      case DuctingRisk.possible:
-        return l10n.mapDuctingPossible;
-      case DuctingRisk.likely:
-        return l10n.mapDuctingLikely;
-      default:
-        return l10n.settingsUnknown;
-    }
-  }
-
-  Color _getDuctingColor(String risk) {
-    switch (risk) {
-      case 'none':
-        return Colors.green;
-      case 'possible':
-        return Colors.orange;
-      case 'likely':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
-
   Future<void> _refreshContacts() => _connectionFlow.refreshContacts();
 
   Future<void> _scanForRepeaters() => _connectionFlow.scanForRepeaters();
@@ -2022,99 +1995,32 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  String _getInterfaceThemeModeText() {
-    final l10n = AppLocalizations.of(context);
-    final appState = MyApp.of(context);
-    if (appState == null) return l10n.settingsThemeSystemDefault;
+  /// Theme/language facade with screen-owned map theme callbacks injected.
+  ThemeFlow get _themeFlow => ThemeFlow(
+    context: context,
+    locationService: _locationService,
+    settingsService: _settingsService,
+    mapThemeMode: () => _mapThemeMode,
+    onMapThemeModeChanged: (mode) => setState(() => _mapThemeMode = mode),
+  );
 
-    switch (appState.themeMode) {
-      case ThemeMode.light:
-        return l10n.settingsThemeLight;
-      case ThemeMode.dark:
-        return l10n.settingsThemeDark;
-      case ThemeMode.system:
-        return l10n.settingsThemeSystemDefault;
-    }
-  }
+  String _getInterfaceThemeModeText() => _themeFlow.interfaceThemeModeText();
 
-  Future<void> _showInterfaceThemeSelector() async {
-    final appState = MyApp.of(context);
-    if (appState == null) return;
+  Future<void> _showInterfaceThemeSelector() =>
+      _themeFlow.showInterfaceThemeSelector();
 
-    final selected = await showDialog<ThemeMode>(
-      context: context,
-      builder: (context) => const InterfaceThemeDialog(),
-    );
+  String _getAppLocalePreferenceText() => _themeFlow.appLocalePreferenceText();
 
-    if (selected != null) {
-      await appState.setThemeMode(selected);
-    }
-  }
+  Future<void> _showLanguageSelector() => _themeFlow.showLanguageSelector();
 
-  String _getAppLocalePreferenceText() {
-    final l10n = AppLocalizations.of(context);
-    switch (MyApp.of(context)?.localePreference) {
-      case AppLocalePreference.en:
-        return l10n.languageEnglish;
-      case AppLocalePreference.ru:
-        return l10n.languageRussian;
-      case AppLocalePreference.system:
-      case null:
-        return l10n.languageSystem;
-    }
-  }
+  String _getMapThemeModeText() => _themeFlow.mapThemeModeText();
 
-  Future<void> _showLanguageSelector() async {
-    final appState = MyApp.of(context);
-    if (appState == null) return;
+  bool _usesDarkMapTiles(BuildContext context) => usesDarkMapTiles(
+    mode: _mapThemeMode,
+    platformBrightness: MediaQuery.platformBrightnessOf(context),
+  );
 
-    final selected = await showDialog<AppLocalePreference>(
-      context: context,
-      builder: (context) => const AppLocaleDialog(),
-    );
-
-    if (selected != null) {
-      await appState.setAppLocalePreference(selected);
-      await _locationService.refreshNotificationCopy();
-    }
-  }
-
-  String _getMapThemeModeText() {
-    final l10n = AppLocalizations.of(context);
-    switch (_mapThemeMode) {
-      case MapThemeMode.light:
-        return l10n.settingsThemeLight;
-      case MapThemeMode.dark:
-        return l10n.settingsThemeDark;
-      case MapThemeMode.system:
-        return l10n.settingsThemeSystemDefault;
-    }
-  }
-
-  bool _usesDarkMapTiles(BuildContext context) {
-    switch (_mapThemeMode) {
-      case MapThemeMode.light:
-        return false;
-      case MapThemeMode.dark:
-        return true;
-      case MapThemeMode.system:
-        return MediaQuery.platformBrightnessOf(context) == Brightness.dark;
-    }
-  }
-
-  Future<void> _showMapThemeSelector() async {
-    final selected = await showDialog<MapThemeMode>(
-      context: context,
-      builder: (context) => const MapThemeDialog(),
-    );
-
-    if (selected != null) {
-      setState(() {
-        _mapThemeMode = selected;
-      });
-      await _settingsService.setMapThemeMode(selected);
-    }
-  }
+  Future<void> _showMapThemeSelector() => _themeFlow.showMapThemeSelector();
 
   String? _getRepeaterName(String? repeaterId) {
     if (repeaterId == null) return null;
@@ -2169,10 +2075,10 @@ class _MapScreenState extends State<MapScreen> {
         resolveRepeaterName: _getRepeaterName,
         ductingLabel: ductingRisk == null
             ? null
-            : _localizedDuctingRisk(l10n, ductingRisk),
+            : localizedDuctingRisk(l10n, ductingRisk),
         ductingColor: ductingRisk == null
             ? null
-            : _getDuctingColor(ductingRisk),
+            : ductingRiskColor(ductingRisk),
       ),
     );
   }
