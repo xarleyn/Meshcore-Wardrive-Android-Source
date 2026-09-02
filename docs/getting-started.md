@@ -24,9 +24,11 @@ that file to your Android device and install it.
 
 ## First Launch
 
-1. **Grant Permissions**: When you first open the app, grant:
-   - Location permissions (choose "Allow all the time" for best results)
-   - Storage permissions (for exporting data)
+1. **Grant Permissions**: When you first open the app, grant the location
+   permissions it asks for (choose "Allow all the time" for best results).
+   No storage permissions are required: exports and imports go through the
+   system file picker / share sheet, and the app never asks for storage
+   access at runtime.
 
 2. **Start Tracking**: Tap the green play button (bottom right)
    - The button will turn red when tracking is active
@@ -84,8 +86,9 @@ The app language (System / English / Русский) is under Settings → App &
 
 ### Data Management
 - **Export**: Saves all collected samples as JSON file
-  - Files saved to app's external storage
-  - Named with timestamp: `meshcore_export_YYYYMMDD_HHMMSS.json`
+  - Save location is chosen in the system file picker (or shared via the
+    Android share sheet)
+  - Suggested file name: `meshcore_export_YYYYMMDD_HHMMSS.json`
   
 - **Clear**: Deletes all collected data (with confirmation)
 
@@ -138,8 +141,8 @@ Exported JSON contains an array of samples:
 - Verify INTERNET permission is granted
 
 ### Export Fails
-- Grant storage permissions
-- Check available storage space
+- Check available storage space on the device
+- Pick a different folder in the system file picker, or use the share option
 
 ## Technical Details
 

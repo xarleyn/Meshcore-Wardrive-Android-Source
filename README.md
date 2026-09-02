@@ -89,30 +89,51 @@ setup, public version changes, and per-architecture builds.
 
 ```
 lib/
-├── main.dart                    # App entry point
+├── main.dart                        # App entry point and initialization
 ├── constants/
-│   └── app_version.dart         # Version constant
+│   └── app_version.dart             # Version constant (synced by tool/version.dart)
+├── l10n/                            # Localization inputs; generated outputs in l10n/generated/
 ├── models/
-│   └── models.dart              # Data models (Sample, Coverage, Repeater, WSession)
+│   ├── models.dart                  # Core models (Sample, Coverage, Repeater, Edge, WSession, NodeData)
+│   ├── impossible_zone.dart         # Impossible Zones
+│   └── location_quality_settings.dart # GPS quality filter thresholds
 ├── screens/
 │   ├── map_screen.dart              # Main map interface
+│   ├── map/                         # Map screen building blocks
+│   │   ├── map_screen_controller.dart   # Map data store, caching, level of detail
+│   │   ├── map_settings_controller.dart # Settings snapshot handling
+│   │   ├── map_runtime_bindings.dart    # Stream/timer wiring
+│   │   ├── dialogs/                 # Marker, coverage, connection, upload, and tile dialogs
+│   │   ├── layers/                  # Coverage, sample, repeater, route, and overlay layers
+│   │   └── widgets/                 # Control panels, action buttons, banners
+│   ├── settings/                    # Settings UI
+│   │   ├── settings_screen.dart     # Settings screen shell
+│   │   ├── settings_page.dart       # Settings page content
+│   │   ├── settings_dialogs.dart    # Shared settings dialogs
+│   │   ├── sections/                # Grouped settings sections (discovery, map display, ...)
+│   │   └── widgets/                 # Settings dialogs and section headers
+│   ├── analytics_screen.dart        # Coverage analytics
+│   ├── session_history_screen.dart  # Session history viewer
+│   ├── repeater_health_screen.dart  # Repeater health statistics
+│   ├── signal_trend_screen.dart     # Signal trend charts
+│   ├── achievements_screen.dart     # Achievements
+│   ├── ducting_forecast_screen.dart # Ducting forecast
+│   ├── device_comparison_screen.dart # Device comparison
 │   ├── debug_log_screen.dart        # Debug terminal
-│   ├── debug_diagnostics_screen.dart # Advanced diagnostics
-│   ├── session_history_screen.dart   # Session history viewer
-│   └── signal_trend_screen.dart      # Signal trend charts
+│   └── debug_diagnostics_screen.dart # Advanced diagnostics
 ├── services/
-│   ├── location_service.dart         # GPS tracking & auto-ping
-│   ├── lora_companion_service.dart   # LoRa device communication
-│   ├── database_service.dart         # SQLite database
-│   ├── aggregation_service.dart      # Coverage calculation
-│   ├── upload_service.dart           # Web map upload
-│   ├── settings_service.dart         # User preferences
-│   ├── meshcore_protocol.dart        # Protocol implementation
-│   ├── debug_log_service.dart        # Debug logging
-│   └── persistent_debug_logger.dart  # Persistent log storage
-└── utils/
-    ├── geohash_utils.dart        # Geohash utilities
-    └── color_blind_palette.dart  # Accessible color schemes
+│   ├── location_service.dart        # GPS tracking & auto-ping
+│   ├── lora_companion_service.dart  # Companion radio communication (USB/BLE)
+│   ├── meshcore_protocol.dart       # Companion radio protocol implementation
+│   ├── database_service.dart        # SQLite database
+│   ├── aggregation_service.dart     # Coverage calculation
+│   ├── settings_service.dart        # User preferences & export/import
+│   ├── upload_service.dart          # Web map upload
+│   └── …                            # Backup, tiles, sound, Wi-Fi positioning, achievements, ...
+├── widgets/                         # Shared widgets (play button, device picker, banners)
+└── utils/                           # Helpers: geohash, sample export, color palettes,
+                                      # ping distance/time options, compass calibration, ...
+```
 
 ## Requirements
 
@@ -151,10 +172,12 @@ assets/        Source assets used during development and packaging
 docs/          User, setup, protocol, and troubleshooting documentation
 lib/           Flutter application source
   constants/   Application-wide constants
+  l10n/        Localization inputs and generated outputs
   models/      Domain and persistence models
-  screens/     UI screens
+  screens/     UI screens (map, settings, analytics, and more)
   services/    Device, location, storage, and network services
   utils/       Reusable helpers
+  widgets/     Reusable widgets shared across screens
 test/          Automated tests
 ```
 

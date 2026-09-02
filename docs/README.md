@@ -25,4 +25,4 @@
 - [Fork changelog draft (RU)](changelog-fork-ru.md)
 - [Version history](../CHANGELOG.md)
 
-Screenshot source files are stored in `assets/screenshots/`.
+Screenshot source files are stored in `docs/assets/screenshots/`.
