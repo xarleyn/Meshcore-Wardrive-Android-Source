@@ -1,5 +1,12 @@
 # MeshCore Authentication Setup
 
+> **Fork note:** this guide documents the upstream app's MQTT broker
+> authentication (Ed25519-signed tokens). **MQTT was removed in this fork** -
+> the app now talks only to the companion radio over USB/Bluetooth, and
+> repeater responses arrive as frames on that link (see the
+> [LoRa companion guide](lora-companion.md)). Nothing below applies to this
+> fork; it is kept only as a reference for the upstream implementation.
+
 The app now supports MeshCore's Ed25519 signature-based authentication for MQTT.
 
 ## What You Need

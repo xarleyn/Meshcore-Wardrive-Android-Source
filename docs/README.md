@@ -9,7 +9,8 @@
 ## Guides
 
 - [LoRa companion setup](guides/lora-companion.md)
-- [MeshCore authentication](guides/meshcore-authentication.md)
+- [Carpeater mode (car repeater)](guides/carpeater.md)
+- [MeshCore authentication](guides/meshcore-authentication.md) *(upstream MQTT only - removed in this fork)*
 
 ## Development
 

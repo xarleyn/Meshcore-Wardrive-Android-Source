@@ -91,6 +91,11 @@ The app language (System / English / Русский) is under Settings → App &
   - Suggested JSON file name: `meshcore_export_YYYYMMDD_HHMMSS.json`
 
 - **Clear**: Deletes all collected data (with confirmation)
+- **Database backup**: Settings → Backup → Export Database writes a full
+  snapshot of the SQLite database (samples, sessions, markers, zones, upload
+  tracking) to a file or the share sheet; Import Database restores it. This
+  is more complete than the JSON sample export and is the recommended way to
+  move devices.
 
 ## Tips for Wardriving
 

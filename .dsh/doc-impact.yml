@@ -3,7 +3,8 @@
 #
 # When an agent turn touches the code globs of a rule, the plugin asks the
 # agent to review or update the linked documents and resolve the impact via
-# doc_impact_resolve. Personal overrides belong in
+# doc_impact_resolve. Keep rules precise: each code glob should map only to
+# documents that actually describe that code. Personal overrides belong in
 # .dsh/doc-impact.local.yml (git-ignored).
 version: 1
 defaults:
@@ -42,50 +43,62 @@ rules:
     direction: code-to-docs
     relation: documents
 
-  # Release tooling, signing configuration, and CI define the documented
-  # release process.
+  # Carpeater mode is a fork-specific feature with its own user guide.
+  - id: carpeater-guide
+    description: Carpeater mode guide
+    code:
+      - lib/services/carpeater_service.dart
+      - lib/screens/settings/sections/carpeater_section.dart
+    docs:
+      - docs/guides/carpeater.md
+    direction: code-to-docs
+    relation: documents
+
+  # Release tooling, signing configuration, and the release workflow define
+  # the documented release process.
   - id: release-process
-    description: Release builds, versioning, signing, and CI
+    description: Release builds, versioning, signing, and GitHub Actions
     code:
       - tool/version.dart
       - tool/build_release.ps1
       - android/app/build.gradle.kts
       - android/key.properties.example
-      - .github/workflows/ci.yml
       - .github/workflows/release.yml
     docs:
       - docs/development/releasing.md
     direction: bidirectional
     relation: specification
 
-  # Installation steps mirror package identity and requested permissions.
+  # Installation steps mirror the requested Android permissions.
   - id: installation-docs
-    description: Package identity, permissions, and installation steps
+    description: Permissions and installation steps
     code:
       - android/app/src/main/AndroidManifest.xml
-      - android/app/build.gradle.kts
     docs:
       - docs/INSTALLATION.md
     direction: code-to-docs
     relation: documents
 
-  # Quick-start documents tracking, quality filtering, and settings behavior.
+  # Quick-start documents specific tracking and positioning behavior; each
+  # mapped service implements a section of that document.
   - id: getting-started
-    description: Quick-start describes tracking and settings behavior
+    description: Quick-start tracking and positioning behavior
     code:
       - lib/services/location_service.dart
       - lib/services/location_quality_filter.dart
-      - lib/screens/settings/**
+      - lib/services/bad_fix_monitor.dart
+      - lib/services/radio_position_estimator.dart
+      - lib/services/wifi_location_service.dart
+      - lib/widgets/compass_calibration.dart
     docs:
       - docs/getting-started.md
     direction: code-to-docs
     relation: documents
 
-  # Export format examples follow Sample.toJson and the export builders.
+  # Export format examples follow the export builders and the data flows.
   - id: export-format
     description: Data export format documentation
     code:
-      - lib/models/models.dart
       - lib/utils/sample_export.dart
       - lib/screens/map/data_io.dart
     docs:
@@ -94,15 +107,16 @@ rules:
     direction: code-to-docs
     relation: documents
 
-  # Version bumps sync pubspec, the in-app constant, and the changelog.
+  # Version bumps sync the in-app constant and are recorded in the changelog
+  # and the fork changelog draft.
   - id: changelog-version
-    description: Version bumps are recorded in CHANGELOG.md
+    description: Version bumps are recorded in the changelogs
     code:
-      - pubspec.yaml
       - lib/constants/app_version.dart
       - tool/version.dart
     docs:
       - CHANGELOG.md
+      - docs/changelog-fork-ru.md
     direction: code-to-docs
     relation: synchronized
 
@@ -118,36 +132,33 @@ rules:
     direction: bidirectional
     relation: specification
 
-  - id: localization-spec
-    description: Localization design spec and implementation plan
+  - id: fresh-session-map-spec
+    description: Fresh session map view design spec
     code:
-      - lib/l10n/app_en.arb
-      - lib/l10n/app_ru.arb
+      - lib/widgets/tracking_play_button.dart
+      - lib/screens/map/map_screen_controller.dart
     docs:
-      - docs/superpowers/specs/2026-08-20-localization-design.md
-      - docs/superpowers/plans/2026-08-20-localization.md
-    direction: code-to-docs
-    relation: related
+      - docs/superpowers/specs/2026-08-19-fresh-session-map-design.md
+    direction: bidirectional
+    relation: specification
 
-  # Map tile providers and the offline download policy are tracked by the
-  # provider investigation document.
+  # The tile provider investigation tracks the provider choice and the
+  # offline download policy.
   - id: map-providers
     description: Map provider choice and offline tile policy
     code:
       - lib/services/tile_download_service.dart
       - lib/screens/map/dialogs/offline_tile_dialogs.dart
-      - lib/utils/initial_map_camera.dart
     docs:
       - docs/development/map-providers.md
     direction: code-to-docs
     relation: related
 
-  # AGENTS.md documents the required workflow commands and lint conventions.
+  # AGENTS.md points at analysis_options.yaml as the lint convention.
   - id: agent-conventions
-    description: Repository conventions and required workflow
+    description: Repository lint conventions in AGENTS.md
     code:
       - analysis_options.yaml
-      - .github/workflows/ci.yml
     docs:
       - AGENTS.md
     direction: bidirectional

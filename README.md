@@ -190,7 +190,8 @@ other Flutter platforms are not maintained here.
 - [Getting started](docs/getting-started.md)
 - [Installation](docs/INSTALLATION.md)
 - [LoRa companion guide](docs/guides/lora-companion.md)
-- [MeshCore authentication](docs/guides/meshcore-authentication.md)
+- [Carpeater mode guide](docs/guides/carpeater.md)
+- [MeshCore authentication](docs/guides/meshcore-authentication.md) *(upstream MQTT only)*
 - [Ping debugging](docs/development/debugging-pings.md)
 - [Android release builds](docs/development/releasing.md)
 - [Map screen refactoring plan](docs/development/map-screen-refactoring.md)
