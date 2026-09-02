@@ -52,6 +52,7 @@ import 'map/dialogs/offline_tile_dialogs.dart';
 import 'map/dialogs/update_flow.dart';
 import 'map/dialogs/upload_endpoint_dialog.dart';
 import 'map/data_io.dart';
+import 'map/map_annotations_controller.dart';
 import 'map/map_runtime_bindings.dart';
 import 'map/map_screen_controller.dart';
 import 'map/map_settings_controller.dart';
@@ -1169,13 +1170,33 @@ class _MapScreenState extends State<MapScreen> {
   // PLANNED MARKERS
   // ============================================================================
 
-  Future<void> _loadMarkers() async {
-    final markers = await _databaseService.getAllMarkers();
-    if (!mounted) return;
-    setState(() {
-      _plannedMarkers = markers;
-    });
-  }
+  /// Annotation CRUD facade with screen-owned update callbacks injected.
+  MapAnnotationsController get _annotations => MapAnnotationsController(
+    databaseService: _databaseService,
+    onMarkersLoaded: (markers) async {
+      if (!mounted) return;
+      setState(() {
+        _plannedMarkers = markers;
+      });
+    },
+    onPrivacyZonesLoaded: (zones) async {
+      if (!mounted) return;
+      setState(() {
+        _privacyZones = zones;
+      });
+    },
+    onImpossibleZonesLoaded: (zones) async {
+      if (!mounted) return;
+      setState(() {
+        _impossibleZones = zones;
+      });
+    },
+    loadSamples: _loadSamples,
+    deleteSampleById: _mapDataController.deleteSample,
+    deleteCoverageById: _mapDataController.deleteCoverage,
+  );
+
+  Future<void> _loadMarkers() => _annotations.loadMarkers();
 
   Future<void> _handleMapLongPress(LatLng point) async {
     final action = await showModalBottomSheet<MapLongPressAction>(
@@ -1205,12 +1226,11 @@ class _MapScreenState extends State<MapScreen> {
     );
 
     if (label != null) {
-      await _databaseService.addMarker(
-        point.latitude,
-        point.longitude,
-        label.isEmpty ? null : label,
+      await _annotations.addPlannedMarker(
+        latitude: point.latitude,
+        longitude: point.longitude,
+        label: label.isEmpty ? null : label,
       );
-      await _loadMarkers();
       if (!mounted) return;
       _showSnackBar(AppLocalizations.of(context).mapPlannedRepeaterMarkerAdded);
     }
@@ -1236,8 +1256,7 @@ class _MapScreenState extends State<MapScreen> {
     );
 
     if (action != PlannedMarkerAction.delete) return;
-    await _databaseService.deleteMarker(id);
-    await _loadMarkers();
+    await _annotations.deleteMarker(id);
     if (!mounted) return;
     _showSnackBar(AppLocalizations.of(context).mapMarkerDeleted);
   }
@@ -1246,21 +1265,9 @@ class _MapScreenState extends State<MapScreen> {
   // PRIVACY ZONES
   // ============================================================================
 
-  Future<void> _loadPrivacyZones() async {
-    final zones = await _databaseService.getAllPrivacyZones();
-    if (!mounted) return;
-    setState(() {
-      _privacyZones = zones;
-    });
-  }
+  Future<void> _loadPrivacyZones() => _annotations.loadPrivacyZones();
 
-  Future<void> _loadImpossibleZones() async {
-    final zones = await _databaseService.getAllImpossibleZones();
-    if (!mounted) return;
-    setState(() {
-      _impossibleZones = zones;
-    });
-  }
+  Future<void> _loadImpossibleZones() => _annotations.loadImpossibleZones();
 
   Future<void> _addPrivacyZone(LatLng center) async {
     final l10n = AppLocalizations.of(context);
@@ -1281,13 +1288,12 @@ class _MapScreenState extends State<MapScreen> {
     _updateMapState(() => _zonePreview = null);
 
     if (draft != null) {
-      await _databaseService.addPrivacyZone(
-        center.latitude,
-        center.longitude,
-        draft.radiusMeters,
-        draft.label,
+      await _annotations.addPrivacyZone(
+        latitude: center.latitude,
+        longitude: center.longitude,
+        radiusMeters: draft.radiusMeters,
+        label: draft.label,
       );
-      await _loadPrivacyZones();
       if (!mounted) return;
       _showSnackBar(l10n.mapPrivacyZoneAdded);
     }
@@ -1319,13 +1325,12 @@ class _MapScreenState extends State<MapScreen> {
     _updateMapState(() => _zonePreview = null);
 
     if (draft == null) return;
-    await _databaseService.addImpossibleZone(
-      draft.center.latitude,
-      draft.center.longitude,
-      draft.radiusMeters,
-      draft.label,
+    await _annotations.addImpossibleZone(
+      latitude: draft.center.latitude,
+      longitude: draft.center.longitude,
+      radiusMeters: draft.radiusMeters,
+      label: draft.label,
     );
-    await _loadImpossibleZones();
     if (!mounted) return;
     _showSnackBar(l10n.settingsImpossibleZoneAdded);
   }
@@ -1341,8 +1346,7 @@ class _MapScreenState extends State<MapScreen> {
     );
 
     if (confirmed == true) {
-      await _mapDataController.deleteSample(sample.id);
-      await _loadSamples();
+      await _annotations.deleteSample(sample.id);
       if (!mounted) return;
       _showSnackBar(AppLocalizations.of(context).mapSampleDeleted);
     }
@@ -1356,8 +1360,7 @@ class _MapScreenState extends State<MapScreen> {
     );
 
     if (confirmed == true) {
-      final deleted = await _mapDataController.deleteCoverage(coverage.id);
-      await _loadSamples();
+      final deleted = await _annotations.deleteCoverageCell(coverage.id);
       if (!mounted) return;
       _showSnackBar(
         AppLocalizations.of(context).mapDeletedSamplesFromCell(deleted),
