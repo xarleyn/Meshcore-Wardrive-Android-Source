@@ -126,8 +126,8 @@ void main() {
   testWidgets('zone dialog slider updates the radius text field', (
     tester,
   ) async {
-    await pumpDialog(tester, (context) {
-      return showDialog<PrivacyZoneDraft>(
+    await pumpDialog(tester, (context) async {
+      await showDialog<PrivacyZoneDraft>(
         context: context,
         builder: (context) =>
             const AddPrivacyZoneDialog(center: LatLng(55.75, 37.62)),
@@ -199,8 +199,8 @@ void main() {
   });
 
   testWidgets('collapsible zone dialog stays content-sized', (tester) async {
-    await pumpDialog(tester, (context) {
-      return showAddZoneDialog<PrivacyZoneDraft>(
+    await pumpDialog(tester, (context) async {
+      await showAddZoneDialog<PrivacyZoneDraft>(
         context: context,
         center: const LatLng(55.75, 37.62),
         title: 'Zone',
