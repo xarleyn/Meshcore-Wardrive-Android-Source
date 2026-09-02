@@ -321,27 +321,57 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> _initialize(int generation) async {
+    if (!await _initializeTileCache(generation)) return;
+    if (!await _loadStartupSettings(generation)) return;
+    if (!await _loadStartupAnnotations(generation)) return;
+
+    _bindRadioStreams();
+    _bindLocationStreams();
+    _syncCompassSubscription();
+    _bindMapDataStreams();
+    _bindAlertStreams();
+
+    if (!await _applyStartupAlertSettings(generation)) return;
+
+    _bindTelemetryStreams();
+
+    await _loadStartupMapData(generation);
+  }
+
+  /// Tile cache store and home screen widget setup.
+  Future<bool> _initializeTileCache(int generation) async {
     // Initialize tile cache store
     final cacheDir = await getApplicationDocumentsDirectory();
-    if (!_isInitializationCurrent(generation)) return;
+    if (!_isInitializationCurrent(generation)) return false;
     _tileCacheStore = FileCacheStore('${cacheDir.path}/tile_cache');
 
     // Initialize home screen widget
     await WidgetService.initialize();
-    if (!_isInitializationCurrent(generation)) return;
+    if (!_isInitializationCurrent(generation)) return false;
+    return true;
+  }
 
+  /// Saved user settings snapshot.
+  Future<bool> _loadStartupSettings(int generation) async {
     // Load saved settings
     await _loadSettings();
-    if (!_isInitializationCurrent(generation)) return;
+    if (!_isInitializationCurrent(generation)) return false;
+    return true;
+  }
 
+  /// Planned markers and privacy zones persisted in the database.
+  Future<bool> _loadStartupAnnotations(int generation) async {
     // Load planned markers and privacy zones
     await _loadMarkers();
-    if (!_isInitializationCurrent(generation)) return;
+    if (!_isInitializationCurrent(generation)) return false;
     await _loadPrivacyZones();
-    if (!_isInitializationCurrent(generation)) return;
+    if (!_isInitializationCurrent(generation)) return false;
     await _loadImpossibleZones();
-    if (!_isInitializationCurrent(generation)) return;
+    if (!_isInitializationCurrent(generation)) return false;
+    return true;
+  }
 
+  void _bindRadioStreams() {
     // Subscribe to battery updates
     final loraService = _locationService.loraCompanion;
     _runtimeBindings.bind(
@@ -411,7 +441,9 @@ class _MapScreenState extends State<MapScreen> {
         });
       },
     );
+  }
 
+  void _bindLocationStreams() {
     // Subscribe to position updates
     _runtimeBindings.bind(
       MapRuntimeSubscription.position,
@@ -462,9 +494,9 @@ class _MapScreenState extends State<MapScreen> {
         }
       },
     );
+  }
 
-    _syncCompassSubscription();
-
+  void _bindMapDataStreams() {
     // Subscribe to sample saved events - reload map when new samples are saved
     _runtimeBindings.bind(
       MapRuntimeSubscription.sampleSaved,
@@ -493,7 +525,9 @@ class _MapScreenState extends State<MapScreen> {
         );
       },
     );
+  }
 
+  void _bindAlertStreams() {
     // Subscribe to new repeater discovery alerts
     _runtimeBindings.bind(
       MapRuntimeSubscription.newRepeater,
@@ -561,24 +595,30 @@ class _MapScreenState extends State<MapScreen> {
         );
       },
     );
+  }
 
+  /// Achievement backfill and repeater alert configuration.
+  Future<bool> _applyStartupAlertSettings(int generation) async {
     // Check achievements on startup
     AchievementService().checkAndUnlock();
 
     // Load known repeater IDs from DB so only truly new ones trigger alerts
     final knownIds = await _databaseService.getDistinctRepeaterIds();
-    if (!_isInitializationCurrent(generation)) return;
+    if (!_isInitializationCurrent(generation)) return false;
     await _locationService.loraCompanion.loadKnownRepeaterIds(knownIds);
-    if (!_isInitializationCurrent(generation)) return;
+    if (!_isInitializationCurrent(generation)) return false;
 
     // Load alert toggle settings
     final newRepeaterAlerts = await _settingsService
         .getNewRepeaterAlertsEnabled();
-    if (!_isInitializationCurrent(generation)) return;
+    if (!_isInitializationCurrent(generation)) return false;
     _locationService.loraCompanion.setNewRepeaterAlertsEnabled(
       newRepeaterAlerts,
     );
+    return true;
+  }
 
+  void _bindTelemetryStreams() {
     // Update distance immediately instead of waiting for a periodic map refresh.
     _runtimeBindings.bind(
       MapRuntimeSubscription.distance,
@@ -606,20 +646,24 @@ class _MapScreenState extends State<MapScreen> {
         });
       },
     );
+  }
 
+  /// Samples, position search, and cached community coverage.
+  Future<bool> _loadStartupMapData(int generation) async {
     await _loadSamples();
-    if (!_isInitializationCurrent(generation)) return;
+    if (!_isInitializationCurrent(generation)) return false;
     await _locationService.startPositionSearch();
-    if (!_isInitializationCurrent(generation)) return;
+    if (!_isInitializationCurrent(generation)) return false;
 
     // Load cached community coverage for offline viewing
     final cached = await _uploadService.loadCachedCoverage();
-    if (!_isInitializationCurrent(generation)) return;
+    if (!_isInitializationCurrent(generation)) return false;
     if (cached != null && cached['coverage'] != null) {
       setState(() {
         _communityCoverage = cached['coverage'] as Map<String, dynamic>;
       });
     }
+    return true;
   }
 
   bool _isInitializationCurrent(int generation) =>
