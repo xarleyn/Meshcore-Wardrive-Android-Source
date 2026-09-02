@@ -45,9 +45,8 @@ import 'map/dialogs/coverage_tools_dialogs.dart';
 import 'map/dialogs/map_entity_dialogs.dart';
 import 'map/dialogs/map_workflow_dialogs.dart';
 import 'map/dialogs/marker_dialogs.dart';
-import 'map/dialogs/offline_tile_dialogs.dart';
 import 'map/dialogs/update_flow.dart';
-import 'map/dialogs/upload_endpoint_dialog.dart';
+import 'map/dialogs/upload_flows.dart';
 import 'map/connection_flow.dart';
 import 'map/data_io.dart';
 import 'map/map_annotations_controller.dart';
@@ -80,7 +79,6 @@ import '../constants/app_version.dart';
 import '../services/ducting_service.dart';
 import '../services/carpeater_service.dart';
 import '../services/sound_service.dart';
-import '../services/tile_download_service.dart';
 import 'analytics_screen.dart';
 import 'achievements_screen.dart';
 import 'device_comparison_screen.dart';
@@ -2259,150 +2257,42 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  Future<void> _uploadSamples() async {
-    final endpoints = await _uploadService.getUploadEndpoints();
-    final savedSelectedSites = await _uploadService.getSelectedEndpoints();
-    if (!mounted) return;
+  /// Upload facade with screen-owned snackbars and data callbacks injected.
+  UploadFlow get _uploadFlow => UploadFlow(
+    context: context,
+    onShowSnackBar: _showSnackBar,
+    uploadService: _uploadService,
+    locationService: _locationService,
+    repeaters: () => _repeaters,
+  );
 
-    final selectedSites = await showDialog<List<String>>(
-      context: context,
-      builder: (context) => UploadEndpointSelectionDialog(
-        endpoints: endpoints,
-        initiallySelectedNames: savedSelectedSites,
-      ),
-    );
-    if (!mounted || selectedSites == null || selectedSites.isEmpty) return;
+  /// Community coverage facade; applies coverage through setState.
+  CommunityCoverageFlow get _communityCoverageFlow => CommunityCoverageFlow(
+    context: context,
+    onShowSnackBar: _showSnackBar,
+    uploadService: _uploadService,
+    onCoverageLoaded: (coverage) => setState(() {
+      _communityCoverage = coverage;
+      _showCommunityCoverage = true;
+    }),
+  );
 
-    // Build repeater names map from discovered repeaters and LoRa service
-    final repeaterNames = <String, String>{};
-    for (final repeater in _repeaters) {
-      if (repeater.name != null) {
-        repeaterNames[repeater.id] = repeater.name!;
-      }
-    }
+  /// Offline tile facade reading map camera state through callbacks.
+  OfflineTileFlow get _offlineTileFlow => OfflineTileFlow(
+    context: context,
+    onShowSnackBar: _showSnackBar,
+    hasTileCache: () => _tileCacheStore != null,
+    getVisibleBounds: () => _mapController.camera.visibleBounds,
+    getCameraZoom: () => _mapController.camera.zoom,
+    usesDarkMapTiles: () => _usesDarkMapTiles(context),
+  );
 
-    final loraService = _locationService.loraCompanion;
-    for (final contact in loraService.discoveredRepeaters) {
-      if (contact.name != null && !repeaterNames.containsKey(contact.id)) {
-        repeaterNames[contact.id] = contact.name!;
-      }
-    }
+  Future<void> _uploadSamples() => _uploadFlow.uploadSamples();
 
-    final outcome = await showDialog<UploadProgressOutcome>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => UploadProgressDialog(
-        upload: (onProgress) async {
-          if (selectedSites.isNotEmpty && endpoints.isNotEmpty) {
-            return _uploadService.uploadToSelectedEndpoints(
-              endpointNames: selectedSites,
-              repeaterNames: repeaterNames,
-              onProgress: onProgress,
-            );
-          }
+  Future<void> _manageUploadSites() => _uploadFlow.manageUploadSites();
 
-          final result = await _uploadService.uploadAllSamples(
-            repeaterNames: repeaterNames,
-            onProgress: (current, total) => onProgress('', current, total),
-          );
-          return {UploadService.defaultEndpointName: result};
-        },
-      ),
-    );
-
-    if (outcome == null || !mounted) return;
-    if (outcome.error != null) {
-      _showSnackBar(
-        AppLocalizations.of(context).mapUploadError('${outcome.error}'),
-      );
-      return;
-    }
-
-    await showDialog<void>(
-      context: context,
-      builder: (context) => UploadResultsDialog(results: outcome.results!),
-    );
-  }
-
-  Future<void> _manageUploadSites() async {
-    final endpoints = await _uploadService.getUploadEndpoints();
-    final selectedNames = await _uploadService.getSelectedEndpoints();
-
-    if (!mounted) return;
-    final configuration = await showModalBottomSheet<UploadSitesConfiguration>(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => ManageUploadSitesSheet(
-        initialEndpoints: endpoints,
-        initiallySelectedNames: selectedNames,
-      ),
-    );
-
-    if (configuration == null) return;
-    await _uploadService.setUploadEndpoints(configuration.endpoints);
-    await _uploadService.setSelectedEndpoints(configuration.selectedNames);
-    if (!mounted) return;
-    _showSnackBar(AppLocalizations.of(context).mapUploadSitesUpdated);
-  }
-
-  Future<void> _showOfflineTileDownload() async {
-    if (_tileCacheStore == null) {
-      _showSnackBar(AppLocalizations.of(context).mapTileCacheNotInitialized);
-      return;
-    }
-
-    final bounds = _mapController.camera.visibleBounds;
-    final currentZoom = _mapController.camera.zoom.floor();
-    final isDarkMode = _usesDarkMapTiles(context);
-
-    final options = await showDialog<OfflineTileDownloadOptions>(
-      context: context,
-      builder: (context) =>
-          OfflineTileDownloadDialog(bounds: bounds, initialZoom: currentZoom),
-    );
-
-    if (options == null || !mounted) return;
-
-    final urlTemplate = isDarkMode
-        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
-        : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-
-    final cacheDir =
-        '${(await getApplicationDocumentsDirectory()).path}/tile_cache';
-    final downloader = TileDownloadService(cacheDir);
-    final totalTiles = TileDownloadService.estimateTileCount(
-      bounds.southWest,
-      bounds.northEast,
-      options.minZoom,
-      options.maxZoom,
-    );
-
-    if (!mounted) return;
-    final outcome = await showDialog<OfflineTileDownloadOutcome>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => OfflineTileDownloadProgressDialog(
-        totalTiles: totalTiles,
-        download: (onProgress) => downloader.downloadTiles(
-          sw: bounds.southWest,
-          ne: bounds.northEast,
-          minZoom: options.minZoom,
-          maxZoom: options.maxZoom,
-          urlTemplate: urlTemplate,
-          onProgress: onProgress,
-        ),
-        onCancel: downloader.cancel,
-      ),
-    );
-
-    if (outcome == null || !mounted) return;
-    final l10n = AppLocalizations.of(context);
-    if (outcome.cancelled) {
-      _showSnackBar(l10n.mapDownloadCancelled(outcome.completed));
-    } else {
-      _showSnackBar(l10n.mapDownloadedTiles(outcome.succeeded, totalTiles));
-    }
-  }
+  Future<void> _showOfflineTileDownload() =>
+      _offlineTileFlow.downloadOfflineTiles();
 
   Future<void> _shareCoverageMap() async {
     try {
@@ -2541,66 +2431,8 @@ class _MapScreenState extends State<MapScreen> {
     if (selected != null) _mapController.move(selected.position, 15.0);
   }
 
-  Future<void> _downloadCommunityCoverage() async {
-    // Get endpoint to download from
-    final endpoints = await _uploadService.getUploadEndpoints();
-
-    UploadEndpoint? selectedEndpoint;
-    if (endpoints.length == 1) {
-      selectedEndpoint = endpoints.first;
-    } else {
-      // Let user pick which endpoint to download from
-      if (!mounted) return;
-      selectedEndpoint = await showDialog<UploadEndpoint>(
-        context: context,
-        builder: (context) =>
-            CommunityCoverageEndpointDialog(endpoints: endpoints),
-      );
-    }
-
-    if (selectedEndpoint == null) return;
-
-    if (!mounted) return;
-    _showSnackBar(AppLocalizations.of(context).mapDownloadingCoverage);
-
-    final data = await _uploadService.downloadCoverage(
-      selectedEndpoint.url,
-      onProgress: (current, total) {
-        // Update snackbar with progress (won't stack, just shows latest)
-      },
-    );
-    if (data != null && data['coverage'] != null) {
-      final coverage = data['coverage'] as Map<String, dynamic>;
-      setState(() {
-        _communityCoverage = coverage;
-        _showCommunityCoverage = true;
-      });
-      if (!mounted) return;
-      _showSnackBar(
-        AppLocalizations.of(context)
-            .mapDownloadedCoverageCells(coverage.length),
-      );
-    } else {
-      // Try loading from cache
-      final cached = await _uploadService.loadCachedCoverage();
-      if (cached != null && cached['coverage'] != null) {
-        setState(() {
-          _communityCoverage = cached['coverage'] as Map<String, dynamic>;
-          _showCommunityCoverage = true;
-        });
-        if (!mounted) return;
-        _showSnackBar(AppLocalizations.of(context).mapLoadedCachedCoverage);
-      } else {
-        if (!mounted) return;
-        _showSnackBar(
-          AppLocalizations.of(context).mapDownloadFailed(
-            _uploadService.lastDownloadError ??
-                AppLocalizations.of(context).mapUnknownError,
-          ),
-        );
-      }
-    }
-  }
+  Future<void> _downloadCommunityCoverage() =>
+      _communityCoverageFlow.downloadCommunityCoverage();
 
   void _handleMapTap(LatLng point) {
     if (!_showCommunityCoverage || _communityCoverage == null) return;
