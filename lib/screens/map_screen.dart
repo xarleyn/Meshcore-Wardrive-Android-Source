@@ -56,6 +56,7 @@ import 'map/map_annotations_controller.dart';
 import 'map/map_runtime_bindings.dart';
 import 'map/map_screen_controller.dart';
 import 'map/map_settings_controller.dart';
+import 'map/tracking_permissions.dart';
 import 'map/widgets/delete_mode_banner.dart';
 import 'map/widgets/map_action_buttons.dart';
 import 'map/widgets/map_control_panel.dart';
@@ -69,8 +70,6 @@ import 'package:screenshot/screenshot.dart';
 import 'package:flutter_map_cache/flutter_map_cache.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:dio_cache_interceptor_file_store/dio_cache_interceptor_file_store.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import 'dart:typed_data';
 
@@ -1019,117 +1018,18 @@ class _MapScreenState extends State<MapScreen> {
     _showSnackBar(startMessage);
   }
 
-  Future<bool> _prepareAndroidTracking() async {
-    if (!Platform.isAndroid) return true;
+  /// Android tracking permission facade with screen dependencies injected.
+  TrackingPermissions get _trackingPermissions => TrackingPermissions(
+    context: context,
+    androidTrackingSettings: _androidTrackingSettings,
+    beaconDbWifiPositioning: () => _beaconDbWifiPositioning,
+  );
 
-    final foregroundStatus = await Permission.locationWhenInUse.request();
-    if (!foregroundStatus.isGranted) return true;
+  Future<bool> _prepareAndroidTracking() =>
+      _trackingPermissions.prepareAndroidTracking();
 
-    final accuracy = await Geolocator.getLocationAccuracy();
-    if (accuracy != LocationAccuracyStatus.precise) {
-      if (!mounted) return false;
-      final l10n = AppLocalizations.of(context);
-      await _showSettingsDialog(
-        title: l10n.mapPreciseLocationRequiredTitle,
-        message: l10n.mapPreciseLocationRequiredBody,
-        actionLabel: l10n.mapOpenAppSettings,
-        onOpen: openAppSettings,
-      );
-      return false;
-    }
-
-    var backgroundStatus = await Permission.locationAlways.status;
-    if (!backgroundStatus.isGranted) {
-      if (!mounted) return false;
-      final l10n = AppLocalizations.of(context);
-      final shouldRequest = await _showRequestDialog(
-        title: l10n.mapAllowLocationAllTheTimeTitle,
-        message: l10n.mapAllowLocationAllTheTimeBody,
-      );
-      if (!shouldRequest) return false;
-
-      backgroundStatus = await Permission.locationAlways.request();
-      if (!backgroundStatus.isGranted) {
-        if (!mounted) return false;
-        final l10n = AppLocalizations.of(context);
-        await _showSettingsDialog(
-          title: l10n.mapBackgroundLocationRequiredTitle,
-          message: l10n.mapBackgroundLocationRequiredBody,
-          actionLabel: l10n.mapOpenAppSettings,
-          onOpen: openAppSettings,
-        );
-        return false;
-      }
-    }
-
-    final batteryStatus = await Permission.ignoreBatteryOptimizations.status;
-    if (!batteryStatus.isGranted) {
-      if (!mounted) return false;
-      final l10n = AppLocalizations.of(context);
-      final shouldRequest = await _showRequestDialog(
-        title: l10n.mapUnrestrictedBatteryTitle,
-        message: l10n.mapUnrestrictedBatteryBody,
-      );
-      if (shouldRequest) {
-        await Permission.ignoreBatteryOptimizations.request();
-      }
-    }
-
-    if (_beaconDbWifiPositioning) {
-      if (!await _requestWifiScanThrottlingDisabled()) return false;
-    }
-
-    return true;
-  }
-
-  Future<bool> _requestWifiScanThrottlingDisabled() async {
-    if (!Platform.isAndroid) return true;
-
-    final throttlingEnabled = await _androidTrackingSettings
-        .isWifiScanThrottlingEnabled();
-    if (throttlingEnabled == false || !mounted) return true;
-
-    final l10n = AppLocalizations.of(context);
-    final openedSettings = await _showSettingsDialog(
-      title: l10n.mapDisableWifiThrottlingTitle,
-      message: l10n.mapDisableWifiThrottlingBody,
-      actionLabel: l10n.mapDeveloperOptions,
-      onOpen: _androidTrackingSettings.openWifiScanThrottlingSettings,
-    );
-    return !openedSettings;
-  }
-
-  Future<bool> _showRequestDialog({
-    required String title,
-    required String message,
-  }) async {
-    if (!mounted) return false;
-    return await showDialog<bool>(
-          context: context,
-          builder: (context) =>
-              ContinueRequestDialog(title: title, message: message),
-        ) ??
-        false;
-  }
-
-  Future<bool> _showSettingsDialog({
-    required String title,
-    required String message,
-    required String actionLabel,
-    required Future<bool> Function() onOpen,
-  }) async {
-    if (!mounted) return false;
-    final shouldOpen = await showDialog<bool>(
-      context: context,
-      builder: (context) => OpenSettingsDialog(
-        title: title,
-        message: message,
-        actionLabel: actionLabel,
-      ),
-    );
-    if (shouldOpen != true) return false;
-    return onOpen();
-  }
+  Future<bool> _requestWifiScanThrottlingDisabled() =>
+      _trackingPermissions.requestWifiScanThrottlingDisabled();
 
   /// Data I/O facade with the screen's services and reload hooks injected.
   MapDataIo get _dataIo => MapDataIo(
