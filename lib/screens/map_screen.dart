@@ -30,7 +30,6 @@ import '../utils/community_coverage.dart';
 import '../utils/bluetooth_scan.dart';
 import '../utils/sample_export.dart';
 import '../utils/ping_burst.dart';
-import '../utils/update_check.dart';
 import '../widgets/compass_calibration.dart';
 import '../widgets/bluetooth_device_picker_dialog.dart';
 import 'map/layers/coverage_prediction_layer.dart';
@@ -52,6 +51,7 @@ import 'map/dialogs/map_entity_dialogs.dart';
 import 'map/dialogs/map_workflow_dialogs.dart';
 import 'map/dialogs/marker_dialogs.dart';
 import 'map/dialogs/offline_tile_dialogs.dart';
+import 'map/dialogs/update_flow.dart';
 import 'map/dialogs/upload_endpoint_dialog.dart';
 import 'map/map_runtime_bindings.dart';
 import 'map/map_screen_controller.dart';
@@ -64,8 +64,6 @@ import '../services/widget_service.dart';
 
 import 'package:usb_serial/usb_serial.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:http/http.dart' as http;
-import 'package:url_launcher/url_launcher.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:screenshot/screenshot.dart';
@@ -1768,61 +1766,13 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  Future<void> _checkForUpdates() async {
-    try {
-      final response = await http
-          .get(Uri.parse(updateCheckApiUrl))
-          .timeout(const Duration(seconds: 5));
+  Future<void> _checkForUpdates() => UpdateFlow(
+    context: context,
+    onShowSnackBar: _showSnackBar,
+  ).checkForUpdates();
 
-      if (response.statusCode == 200) {
-        final releases = jsonDecode(response.body) as List<dynamic>;
-        final latestVersion = latestVersionFromReleaseTags(
-          releases
-              .whereType<Map<String, dynamic>>()
-              .map((release) => release['tag_name'])
-              .whereType<String>(),
-        );
-
-        if (!mounted) return;
-        if (latestVersion == null) {
-          _showSnackBar(AppLocalizations.of(context).mapCouldNotCheckUpdates);
-        } else if (!isNewerAppVersion(latestVersion, appVersion)) {
-          _showSnackBar(AppLocalizations.of(context).mapOnLatestVersion);
-        } else {
-          final shouldDownload = await showDialog<bool>(
-            context: context,
-            builder: (context) => UpdateAvailableDialog(
-              latestVersion: latestVersion,
-              currentVersion: appVersion,
-            ),
-          );
-          if (shouldDownload == true) await _openGitHub();
-        }
-      } else {
-        if (!mounted) return;
-        _showSnackBar(AppLocalizations.of(context).mapCouldNotCheckUpdates);
-      }
-    } on SocketException {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapNoInternetTryAgain);
-    } on TimeoutException {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapUpdateCheckTimedOut);
-    } catch (_) {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapCouldNotCheckUpdates);
-    }
-  }
-
-  Future<void> _openGitHub() async {
-    final url = Uri.parse(updateCheckReleasesUrl);
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-    } else {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapCouldNotOpenGitHub);
-    }
-  }
+  Future<void> _openGitHub() =>
+      UpdateFlow(context: context, onShowSnackBar: _showSnackBar).openGitHub();
 
   void _toggleFollowLocation() {
     setState(() {
