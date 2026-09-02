@@ -26,10 +26,8 @@ import '../utils/compass_calibration.dart';
 import '../utils/heading_utils.dart';
 import '../utils/session_map_view.dart';
 import '../utils/community_coverage.dart';
-import '../utils/bluetooth_scan.dart';
 import '../utils/ping_burst.dart';
 import '../widgets/compass_calibration.dart';
-import '../widgets/bluetooth_device_picker_dialog.dart';
 import 'map/layers/coverage_prediction_layer.dart';
 import 'map/layers/coverage_layer.dart';
 import 'map/layers/community_coverage_layer.dart';
@@ -43,7 +41,6 @@ import 'map/layers/route_trail_layer.dart';
 import 'map/layers/sample_cluster_layer.dart';
 import 'map/layers/sample_heatmap_layer.dart';
 import 'map/dialogs/appearance_dialogs.dart';
-import 'map/dialogs/connection_dialogs.dart';
 import 'map/dialogs/coverage_tools_dialogs.dart';
 import 'map/dialogs/map_entity_dialogs.dart';
 import 'map/dialogs/map_workflow_dialogs.dart';
@@ -51,6 +48,7 @@ import 'map/dialogs/marker_dialogs.dart';
 import 'map/dialogs/offline_tile_dialogs.dart';
 import 'map/dialogs/update_flow.dart';
 import 'map/dialogs/upload_endpoint_dialog.dart';
+import 'map/connection_flow.dart';
 import 'map/data_io.dart';
 import 'map/map_annotations_controller.dart';
 import 'map/map_runtime_bindings.dart';
@@ -63,8 +61,6 @@ import 'map/widgets/map_control_panel.dart';
 import 'map/widgets/map_quick_settings_panel.dart';
 import '../services/widget_service.dart';
 
-import 'package:usb_serial/usb_serial.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:flutter_map_cache/flutter_map_cache.dart';
@@ -1936,144 +1932,29 @@ class _MapScreenState extends State<MapScreen> {
     return (nodeId.length > 8 ? nodeId.substring(0, 8) : nodeId).toUpperCase();
   }
 
-  void _showConnectionDialog() async {
-    final method = await showDialog<ConnectionMethod>(
-      context: context,
-      builder: (context) => const ConnectionMethodDialog(),
-    );
-    switch (method) {
-      case ConnectionMethod.usb:
-        await _connectUsb();
-      case ConnectionMethod.bluetooth:
-        await _connectBluetooth();
-      case null:
-        return;
-    }
-  }
+  /// Companion connection facade with screen-owned state callbacks injected.
+  ConnectionFlow get _connectionFlow => ConnectionFlow(
+    context: context,
+    onShowSnackBar: _showSnackBar,
+    locationService: _locationService,
+    settingsService: _settingsService,
+    databaseService: _databaseService,
+    isConnecting: () => _isConnecting,
+    setConnecting: (connecting) => setState(() => _isConnecting = connecting),
+    loraConnected: () => _loraConnected,
+    onLoadSamples: _loadSamples,
+    onDeviceDisconnected: () => setState(() {
+      _autoPingEnabled = false;
+      _carpeaterState = CarpeaterState.disabled;
+    }),
+    onRepeatersReplaced: (repeaters) =>
+        setState(() => _mapDataController.replaceRepeaters(repeaters)),
+    onRepeatersFound: _showRepeatersDialog,
+  );
 
-  Future<void> _connectUsb() async {
-    if (_isConnecting) return;
-    setState(() => _isConnecting = true);
-    try {
-      final devices = await _locationService.loraCompanion.scanUsbDevices();
+  void _showConnectionDialog() => _connectionFlow.showConnectionDialog();
 
-      if (!mounted) return;
-
-      if (devices.isEmpty) {
-        _showSnackBar(AppLocalizations.of(context).mapNoUsbDevices);
-        return;
-      }
-
-      final selected = await showDialog<UsbDevice>(
-        context: context,
-        builder: (context) => UsbDeviceDialog(devices: devices),
-      );
-
-      if (selected != null) {
-        final connected = await _locationService.loraCompanion.connectUsb(
-          selected,
-        );
-        if (connected) {
-          if (!mounted) return;
-          _showSnackBar(AppLocalizations.of(context).mapConnectedViaUsb);
-          await _loadSamples();
-        } else {
-          if (!mounted) return;
-          _showSnackBar(AppLocalizations.of(context).mapFailedConnectUsb);
-        }
-      }
-    } catch (e) {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapUsbError('$e'));
-    } finally {
-      if (mounted) setState(() => _isConnecting = false);
-    }
-  }
-
-  Future<void> _connectBluetooth() async {
-    if (_isConnecting) return;
-    setState(() => _isConnecting = true);
-    try {
-      final recent = await _settingsService.getRecentBluetoothDevices();
-      final tracked = [
-        for (final row in await _databaseService.getAllDevices())
-          if (row['connection_type'] == 'bluetooth')
-            KnownBluetoothDevice(
-              remoteId:
-                  bluetoothRemoteIdFromStoredId('${row['public_key'] ?? ''}') ??
-                  '',
-              name: '${row['name'] ?? ''}',
-            ),
-      ].where((device) => device.remoteId.isNotEmpty).toList();
-      final bonded = await _locationService.loraCompanion
-          .getBondedCompanionDevices();
-      final known = collectKnownBluetoothDevices(
-        recent: recent,
-        tracked: tracked,
-        bonded: bonded,
-      );
-
-      if (!mounted) return;
-      final selected = await showDialog<BluetoothScanEntry>(
-        context: context,
-        builder: (context) => BluetoothDevicePickerDialog(
-          scan: _locationService.loraCompanion.watchBluetoothScan(
-            knownDevices: known,
-          ),
-        ),
-      );
-
-      if (selected == null) return;
-
-      if (!mounted) return;
-      _showSnackBar(
-        AppLocalizations.of(context).mapConnectingTo(selected.displayName),
-      );
-
-      final connected = await _locationService.loraCompanion.connectBluetooth(
-        BluetoothDevice.fromId(selected.remoteId),
-      );
-      if (connected) {
-        await _settingsService.rememberBluetoothDevice(
-          remoteId: selected.remoteId,
-          name: _locationService.loraCompanion.deviceName ?? selected.name,
-        );
-        if (!mounted) return;
-        _showSnackBar(AppLocalizations.of(context).mapConnectedViaBluetooth);
-        await _loadSamples();
-      } else {
-        if (!mounted) return;
-        _showSnackBar(AppLocalizations.of(context).mapFailedConnectBluetooth);
-      }
-    } catch (e) {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).bluetoothError('$e'));
-    } finally {
-      if (mounted) setState(() => _isConnecting = false);
-    }
-  }
-
-  Future<void> _disconnectLoRa() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => const DisconnectDeviceDialog(),
-    );
-
-    if (confirmed == true) {
-      // Disable auto-ping and carpeater
-      _locationService.disableAutoPing();
-      _locationService.carpeaterService.stop();
-      setState(() {
-        _autoPingEnabled = false;
-        _carpeaterState = CarpeaterState.disabled;
-      });
-
-      await _locationService.loraCompanion.disconnectDevice();
-      await _loadSamples();
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapLoraDisconnected);
-    }
-  }
+  Future<void> _disconnectLoRa() => _connectionFlow.disconnectLoRa();
 
   String _localizedDuctingRisk(AppLocalizations l10n, String risk) {
     switch (risk) {
@@ -2101,47 +1982,9 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  Future<void> _refreshContacts() async {
-    if (!_loraConnected) {
-      _showSnackBar(AppLocalizations.of(context).mapConnectLoraFirst);
-      return;
-    }
+  Future<void> _refreshContacts() => _connectionFlow.refreshContacts();
 
-    _showSnackBar(AppLocalizations.of(context).mapRefreshingContactList);
-
-    // Request full contact list from device
-    await _locationService.loraCompanion.refreshContactList();
-
-    // Give it a moment to process
-    await Future.delayed(const Duration(seconds: 2));
-
-    if (!mounted) return;
-    _showSnackBar(AppLocalizations.of(context).mapContactListUpdated);
-  }
-
-  Future<void> _scanForRepeaters() async {
-    if (!_loraConnected) {
-      _showSnackBar(AppLocalizations.of(context).mapConnectLoraFirst);
-      return;
-    }
-
-    _showSnackBar(AppLocalizations.of(context).mapScanningForRepeaters);
-
-    final repeaters = await _locationService.loraCompanion.scanForRepeaters();
-
-    setState(() => _mapDataController.replaceRepeaters(repeaters));
-
-    if (repeaters.isEmpty) {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapNoRepeatersFound);
-    } else {
-      if (!mounted) return;
-      _showSnackBar(
-        AppLocalizations.of(context).mapRepeatersFound(repeaters.length),
-      );
-      _showRepeatersDialog();
-    }
-  }
+  Future<void> _scanForRepeaters() => _connectionFlow.scanForRepeaters();
 
   void _openSessionHistory() {
     Navigator.push(
