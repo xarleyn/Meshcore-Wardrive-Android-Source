@@ -67,6 +67,7 @@ app.*.map.json
 
 # Local AI tooling
 .aider*
+.dsh/doc-impact.local.yml
 
 # Local scratch scripts and data exports
 /tmp/

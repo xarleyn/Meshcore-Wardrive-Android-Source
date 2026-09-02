@@ -144,6 +144,11 @@ or a physical LoRa device, describe any manual device testing that remains.
   output. Distribute binaries through GitHub Releases.
 - Update documentation and examples when changing commands, paths, settings, or
   user-visible behavior.
+- `.dsh/doc-impact.yml` maps source areas to the documents they affect for the
+  `dsh-doc-impact` agent plugin. When a change touches files covered by a rule,
+  review or update the linked documents and resolve the impact with the
+  plugin's `doc_impact_resolve` tool before finishing the turn. Personal
+  overrides belong in `.dsh/doc-impact.local.yml`, which is not committed.
 
 ## Architecture notes
 

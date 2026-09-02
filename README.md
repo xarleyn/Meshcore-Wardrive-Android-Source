@@ -62,7 +62,7 @@ flutter pub get
 
 3. Generate app icons:
 ```bash
-flutter pub run flutter_launcher_icons
+dart run flutter_launcher_icons
 ```
 
 4. Run on connected device:
@@ -192,6 +192,8 @@ other Flutter platforms are not maintained here.
 - [LoRa companion guide](docs/guides/lora-companion.md)
 - [MeshCore authentication](docs/guides/meshcore-authentication.md)
 - [Ping debugging](docs/development/debugging-pings.md)
+- [Android release builds](docs/development/releasing.md)
+- [Map screen refactoring plan](docs/development/map-screen-refactoring.md)
 - [Changelog](CHANGELOG.md)
 
 ## Privacy

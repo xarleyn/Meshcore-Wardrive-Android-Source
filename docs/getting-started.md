@@ -85,11 +85,11 @@ The app language (System / English / Русский) is under Settings → App &
   - Age: Green (fresh) → Red (old)
 
 ### Data Management
-- **Export**: Saves all collected samples as JSON file
+- **Export**: Saves all collected samples as JSON, CSV, GPX, or KML
   - Save location is chosen in the system file picker (or shared via the
     Android share sheet)
-  - Suggested file name: `meshcore_export_YYYYMMDD_HHMMSS.json`
-  
+  - Suggested JSON file name: `meshcore_export_YYYYMMDD_HHMMSS.json`
+
 - **Clear**: Deletes all collected data (with confirmation)
 
 ## Tips for Wardriving
@@ -102,7 +102,9 @@ The app language (System / English / Русский) is under Settings → App &
 
 ## Data Format
 
-Exported JSON contains an array of samples:
+Exported JSON contains an array of samples. Ping-related fields (`rssi`,
+`snr`, `pingSuccess`, `responseTimeMs`) are `null` for samples recorded
+without a radio response:
 ```json
 [
   {
@@ -111,7 +113,14 @@ Exported JSON contains an array of samples:
     "lon": -122.4247,
     "timestamp": "2024-01-01T12:00:00.000Z",
     "path": null,
-    "geohash": "c23nb2q2"
+    "geohash": "c23nb2q2",
+    "rssi": -85,
+    "snr": 7,
+    "pingSuccess": true,
+    "responseTimeMs": 2350,
+    "ductingRisk": null,
+    "source": null,
+    "deviceId": null
   }
 ]
 ```

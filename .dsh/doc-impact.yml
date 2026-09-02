@@ -1,0 +1,154 @@
+# Documentation-impact rules for the dsh-doc-impact plugin
+# (https://github.com/xarleyn/dsh-plugins/tree/main/plugins/dsh-doc-impact).
+#
+# When an agent turn touches the code globs of a rule, the plugin asks the
+# agent to review or update the linked documents and resolve the impact via
+# doc_impact_resolve. Personal overrides belong in
+# .dsh/doc-impact.local.yml (git-ignored).
+version: 1
+defaults:
+  mode: remind
+  scope: turn
+  changeDetection: auto
+rules:
+  # The map screen composition root is being slimmed down; its structure and
+  # the refactoring plan must move together (steps and live checklist live in
+  # the plan document).
+  - id: map-refactoring-plan
+    description: Map screen structure is tracked by the refactoring plan
+    code:
+      include:
+        - lib/screens/map_screen.dart
+        - lib/screens/map/**
+      exclude:
+        - "**/*.g.dart"
+    docs:
+      - docs/development/map-screen-refactoring.md
+    direction: bidirectional
+    relation: synchronized
+    mode: require-review
+
+  # The companion guide and the ping-debugging notes describe the behavior
+  # and frame flow implemented by these services.
+  - id: lora-companion-guide
+    description: Companion radio, protocol, and ping debugging documentation
+    code:
+      - lib/services/lora_companion_service.dart
+      - lib/services/meshcore_protocol.dart
+      - lib/services/manual_ping_service.dart
+    docs:
+      - docs/guides/lora-companion.md
+      - docs/development/debugging-pings.md
+    direction: code-to-docs
+    relation: documents
+
+  # Release tooling, signing configuration, and CI define the documented
+  # release process.
+  - id: release-process
+    description: Release builds, versioning, signing, and CI
+    code:
+      - tool/version.dart
+      - tool/build_release.ps1
+      - android/app/build.gradle.kts
+      - android/key.properties.example
+      - .github/workflows/ci.yml
+      - .github/workflows/release.yml
+    docs:
+      - docs/development/releasing.md
+    direction: bidirectional
+    relation: specification
+
+  # Installation steps mirror package identity and requested permissions.
+  - id: installation-docs
+    description: Package identity, permissions, and installation steps
+    code:
+      - android/app/src/main/AndroidManifest.xml
+      - android/app/build.gradle.kts
+    docs:
+      - docs/INSTALLATION.md
+    direction: code-to-docs
+    relation: documents
+
+  # Quick-start documents tracking, quality filtering, and settings behavior.
+  - id: getting-started
+    description: Quick-start describes tracking and settings behavior
+    code:
+      - lib/services/location_service.dart
+      - lib/services/location_quality_filter.dart
+      - lib/screens/settings/**
+    docs:
+      - docs/getting-started.md
+    direction: code-to-docs
+    relation: documents
+
+  # Export format examples follow Sample.toJson and the export builders.
+  - id: export-format
+    description: Data export format documentation
+    code:
+      - lib/models/models.dart
+      - lib/utils/sample_export.dart
+      - lib/screens/map/data_io.dart
+    docs:
+      - docs/getting-started.md
+      - docs/guides/lora-companion.md
+    direction: code-to-docs
+    relation: documents
+
+  # Version bumps sync pubspec, the in-app constant, and the changelog.
+  - id: changelog-version
+    description: Version bumps are recorded in CHANGELOG.md
+    code:
+      - pubspec.yaml
+      - lib/constants/app_version.dart
+      - tool/version.dart
+    docs:
+      - CHANGELOG.md
+    direction: code-to-docs
+    relation: synchronized
+
+  # Design specs describe implemented features; keep them synchronized.
+  - id: impossible-zones-spec
+    description: Impossible Zones design spec
+    code:
+      - lib/models/impossible_zone.dart
+      - lib/services/location_quality_filter.dart
+      - lib/services/bad_fix_monitor.dart
+    docs:
+      - docs/superpowers/specs/2026-08-20-impossible-zones-design.md
+    direction: bidirectional
+    relation: specification
+
+  - id: localization-spec
+    description: Localization design spec and implementation plan
+    code:
+      - lib/l10n/app_en.arb
+      - lib/l10n/app_ru.arb
+    docs:
+      - docs/superpowers/specs/2026-08-20-localization-design.md
+      - docs/superpowers/plans/2026-08-20-localization.md
+    direction: code-to-docs
+    relation: related
+
+  # Map tile providers and the offline download policy are tracked by the
+  # provider investigation document.
+  - id: map-providers
+    description: Map provider choice and offline tile policy
+    code:
+      - lib/services/tile_download_service.dart
+      - lib/screens/map/dialogs/offline_tile_dialogs.dart
+      - lib/utils/initial_map_camera.dart
+    docs:
+      - docs/development/map-providers.md
+    direction: code-to-docs
+    relation: related
+
+  # AGENTS.md documents the required workflow commands and lint conventions.
+  - id: agent-conventions
+    description: Repository conventions and required workflow
+    code:
+      - analysis_options.yaml
+      - .github/workflows/ci.yml
+    docs:
+      - AGENTS.md
+    direction: bidirectional
+    relation: specification
