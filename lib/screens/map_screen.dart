@@ -77,6 +77,7 @@ import '../l10n/generated/app_localizations.dart';
 import '../constants/app_version.dart';
 import '../services/ducting_service.dart';
 import '../services/carpeater_service.dart';
+import '../services/manual_ping_service.dart';
 import '../services/sound_service.dart';
 import 'analytics_screen.dart';
 import 'achievements_screen.dart';
@@ -1867,6 +1868,12 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
+  /// Manual ping business logic with the screen's companion and DB wired in.
+  ManualPingService get _manualPingService => ManualPingService(
+    loraCompanion: _locationService.loraCompanion,
+    databaseService: _databaseService,
+  );
+
   Future<void> _manualPing() async {
     if (!_loraConnected) {
       _showSnackBar(AppLocalizations.of(context).mapConnectLoraFirst);
@@ -1884,76 +1891,22 @@ class _MapScreenState extends State<MapScreen> {
     }
 
     _showSnackBar(AppLocalizations.of(context).mapSendingPing);
-    SoundService().playPingSent();
 
-    // Send ping via LoRa companion
-    final result = await _locationService.loraCompanion.ping(
-      latitude: _currentPosition!.latitude,
-      longitude: _currentPosition!.longitude,
+    final outcome = await _manualPingService.ping(
+      position: _currentPosition!,
       timeoutSeconds: _discoveryTimeoutSeconds,
-      waitForAllResponses: true,
-      collectUntilTimeout: _thoroughResponseCollection,
+      thoroughResponseCollection: _thoroughResponseCollection,
     );
-
-    final responses = result.responses;
-    final pingSuccess =
-        result.status == PingStatus.success && responses.isNotEmpty;
-
-    if (pingSuccess) {
-      for (final response in responses) {
-        await SoundService().playForPingResult(
-          success: true,
-          snr: response.snr,
-          rssi: response.rssi,
-        );
-      }
-    } else {
-      await SoundService().playForPingResult(success: false);
-    }
-
-    // Create and save sample
-    final geohash = GeohashUtils.sampleKey(
-      _currentPosition!.latitude,
-      _currentPosition!.longitude,
-    );
-
-    if (pingSuccess) {
-      for (var index = 0; index < responses.length; index++) {
-        final response = responses[index];
-        final sample = Sample(
-          id: '${DateTime.now().microsecondsSinceEpoch}_${index}_$geohash',
-          position: _currentPosition!,
-          timestamp: DateTime.now(),
-          path: response.nodeId,
-          geohash: geohash,
-          rssi: response.rssi,
-          snr: response.snr,
-          pingSuccess: true,
-          responseTimeMs: response.responseTimeMs,
-          deviceId: _locationService.loraCompanion.connectedDeviceId,
-        );
-        await _databaseService.insertSample(sample);
-      }
-    } else {
-      final sample = Sample(
-        id: '${DateTime.now().microsecondsSinceEpoch}_$geohash',
-        position: _currentPosition!,
-        timestamp: DateTime.now(),
-        geohash: geohash,
-        pingSuccess: false,
-        responseTimeMs: result.responseTimeMs,
-        deviceId: _locationService.loraCompanion.connectedDeviceId,
-      );
-      await _databaseService.insertSample(sample);
-    }
 
     // Reload samples to update map
     await _loadSamples();
 
     // Show result
-    if (pingSuccess) {
+    final result = outcome.result;
+    if (outcome.pingSuccess) {
       if (!mounted) return;
       final l10n = AppLocalizations.of(context);
+      final responses = result.responses;
       final summary = responses.length == 1
           ? l10n.mapPingHeardBy(_shortNodeId(responses.single.nodeId))
           : l10n.mapDiscoveryComplete(responses.length);
