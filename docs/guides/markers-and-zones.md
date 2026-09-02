@@ -29,10 +29,10 @@ exact location.
 - **Preview on map** collapses the dialog into a small bar at the bottom of
   the screen and draws the zone circle; the map stays interactive, and the
   bar offers Edit, Add, and Close.
-- Samples inside a privacy zone are excluded from **web map uploads**, so
-  published maps never show them. Sample exports (JSON/CSV/GPX/KML) currently
-  include all samples; keep privacy-zone data out of shared files by deleting
-  it first or sharing only uploads.
+- Samples inside a privacy zone are excluded from **web map uploads** and
+  from sample exports (JSON/CSV/GPX/KML), so shared files never contain them.
+  The full database backup is the one exception: it is a complete snapshot of
+  the local database, including privacy-zone data.
 
 ## GPS exclusion zones (Impossible Zones)
 

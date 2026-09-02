@@ -20,6 +20,9 @@ A JSON export contains an array of samples with position, timestamp, geohash,
 and the ping fields (`rssi`, `snr`, `pingSuccess`, `responseTimeMs`) when a
 radio response was recorded.
 
+Samples inside privacy zones are excluded from every file export, so shared
+files never contain them. The database backup below is the one exception.
+
 ## Sample import
 
 Import accepts both the current unified format
@@ -41,7 +44,9 @@ Settings → Backup offers a complete snapshot of the database:
 - Tracking must be stopped before an import.
 
 A database backup is more complete than a JSON sample export and is the
-recommended way to move devices.
+recommended way to move devices. Unlike the sample exports, it deliberately
+keeps privacy-zone data: it is a complete snapshot of the local database, so
+treat backup files with the same care as the device itself.
 
 ## Settings export/import
 

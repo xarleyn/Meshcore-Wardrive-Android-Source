@@ -122,6 +122,9 @@ class MapDataIo {
 
     try {
       final samples = await locationService.getAllSamples();
+      // Privacy-zone samples never leave the device through file exports;
+      // only the full database backup keeps them.
+      final exportSamples = await databaseService.filterByPrivacyZones(samples);
       final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
       String content;
       String fileName;
@@ -129,17 +132,17 @@ class MapDataIo {
 
       switch (format) {
         case SampleExportFormat.csv:
-          content = SampleExport.buildCsv(samples);
+          content = SampleExport.buildCsv(exportSamples);
           extension = 'csv';
           fileName = 'meshcore_export_$timestamp.csv';
           break;
         case SampleExportFormat.gpx:
-          content = SampleExport.buildGpx(samples);
+          content = SampleExport.buildGpx(exportSamples);
           extension = 'gpx';
           fileName = 'meshcore_export_$timestamp.gpx';
           break;
         case SampleExportFormat.kml:
-          content = SampleExport.buildKml(samples);
+          content = SampleExport.buildKml(exportSamples);
           extension = 'kml';
           fileName = 'meshcore_export_$timestamp.kml';
           break;
@@ -172,7 +175,7 @@ class MapDataIo {
         if (!context.mounted) return;
         onShowSnackBar(
           AppLocalizations.of(context)
-              .mapExportedSamples(samples.length, format.displayName),
+              .mapExportedSamples(exportSamples.length, format.displayName),
         );
       } else if (choice == ExportDestination.share) {
         final directory = await getExternalStorageDirectory();
@@ -185,7 +188,7 @@ class MapDataIo {
             files: [XFile(file.path)],
             subject: AppLocalizations.of(context).mapExportShareSubject,
             text: AppLocalizations.of(context)
-                .mapExportShareText(samples.length),
+                .mapExportShareText(exportSamples.length),
           ),
         );
         if (!context.mounted) return;

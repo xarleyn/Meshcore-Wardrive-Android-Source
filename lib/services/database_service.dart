@@ -497,12 +497,17 @@ class DatabaseService {
     return samples.map((s) => s.toJson()).toList();
   }
 
-  /// Export all data (samples + sessions + repeaters) as a unified JSON map
+  /// Export all data (samples + sessions + repeaters) as a unified JSON map.
   /// Pass discoveredRepeaters from the LoRa service to include them.
+  ///
+  /// Samples inside privacy zones are excluded so shared files never contain
+  /// them. The SQLite database backup (DatabaseBackupService) is the only
+  /// export that keeps privacy-zone data: it is a complete snapshot of the
+  /// local database.
   Future<Map<String, dynamic>> exportAllData({
     List<Map<String, dynamic>>? repeaters,
   }) async {
-    final samples = await getAllSamples();
+    final samples = await filterByPrivacyZones(await getAllSamples());
     final sessions = await getAllSessions();
     final data = <String, dynamic>{
       '_format': 'meshcore_wardrive_data',
@@ -909,7 +914,7 @@ class DatabaseService {
   }
 
   /// Whether the point falls inside the given privacy-zone row.
-  static bool _isInsidePrivacyZone(
+  static bool isInsidePrivacyZone(
     Map<String, dynamic> zone,
     double lat,
     double lon,
@@ -923,24 +928,15 @@ class DatabaseService {
         (zone['radius_meters'] as double);
   }
 
-  /// Check if a lat/lon point falls inside any privacy zone
-  /// Uses haversine approximation (good enough for small radii)
-  Future<bool> isInPrivacyZone(double lat, double lon) async {
-    final zones = await getAllPrivacyZones();
-    for (final zone in zones) {
-      if (_isInsidePrivacyZone(zone, lat, lon)) return true;
-    }
-    return false;
-  }
-
-  /// Filter a list of samples, removing those inside privacy zones
-  Future<List<Sample>> filterByPrivacyZones(List<Sample> samples) async {
-    final zones = await getAllPrivacyZones();
+  /// Removes samples located inside any of the given privacy zones.
+  static List<Sample> filterSamplesByPrivacyZones(
+    List<Sample> samples,
+    List<Map<String, dynamic>> zones,
+  ) {
     if (zones.isEmpty) return samples;
-
     return samples.where((s) {
       for (final zone in zones) {
-        if (_isInsidePrivacyZone(
+        if (isInsidePrivacyZone(
           zone,
           s.position.latitude,
           s.position.longitude,
@@ -950,6 +946,12 @@ class DatabaseService {
       }
       return true;
     }).toList();
+  }
+
+  /// Filter a list of samples, removing those inside privacy zones
+  Future<List<Sample>> filterByPrivacyZones(List<Sample> samples) async {
+    final zones = await getAllPrivacyZones();
+    return filterSamplesByPrivacyZones(samples, zones);
   }
 
   // ============================================================================
