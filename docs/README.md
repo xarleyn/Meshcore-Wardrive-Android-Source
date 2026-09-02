@@ -10,6 +10,12 @@
 
 - [LoRa companion setup](guides/lora-companion.md)
 - [Carpeater mode (car repeater)](guides/carpeater.md)
+- [Recording sessions](guides/recording-sessions.md)
+- [Markers and zones](guides/markers-and-zones.md)
+- [Positioning and location quality](guides/positioning.md)
+- [Data management](guides/data-management.md)
+- [Online coverage features](guides/online-coverage.md)
+- [Analytics and statistics](guides/analytics.md)
 - [MeshCore authentication](guides/meshcore-authentication.md) *(upstream MQTT only - removed in this fork)*
 
 ## Development

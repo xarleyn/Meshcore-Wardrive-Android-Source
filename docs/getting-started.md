@@ -1,5 +1,9 @@
 # MeshCore Wardrive - Quick Start
 
+Feature deep dives - recording sessions, markers and zones, positioning,
+data management, online coverage, and analytics - live in the
+[documentation index](README.md).
+
 ## Build and Install
 
 Build and install the app on an Android device from the repository root.
@@ -50,7 +54,12 @@ that file to your Android device and install it.
   while stopped starts a fresh session that only shows this trip. After you
   stop, the map stays on that session until you short-press Play (show all) or
   pick another session in Settings → Session History. Stopping with no GPS
-  points asks whether to save the empty session.
+  points asks whether to save the empty session. See the
+  [sessions guide](guides/recording-sessions.md).
+- **Quick Settings** (double-tap the play button): Compact panel with ping and
+  display controls
+- **Long-press the map**: Choose what to add at that point - a planned
+  repeater, a privacy zone, or a GPS exclusion zone
 - **Settings Icon** (top right): Access display options
 
 ### Settings Options

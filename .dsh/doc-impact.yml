@@ -79,10 +79,11 @@ rules:
     direction: code-to-docs
     relation: documents
 
-  # Quick-start documents specific tracking and positioning behavior; each
-  # mapped service implements a section of that document.
+  # Quick-start and the positioning guide document tracking, quality
+  # filtering, and positioning behavior; each mapped service implements a
+  # section of those documents.
   - id: getting-started
-    description: Quick-start tracking and positioning behavior
+    description: Quick-start and positioning guides
     code:
       - lib/services/location_service.dart
       - lib/services/location_quality_filter.dart
@@ -92,17 +93,21 @@ rules:
       - lib/widgets/compass_calibration.dart
     docs:
       - docs/getting-started.md
+      - docs/guides/positioning.md
     direction: code-to-docs
     relation: documents
 
-  # Export format examples follow the export builders and the data flows.
+  # Export format examples follow the export builders, data flows, and the
+  # database backup service.
   - id: export-format
-    description: Data export format documentation
+    description: Data export and backup documentation
     code:
       - lib/utils/sample_export.dart
       - lib/screens/map/data_io.dart
+      - lib/services/database_backup_service.dart
     docs:
       - docs/getting-started.md
+      - docs/guides/data-management.md
       - docs/guides/lora-companion.md
     direction: code-to-docs
     relation: documents
@@ -142,6 +147,57 @@ rules:
     direction: bidirectional
     relation: specification
 
+  # Recording sessions are a fork feature with their own guide.
+  - id: recording-sessions-guide
+    description: Recording sessions guide
+    code:
+      - lib/widgets/tracking_play_button.dart
+      - lib/screens/session_history_screen.dart
+    docs:
+      - docs/guides/recording-sessions.md
+    direction: code-to-docs
+    relation: documents
+
+  # Markers and zones have their own guide.
+  - id: markers-zones-guide
+    description: Markers and zones guide
+    code:
+      - lib/screens/map/map_annotations_controller.dart
+      - lib/screens/map/dialogs/marker_dialogs.dart
+      - lib/screens/map/layers/zone_overlay_layer.dart
+      - lib/screens/map/layers/planned_marker_layer.dart
+    docs:
+      - docs/guides/markers-and-zones.md
+    direction: code-to-docs
+    relation: documents
+
+  # Upload, community coverage, offline tiles, and connectivity detection.
+  - id: online-coverage-guide
+    description: Online coverage features guide
+    code:
+      - lib/services/upload_service.dart
+      - lib/screens/map/layers/community_coverage_layer.dart
+      - lib/services/internet_connectivity_service.dart
+    docs:
+      - docs/guides/online-coverage.md
+    direction: code-to-docs
+    relation: documents
+
+  # Analytics screens and achievements have their own guide.
+  - id: analytics-guide
+    description: Analytics and statistics guide
+    code:
+      - lib/screens/analytics_screen.dart
+      - lib/screens/repeater_health_screen.dart
+      - lib/screens/signal_trend_screen.dart
+      - lib/screens/device_comparison_screen.dart
+      - lib/screens/achievements_screen.dart
+      - lib/services/achievement_service.dart
+    docs:
+      - docs/guides/analytics.md
+    direction: code-to-docs
+    relation: documents
+
   # The tile provider investigation tracks the provider choice and the
   # offline download policy.
   - id: map-providers
@@ -151,6 +207,7 @@ rules:
       - lib/screens/map/dialogs/offline_tile_dialogs.dart
     docs:
       - docs/development/map-providers.md
+      - docs/guides/online-coverage.md
     direction: code-to-docs
     relation: related
 
