@@ -151,8 +151,10 @@ section 5.1. Each step is one commit with full verification. Status:
 - [x] 10. Manual ping sample recording -> `lib/services/manual_ping_service.dart`
   (8cd89d1).
 - [ ] 11. `MapLayerStack` and typed panel callbacks ->
-  `map/widgets/map_layer_stack.dart`, `map/widgets/map_screen_actions.dart`
-  (in progress).
+  `map/widgets/map_layer_stack.dart`, `map/widgets/map_screen_actions.dart`.
+  Typed callbacks (`MapPanelCallbacks`, `MapMenuCallbacks`) are extracted and
+  wired into every call site; `MapLayerStack` is extracted but `_buildMap`
+  still assembles the layer list inline, so wiring it in remains.
 - [ ] 12. Decouple `lib/screens/settings/settings_page.dart` from
   `_MapScreenState` via `MapUiSnapshot` + `MapUiActions` (same as stage 5).
 

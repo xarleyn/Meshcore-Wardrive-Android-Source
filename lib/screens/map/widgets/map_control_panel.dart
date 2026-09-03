@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../services/carpeater_service.dart';
 import '../../../services/lora_companion_service.dart';
+import 'map_screen_actions.dart';
 
 class MapControlPanel extends StatelessWidget {
   const MapControlPanel({
@@ -20,10 +21,7 @@ class MapControlPanel extends StatelessWidget {
     required this.ductingLabel,
     required this.ductingColor,
     required this.batterySaverActive,
-    required this.onConnect,
-    required this.onDisconnect,
-    required this.onManualPing,
-    required this.onCarpeaterRetry,
+    required this.actions,
     super.key,
   });
 
@@ -41,10 +39,7 @@ class MapControlPanel extends StatelessWidget {
   final String? ductingLabel;
   final Color? ductingColor;
   final bool batterySaverActive;
-  final VoidCallback onConnect;
-  final VoidCallback onDisconnect;
-  final VoidCallback onManualPing;
-  final VoidCallback onCarpeaterRetry;
+  final MapPanelCallbacks actions;
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +93,7 @@ class MapControlPanel extends StatelessWidget {
               const Spacer(),
               if (!loraConnected)
                 TextButton(
-                  onPressed: isConnecting ? null : onConnect,
+                  onPressed: isConnecting ? null : actions.onConnect,
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
@@ -114,7 +109,7 @@ class MapControlPanel extends StatelessWidget {
               if (loraConnected) ...[
                 IconButton(
                   icon: const Icon(Icons.link_off, size: 16),
-                  onPressed: onDisconnect,
+                  onPressed: actions.onDisconnect,
                   tooltip: l10n.mapDisconnect,
                   color: Colors.red,
                   padding: EdgeInsets.zero,
@@ -123,7 +118,7 @@ class MapControlPanel extends StatelessWidget {
                 const SizedBox(width: 4),
                 IconButton(
                   icon: const Icon(Icons.send, size: 18),
-                  onPressed: onManualPing,
+                  onPressed: actions.onManualPing,
                   tooltip: l10n.mapManualPing,
                   color: Colors.blue,
                   padding: EdgeInsets.zero,
@@ -161,7 +156,7 @@ class MapControlPanel extends StatelessWidget {
             padding: const EdgeInsets.only(top: 2),
             child: GestureDetector(
               onTap: carpeaterState == CarpeaterState.error
-                  ? onCarpeaterRetry
+                  ? actions.onCarpeaterRetry
                   : null,
               child: _StatusBadge(
                 color: carpeaterColor,

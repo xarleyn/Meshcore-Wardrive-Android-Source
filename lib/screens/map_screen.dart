@@ -59,6 +59,7 @@ import 'map/widgets/delete_mode_banner.dart';
 import 'map/widgets/map_action_buttons.dart';
 import 'map/widgets/map_control_panel.dart';
 import 'map/widgets/map_quick_settings_panel.dart';
+import 'map/widgets/map_screen_actions.dart';
 import '../services/widget_service.dart';
 
 import 'package:share_plus/share_plus.dart';
@@ -1565,19 +1566,21 @@ class _MapScreenState extends State<MapScreen> {
                     ? ductingRiskColor(_currentDuctingRisk)
                     : null,
                 batterySaverActive: _batterySaverActive,
-                onConnect: _showConnectionDialog,
-                onDisconnect: _disconnectLoRa,
-                onManualPing: _manualPing,
-                onCarpeaterRetry: () async {
-                  _showSnackBar(l10n.mapRetryingCarpeater);
-                  final ok = await _locationService.startCarpeater();
-                  if (!mounted) return;
-                  _showSnackBar(
-                    ok
-                        ? l10n.mapCarpeaterReconnected
-                        : l10n.mapCarpeaterRetryFailed,
-                  );
-                },
+                actions: MapPanelCallbacks(
+                  onConnect: _showConnectionDialog,
+                  onDisconnect: _disconnectLoRa,
+                  onManualPing: _manualPing,
+                  onCarpeaterRetry: () async {
+                    _showSnackBar(l10n.mapRetryingCarpeater);
+                    final ok = await _locationService.startCarpeater();
+                    if (!mounted) return;
+                    _showSnackBar(
+                      ok
+                          ? l10n.mapCarpeaterReconnected
+                          : l10n.mapCarpeaterRetryFailed,
+                    );
+                  },
+                ),
               ),
             if (_showQuickSettings)
               MapQuickSettingsPanel(

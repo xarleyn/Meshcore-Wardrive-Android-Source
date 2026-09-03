@@ -4,6 +4,7 @@ import 'package:meshcore_wardrive/screens/map/widgets/delete_mode_banner.dart';
 import 'package:meshcore_wardrive/screens/map/widgets/map_action_buttons.dart';
 import 'package:meshcore_wardrive/screens/map/widgets/map_control_panel.dart';
 import 'package:meshcore_wardrive/screens/map/widgets/map_quick_settings_panel.dart';
+import 'package:meshcore_wardrive/screens/map/widgets/map_screen_actions.dart';
 import 'package:meshcore_wardrive/services/carpeater_service.dart';
 import 'package:meshcore_wardrive/services/lora_companion_service.dart';
 import 'package:meshcore_wardrive/utils/compass_calibration.dart';
@@ -147,10 +148,12 @@ void main() {
               ductingLabel: null,
               ductingColor: null,
               batterySaverActive: false,
-              onConnect: () => connects++,
-              onDisconnect: () {},
-              onManualPing: () {},
-              onCarpeaterRetry: () {},
+              actions: MapPanelCallbacks(
+                onConnect: () => connects++,
+                onDisconnect: () {},
+                onManualPing: () {},
+                onCarpeaterRetry: () {},
+              ),
             ),
           ],
         ),
