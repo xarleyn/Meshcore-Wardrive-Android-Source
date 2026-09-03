@@ -9,15 +9,13 @@ import '../models/location_quality_settings.dart';
 /// The altitude check is deliberately combined with speed. A blanket altitude
 /// limit would discard legitimate drives on mountain roads.
 class LocationQualityFilter {
-  LocationQualityFilter({
-    LocationQualitySettings settings = const LocationQualitySettings(),
-  }) : _settings = settings;
+  LocationQualityFilter({this.settings = const LocationQualitySettings()});
 
-  LocationQualitySettings _settings;
+  LocationQualitySettings settings;
   Position? _lastAcceptedPosition;
 
-  void updateSettings(LocationQualitySettings settings) {
-    _settings = settings;
+  void updateSettings(LocationQualitySettings newSettings) {
+    settings = newSettings;
     reset();
   }
 
@@ -37,10 +35,10 @@ class LocationQualityFilter {
     }
 
     if (position.accuracy.isFinite &&
-        position.accuracy > _settings.maxHorizontalAccuracyMeters) {
+        position.accuracy > settings.maxHorizontalAccuracyMeters) {
       return 'horizontal accuracy ${position.accuracy.toStringAsFixed(1)}m '
           'is worse than '
-          '${_settings.maxHorizontalAccuracyMeters.toStringAsFixed(0)}m';
+          '${settings.maxHorizontalAccuracyMeters.toStringAsFixed(0)}m';
     }
 
     final reportedSpeed = position.speed.isFinite && position.speed > 0
@@ -50,14 +48,14 @@ class LocationQualityFilter {
     final effectiveSpeed = math.max(reportedSpeed, derivedSpeed);
 
     if (position.altitude.isFinite &&
-        position.altitude >= _settings.airborneAltitudeMeters &&
-        effectiveSpeed >= _settings.airborneSpeedMetersPerSecond) {
+        position.altitude >= settings.airborneAltitudeMeters &&
+        effectiveSpeed >= settings.airborneSpeedMetersPerSecond) {
       return 'probable flight: altitude '
           '${position.altitude.toStringAsFixed(0)}m, speed '
           '${(effectiveSpeed * 3.6).toStringAsFixed(0)}km/h';
     }
 
-    if (effectiveSpeed >= _settings.maxWardriveSpeedMetersPerSecond) {
+    if (effectiveSpeed >= settings.maxWardriveSpeedMetersPerSecond) {
       return 'speed ${(effectiveSpeed * 3.6).toStringAsFixed(0)}km/h '
           'is too high for wardriving';
     }

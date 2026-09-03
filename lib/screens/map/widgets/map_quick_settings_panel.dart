@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
-import '../../../utils/discovery_timeout_options.dart';
-import '../../../utils/ping_distance_options.dart';
+import '../../../widgets/discovery_timeout_options.dart';
+import '../../../widgets/ping_distance_options.dart';
 
 class MapQuickSettingsPanel extends StatelessWidget {
   const MapQuickSettingsPanel({

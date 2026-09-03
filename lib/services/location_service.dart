@@ -96,6 +96,9 @@ class LocationService {
   Position? _lastFusedPosition;
   LocationPositionSource _activePositionSource = LocationPositionSource.fused;
   bool _isTracking = false;
+  // Set as the very first line of [dispose]; the guarded emit helpers below
+  // check it so in-flight async work never adds to a closed controller.
+  bool _disposed = false;
   bool _autoPingEnabled = false;
   bool _autoPingResumeOnReconnect = false;
 
@@ -190,6 +193,60 @@ class LocationService {
   final _batterySaverController = StreamController<bool>.broadcast();
   Stream<bool> get batterySaverStream => _batterySaverController.stream;
   bool get isBatterySaverActive => _batterySaverActive;
+
+  // Emit helpers: asynchronous work that is still in flight when [dispose]
+  // runs must never touch a closed controller, so every controller add in
+  // this class goes through one of these guarded wrappers.
+
+  void _emitCurrentPosition(LatLng latLng) {
+    if (_disposed) return;
+    _currentPositionController.add(latLng);
+  }
+
+  void _emitPositionSource(LocationPositionSource source) {
+    if (_disposed) return;
+    _positionSourceController.add(source);
+  }
+
+  void _emitCourse(double headingDegrees) {
+    if (_disposed) return;
+    _courseController.add(headingDegrees);
+  }
+
+  void _emitSampleSaved() {
+    if (_disposed) return;
+    _sampleSavedController.add(null);
+  }
+
+  void _emitPingEvent(String event) {
+    if (_disposed) return;
+    _pingEventController.add(event);
+  }
+
+  void _emitPingPause(bool paused) {
+    if (_disposed) return;
+    _pingPauseController.add(paused);
+  }
+
+  void _emitTotalDistance(double meters) {
+    if (_disposed) return;
+    _totalDistanceController.add(meters);
+  }
+
+  void _emitSpeed(double speedMps) {
+    if (_disposed) return;
+    _speedController.add(speedMps);
+  }
+
+  void _emitDeadZone(String cellHash) {
+    if (_disposed) return;
+    _deadZoneController.add(cellHash);
+  }
+
+  void _emitBatterySaver(bool active) {
+    if (_disposed) return;
+    _batterySaverController.add(active);
+  }
 
   // Ducting monitoring
   bool _ductingEnabled = false;
@@ -344,7 +401,7 @@ class LocationService {
     final paused = _pingPauseEnabled && _badFixMonitor.isPaused;
     if (paused == _pingPauseActive) return;
     _pingPauseActive = paused;
-    _pingPauseController.add(paused);
+    _emitPingPause(paused);
     if (paused) {
       unawaited(
         _logger.logPingEvent(
@@ -738,7 +795,7 @@ class LocationService {
       _lastRecordedPosition = null;
       _lastPingPosition = null;
       _lastPingTimestamp = null;
-      _totalDistanceController.add(_totalDistanceMeters);
+      _emitTotalDistance(_totalDistanceMeters);
       _sessionStartTime = DateTime.now();
       _sessionPingCount = 0;
       _sessionSuccessCount = 0;
@@ -911,7 +968,9 @@ class LocationService {
 
     _timePingTimer = Timer.periodic(
       Duration(seconds: _pingTimeIntervalSeconds),
-      (_) => _handleTimePing(),
+      (_) {
+        unawaited(_handleTimePing());
+      },
     );
     _logger.logPingEvent(
       'Time-based ping timer started (${_pingTimeIntervalSeconds}s)',
@@ -919,7 +978,7 @@ class LocationService {
   }
 
   /// Handle a time-triggered ping
-  void _handleTimePing() async {
+  Future<void> _handleTimePing() async {
     if (!_autoPingEnabled ||
         _carpeaterModeEnabled ||
         _pingInProgress ||
@@ -946,6 +1005,22 @@ class LocationService {
       }
     }
 
+    try {
+      await _triggerPing(position, 'Time-based');
+    } catch (e) {
+      // A failed trigger must not leave the single-ping guard stuck on.
+      _pingInProgress = false;
+      await _logger.logError('Auto Ping', e.toString());
+      debugPrint('Error triggering time-based ping: $e');
+    }
+  }
+
+  /// Shared tail of the time- and distance-triggered ping paths: claim the
+  /// single in-flight ping slot, announce the trigger via event, sound and
+  /// foreground notification, then hand off to the background ping without
+  /// waiting for it.
+  Future<void> _triggerPing(LatLng position, String trigger) async {
+    // Keep a single radio ping active so its response window has one owner.
     _pingInProgress = true;
     _lastPingPosition = position;
     _lastRecordedPosition = position;
@@ -956,15 +1031,18 @@ class LocationService {
       position.longitude,
     );
     await _logger.logPingEvent(
-      'Time-based ping triggered at ${position.latitude}, ${position.longitude}',
+      '$trigger ping triggered at ${position.latitude}, ${position.longitude}',
     );
 
-    _pingEventController.add('pinging');
+    // Notify UI that ping is starting
+    _emitPingEvent('pinging');
     _soundService.playPingSent();
 
+    // Update foreground notification
     await _setNotificationText((l10n) => l10n.notificationPinging);
 
-    _performPingInBackground(position, geohash);
+    // Start ping in background - don't wait for it
+    unawaited(_performPingInBackground(position, geohash));
   }
 
   /// Get total distance traveled in meters
@@ -1041,11 +1119,11 @@ class LocationService {
 
     // Update speed (filter out invalid negative values)
     _currentSpeedMps = (position.speed >= 0) ? position.speed : 0.0;
-    _speedController.add(_currentSpeedMps);
+    _emitSpeed(_currentSpeedMps);
     if (_currentSpeedMps >= 0.5 &&
         position.heading.isFinite &&
         position.heading >= 0) {
-      _courseController.add(position.heading % 360);
+      _emitCourse(position.heading % 360);
     }
 
     // Calculate distance at the same five-metre granularity previously
@@ -1061,7 +1139,7 @@ class LocationService {
       if (distanceMeters >= _minimumRecordedMovementMeters) {
         _totalDistanceMeters += distanceMeters;
         _lastDistancePosition = latLng;
-        _totalDistanceController.add(_totalDistanceMeters);
+        _emitTotalDistance(_totalDistanceMeters);
       }
     } else if (_isTracking) {
       _lastDistancePosition = latLng;
@@ -1069,7 +1147,7 @@ class LocationService {
     _lastPosition = latLng;
 
     // Broadcast current position to listeners
-    _currentPositionController.add(latLng);
+    _emitCurrentPosition(latLng);
 
     // Outside an active wardrive session we still keep the current-position
     // marker fresh, but do not calculate trip distance or persist samples.
@@ -1116,31 +1194,11 @@ class LocationService {
       }
 
       if (shouldPing) {
-        // Keep a single radio ping active so its response window has one owner.
-        _pingInProgress = true;
-        _lastPingPosition = latLng;
-        _lastRecordedPosition = latLng;
-        _lastPingTimestamp = DateTime.now();
-        await _logger.logPingEvent(
-          'Distance-based ping triggered at ${latLng.latitude}, ${latLng.longitude}',
-        );
-
-        // Notify UI that ping is starting
-        _pingEventController.add('pinging');
-        _soundService.playPingSent();
-
-        // Update foreground notification
-        await _setNotificationText((l10n) => l10n.notificationPinging);
-
         // Start ping in background - don't wait for it
         debugPrint(
           'Triggering auto-ping via LoRa at ${latLng.latitude}, ${latLng.longitude}',
         );
-        final geohash = GeohashUtils.sampleKey(
-          position.latitude,
-          position.longitude,
-        );
-        _performPingInBackground(latLng, geohash);
+        unawaited(_triggerPing(latLng, 'Distance-based'));
         return; // Don't save GPS sample when auto-pinging - wait for ping result
       }
     }
@@ -1159,7 +1217,7 @@ class LocationService {
     _lastRecordedPosition = latLng;
 
     // Dead zone alert: check if current coverage cell is a known dead zone
-    _checkDeadZone(latLng);
+    unawaited(_checkDeadZone(latLng));
 
     // Create sample
     final geohash = GeohashUtils.sampleKey(
@@ -1194,7 +1252,7 @@ class LocationService {
         'Saved GPS sample: ${sample.id} at ${latLng.latitude}, ${latLng.longitude}',
       );
       // Notify listeners that a sample was saved
-      _sampleSavedController.add(null);
+      _emitSampleSaved();
     } catch (e) {
       debugPrint('Error saving sample: $e');
     }
@@ -1214,7 +1272,7 @@ class LocationService {
     _lastDistancePosition = null;
     _lastRecordedPosition = null;
     _lastPingPosition = null;
-    _positionSourceController.add(source);
+    _emitPositionSource(source);
     _logger.logLocationEvent('Active position source: ${source.name}');
   }
 
@@ -1260,7 +1318,7 @@ class LocationService {
     _batterySaverActive = true;
     _normalPingInterval = _pingIntervalMeters;
     _pingIntervalMeters = _normalPingInterval * 2;
-    _batterySaverController.add(true);
+    _emitBatterySaver(true);
     _logger.logPowerEvent(
       'Battery saver ON — ping interval doubled to ${_pingIntervalMeters.toStringAsFixed(0)}m',
     );
@@ -1269,14 +1327,14 @@ class LocationService {
   void _deactivateBatterySaver() {
     _batterySaverActive = false;
     _pingIntervalMeters = _normalPingInterval;
-    _batterySaverController.add(false);
+    _emitBatterySaver(false);
     _logger.logPowerEvent(
       'Battery saver OFF — ping interval restored to ${_pingIntervalMeters.toStringAsFixed(0)}m',
     );
   }
 
   /// Check if the current position is in a known dead zone and alert once per cell
-  void _checkDeadZone(LatLng latLng) async {
+  Future<void> _checkDeadZone(LatLng latLng) async {
     if (!_deadZoneAlertsEnabled) return;
     try {
       final precision = await _settings.getCoveragePrecision();
@@ -1290,7 +1348,7 @@ class LocationService {
       final isDead = await _dbService.isDeadZoneCell(cellHash);
       if (isDead) {
         _deadZoneAlertedCells.add(cellHash);
-        _deadZoneController.add(cellHash);
+        _emitDeadZone(cellHash);
         _soundService.playPingFailed();
         await _logger.logPingEvent('Dead zone alert: cell $cellHash');
       }
@@ -1300,7 +1358,7 @@ class LocationService {
   }
 
   /// Perform ping in background and update sample when complete
-  void _performPingInBackground(LatLng latLng, String geohash) async {
+  Future<void> _performPingInBackground(LatLng latLng, String geohash) async {
     try {
       // Get user-configured discovery timeout
       final timeoutSeconds = await _settings.getDiscoveryTimeout();
@@ -1358,7 +1416,7 @@ class LocationService {
       if (pingSuccess) _sessionSuccessCount++;
 
       // Notify UI
-      _pingEventController.add(pingSuccess ? 'success' : 'failed');
+      _emitPingEvent(pingSuccess ? 'success' : 'failed');
 
       // Update notification with live stats
       Future.delayed(const Duration(seconds: 3), () {
@@ -1404,7 +1462,7 @@ class LocationService {
         await _dbService.insertSample(sample);
       }
       // Notify listeners
-      _sampleSavedController.add(null);
+      _emitSampleSaved();
     } catch (e) {
       await _logger.logError('Background Ping', e.toString());
       debugPrint('Error during background ping: $e');
@@ -1422,7 +1480,7 @@ class LocationService {
       );
       await _dbService.insertSample(sample);
       // Notify listeners
-      _sampleSavedController.add(null);
+      _emitSampleSaved();
     } finally {
       _pingInProgress = false;
     }
@@ -1541,13 +1599,15 @@ class LocationService {
         .discoveryStartedStream
         .listen((_) {
           _carpeaterDiscoveryPosition = _lastPosition;
-          _pingEventController.add('pinging');
+          _emitPingEvent('pinging');
           _soundService.playPingSent();
         });
 
     // Subscribe to neighbour results
     _carpeaterNeighboursSubscription = _carpeaterService.neighboursStream
-        .listen(_onCarpeaterNeighbours);
+        .listen((neighbours) {
+          unawaited(_onCarpeaterNeighbours(neighbours));
+        });
 
     final started = await _carpeaterService.start();
     if (!started) {
@@ -1572,120 +1632,138 @@ class LocationService {
   }
 
   /// Handle Carpeater neighbour results — save as samples
-  void _onCarpeaterNeighbours(List<Map<String, dynamic>> neighbours) async {
-    final position = _carpeaterDiscoveryPosition ?? _lastPosition;
-    if (position == null) return;
+  Future<void> _onCarpeaterNeighbours(
+    List<Map<String, dynamic>> neighbours,
+  ) async {
+    try {
+      final position = _carpeaterDiscoveryPosition ?? _lastPosition;
+      if (position == null) return;
 
-    final geohash = GeohashUtils.sampleKey(
-      position.latitude,
-      position.longitude,
-    );
-
-    // Filter out the target repeater itself — it always shows up as its own neighbour
-    final targetId = _carpeaterService.targetRepeaterId?.toUpperCase();
-    final filtered = neighbours.where((n) {
-      final pubkey = n['pubkey'] as String?;
-      if (pubkey == null || targetId == null) return true;
-      final nId = pubkey.length >= 8
-          ? pubkey.substring(0, 8).toUpperCase()
-          : pubkey.toUpperCase();
-      return !nId.startsWith(targetId);
-    }).toList();
-
-    // Also filter ignored repeater prefixes if set (comma-separated)
-    final ignoredPrefixStr = _loraCompanion.ignoredRepeaterPrefix;
-    final results = ignoredPrefixStr != null && ignoredPrefixStr.isNotEmpty
-        ? filtered.where((n) {
-            final pubkey = n['pubkey'] as String?;
-            if (pubkey == null) return true;
-            final nId = pubkey.length >= 8
-                ? pubkey.substring(0, 8).toUpperCase()
-                : pubkey.toUpperCase();
-            final prefixes = ignoredPrefixStr
-                .split(',')
-                .map((s) => s.trim().toUpperCase())
-                .where((s) => s.isNotEmpty);
-            return !prefixes.any((prefix) => nId.startsWith(prefix));
-          }).toList()
-        : filtered;
-
-    // Get ducting risk if enabled
-    String? ductingRisk;
-    if (_ductingEnabled) {
-      ductingRisk = await _ductingService.getCurrentRisk(DateTime.now());
-      if (ductingRisk == DuctingRisk.unknown) ductingRisk = null;
-    }
-
-    if (results.isEmpty) {
-      // Dead zone — repeater heard nobody
-      final sample = Sample(
-        id: _generateUniqueId(),
-        position: position,
-        timestamp: DateTime.now(),
-        path: _carpeaterService.targetRepeaterId,
-        geohash: geohash,
-        pingSuccess: false,
-        ductingRisk: ductingRisk,
-        deviceId: _loraCompanion.connectedDeviceId,
+      final geohash = GeohashUtils.sampleKey(
+        position.latitude,
+        position.longitude,
       );
-      await _dbService.insertSample(sample);
-      _pingEventController.add('failed');
-      _soundService.playPingFailed();
-    } else {
-      // Save one sample per neighbour
-      for (final n in results) {
-        final pubkey = n['pubkey'] as String?;
-        final snr = snrQuarterDbToWholeDb(n['snr']);
-        final repeaterId = pubkey != null && pubkey.length >= 8
-            ? pubkey.substring(0, 8)
-            : pubkey;
 
+      // Filter out the target repeater itself — it always shows up as its own neighbour
+      final targetId = _carpeaterService.targetRepeaterId?.toUpperCase();
+      final filtered = neighbours.where((n) {
+        final pubkey = n['pubkey'] as String?;
+        if (pubkey == null || targetId == null) return true;
+        final nId = pubkey.length >= 8
+            ? pubkey.substring(0, 8).toUpperCase()
+            : pubkey.toUpperCase();
+        return !nId.startsWith(targetId);
+      }).toList();
+
+      // Also filter ignored repeater prefixes if set (comma-separated)
+      final ignoredPrefixStr = _loraCompanion.ignoredRepeaterPrefix;
+      final results = ignoredPrefixStr != null && ignoredPrefixStr.isNotEmpty
+          ? filtered.where((n) {
+              final pubkey = n['pubkey'] as String?;
+              if (pubkey == null) return true;
+              final nId = pubkey.length >= 8
+                  ? pubkey.substring(0, 8).toUpperCase()
+                  : pubkey.toUpperCase();
+              final prefixes = ignoredPrefixStr
+                  .split(',')
+                  .map((s) => s.trim().toUpperCase())
+                  .where((s) => s.isNotEmpty);
+              return !prefixes.any((prefix) => nId.startsWith(prefix));
+            }).toList()
+          : filtered;
+
+      // Get ducting risk if enabled
+      String? ductingRisk;
+      if (_ductingEnabled) {
+        ductingRisk = await _ductingService.getCurrentRisk(DateTime.now());
+        if (ductingRisk == DuctingRisk.unknown) ductingRisk = null;
+      }
+
+      if (results.isEmpty) {
+        // Dead zone — repeater heard nobody
         final sample = Sample(
           id: _generateUniqueId(),
           position: position,
           timestamp: DateTime.now(),
-          path: repeaterId,
+          path: _carpeaterService.targetRepeaterId,
           geohash: geohash,
-          snr: snr,
-          pingSuccess: true,
+          pingSuccess: false,
           ductingRisk: ductingRisk,
           deviceId: _loraCompanion.connectedDeviceId,
         );
         await _dbService.insertSample(sample);
+        _emitPingEvent('failed');
+        _soundService.playPingFailed();
+      } else {
+        // Save one sample per neighbour
+        for (final n in results) {
+          final pubkey = n['pubkey'] as String?;
+          final snr = snrQuarterDbToWholeDb(n['snr']);
+          final repeaterId = pubkey != null && pubkey.length >= 8
+              ? pubkey.substring(0, 8)
+              : pubkey;
+
+          final sample = Sample(
+            id: _generateUniqueId(),
+            position: position,
+            timestamp: DateTime.now(),
+            path: repeaterId,
+            geohash: geohash,
+            snr: snr,
+            pingSuccess: true,
+            ductingRisk: ductingRisk,
+            deviceId: _loraCompanion.connectedDeviceId,
+          );
+          await _dbService.insertSample(sample);
+        }
+        _emitPingEvent('success');
+        // Use best SNR from filtered results for sound quality
+        final bestSnr = results
+            .map((n) => snrQuarterDbToWholeDb(n['snr']))
+            .where((s) => s != null)
+            .fold<int?>(
+              null,
+              (best, s) => best == null || s! > best ? s : best,
+            );
+        _soundService.playForPingResult(success: true, snr: bestSnr);
       }
-      _pingEventController.add('success');
-      // Use best SNR from filtered results for sound quality
-      final bestSnr = results
-          .map((n) => snrQuarterDbToWholeDb(n['snr']))
-          .where((s) => s != null)
-          .fold<int?>(null, (best, s) => best == null || s! > best ? s : best);
-      _soundService.playForPingResult(success: true, snr: bestSnr);
+
+      _emitSampleSaved();
+
+      await _setNotificationText(
+        (l10n) => results.isEmpty
+            ? l10n.notificationCarpeaterNoNeighbours
+            : l10n.notificationCarpeaterNeighboursFound(results.length),
+      );
+      Future.delayed(const Duration(seconds: 3), () {
+        _updateCarpeaterNotification();
+      });
+    } catch (e) {
+      await _logger.logError('Carpeater Neighbours', e.toString());
+      debugPrint('Error handling Carpeater neighbours: $e');
     }
-
-    _sampleSavedController.add(null);
-
-    await _setNotificationText(
-      (l10n) => results.isEmpty
-          ? l10n.notificationCarpeaterNoNeighbours
-          : l10n.notificationCarpeaterNeighboursFound(results.length),
-    );
-    Future.delayed(const Duration(seconds: 3), () {
-      _updateCarpeaterNotification();
-    });
   }
 
   /// Dispose resources
   void dispose() {
+    // Must be the first line: the guarded emit helpers above stop feeding the
+    // controllers that are closed below, so in-flight async work (background
+    // pings, Carpeater results, dead-zone checks) can never add to them.
+    _disposed = true;
     _positionSearchRequested = false;
     _wifiPositioningEnabled = false;
     _positionWatchdogTimer?.cancel();
     _positionRestartTimer?.cancel();
     _wifiLocationTimer?.cancel();
+    // Cancel here as well: stopTracking() below is fire-and-forget, so the
+    // ducting timer must not be left running on the dispose path.
+    _ductingFetchTimer?.cancel();
+    _ductingFetchTimer = null;
     _locationServiceStatusSubscription?.cancel();
     _positionStreamGeneration++;
     _positionStreamSubscription?.cancel();
     _positionStreamSubscription = null;
-    stopTracking();
+    unawaited(stopTracking());
     _disconnectSubscription?.cancel();
     _connectedSubscription?.cancel();
     _logger.close();

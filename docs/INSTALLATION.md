@@ -33,8 +33,11 @@ the old package permanently deletes its private data.
 On first launch, grant these permissions:
 - **Location** (Always) - Required for GPS tracking
 - **Bluetooth** - For Bluetooth LoRa device connection
-- **Storage** - For exporting data
 - **USB** - For USB LoRa device connection (when connected)
+
+No storage permissions are required: exports and imports go through the
+system file picker / share sheet, and the app never asks for storage access
+at runtime.
 
 ## First Time Setup
 

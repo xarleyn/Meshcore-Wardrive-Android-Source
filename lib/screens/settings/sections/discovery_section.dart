@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
-import '../../../utils/discovery_timeout_options.dart';
+import '../../../widgets/discovery_timeout_options.dart';
 import '../widgets/settings_section_header.dart';
 
 class DiscoverySettingsValues {

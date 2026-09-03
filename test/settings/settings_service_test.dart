@@ -552,4 +552,144 @@ void main() {
       expect(await settings.getCompanionNodeName(), isNull);
     });
   });
+
+  group('carpeater password secure storage', () {
+    const passwordKey = 'carpeater_password';
+
+    test('defaults to unset', () async {
+      SharedPreferences.setMockInitialValues({});
+      final settings = SettingsService(
+        credentialsStore: _FakeSecureCredentialsStore(),
+      );
+
+      expect(await settings.getCarpeaterPassword(), isNull);
+    });
+
+    test('persists to secure storage and keeps prefs clean', () async {
+      SharedPreferences.setMockInitialValues({});
+      final secure = _FakeSecureCredentialsStore();
+      final settings = SettingsService(credentialsStore: secure);
+
+      await settings.setCarpeaterPassword('s3cret');
+
+      expect(await settings.getCarpeaterPassword(), 's3cret');
+      expect(secure.values[passwordKey], 's3cret');
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString(passwordKey), isNull);
+    });
+
+    test('migrates a legacy plaintext password on first read', () async {
+      SharedPreferences.setMockInitialValues({passwordKey: 'legacy'});
+      final secure = _FakeSecureCredentialsStore();
+      final settings = SettingsService(credentialsStore: secure);
+
+      expect(await settings.getCarpeaterPassword(), 'legacy');
+      expect(secure.values[passwordKey], 'legacy');
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString(passwordKey), isNull);
+    });
+
+    test(
+      'migration is idempotent and secure storage wins afterwards',
+      () async {
+        SharedPreferences.setMockInitialValues({passwordKey: 'legacy'});
+        final secure = _FakeSecureCredentialsStore();
+        final settings = SettingsService(credentialsStore: secure);
+
+        expect(await settings.getCarpeaterPassword(), 'legacy');
+
+        // A stale plaintext value reappearing in prefs must not win over the
+        // already migrated secure value.
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(passwordKey, 'stale-reinserted');
+        expect(await settings.getCarpeaterPassword(), 'legacy');
+      },
+    );
+
+    test('keeps the legacy value when secure storage is unavailable', () async {
+      SharedPreferences.setMockInitialValues({passwordKey: 'legacy'});
+      final secure = _FakeSecureCredentialsStore()..failWrites = true;
+      final settings = SettingsService(credentialsStore: secure);
+
+      expect(await settings.getCarpeaterPassword(), 'legacy');
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString(passwordKey), 'legacy');
+    });
+
+    test('clearing removes the value from secure and legacy storage', () async {
+      SharedPreferences.setMockInitialValues({});
+      final secure = _FakeSecureCredentialsStore();
+      final settings = SettingsService(credentialsStore: secure);
+
+      await settings.setCarpeaterPassword('s3cret');
+      await settings.setCarpeaterPassword(null);
+      expect(await settings.getCarpeaterPassword(), isNull);
+      expect(secure.values, isEmpty);
+
+      await settings.setCarpeaterPassword('');
+      expect(await settings.getCarpeaterPassword(), isNull);
+      expect(secure.values, isEmpty);
+    });
+
+    test('export never contains the password', () async {
+      SharedPreferences.setMockInitialValues({});
+      final settings = SettingsService(
+        credentialsStore: _FakeSecureCredentialsStore(),
+      );
+
+      await settings.setCarpeaterPassword('s3cret');
+      final exported = await settings.exportSettings();
+
+      expect(exported, isNot(contains('carpeater_password')));
+    });
+
+    test('legacy export file with a password imports without it', () async {
+      SharedPreferences.setMockInitialValues({});
+      final secure = _FakeSecureCredentialsStore();
+      final settings = SettingsService(credentialsStore: secure);
+
+      final legacyExport = <String, dynamic>{
+        '_format': 'meshcore_wardrive_settings',
+        '_version': 1,
+        'carpeater_enabled': true,
+        'carpeater_password': 'leaked-from-old-export',
+      };
+      final applied = await settings.importSettings(legacyExport);
+
+      expect(applied, 1);
+      expect(await settings.getCarpeaterEnabled(), isTrue);
+      expect(await settings.getCarpeaterPassword(), isNull);
+      expect(secure.values, isEmpty);
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString(passwordKey), isNull);
+    });
+  });
+}
+
+/// In-memory [SecureCredentialsStore] fake standing in for the platform
+/// secure storage in tests.
+class _FakeSecureCredentialsStore implements SecureCredentialsStore {
+  _FakeSecureCredentialsStore([Map<String, String>? initial])
+    : values = initial == null ? <String, String>{} : Map.of(initial);
+
+  final Map<String, String> values;
+
+  /// When true, writes throw to simulate an unavailable secure backend.
+  bool failWrites = false;
+
+  @override
+  Future<String?> read(String key) async => values[key];
+
+  @override
+  Future<void> write(String key, String value) async {
+    if (failWrites) {
+      throw StateError('secure storage unavailable');
+    }
+    values[key] = value;
+  }
+
+  @override
+  Future<void> delete(String key) async {
+    values.remove(key);
+  }
 }

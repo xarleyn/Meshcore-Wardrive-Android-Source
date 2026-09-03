@@ -1,0 +1,222 @@
+# Documentation-impact rules for the dsh-doc-impact plugin
+# (https://github.com/xarleyn/dsh-plugins/tree/main/plugins/dsh-doc-impact).
+#
+# When an agent turn touches the code globs of a rule, the plugin asks the
+# agent to review or update the linked documents and resolve the impact via
+# doc_impact_resolve. Keep rules precise: each code glob should map only to
+# documents that actually describe that code. Personal overrides belong in
+# .dsh/doc-impact.local.yml (git-ignored).
+version: 1
+defaults:
+  mode: remind
+  scope: turn
+  changeDetection: auto
+rules:
+  # The map screen composition root is being slimmed down; its structure and
+  # the refactoring plan must move together (steps and live checklist live in
+  # the plan document).
+  - id: map-refactoring-plan
+    description: Map screen structure is tracked by the refactoring plan
+    code:
+      include:
+        - lib/screens/map_screen.dart
+        - lib/screens/map/**
+      exclude:
+        - "**/*.g.dart"
+    docs:
+      - docs/development/map-screen-refactoring.md
+    direction: bidirectional
+    relation: synchronized
+    mode: require-review
+
+  # The companion guide and the ping-debugging notes describe the behavior
+  # and frame flow implemented by these services.
+  - id: lora-companion-guide
+    description: Companion radio, protocol, and ping debugging documentation
+    code:
+      - lib/services/lora_companion_service.dart
+      - lib/services/meshcore_protocol.dart
+      - lib/services/manual_ping_service.dart
+    docs:
+      - docs/guides/lora-companion.md
+      - docs/development/debugging-pings.md
+    direction: code-to-docs
+    relation: documents
+
+  # Carpeater mode is a fork-specific feature with its own user guide.
+  - id: carpeater-guide
+    description: Carpeater mode guide
+    code:
+      - lib/services/carpeater_service.dart
+      - lib/screens/settings/sections/carpeater_section.dart
+    docs:
+      - docs/guides/carpeater.md
+    direction: code-to-docs
+    relation: documents
+
+  # Release tooling, signing configuration, and the release workflow define
+  # the documented release process.
+  - id: release-process
+    description: Release builds, versioning, signing, and GitHub Actions
+    code:
+      - tool/version.dart
+      - tool/build_release.ps1
+      - android/app/build.gradle.kts
+      - android/key.properties.example
+      - .github/workflows/release.yml
+    docs:
+      - docs/development/releasing.md
+    direction: bidirectional
+    relation: specification
+
+  # Installation steps mirror the requested Android permissions.
+  - id: installation-docs
+    description: Permissions and installation steps
+    code:
+      - android/app/src/main/AndroidManifest.xml
+    docs:
+      - docs/INSTALLATION.md
+    direction: code-to-docs
+    relation: documents
+
+  # Quick-start and the positioning guide document tracking, quality
+  # filtering, and positioning behavior; each mapped service implements a
+  # section of those documents.
+  - id: getting-started
+    description: Quick-start and positioning guides
+    code:
+      - lib/services/location_service.dart
+      - lib/services/location_quality_filter.dart
+      - lib/services/bad_fix_monitor.dart
+      - lib/services/radio_position_estimator.dart
+      - lib/services/wifi_location_service.dart
+      - lib/widgets/compass_calibration.dart
+    docs:
+      - docs/getting-started.md
+      - docs/guides/positioning.md
+    direction: code-to-docs
+    relation: documents
+
+  # Export format examples follow the export builders, data flows, and the
+  # database backup service.
+  - id: export-format
+    description: Data export and backup documentation
+    code:
+      - lib/utils/sample_export.dart
+      - lib/screens/map/data_io.dart
+      - lib/services/database_backup_service.dart
+    docs:
+      - docs/getting-started.md
+      - docs/guides/data-management.md
+      - docs/guides/lora-companion.md
+    direction: code-to-docs
+    relation: documents
+
+  # Version bumps sync the in-app constant and are recorded in the changelog
+  # and the fork changelog draft.
+  - id: changelog-version
+    description: Version bumps are recorded in the changelogs
+    code:
+      - lib/constants/app_version.dart
+      - tool/version.dart
+    docs:
+      - CHANGELOG.md
+      - docs/changelog-fork-ru.md
+    direction: code-to-docs
+    relation: synchronized
+
+  # Design specs describe implemented features; keep them synchronized.
+  - id: impossible-zones-spec
+    description: Impossible Zones design spec
+    code:
+      - lib/models/impossible_zone.dart
+      - lib/services/location_quality_filter.dart
+      - lib/services/bad_fix_monitor.dart
+    docs:
+      - docs/superpowers/specs/2026-08-20-impossible-zones-design.md
+    direction: bidirectional
+    relation: specification
+
+  - id: fresh-session-map-spec
+    description: Fresh session map view design spec
+    code:
+      - lib/widgets/tracking_play_button.dart
+      - lib/screens/map/map_screen_controller.dart
+    docs:
+      - docs/superpowers/specs/2026-08-19-fresh-session-map-design.md
+    direction: bidirectional
+    relation: specification
+
+  # Recording sessions are a fork feature with their own guide.
+  - id: recording-sessions-guide
+    description: Recording sessions guide
+    code:
+      - lib/widgets/tracking_play_button.dart
+      - lib/screens/session_history_screen.dart
+    docs:
+      - docs/guides/recording-sessions.md
+    direction: code-to-docs
+    relation: documents
+
+  # Markers and zones have their own guide.
+  - id: markers-zones-guide
+    description: Markers and zones guide
+    code:
+      - lib/screens/map/map_annotations_controller.dart
+      - lib/screens/map/dialogs/marker_dialogs.dart
+      - lib/screens/map/layers/zone_overlay_layer.dart
+      - lib/screens/map/layers/planned_marker_layer.dart
+    docs:
+      - docs/guides/markers-and-zones.md
+    direction: code-to-docs
+    relation: documents
+
+  # Upload, community coverage, offline tiles, and connectivity detection.
+  - id: online-coverage-guide
+    description: Online coverage features guide
+    code:
+      - lib/services/upload_service.dart
+      - lib/screens/map/layers/community_coverage_layer.dart
+      - lib/services/internet_connectivity_service.dart
+    docs:
+      - docs/guides/online-coverage.md
+    direction: code-to-docs
+    relation: documents
+
+  # Analytics screens and achievements have their own guide.
+  - id: analytics-guide
+    description: Analytics and statistics guide
+    code:
+      - lib/screens/analytics_screen.dart
+      - lib/screens/repeater_health_screen.dart
+      - lib/screens/signal_trend_screen.dart
+      - lib/screens/device_comparison_screen.dart
+      - lib/screens/achievements_screen.dart
+      - lib/services/achievement_service.dart
+    docs:
+      - docs/guides/analytics.md
+    direction: code-to-docs
+    relation: documents
+
+  # The tile provider investigation tracks the provider choice and the
+  # offline download policy.
+  - id: map-providers
+    description: Map provider choice and offline tile policy
+    code:
+      - lib/services/tile_download_service.dart
+      - lib/screens/map/dialogs/offline_tile_dialogs.dart
+    docs:
+      - docs/development/map-providers.md
+      - docs/guides/online-coverage.md
+    direction: code-to-docs
+    relation: related
+
+  # AGENTS.md points at analysis_options.yaml as the lint convention.
+  - id: agent-conventions
+    description: Repository lint conventions in AGENTS.md
+    code:
+      - analysis_options.yaml
+    docs:
+      - AGENTS.md
+    direction: bidirectional
+    relation: specification

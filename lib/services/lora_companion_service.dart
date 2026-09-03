@@ -344,6 +344,9 @@ class LoRaCompanionService {
   final Map<String, Repeater> _repeaterContactCache =
       {}; // All known repeater contacts (from scan)
   Completer<List<Repeater>>? _scanCompleter;
+  // Timeout of the active repeater scan; cancelled when a newer scan starts
+  // or on dispose so a stale timer cannot complete a newer scan.
+  Timer? _scanTimeoutTimer;
   final Map<String, Repeater> _knownRepeaters =
       {}; // Map of repeater ID -> location from internet map
   // Advertised names of every repeater/room-server contact ever parsed
@@ -694,10 +697,16 @@ class LoRaCompanionService {
                     debugPrint('Battery level: $_batteryPercent%');
                   }
 
-                  // Subscribe to battery updates if supported
+                  // Subscribe to battery updates if supported. The
+                  // subscription is stored in a field and cancelled by
+                  // _stopBatteryMonitoring so reconnects cannot stack
+                  // long-lived listeners.
                   if (char.properties.notify) {
                     await char.setNotifyValue(true);
-                    char.lastValueStream.listen((value) {
+                    _batteryNotifySubscription?.cancel();
+                    _batteryNotifySubscription = char.lastValueStream.listen((
+                      value,
+                    ) {
                       if (value.isNotEmpty) {
                         _batteryPercent = value[0];
                         _batteryController.add(_batteryPercent);
@@ -738,23 +747,7 @@ class LoRaCompanionService {
             }
           });
 
-          // Enable BLE mode in protocol parser (unwrapped frames)
-          _protocol.setBLEMode(true);
-          _debugLog.logInfo('Protocol set to BLE mode (unwrapped frames)');
-
-          // Start periodic battery check if not already getting updates
-          _startBatteryMonitoring();
-
-          // Negotiate the protocol and identify the app.
-          await Future.delayed(const Duration(milliseconds: 500));
-          await _sendProtocolHandshake();
-
-          // Load full contact list so repeaters appear on the map
-          await Future.delayed(const Duration(milliseconds: 150));
-          await _requestAllContacts();
-
-          _notifyConnectionEstablished();
-          return true;
+          return await _finishConnection(ble: true);
         }
 
         return false;
@@ -812,7 +805,7 @@ class LoRaCompanionService {
         await _usbPort!.setDTR(true);
         await _usbPort!.setRTS(true);
         await _usbPort!.setPortParameters(
-          115200, // Standard baud rate for Meshtastic
+          115200, // Standard baud rate for MeshCore
           UsbPort.DATABITS_8,
           UsbPort.STOPBITS_1,
           UsbPort.PARITY_NONE,
@@ -843,20 +836,7 @@ class LoRaCompanionService {
           'Connected to LoRa device via USB (ID: $_connectedDeviceId)',
         );
 
-        // Ensure USB mode in protocol parser (wrapped frames with '>')
-        _protocol.setBLEMode(false);
-        _debugLog.logInfo('Protocol set to USB mode (wrapped frames)');
-
-        // Negotiate the protocol and identify the app.
-        await Future.delayed(const Duration(milliseconds: 500));
-        await _sendProtocolHandshake();
-
-        // Load full contact list so repeaters appear on the map
-        await Future.delayed(const Duration(milliseconds: 150));
-        await _requestAllContacts();
-
-        _notifyConnectionEstablished();
-        return true;
+        return await _finishConnection(ble: false);
       } catch (e) {
         debugPrint('USB connection error: $e');
         return false;
@@ -866,9 +846,33 @@ class LoRaCompanionService {
     }
   }
 
-  // ============================================================================
-  // MQTT CONNECTION - REMOVED
-  // ============================================================================
+  /// Post-connect sequence shared by both transports: select the frame
+  /// format, negotiate the protocol and identify the app, load the contact
+  /// list so repeaters appear on the map, then notify listeners.
+  Future<bool> _finishConnection({required bool ble}) async {
+    // BLE uses unwrapped frames; USB wraps frames with '>'.
+    _protocol.setBLEMode(ble);
+    _debugLog.logInfo(
+      ble
+          ? 'Protocol set to BLE mode (unwrapped frames)'
+          : 'Protocol set to USB mode (wrapped frames)',
+    );
+    if (ble) {
+      // Start periodic battery check if not already getting updates
+      _startBatteryMonitoring();
+    }
+
+    // Negotiate the protocol and identify the app.
+    await Future.delayed(const Duration(milliseconds: 500));
+    await _sendProtocolHandshake();
+
+    // Load full contact list so repeaters appear on the map
+    await Future.delayed(const Duration(milliseconds: 150));
+    await _requestAllContacts();
+
+    _notifyConnectionEstablished();
+    return true;
+  }
 
   // ============================================================================
   // REPEATER SCANNING
@@ -884,8 +888,16 @@ class LoRaCompanionService {
 
     try {
       _debugLog.logInfo('🔍 Loading repeater contacts from device...');
+      // A newer scan supersedes an in-flight one: finish it with the data
+      // collected so far so its awaiter is not left hanging.
+      final previous = _scanCompleter;
+      if (previous != null) {
+        _finishRepeaterScan(previous);
+      }
+      _scanTimeoutTimer?.cancel();
       _repeaterContactCache.clear();
-      _scanCompleter = Completer<List<Repeater>>();
+      final completer = Completer<List<Repeater>>();
+      _scanCompleter = completer;
 
       // Request all contacts from device
       await _requestAllContacts();
@@ -893,24 +905,34 @@ class LoRaCompanionService {
       _debugLog.logInfo('Requested contact list');
       debugPrint('📡 Loading repeater contacts...');
 
-      // Wait for contacts to be loaded
-      Timer(Duration(seconds: timeoutSeconds), () {
-        if (_scanCompleter != null && !_scanCompleter!.isCompleted) {
-          _debugLog.logInfo(
-            '✅ Scan complete: Cached ${_repeaterContactCache.length} contact(s)',
-          );
-          debugPrint(
-            '✅ Cached ${_repeaterContactCache.length} repeater contact(s)',
-          );
-          _scanCompleter!.complete(List.from(_repeaterContactCache.values));
-          _scanCompleter = null;
-        }
+      // Wait for contacts to be loaded. The timeout completes the local
+      // [completer] it captured, so a stale timer can never complete a newer
+      // scan with partial data.
+      _scanTimeoutTimer = Timer(Duration(seconds: timeoutSeconds), () {
+        _debugLog.logInfo(
+          '✅ Scan complete: Cached ${_repeaterContactCache.length} contact(s)',
+        );
+        debugPrint(
+          '✅ Cached ${_repeaterContactCache.length} repeater contact(s)',
+        );
+        _finishRepeaterScan(completer);
       });
 
-      return await _scanCompleter!.future;
+      return await completer.future;
     } catch (e) {
       _debugLog.logError('Repeater scan error: $e');
       return [];
+    }
+  }
+
+  /// Completes [completer] with the contacts collected so far and forgets it
+  /// when it is still the active scan.
+  void _finishRepeaterScan(Completer<List<Repeater>> completer) {
+    if (!completer.isCompleted) {
+      completer.complete(List.from(_repeaterContactCache.values));
+    }
+    if (identical(_scanCompleter, completer)) {
+      _scanCompleter = null;
     }
   }
 
@@ -1095,7 +1117,6 @@ class LoRaCompanionService {
           _pingResultController.add(result);
         }
       });
-      _startingPing = false;
 
       // Send zero-hop advertisement to get immediate contact updates
       final zeroHopPayload = Uint8List.fromList([0]); // 0 = zero-hop
@@ -1638,6 +1659,9 @@ class LoRaCompanionService {
 
   Timer? _batteryMonitorTimer;
   BluetoothCharacteristic? _batteryCharacteristic;
+  // BLE battery notify listener, kept in a field so it can be cancelled when
+  // battery monitoring stops instead of leaking across reconnects.
+  StreamSubscription<List<int>>? _batteryNotifySubscription;
 
   void _startBatteryMonitoring() {
     // Poll battery every 30 seconds if we have a battery characteristic
@@ -1663,6 +1687,8 @@ class LoRaCompanionService {
   void _stopBatteryMonitoring() {
     _batteryMonitorTimer?.cancel();
     _batteryMonitorTimer = null;
+    _batteryNotifySubscription?.cancel();
+    _batteryNotifySubscription = null;
     _batteryCharacteristic = null;
     _batteryPercent = null;
     _batteryController.add(null);
@@ -1681,23 +1707,7 @@ class LoRaCompanionService {
     if (_connectionType != ConnectionType.usb) return;
     debugPrint('⚠️ USB device disconnected');
     _debugLog.logError('USB disconnected');
-
-    _stopBatteryMonitoring();
-    _deviceSubscription?.cancel();
-    _deviceSubscription = null;
-
-    _usbPort = null;
-    _connectionType = ConnectionType.none;
-    _deviceName = null;
-    _forgetNodeAdvertName();
-
-    _failPendingPings('USB connection lost');
-
-    // Notify listeners of disconnect
-    _disconnectController.add(null);
-
-    // The user did not ask for this: try to restore the connection.
-    _beginAutoReconnect();
+    _handleLinkLost('USB connection lost');
   }
 
   /// Handle unexpected Bluetooth disconnection
@@ -1705,7 +1715,14 @@ class LoRaCompanionService {
     if (_connectionType != ConnectionType.bluetooth) return;
     debugPrint('⚠️ Bluetooth device disconnected unexpectedly');
     _debugLog.logError('Bluetooth disconnected');
+    _handleLinkLost('Bluetooth connection lost');
+  }
 
+  /// Shared teardown after an unexpected USB/BLE link loss: stops battery
+  /// monitoring, cancels transport subscriptions, forgets device state and
+  /// in-flight contact requests, fails pending pings with [reason], and
+  /// engages the automatic reconnection loop.
+  void _handleLinkLost(String reason) {
     _stopBatteryMonitoring();
     _connectionStateSubscription?.cancel();
     _deviceSubscription?.cancel();
@@ -1715,11 +1732,13 @@ class LoRaCompanionService {
     _bluetoothDevice = null;
     _txCharacteristic = null;
     _rxCharacteristic = null;
+    _usbPort = null;
     _connectionType = ConnectionType.none;
     _deviceName = null;
     _forgetNodeAdvertName();
+    _pendingContactRequests.clear();
 
-    _failPendingPings('Bluetooth connection lost');
+    _failPendingPings(reason);
 
     // Notify listeners of disconnect
     _disconnectController.add(null);
@@ -1755,10 +1774,13 @@ class LoRaCompanionService {
       _forgetNodeAdvertName();
       _connectionStateSubscription = null;
       _deviceSubscription = null;
+      _pendingContactRequests.clear();
       debugPrint('LoRa device disconnected');
 
       // Notify listeners of disconnect
-      _disconnectController.add(null);
+      if (!_disconnectController.isClosed) {
+        _disconnectController.add(null);
+      }
     } catch (e) {
       debugPrint('Error disconnecting device: $e');
     }
@@ -1904,10 +1926,6 @@ class LoRaCompanionService {
     );
   }
 
-  Future<void> disconnectMqtt() async {
-    // MQTT removed - no-op
-  }
-
   // ============================================================================
   // CARPEATER MODE - PUBLIC METHODS FOR REPEATER CONTROL
   // ============================================================================
@@ -1999,13 +2017,58 @@ class LoRaCompanionService {
     _carpeaterPayloadCallback = callback;
   }
 
+  /// Deterministic synchronous teardown.
+  ///
+  /// Subscriptions and timers are cancelled first so no callback can fire
+  /// into a closed controller, pending pings are failed with a 'disposed'
+  /// reason, and only then are the controllers closed. The device link is
+  /// dropped best-effort in the background. After [dispose] returns the
+  /// service is inert and must not throw.
   void dispose() {
     _stopAutoReconnect();
-    disconnectDevice();
+    _stopBatteryMonitoring();
+    _scanTimeoutTimer?.cancel();
+    _scanTimeoutTimer = null;
+    final pendingScan = _scanCompleter;
+    if (pendingScan != null) {
+      _finishRepeaterScan(pendingScan);
+    }
+    unawaited(_connectionStateSubscription?.cancel());
+    unawaited(_deviceSubscription?.cancel());
+    _connectionStateSubscription = null;
+    _deviceSubscription = null;
+    _failPendingPings('disposed');
+    unawaited(_closeTransportLink());
+
+    _bluetoothDevice = null;
+    _txCharacteristic = null;
+    _rxCharacteristic = null;
+    _usbPort = null;
+    _connectionType = ConnectionType.none;
+    _deviceName = null;
+    _forgetNodeAdvertName();
+
     _pingResultController.close();
     _batteryController.close();
     _disconnectController.close();
     _reconnectStateController.close();
     _connectedController.close();
+  }
+
+  /// Best-effort transport drop used by [dispose]. It only talks to the
+  /// plugin; every service subscription is already cancelled by the time the
+  /// futures settle, so no callback can reach a closed controller.
+  Future<void> _closeTransportLink() async {
+    try {
+      final bluetoothDevice = _bluetoothDevice;
+      final usbPort = _usbPort;
+      if (bluetoothDevice != null) {
+        await bluetoothDevice.disconnect();
+      } else if (usbPort != null) {
+        await usbPort.close();
+      }
+    } catch (e) {
+      debugPrint('Error closing device link on dispose: $e');
+    }
   }
 }

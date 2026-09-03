@@ -23,13 +23,17 @@ class UploadService {
         norm(url) == norm(defaultGlobalApiUrl);
   }
 
-  static const String _apiUrlKey = 'upload_api_url';
-  static const String _autoUploadKey = 'auto_upload_enabled';
-  static const String _lastUploadKey = 'last_upload_timestamp';
-  static const String _uploadEndpointsKey =
+  /// Preference keys shared with [SettingsService] for settings export and
+  /// import. Keep the string values stable: existing installs persist them
+  /// verbatim, and the settings backup references these same constants.
+  static const String apiUrlKey = 'upload_api_url';
+  static const String autoUploadKey = 'auto_upload_enabled';
+  static const String uploadEndpointsKey =
       'upload_endpoints'; // JSON list of endpoints
-  static const String _selectedEndpointsKey =
+  static const String selectedEndpointsKey =
       'selected_endpoints'; // JSON list of selected endpoint names
+
+  static const String _lastUploadKey = 'last_upload_timestamp';
 
   static const String defaultEndpointName = 'Meshcoretel';
   static const String defaultRuApiUrl =
@@ -86,22 +90,22 @@ class UploadService {
 
   Future<String> getApiUrl() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_apiUrlKey) ?? defaultApiUrl;
+    return prefs.getString(apiUrlKey) ?? defaultApiUrl;
   }
 
   Future<void> setApiUrl(String url) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_apiUrlKey, url);
+    await prefs.setString(apiUrlKey, url);
   }
 
   Future<bool> isAutoUploadEnabled() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_autoUploadKey) ?? false;
+    return prefs.getBool(autoUploadKey) ?? false;
   }
 
   Future<void> setAutoUploadEnabled(bool enabled) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_autoUploadKey, enabled);
+    await prefs.setBool(autoUploadKey, enabled);
   }
 
   Future<DateTime?> getLastUploadTime() async {
@@ -144,102 +148,24 @@ class UploadService {
         return UploadResult(success: true, message: 'No new samples to upload');
       }
 
-      final samplesJson = _samplesToJson(samples, repeaterNames: repeaterNames);
+      final result = await _uploadSamplesToEndpoint(
+        apiUrl,
+        samples,
+        repeaterNames: repeaterNames,
+        onProgress: onProgress,
+      );
 
-      debugPrint('Uploading ${samplesJson.length} samples in batches...');
-
-      // Split into batches of 100 samples each
-      const batchSize = 100;
-      final totalBatches = (samplesJson.length / batchSize).ceil();
-      int totalCells = 0;
-
-      for (int i = 0; i < totalBatches; i++) {
-        final start = i * batchSize;
-        final end = (start + batchSize < samplesJson.length)
-            ? start + batchSize
-            : samplesJson.length;
-        final batch = samplesJson.sublist(start, end);
-
-        // Report progress
-        if (onProgress != null) {
-          onProgress(i + 1, totalBatches);
-        }
-
-        debugPrint(
-          'Uploading batch ${i + 1}/$totalBatches (${batch.length} samples)',
-        );
-
-        // Try up to 2 times (original + 1 retry)
-        bool success = false;
-        http.Response? response;
-        String? error;
-
-        for (int attempt = 0; attempt < 2; attempt++) {
-          try {
-            response = await http
-                .post(
-                  Uri.parse(apiUrl),
-                  headers: {'Content-Type': 'application/json'},
-                  body: jsonEncode({'samples': batch}),
-                )
-                .timeout(const Duration(seconds: 60));
-
-            if (response.statusCode == 200) {
-              success = true;
-              final responseData = jsonDecode(response.body);
-              totalCells = responseData['totalCells'] ?? totalCells;
-              break; // Success, exit retry loop
-            } else {
-              error = 'Server error: ${response.statusCode}';
-              if (attempt == 0) {
-                debugPrint(
-                  'Batch ${i + 1} failed with ${response.statusCode}, retrying...',
-                );
-                await Future.delayed(const Duration(seconds: 2));
-              }
-            }
-          } catch (e) {
-            error = e.toString();
-            if (attempt == 0) {
-              debugPrint('Batch ${i + 1} failed: $e, retrying...');
-              await Future.delayed(const Duration(seconds: 2));
-            }
-          }
-        }
-
-        if (!success) {
-          return UploadResult(
-            success: false,
-            message: 'Failed at batch ${i + 1}/$totalBatches: $error',
-          );
-        }
-      }
-
-      // All batches successful
-      await _setLastUploadTime(DateTime.now());
-
-      // Mark ALL samples (including GPS-only) as uploaded so they don't get re-queried
-      final allSampleIds = allSamples.map((s) => s.id).toList();
-      if (isDefault) {
+      // Mark ALL samples (including GPS-only) as uploaded so they don't get
+      // re-queried.
+      if (result.success && isDefault) {
+        final allSampleIds = allSamples.map((s) => s.id).toList();
         await _db.markSamplesAsUploaded(allSampleIds);
       }
 
-      return UploadResult(
-        success: true,
-        message: 'Upload Complete',
-        uploadedCount: samples.length,
-        totalCount: totalCells,
-      );
+      return result;
     } catch (e) {
       return UploadResult(success: false, message: 'Upload failed: $e');
     }
-  }
-
-  /// Upload only samples since last upload (deprecated - use uploadAllSamples instead)
-  Future<UploadResult> uploadNewSamples({
-    Map<String, String>? repeaterNames,
-  }) async {
-    return uploadAllSamples(repeaterNames: repeaterNames);
   }
 
   /// Download community coverage data from a map endpoint.
@@ -371,7 +297,7 @@ class UploadService {
   /// Get list of configured upload endpoints
   Future<List<UploadEndpoint>> getUploadEndpoints() async {
     final prefs = await SharedPreferences.getInstance();
-    final json = prefs.getString(_uploadEndpointsKey);
+    final json = prefs.getString(uploadEndpointsKey);
 
     if (json == null || json.isEmpty) {
       // Return default endpoint
@@ -388,13 +314,13 @@ class UploadService {
   Future<void> setUploadEndpoints(List<UploadEndpoint> endpoints) async {
     final prefs = await SharedPreferences.getInstance();
     final json = jsonEncode(endpoints.map((e) => e.toJson()).toList());
-    await prefs.setString(_uploadEndpointsKey, json);
+    await prefs.setString(uploadEndpointsKey, json);
   }
 
   /// Get list of selected endpoint names (for multi-upload)
   Future<List<String>> getSelectedEndpoints() async {
     final prefs = await SharedPreferences.getInstance();
-    final json = prefs.getString(_selectedEndpointsKey);
+    final json = prefs.getString(selectedEndpointsKey);
 
     if (json == null || json.isEmpty) {
       return [defaultEndpointName];
@@ -405,7 +331,7 @@ class UploadService {
 
     // Preserve selection for installs that stored the old implicit name but
     // never saved a custom endpoint list.
-    if (!prefs.containsKey(_uploadEndpointsKey) && names.contains('Default')) {
+    if (!prefs.containsKey(uploadEndpointsKey) && names.contains('Default')) {
       return names
           .map((name) => name == 'Default' ? defaultEndpointName : name)
           .toList();
@@ -417,7 +343,7 @@ class UploadService {
   Future<void> setSelectedEndpoints(List<String> names) async {
     final prefs = await SharedPreferences.getInstance();
     final json = jsonEncode(names);
-    await prefs.setString(_selectedEndpointsKey, json);
+    await prefs.setString(selectedEndpointsKey, json);
   }
 
   /// Upload to all selected endpoints

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meshcore_wardrive/utils/ping_distance_options.dart';
+import 'package:meshcore_wardrive/widgets/ping_distance_options.dart';
 
 void main() {
   test('includes the Frequent 50m interval used in Settings', () {

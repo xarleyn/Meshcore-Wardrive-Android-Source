@@ -54,6 +54,17 @@ class CarpeaterService {
 
   // Response completers
   Completer<Map<String, dynamic>?>? _loginCompleter;
+
+  /// Ack completer for the CLI command currently in flight
+  /// ('discover.neighbors' / 'neighbor.remove ').
+  ///
+  /// WARNING: both commands share this field, and a RESP_CODE_SENT push
+  /// carries no command identity — a late ack from the previous command
+  /// could therefore ack the wrong wait. This does not fire today only
+  /// because the discovery cycle is strictly sequential and every attempt
+  /// clears the field as soon as it stops waiting (see [_sendAndAwaitPush],
+  /// which owns that clearing). Never await two commands on this field
+  /// concurrently — give each command its own completer field instead.
   Completer<bool>? _sentCompleter;
   Completer<Map<String, dynamic>?>? _neighboursCompleter;
 
@@ -271,6 +282,10 @@ class CarpeaterService {
 
   bool get _isStopped => _stopSignal == null || _stopSignal!.isCompleted;
 
+  /// A discovery cycle must stop publishing once [stop] was requested or
+  /// [dispose] already closed the stream controllers.
+  bool get _cycleAborted => _isStopped || _neighboursController.isClosed;
+
   Future<void> _runDiscoveryLoop() async {
     while (!_isStopped) {
       await _runDiscoveryCycle();
@@ -320,9 +335,11 @@ class CarpeaterService {
       // Without this, the repeater returns cached neighbours from wherever
       // it was last located, not what it can hear RIGHT NOW
       await _clearPreviousNeighbours();
+      if (_cycleAborted) return;
 
       // Step 1: Trigger discovery — tell repeater to send zero-hop advert
       final advertOk = await _triggerRepeaterAdvert();
+      if (_cycleAborted) return;
       if (!advertOk) {
         _debugLog.logError(
           'Carpeater: Could not trigger advert — skipping cycle',
@@ -333,7 +350,9 @@ class CarpeaterService {
       }
 
       // Notify listeners to snapshot GPS position
-      _discoveryStartedController.add(null);
+      if (!_discoveryStartedController.isClosed) {
+        _discoveryStartedController.add(null);
+      }
 
       // Step 2: Wait for responses — v1.14+ repeaters respond via zero-hop
       // adverts within 1-2s of LoRa airtime. 3s is plenty.
@@ -345,22 +364,27 @@ class CarpeaterService {
         Future.delayed(const Duration(seconds: discoveryWaitSeconds)),
         if (_stopSignal != null) _stopSignal!.future,
       ]);
-      if (_stopSignal == null || _stopSignal!.isCompleted) return;
+      if (_cycleAborted) return;
 
       // Step 3: Fetch neighbours
       _setState(CarpeaterState.fetchingNeighbours);
       final neighbours = await _fetchNeighbours();
+      if (_cycleAborted) return;
 
       if (neighbours != null && neighbours.isNotEmpty) {
         _lastNeighbours = neighbours;
         _lastDiscoveryTime = DateTime.now();
-        _neighboursController.add(neighbours);
+        if (!_neighboursController.isClosed) {
+          _neighboursController.add(neighbours);
+        }
         _totalNeighboursFound += neighbours.length;
         _debugLog.logInfo('Carpeater: Found ${neighbours.length} neighbours');
         _consecutiveFailures = 0;
       } else {
         _debugLog.logInfo('Carpeater: No neighbours found this cycle');
-        _neighboursController.add([]);
+        if (!_neighboursController.isClosed) {
+          _neighboursController.add([]);
+        }
       }
 
       _cyclesCompleted++;
@@ -372,6 +396,34 @@ class CarpeaterService {
     }
   }
 
+  /// Run one attempt of a repeater command: register [completer] as the
+  /// pending response via [setPending], send the command via [send], and
+  /// wait up to [timeout] for the radio push to complete it.
+  ///
+  /// Returns null when the command was not enqueued or no push arrived in
+  /// time. The pending-completer field is cleared on every exit path so a
+  /// late response can never complete a wait that has already been
+  /// abandoned.
+  Future<T?> _sendAndAwaitPush<T>(
+    Completer<T> completer,
+    void Function(Completer<T>?) setPending,
+    Future<bool> Function() send,
+    Duration timeout,
+  ) async {
+    setPending(completer);
+    try {
+      final sent = await send();
+      if (!sent) return null;
+      return await completer.future.timeout(timeout);
+    } on TimeoutException {
+      // No push arrived in time — same as the previous per-call
+      // `onTimeout: () => null/false` behaviour.
+      return null;
+    } finally {
+      setPending(null);
+    }
+  }
+
   Future<bool> _triggerRepeaterAdvert() async {
     if (_targetRepeaterPubKeyBytes == null) return false;
 
@@ -379,23 +431,18 @@ class CarpeaterService {
     for (int attempt = 1; attempt <= maxAttempts; attempt++) {
       if (attempt > 1) await Future.delayed(const Duration(seconds: 2));
       try {
-        _sentCompleter = Completer<bool>();
-        final enqueued = await _loraService.sendRepeaterCliCommand(
-          targetPubKey: _targetRepeaterPubKeyBytes!,
-          command: 'discover.neighbors',
-        );
-        if (!enqueued) {
-          _sentCompleter = null;
-          continue;
-        }
-        final acked = await _sentCompleter!.future.timeout(
+        final acked = await _sendAndAwaitPush<bool>(
+          Completer<bool>(),
+          (completer) => _sentCompleter = completer,
+          () => _loraService.sendRepeaterCliCommand(
+            targetPubKey: _targetRepeaterPubKeyBytes!,
+            command: 'discover.neighbors',
+          ),
           const Duration(seconds: 5),
-          onTimeout: () => false,
         );
-        _sentCompleter = null;
-        if (acked) return true;
-      } catch (e) {
-        _sentCompleter = null;
+        if (acked ?? false) return true;
+      } catch (_) {
+        // Drop the attempt and retry.
       }
     }
     return false;
@@ -408,25 +455,20 @@ class CarpeaterService {
     for (int attempt = 1; attempt <= maxAttempts; attempt++) {
       if (attempt > 1) await Future.delayed(const Duration(seconds: 2));
       try {
-        _neighboursCompleter = Completer<Map<String, dynamic>?>();
-        final sent = await _loraService.sendRepeaterGetNeighbours(
-          targetPubKey: _targetRepeaterPubKeyBytes!,
-        );
-        if (!sent) {
-          _neighboursCompleter = null;
-          continue;
-        }
-        final response = await _neighboursCompleter!.future.timeout(
+        final response = await _sendAndAwaitPush<Map<String, dynamic>?>(
+          Completer<Map<String, dynamic>?>(),
+          (completer) => _neighboursCompleter = completer,
+          () => _loraService.sendRepeaterGetNeighbours(
+            targetPubKey: _targetRepeaterPubKeyBytes!,
+          ),
           const Duration(seconds: 8),
-          onTimeout: () => null,
         );
-        _neighboursCompleter = null;
         if (response == null) continue;
         return (response['neighbours'] as List?)
                 ?.cast<Map<String, dynamic>>() ??
             [];
-      } catch (e) {
-        _neighboursCompleter = null;
+      } catch (_) {
+        // Drop the attempt and retry.
       }
     }
     return null;
@@ -439,23 +481,18 @@ class CarpeaterService {
     for (int attempt = 1; attempt <= maxAttempts; attempt++) {
       if (attempt > 1) await Future.delayed(const Duration(seconds: 3));
       try {
-        _sentCompleter = Completer<bool>();
-        final enqueued = await _loraService.sendRepeaterCliCommand(
-          targetPubKey: _targetRepeaterPubKeyBytes!,
-          command: 'neighbor.remove ',
-        );
-        if (!enqueued) {
-          _sentCompleter = null;
-          continue;
-        }
-        final acked = await _sentCompleter!.future.timeout(
+        final acked = await _sendAndAwaitPush<bool>(
+          Completer<bool>(),
+          (completer) => _sentCompleter = completer,
+          () => _loraService.sendRepeaterCliCommand(
+            targetPubKey: _targetRepeaterPubKeyBytes!,
+            command: 'neighbor.remove ',
+          ),
           const Duration(seconds: 10),
-          onTimeout: () => false,
         );
-        _sentCompleter = null;
-        if (acked) return true;
-      } catch (e) {
-        _sentCompleter = null;
+        if (acked ?? false) return true;
+      } catch (_) {
+        // Drop the attempt and retry.
       }
     }
     return false;
@@ -498,11 +535,19 @@ class CarpeaterService {
   void _setState(CarpeaterState newState) {
     if (_state != newState) {
       _state = newState;
-      _stateController.add(newState);
+      // dispose() closes this controller right after stop(); late state
+      // transitions from an in-flight cycle must not add to it.
+      if (!_stateController.isClosed) {
+        _stateController.add(newState);
+      }
     }
   }
 
   void dispose() {
+    // stop() first: pending completers are resolved and the stop signal is
+    // raised so in-flight cycle code unwinds before the controllers close.
+    // Every controller add in this class checks isClosed immediately before
+    // adding, with no await in between — race-free on the single isolate.
     stop();
     _neighboursController.close();
     _stateController.close();

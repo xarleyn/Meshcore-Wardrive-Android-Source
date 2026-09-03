@@ -56,9 +56,9 @@ class MapCoverageLod {
 }
 
 class MapScreenController {
-  MapScreenController({required MapDataStore store}) : _store = store;
+  MapScreenController({required this.store});
 
-  final MapDataStore _store;
+  final MapDataStore store;
 
   int _sampleCount = 0;
   List<Sample> _samples = const [];
@@ -125,7 +125,7 @@ class MapScreenController {
     final generation = ++_refreshGeneration;
     final repeaters = List<Repeater>.unmodifiable(discoveredRepeaters);
     final repeaterFingerprint = _repeaterFingerprint(repeaters);
-    final count = await _store.getSampleCount();
+    final count = await store.getSampleCount();
     if (generation != _refreshGeneration) return false;
 
     final needsAggregation =
@@ -138,7 +138,7 @@ class MapScreenController {
     _sampleCount = count;
     if (!needsAggregation) return false;
 
-    var samples = _sessionView.visibleSamples(await _store.getAllSamples());
+    var samples = _sessionView.visibleSamples(await store.getAllSamples());
     if (generation != _refreshGeneration) return false;
     final sourceFilter = _sourceFilter;
     if (sourceFilter != null) {
@@ -191,20 +191,20 @@ class MapScreenController {
   }
 
   Future<void> deleteSample(String sampleId) async {
-    await _store.deleteSample(sampleId);
+    await store.deleteSample(sampleId);
     invalidate();
   }
 
   Future<int> deleteCoverage(String geohashPrefix) async {
-    final deleted = await _store.deleteSamplesByGeohash(geohashPrefix);
+    final deleted = await store.deleteSamplesByGeohash(geohashPrefix);
     invalidate();
     return deleted;
   }
 
-  Future<List<WSession>> getSessions() => _store.getAllSessions();
+  Future<List<WSession>> getSessions() => store.getAllSessions();
 
   Future<void> deleteSession(int id) async {
-    await _store.deleteSession(id);
+    await store.deleteSession(id);
     invalidate();
   }
 

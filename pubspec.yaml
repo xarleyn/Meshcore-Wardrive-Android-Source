@@ -18,8 +18,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # of the product and file versions while build-number is used as the build suffix.
 # Fork releases use the "-x" marker on the base version (1.0.44-x+47).
 # Bump to the next fork release with: dart run tool/version.dart bump
-version: 1.0.44-x+47
-
+version: 1.0.45-x+48
 environment:
   sdk: ^3.13.0
 
@@ -28,8 +27,6 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-
-  cupertino_icons: ^1.0.9
 
   # Map and location
   # flutter_map 8 and flutter_map_cache 2 need a heatmap plugin that still
@@ -66,7 +63,6 @@ dependencies:
   # 11 needs API 37.
   flutter_secure_storage: ^10.0.0
   shared_preferences: ^2.5.5
-  pointycastle: ^4.0.0
 
   # Utilities and export
   intl: any
@@ -96,6 +92,7 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.4
+  sqflite_common_ffi: ^2.4.2+1
 
 flutter:
   generate: true

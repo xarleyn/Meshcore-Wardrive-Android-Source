@@ -18,6 +18,11 @@ stores observations in SQLite, and renders aggregated coverage on a map.
 - `lib/services/`: location, radio, protocol, storage, settings, logging, and
   upload integrations.
 - `lib/utils/`: reusable helpers without UI responsibilities.
+- `lib/widgets/`: reusable widgets shared across screens.
+- `lib/l10n/`: localization inputs; generated outputs under `lib/l10n/generated/`.
+- `lib/constants/`: generated version constant synced by `tool/version.dart`.
+- `tool/`: developer scripts for versioning and release builds (`version.dart`,
+  `build_release.ps1`).
 - `android/`: the only maintained Flutter host platform.
 - `test/`: unit and widget tests, grouped into subdirectories by name prefix
   such as `test/bluetooth/` and `test/map/`; shared helpers stay in
@@ -68,7 +73,9 @@ not launch concurrent release builds. If a build runner was interrupted and a
 subsequent build reports that an intermediate file such as `base.jar` is in
 use, first confirm that no build is still active. A stale Gradle daemon for this
 project can then be stopped from `android/` with `gradlew.bat --stop` before
-retrying once.
+retrying once. On a fresh clone the Gradle wrapper (`gradlew.bat` and its JAR)
+is absent until the first `flutter run` or `flutter build` regenerates it,
+because `android/.gitignore` excludes those files.
 
 The full analyzer may report existing diagnostics outside the current change.
 Still run it, and also use targeted analysis for edited files when needed to
@@ -97,8 +104,10 @@ or a physical LoRa device, describe any manual device testing that remains.
   `lowerCamelCase` members.
 - Keep asynchronous lifecycle cleanup explicit: cancel subscriptions, timers,
   and device connections when their owner is disposed.
-- Keep secrets and device credentials out of source control. Store runtime
-  credentials with the existing secure-storage abstraction.
+- Keep secrets and device credentials out of source control and out of
+  exported settings files. A credential that must persist on the device is
+  stored with platform secure storage, never in plaintext
+  `SharedPreferences`, and never included in settings export/import.
 - Add or update tests for behavior that can be exercised without physical
   hardware. Isolate device and network boundaries so they can be faked.
 - Prefer placing new tests in the `test/` subdirectory matching the test name
@@ -135,6 +144,11 @@ or a physical LoRa device, describe any manual device testing that remains.
   output. Distribute binaries through GitHub Releases.
 - Update documentation and examples when changing commands, paths, settings, or
   user-visible behavior.
+- `.dsh/doc-impact.yml` maps source areas to the documents they affect for the
+  `dsh-doc-impact` agent plugin. When a change touches files covered by a rule,
+  review or update the linked documents and resolve the impact with the
+  plugin's `doc_impact_resolve` tool before finishing the turn. Personal
+  overrides belong in `.dsh/doc-impact.local.yml`, which is not committed.
 
 ## Architecture notes
 

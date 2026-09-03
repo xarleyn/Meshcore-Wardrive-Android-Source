@@ -1,5 +1,9 @@
 # MeshCore Wardrive - Quick Start
 
+Feature deep dives - recording sessions, markers and zones, positioning,
+data management, online coverage, and analytics - live in the
+[documentation index](README.md).
+
 ## Build and Install
 
 Build and install the app on an Android device from the repository root.
@@ -24,9 +28,11 @@ that file to your Android device and install it.
 
 ## First Launch
 
-1. **Grant Permissions**: When you first open the app, grant:
-   - Location permissions (choose "Allow all the time" for best results)
-   - Storage permissions (for exporting data)
+1. **Grant Permissions**: When you first open the app, grant the location
+   permissions it asks for (choose "Allow all the time" for best results).
+   No storage permissions are required: exports and imports go through the
+   system file picker / share sheet, and the app never asks for storage
+   access at runtime.
 
 2. **Start Tracking**: Tap the green play button (bottom right)
    - The button will turn red when tracking is active
@@ -48,7 +54,12 @@ that file to your Android device and install it.
   while stopped starts a fresh session that only shows this trip. After you
   stop, the map stays on that session until you short-press Play (show all) or
   pick another session in Settings → Session History. Stopping with no GPS
-  points asks whether to save the empty session.
+  points asks whether to save the empty session. See the
+  [sessions guide](guides/recording-sessions.md).
+- **Quick Settings** (double-tap the play button): Compact panel with ping and
+  display controls
+- **Long-press the map**: Choose what to add at that point - a planned
+  repeater, a privacy zone, or a GPS exclusion zone
 - **Settings Icon** (top right): Access display options
 
 ### Settings Options
@@ -83,11 +94,17 @@ The app language (System / English / Русский) is under Settings → App &
   - Age: Green (fresh) → Red (old)
 
 ### Data Management
-- **Export**: Saves all collected samples as JSON file
-  - Files saved to app's external storage
-  - Named with timestamp: `meshcore_export_YYYYMMDD_HHMMSS.json`
-  
+- **Export**: Saves all collected samples as JSON, CSV, GPX, or KML
+  - Save location is chosen in the system file picker (or shared via the
+    Android share sheet)
+  - Suggested JSON file name: `meshcore_export_YYYYMMDD_HHMMSS.json`
+
 - **Clear**: Deletes all collected data (with confirmation)
+- **Database backup**: Settings → Backup → Export Database writes a full
+  snapshot of the SQLite database (samples, sessions, markers, zones, upload
+  tracking) to a file or the share sheet; Import Database restores it. This
+  is more complete than the JSON sample export and is the recommended way to
+  move devices.
 
 ## Tips for Wardriving
 
@@ -99,7 +116,9 @@ The app language (System / English / Русский) is under Settings → App &
 
 ## Data Format
 
-Exported JSON contains an array of samples:
+Exported JSON contains an array of samples. Ping-related fields (`rssi`,
+`snr`, `pingSuccess`, `responseTimeMs`) are `null` for samples recorded
+without a radio response:
 ```json
 [
   {
@@ -108,7 +127,14 @@ Exported JSON contains an array of samples:
     "lon": -122.4247,
     "timestamp": "2024-01-01T12:00:00.000Z",
     "path": null,
-    "geohash": "c23nb2q2"
+    "geohash": "c23nb2q2",
+    "rssi": -85,
+    "snr": 7,
+    "pingSuccess": true,
+    "responseTimeMs": 2350,
+    "ductingRisk": null,
+    "source": null,
+    "deviceId": null
   }
 ]
 ```
@@ -138,8 +164,8 @@ Exported JSON contains an array of samples:
 - Verify INTERNET permission is granted
 
 ### Export Fails
-- Grant storage permissions
-- Check available storage space
+- Check available storage space on the device
+- Pick a different folder in the system file picker, or use the share option
 
 ## Technical Details
 

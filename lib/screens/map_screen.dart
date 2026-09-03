@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -27,12 +26,9 @@ import '../utils/compass_calibration.dart';
 import '../utils/heading_utils.dart';
 import '../utils/session_map_view.dart';
 import '../utils/community_coverage.dart';
-import '../utils/bluetooth_scan.dart';
-import '../utils/sample_export.dart';
+import '../utils/ducting_presentation.dart';
 import '../utils/ping_burst.dart';
-import '../utils/update_check.dart';
 import '../widgets/compass_calibration.dart';
-import '../widgets/bluetooth_device_picker_dialog.dart';
 import 'map/layers/coverage_prediction_layer.dart';
 import 'map/layers/coverage_layer.dart';
 import 'map/layers/community_coverage_layer.dart';
@@ -45,50 +41,45 @@ import 'map/layers/repeater_layer.dart';
 import 'map/layers/route_trail_layer.dart';
 import 'map/layers/sample_cluster_layer.dart';
 import 'map/layers/sample_heatmap_layer.dart';
-import 'map/dialogs/appearance_dialogs.dart';
-import 'map/dialogs/connection_dialogs.dart';
 import 'map/dialogs/coverage_tools_dialogs.dart';
 import 'map/dialogs/map_entity_dialogs.dart';
 import 'map/dialogs/map_workflow_dialogs.dart';
 import 'map/dialogs/marker_dialogs.dart';
-import 'map/dialogs/offline_tile_dialogs.dart';
-import 'map/dialogs/upload_endpoint_dialog.dart';
+import 'map/dialogs/theme_flows.dart';
+import 'map/dialogs/update_flow.dart';
+import 'map/dialogs/upload_flows.dart';
+import 'map/connection_flow.dart';
+import 'map/data_io.dart';
+import 'map/map_annotations_controller.dart';
 import 'map/map_runtime_bindings.dart';
 import 'map/map_screen_controller.dart';
 import 'map/map_settings_controller.dart';
+import 'map/tracking_permissions.dart';
 import 'map/widgets/delete_mode_banner.dart';
 import 'map/widgets/map_action_buttons.dart';
 import 'map/widgets/map_control_panel.dart';
 import 'map/widgets/map_quick_settings_panel.dart';
+import 'map/widgets/map_screen_actions.dart';
 import '../services/widget_service.dart';
 
-import 'package:usb_serial/usb_serial.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:http/http.dart' as http;
-import 'package:url_launcher/url_launcher.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:flutter_map_cache/flutter_map_cache.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:dio_cache_interceptor_file_store/dio_cache_interceptor_file_store.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import 'dart:typed_data';
 
 import 'debug_log_screen.dart';
 import 'debug_diagnostics_screen.dart';
 import 'session_history_screen.dart';
-import '../main.dart';
 import '../l10n/achievement_l10n.dart';
-import '../l10n/app_locale.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../constants/app_version.dart';
 import '../services/ducting_service.dart';
 import '../services/carpeater_service.dart';
+import '../services/manual_ping_service.dart';
 import '../services/sound_service.dart';
-import '../services/tile_download_service.dart';
 import 'analytics_screen.dart';
 import 'achievements_screen.dart';
 import 'device_comparison_screen.dart';
@@ -332,27 +323,57 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> _initialize(int generation) async {
+    if (!await _initializeTileCache(generation)) return;
+    if (!await _loadStartupSettings(generation)) return;
+    if (!await _loadStartupAnnotations(generation)) return;
+
+    _bindRadioStreams();
+    _bindLocationStreams();
+    _syncCompassSubscription();
+    _bindMapDataStreams();
+    _bindAlertStreams();
+
+    if (!await _applyStartupAlertSettings(generation)) return;
+
+    _bindTelemetryStreams();
+
+    await _loadStartupMapData(generation);
+  }
+
+  /// Tile cache store and home screen widget setup.
+  Future<bool> _initializeTileCache(int generation) async {
     // Initialize tile cache store
     final cacheDir = await getApplicationDocumentsDirectory();
-    if (!_isInitializationCurrent(generation)) return;
+    if (!_isInitializationCurrent(generation)) return false;
     _tileCacheStore = FileCacheStore('${cacheDir.path}/tile_cache');
 
     // Initialize home screen widget
     await WidgetService.initialize();
-    if (!_isInitializationCurrent(generation)) return;
+    if (!_isInitializationCurrent(generation)) return false;
+    return true;
+  }
 
+  /// Saved user settings snapshot.
+  Future<bool> _loadStartupSettings(int generation) async {
     // Load saved settings
     await _loadSettings();
-    if (!_isInitializationCurrent(generation)) return;
+    if (!_isInitializationCurrent(generation)) return false;
+    return true;
+  }
 
+  /// Planned markers and privacy zones persisted in the database.
+  Future<bool> _loadStartupAnnotations(int generation) async {
     // Load planned markers and privacy zones
     await _loadMarkers();
-    if (!_isInitializationCurrent(generation)) return;
+    if (!_isInitializationCurrent(generation)) return false;
     await _loadPrivacyZones();
-    if (!_isInitializationCurrent(generation)) return;
+    if (!_isInitializationCurrent(generation)) return false;
     await _loadImpossibleZones();
-    if (!_isInitializationCurrent(generation)) return;
+    if (!_isInitializationCurrent(generation)) return false;
+    return true;
+  }
 
+  void _bindRadioStreams() {
     // Subscribe to battery updates
     final loraService = _locationService.loraCompanion;
     _runtimeBindings.bind(
@@ -422,7 +443,9 @@ class _MapScreenState extends State<MapScreen> {
         });
       },
     );
+  }
 
+  void _bindLocationStreams() {
     // Subscribe to position updates
     _runtimeBindings.bind(
       MapRuntimeSubscription.position,
@@ -473,9 +496,9 @@ class _MapScreenState extends State<MapScreen> {
         }
       },
     );
+  }
 
-    _syncCompassSubscription();
-
+  void _bindMapDataStreams() {
     // Subscribe to sample saved events - reload map when new samples are saved
     _runtimeBindings.bind(
       MapRuntimeSubscription.sampleSaved,
@@ -504,7 +527,9 @@ class _MapScreenState extends State<MapScreen> {
         );
       },
     );
+  }
 
+  void _bindAlertStreams() {
     // Subscribe to new repeater discovery alerts
     _runtimeBindings.bind(
       MapRuntimeSubscription.newRepeater,
@@ -572,24 +597,30 @@ class _MapScreenState extends State<MapScreen> {
         );
       },
     );
+  }
 
+  /// Achievement backfill and repeater alert configuration.
+  Future<bool> _applyStartupAlertSettings(int generation) async {
     // Check achievements on startup
     AchievementService().checkAndUnlock();
 
     // Load known repeater IDs from DB so only truly new ones trigger alerts
     final knownIds = await _databaseService.getDistinctRepeaterIds();
-    if (!_isInitializationCurrent(generation)) return;
+    if (!_isInitializationCurrent(generation)) return false;
     await _locationService.loraCompanion.loadKnownRepeaterIds(knownIds);
-    if (!_isInitializationCurrent(generation)) return;
+    if (!_isInitializationCurrent(generation)) return false;
 
     // Load alert toggle settings
     final newRepeaterAlerts = await _settingsService
         .getNewRepeaterAlertsEnabled();
-    if (!_isInitializationCurrent(generation)) return;
+    if (!_isInitializationCurrent(generation)) return false;
     _locationService.loraCompanion.setNewRepeaterAlertsEnabled(
       newRepeaterAlerts,
     );
+    return true;
+  }
 
+  void _bindTelemetryStreams() {
     // Update distance immediately instead of waiting for a periodic map refresh.
     _runtimeBindings.bind(
       MapRuntimeSubscription.distance,
@@ -617,20 +648,24 @@ class _MapScreenState extends State<MapScreen> {
         });
       },
     );
+  }
 
+  /// Samples, position search, and cached community coverage.
+  Future<bool> _loadStartupMapData(int generation) async {
     await _loadSamples();
-    if (!_isInitializationCurrent(generation)) return;
+    if (!_isInitializationCurrent(generation)) return false;
     await _locationService.startPositionSearch();
-    if (!_isInitializationCurrent(generation)) return;
+    if (!_isInitializationCurrent(generation)) return false;
 
     // Load cached community coverage for offline viewing
     final cached = await _uploadService.loadCachedCoverage();
-    if (!_isInitializationCurrent(generation)) return;
+    if (!_isInitializationCurrent(generation)) return false;
     if (cached != null && cached['coverage'] != null) {
       setState(() {
         _communityCoverage = cached['coverage'] as Map<String, dynamic>;
       });
     }
+    return true;
   }
 
   bool _isInitializationCurrent(int generation) =>
@@ -1022,495 +1057,85 @@ class _MapScreenState extends State<MapScreen> {
     _showSnackBar(startMessage);
   }
 
-  Future<bool> _prepareAndroidTracking() async {
-    if (!Platform.isAndroid) return true;
+  /// Android tracking permission facade with screen dependencies injected.
+  TrackingPermissions get _trackingPermissions => TrackingPermissions(
+    context: context,
+    androidTrackingSettings: _androidTrackingSettings,
+    beaconDbWifiPositioning: () => _beaconDbWifiPositioning,
+  );
 
-    final foregroundStatus = await Permission.locationWhenInUse.request();
-    if (!foregroundStatus.isGranted) return true;
+  Future<bool> _prepareAndroidTracking() =>
+      _trackingPermissions.prepareAndroidTracking();
 
-    final accuracy = await Geolocator.getLocationAccuracy();
-    if (accuracy != LocationAccuracyStatus.precise) {
-      if (!mounted) return false;
-      final l10n = AppLocalizations.of(context);
-      await _showSettingsDialog(
-        title: l10n.mapPreciseLocationRequiredTitle,
-        message: l10n.mapPreciseLocationRequiredBody,
-        actionLabel: l10n.mapOpenAppSettings,
-        onOpen: openAppSettings,
-      );
-      return false;
-    }
+  Future<bool> _requestWifiScanThrottlingDisabled() =>
+      _trackingPermissions.requestWifiScanThrottlingDisabled();
 
-    var backgroundStatus = await Permission.locationAlways.status;
-    if (!backgroundStatus.isGranted) {
-      if (!mounted) return false;
-      final l10n = AppLocalizations.of(context);
-      final shouldRequest = await _showRequestDialog(
-        title: l10n.mapAllowLocationAllTheTimeTitle,
-        message: l10n.mapAllowLocationAllTheTimeBody,
-      );
-      if (!shouldRequest) return false;
+  /// Data I/O facade with the screen's services and reload hooks injected.
+  MapDataIo get _dataIo => MapDataIo(
+    context: context,
+    onShowSnackBar: _showSnackBar,
+    locationService: _locationService,
+    databaseService: _databaseService,
+    databaseBackupService: _databaseBackupService,
+    settingsService: _settingsService,
+    isTracking: () => _isTracking,
+    sampleCount: () => _sampleCount,
+    repeaters: () => _repeaters,
+    invalidateCaches: _mapDataController.invalidate,
+    loadSamples: _loadSamples,
+    loadSettings: _loadSettings,
+    onDatabaseRestored: () =>
+        _updateMapState(() => _sessionMapView = const SessionMapView.all()),
+    loadMarkers: _loadMarkers,
+    loadPrivacyZones: _loadPrivacyZones,
+    loadImpossibleZones: _loadImpossibleZones,
+  );
 
-      backgroundStatus = await Permission.locationAlways.request();
-      if (!backgroundStatus.isGranted) {
-        if (!mounted) return false;
-        final l10n = AppLocalizations.of(context);
-        await _showSettingsDialog(
-          title: l10n.mapBackgroundLocationRequiredTitle,
-          message: l10n.mapBackgroundLocationRequiredBody,
-          actionLabel: l10n.mapOpenAppSettings,
-          onOpen: openAppSettings,
-        );
-        return false;
-      }
-    }
+  Future<void> _clearData() => _dataIo.clearData();
 
-    final batteryStatus = await Permission.ignoreBatteryOptimizations.status;
-    if (!batteryStatus.isGranted) {
-      if (!mounted) return false;
-      final l10n = AppLocalizations.of(context);
-      final shouldRequest = await _showRequestDialog(
-        title: l10n.mapUnrestrictedBatteryTitle,
-        message: l10n.mapUnrestrictedBatteryBody,
-      );
-      if (shouldRequest) {
-        await Permission.ignoreBatteryOptimizations.request();
-      }
-    }
+  Future<void> _exportData() => _dataIo.exportData();
 
-    if (_beaconDbWifiPositioning) {
-      if (!await _requestWifiScanThrottlingDisabled()) return false;
-    }
+  Future<void> _importData() => _dataIo.importData();
 
-    return true;
-  }
+  Future<void> _exportSettings() => _dataIo.exportSettings();
 
-  Future<bool> _requestWifiScanThrottlingDisabled() async {
-    if (!Platform.isAndroid) return true;
+  Future<void> _importSettings() => _dataIo.importSettings();
 
-    final throttlingEnabled = await _androidTrackingSettings
-        .isWifiScanThrottlingEnabled();
-    if (throttlingEnabled == false || !mounted) return true;
+  Future<void> _exportDatabase() => _dataIo.exportDatabase();
 
-    final l10n = AppLocalizations.of(context);
-    final openedSettings = await _showSettingsDialog(
-      title: l10n.mapDisableWifiThrottlingTitle,
-      message: l10n.mapDisableWifiThrottlingBody,
-      actionLabel: l10n.mapDeveloperOptions,
-      onOpen: _androidTrackingSettings.openWifiScanThrottlingSettings,
-    );
-    return !openedSettings;
-  }
-
-  Future<bool> _showRequestDialog({
-    required String title,
-    required String message,
-  }) async {
-    if (!mounted) return false;
-    return await showDialog<bool>(
-          context: context,
-          builder: (context) =>
-              ContinueRequestDialog(title: title, message: message),
-        ) ??
-        false;
-  }
-
-  Future<bool> _showSettingsDialog({
-    required String title,
-    required String message,
-    required String actionLabel,
-    required Future<bool> Function() onOpen,
-  }) async {
-    if (!mounted) return false;
-    final shouldOpen = await showDialog<bool>(
-      context: context,
-      builder: (context) => OpenSettingsDialog(
-        title: title,
-        message: message,
-        actionLabel: actionLabel,
-      ),
-    );
-    if (shouldOpen != true) return false;
-    return onOpen();
-  }
-
-  Future<void> _clearData() async {
-    final l10n = AppLocalizations.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => ClearMapHistoryDialog(sampleCount: _sampleCount),
-    );
-
-    if (confirmed == true) {
-      await _locationService.clearAllSamples();
-      await _loadSamples();
-      _showSnackBar(l10n.mapDeletedSamples(_sampleCount));
-    }
-  }
-
-  Future<void> _exportData() async {
-    // Ask user for export format
-    final format = await showDialog<SampleExportFormat>(
-      context: context,
-      builder: (context) => const SampleExportFormatDialog(),
-    );
-
-    if (format == null) return;
-
-    // Ask save or share
-    if (!mounted) return;
-    final choice = await showDialog<ExportDestination>(
-      context: context,
-      builder: (context) => ExportDestinationDialog(
-        title: AppLocalizations.of(context).mapExportAs(format.displayName),
-      ),
-    );
-
-    if (choice == null) return;
-
-    try {
-      final samples = await _locationService.getAllSamples();
-      final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-      String content;
-      String fileName;
-      String extension;
-
-      switch (format) {
-        case SampleExportFormat.csv:
-          content = SampleExport.buildCsv(samples);
-          extension = 'csv';
-          fileName = 'meshcore_export_$timestamp.csv';
-          break;
-        case SampleExportFormat.gpx:
-          content = SampleExport.buildGpx(samples);
-          extension = 'gpx';
-          fileName = 'meshcore_export_$timestamp.gpx';
-          break;
-        case SampleExportFormat.kml:
-          content = SampleExport.buildKml(samples);
-          extension = 'kml';
-          fileName = 'meshcore_export_$timestamp.kml';
-          break;
-        case SampleExportFormat.json:
-          // Include discovered repeater contacts in the export
-          final repeaterJsonList = _repeaters
-              .where(
-                (r) =>
-                    r.position.latitude != 0.0 || r.position.longitude != 0.0,
-              )
-              .map((r) => r.toJson())
-              .toList();
-          final data = await _databaseService.exportAllData(
-            repeaters: repeaterJsonList,
-          );
-          content = jsonEncode(data);
-          extension = 'json';
-          fileName = 'meshcore_export_$timestamp.json';
-      }
-
-      if (choice == ExportDestination.save) {
-        if (!mounted) return;
-        await FilePicker.platform.saveFile(
-          dialogTitle: AppLocalizations.of(context).mapSaveExport,
-          fileName: fileName,
-          type: FileType.custom,
-          allowedExtensions: [extension],
-          bytes: utf8.encode(content),
-        );
-        if (!mounted) return;
-        _showSnackBar(
-          AppLocalizations.of(context)
-              .mapExportedSamples(samples.length, format.displayName),
-        );
-      } else if (choice == ExportDestination.share) {
-        final directory = await getExternalStorageDirectory();
-        final file = File('${directory!.path}/$fileName');
-        await file.writeAsString(content);
-
-        if (!mounted) return;
-        await SharePlus.instance.share(
-          ShareParams(
-            files: [XFile(file.path)],
-            subject: AppLocalizations.of(context).mapExportShareSubject,
-            text: AppLocalizations.of(context)
-                .mapExportShareText(samples.length),
-          ),
-        );
-        if (!mounted) return;
-        _showSnackBar(AppLocalizations.of(context).mapExportShared);
-      }
-    } catch (e) {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapExportFailed('$e'));
-    }
-  }
-
-  Future<void> _importData() async {
-    try {
-      // Pick JSON file(s) — allow multiple for community merge
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['json'],
-        allowMultiple: true,
-      );
-
-      if (result == null || result.files.isEmpty) return;
-
-      int totalSamplesImported = 0;
-      int totalSessionsImported = 0;
-      final Set<String> sources = {};
-
-      for (final pickedFile in result.files) {
-        if (pickedFile.path == null) continue;
-        final file = File(pickedFile.path!);
-        final jsonString = await file.readAsString();
-        final dynamic jsonData = jsonDecode(jsonString);
-
-        // Use unified import that handles both old (array) and new (object) formats
-        final counts = await _databaseService.importAllData(jsonData);
-        totalSamplesImported += counts['samples'] ?? 0;
-        totalSessionsImported += counts['sessions'] ?? 0;
-
-        // Extract sources for display
-        if (jsonData is Map<String, dynamic> &&
-            jsonData.containsKey('samples')) {
-          for (final s in (jsonData['samples'] as List<dynamic>)) {
-            final map = s as Map<String, dynamic>;
-            if (map['source'] != null) sources.add(map['source'] as String);
-          }
-        } else if (jsonData is List) {
-          for (final s in jsonData) {
-            final map = s as Map<String, dynamic>;
-            if (map['source'] != null) sources.add(map['source'] as String);
-          }
-        }
-      }
-
-      // Reload map
-      _mapDataController.invalidate();
-      await _loadSamples();
-
-      if (!mounted) return;
-      final l10n = AppLocalizations.of(context);
-      final sessionLabel = totalSessionsImported > 0
-          ? l10n.mapImportedSessionsSuffix(totalSessionsImported)
-          : '';
-      final sourceLabel = sources.isNotEmpty
-          ? l10n.mapImportedFromSources(sources.join(', '))
-          : '';
-      _showSnackBar(
-        '${l10n.mapImportedSamples(totalSamplesImported)}$sessionLabel$sourceLabel',
-      );
-    } catch (e) {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapImportFailed('$e'));
-    }
-  }
-
-  Future<void> _exportSettings() async {
-    try {
-      final jsonString = await _settingsService.exportSettingsJson();
-      final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-      final fileName = 'meshcore_settings_$timestamp.json';
-
-      // Ask save or share
-      if (!mounted) return;
-      final choice = await showDialog<ExportDestination>(
-        context: context,
-        builder: (context) => ExportDestinationDialog(
-          title: AppLocalizations.of(context).settingsExportSettings,
-        ),
-      );
-
-      if (choice == null) return;
-
-      if (choice == ExportDestination.save) {
-        if (!mounted) return;
-        await FilePicker.platform.saveFile(
-          dialogTitle: AppLocalizations.of(context).mapSaveSettings,
-          fileName: fileName,
-          type: FileType.custom,
-          allowedExtensions: ['json'],
-          bytes: utf8.encode(jsonString),
-        );
-        if (!mounted) return;
-        _showSnackBar(AppLocalizations.of(context).mapSettingsExported);
-      } else if (choice == ExportDestination.share) {
-        final dir = await getApplicationDocumentsDirectory();
-        final file = File('${dir.path}/$fileName');
-        await file.writeAsString(jsonString);
-        if (!mounted) return;
-        await SharePlus.instance.share(
-          ShareParams(
-            files: [XFile(file.path)],
-            text: AppLocalizations.of(context).mapSettingsShareText,
-          ),
-        );
-      }
-    } catch (e) {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapExportFailed('$e'));
-    }
-  }
-
-  Future<void> _importSettings() async {
-    try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['json'],
-      );
-
-      if (result == null || result.files.isEmpty) return;
-      final pickedFile = result.files.single;
-
-      final file = File(pickedFile.path!);
-      final jsonString = await file.readAsString();
-
-      // Show confirmation dialog
-      if (!mounted) return;
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (context) => const ImportSettingsConfirmationDialog(),
-      );
-
-      if (confirmed != true) return;
-
-      final applied = await _settingsService.importSettingsJson(jsonString);
-
-      // Reload settings to apply changes
-      await _loadSettings();
-      _mapDataController.invalidate();
-      await _loadSamples();
-
-      if (!mounted) return;
-      _showSnackBar(
-        AppLocalizations.of(context).mapImportedSettingsCount(applied),
-      );
-    } on FormatException catch (e) {
-      if (!mounted) return;
-      _showSnackBar(
-        AppLocalizations.of(context).mapInvalidSettingsFile(e.message),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapImportFailed('$e'));
-    }
-  }
-
-  Future<void> _exportDatabase() async {
-    try {
-      final timestamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
-      final fileName = 'meshcore_backup_$timestamp.db';
-
-      if (!mounted) return;
-      final choice = await showDialog<ExportDestination>(
-        context: context,
-        builder: (context) => ExportDestinationDialog(
-          title: AppLocalizations.of(context).settingsExportDatabase,
-        ),
-      );
-
-      if (choice == null) return;
-
-      if (choice == ExportDestination.save) {
-        final bytes = await _databaseBackupService.exportSnapshotBytes();
-        if (!mounted) return;
-        await FilePicker.platform.saveFile(
-          dialogTitle: AppLocalizations.of(context).mapSaveExport,
-          fileName: fileName,
-          type: FileType.custom,
-          allowedExtensions: ['db'],
-          bytes: bytes,
-        );
-        if (!mounted) return;
-        _showSnackBar(AppLocalizations.of(context).settingsDatabaseExported);
-      } else if (choice == ExportDestination.share) {
-        final dir = await getApplicationDocumentsDirectory();
-        final file = await _databaseBackupService.exportToShareFile(
-          dir,
-          fileName,
-        );
-        if (!mounted) return;
-        await SharePlus.instance.share(
-          ShareParams(
-            files: [XFile(file.path)],
-            subject: AppLocalizations.of(context).settingsExportDatabase,
-            text: AppLocalizations.of(context).settingsDatabaseShareText,
-          ),
-        );
-        if (!mounted) return;
-        _showSnackBar(AppLocalizations.of(context).mapExportShared);
-      }
-    } catch (e) {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapExportFailed('$e'));
-    }
-  }
-
-  Future<void> _importDatabase() async {
-    final l10n = AppLocalizations.of(context);
-    if (_isTracking) {
-      _showSnackBar(l10n.settingsImportDatabaseStopTracking);
-      return;
-    }
-
-    try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['db'],
-      );
-
-      if (result == null || result.files.isEmpty) return;
-      final backupPath = result.files.single.path;
-      if (backupPath == null) return;
-
-      // Validate before destroying anything.
-      await _databaseBackupService.validateBackupFile(backupPath);
-
-      if (!mounted) return;
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (context) => const ImportDatabaseConfirmationDialog(),
-      );
-      if (confirmed != true) return;
-
-      await _databaseBackupService.restoreFromFile(backupPath);
-
-      // Reload everything that is derived from the database.
-      _updateMapState(() => _sessionMapView = const SessionMapView.all());
-      _mapDataController.invalidate();
-      await _loadSamples();
-      await _loadMarkers();
-      await _loadPrivacyZones();
-      await _loadImpossibleZones();
-
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).settingsDatabaseImported);
-    } on DatabaseBackupException catch (e) {
-      if (!mounted) return;
-      _showSnackBar(switch (e.error) {
-        DatabaseBackupValidationError.newerVersion => AppLocalizations.of(
-          context,
-        ).settingsDatabaseNewerVersion,
-        _ => AppLocalizations.of(context).settingsDatabaseInvalidFile,
-      });
-    } catch (e) {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapImportFailed('$e'));
-    }
-  }
+  Future<void> _importDatabase() => _dataIo.importDatabase();
 
   // ============================================================================
   // PLANNED MARKERS
   // ============================================================================
 
-  Future<void> _loadMarkers() async {
-    final markers = await _databaseService.getAllMarkers();
-    if (!mounted) return;
-    setState(() {
-      _plannedMarkers = markers;
-    });
-  }
+  /// Annotation CRUD facade with screen-owned update callbacks injected.
+  MapAnnotationsController get _annotations => MapAnnotationsController(
+    databaseService: _databaseService,
+    onMarkersLoaded: (markers) async {
+      if (!mounted) return;
+      setState(() {
+        _plannedMarkers = markers;
+      });
+    },
+    onPrivacyZonesLoaded: (zones) async {
+      if (!mounted) return;
+      setState(() {
+        _privacyZones = zones;
+      });
+    },
+    onImpossibleZonesLoaded: (zones) async {
+      if (!mounted) return;
+      setState(() {
+        _impossibleZones = zones;
+      });
+    },
+    loadSamples: _loadSamples,
+    deleteSampleById: _mapDataController.deleteSample,
+    deleteCoverageById: _mapDataController.deleteCoverage,
+  );
+
+  Future<void> _loadMarkers() => _annotations.loadMarkers();
 
   Future<void> _handleMapLongPress(LatLng point) async {
     final action = await showModalBottomSheet<MapLongPressAction>(
@@ -1540,12 +1165,11 @@ class _MapScreenState extends State<MapScreen> {
     );
 
     if (label != null) {
-      await _databaseService.addMarker(
-        point.latitude,
-        point.longitude,
-        label.isEmpty ? null : label,
+      await _annotations.addPlannedMarker(
+        latitude: point.latitude,
+        longitude: point.longitude,
+        label: label.isEmpty ? null : label,
       );
-      await _loadMarkers();
       if (!mounted) return;
       _showSnackBar(AppLocalizations.of(context).mapPlannedRepeaterMarkerAdded);
     }
@@ -1571,8 +1195,7 @@ class _MapScreenState extends State<MapScreen> {
     );
 
     if (action != PlannedMarkerAction.delete) return;
-    await _databaseService.deleteMarker(id);
-    await _loadMarkers();
+    await _annotations.deleteMarker(id);
     if (!mounted) return;
     _showSnackBar(AppLocalizations.of(context).mapMarkerDeleted);
   }
@@ -1581,21 +1204,9 @@ class _MapScreenState extends State<MapScreen> {
   // PRIVACY ZONES
   // ============================================================================
 
-  Future<void> _loadPrivacyZones() async {
-    final zones = await _databaseService.getAllPrivacyZones();
-    if (!mounted) return;
-    setState(() {
-      _privacyZones = zones;
-    });
-  }
+  Future<void> _loadPrivacyZones() => _annotations.loadPrivacyZones();
 
-  Future<void> _loadImpossibleZones() async {
-    final zones = await _databaseService.getAllImpossibleZones();
-    if (!mounted) return;
-    setState(() {
-      _impossibleZones = zones;
-    });
-  }
+  Future<void> _loadImpossibleZones() => _annotations.loadImpossibleZones();
 
   Future<void> _addPrivacyZone(LatLng center) async {
     final l10n = AppLocalizations.of(context);
@@ -1616,13 +1227,12 @@ class _MapScreenState extends State<MapScreen> {
     _updateMapState(() => _zonePreview = null);
 
     if (draft != null) {
-      await _databaseService.addPrivacyZone(
-        center.latitude,
-        center.longitude,
-        draft.radiusMeters,
-        draft.label,
+      await _annotations.addPrivacyZone(
+        latitude: center.latitude,
+        longitude: center.longitude,
+        radiusMeters: draft.radiusMeters,
+        label: draft.label,
       );
-      await _loadPrivacyZones();
       if (!mounted) return;
       _showSnackBar(l10n.mapPrivacyZoneAdded);
     }
@@ -1654,13 +1264,12 @@ class _MapScreenState extends State<MapScreen> {
     _updateMapState(() => _zonePreview = null);
 
     if (draft == null) return;
-    await _databaseService.addImpossibleZone(
-      draft.center.latitude,
-      draft.center.longitude,
-      draft.radiusMeters,
-      draft.label,
+    await _annotations.addImpossibleZone(
+      latitude: draft.center.latitude,
+      longitude: draft.center.longitude,
+      radiusMeters: draft.radiusMeters,
+      label: draft.label,
     );
-    await _loadImpossibleZones();
     if (!mounted) return;
     _showSnackBar(l10n.settingsImpossibleZoneAdded);
   }
@@ -1676,8 +1285,7 @@ class _MapScreenState extends State<MapScreen> {
     );
 
     if (confirmed == true) {
-      await _mapDataController.deleteSample(sample.id);
-      await _loadSamples();
+      await _annotations.deleteSample(sample.id);
       if (!mounted) return;
       _showSnackBar(AppLocalizations.of(context).mapSampleDeleted);
     }
@@ -1691,8 +1299,7 @@ class _MapScreenState extends State<MapScreen> {
     );
 
     if (confirmed == true) {
-      final deleted = await _mapDataController.deleteCoverage(coverage.id);
-      await _loadSamples();
+      final deleted = await _annotations.deleteCoverageCell(coverage.id);
       if (!mounted) return;
       _showSnackBar(
         AppLocalizations.of(context).mapDeletedSamplesFromCell(deleted),
@@ -1767,61 +1374,13 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  Future<void> _checkForUpdates() async {
-    try {
-      final response = await http
-          .get(Uri.parse(updateCheckApiUrl))
-          .timeout(const Duration(seconds: 5));
+  Future<void> _checkForUpdates() => UpdateFlow(
+    context: context,
+    onShowSnackBar: _showSnackBar,
+  ).checkForUpdates();
 
-      if (response.statusCode == 200) {
-        final releases = jsonDecode(response.body) as List<dynamic>;
-        final latestVersion = latestVersionFromReleaseTags(
-          releases
-              .whereType<Map<String, dynamic>>()
-              .map((release) => release['tag_name'])
-              .whereType<String>(),
-        );
-
-        if (!mounted) return;
-        if (latestVersion == null) {
-          _showSnackBar(AppLocalizations.of(context).mapCouldNotCheckUpdates);
-        } else if (!isNewerAppVersion(latestVersion, appVersion)) {
-          _showSnackBar(AppLocalizations.of(context).mapOnLatestVersion);
-        } else {
-          final shouldDownload = await showDialog<bool>(
-            context: context,
-            builder: (context) => UpdateAvailableDialog(
-              latestVersion: latestVersion,
-              currentVersion: appVersion,
-            ),
-          );
-          if (shouldDownload == true) await _openGitHub();
-        }
-      } else {
-        if (!mounted) return;
-        _showSnackBar(AppLocalizations.of(context).mapCouldNotCheckUpdates);
-      }
-    } on SocketException {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapNoInternetTryAgain);
-    } on TimeoutException {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapUpdateCheckTimedOut);
-    } catch (_) {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapCouldNotCheckUpdates);
-    }
-  }
-
-  Future<void> _openGitHub() async {
-    final url = Uri.parse(updateCheckReleasesUrl);
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-    } else {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapCouldNotOpenGitHub);
-    }
-  }
+  Future<void> _openGitHub() =>
+      UpdateFlow(context: context, onShowSnackBar: _showSnackBar).openGitHub();
 
   void _toggleFollowLocation() {
     setState(() {
@@ -2000,26 +1559,28 @@ class _MapScreenState extends State<MapScreen> {
                 carpeaterState: _carpeaterState,
                 ductingLabel:
                     _showDucting && _currentDuctingRisk != DuctingRisk.unknown
-                    ? _localizedDuctingRisk(l10n, _currentDuctingRisk)
+                    ? localizedDuctingRisk(l10n, _currentDuctingRisk)
                     : null,
                 ductingColor:
                     _showDucting && _currentDuctingRisk != DuctingRisk.unknown
-                    ? _getDuctingColor(_currentDuctingRisk)
+                    ? ductingRiskColor(_currentDuctingRisk)
                     : null,
                 batterySaverActive: _batterySaverActive,
-                onConnect: _showConnectionDialog,
-                onDisconnect: _disconnectLoRa,
-                onManualPing: _manualPing,
-                onCarpeaterRetry: () async {
-                  _showSnackBar(l10n.mapRetryingCarpeater);
-                  final ok = await _locationService.startCarpeater();
-                  if (!mounted) return;
-                  _showSnackBar(
-                    ok
-                        ? l10n.mapCarpeaterReconnected
-                        : l10n.mapCarpeaterRetryFailed,
-                  );
-                },
+                actions: MapPanelCallbacks(
+                  onConnect: _showConnectionDialog,
+                  onDisconnect: _disconnectLoRa,
+                  onManualPing: _manualPing,
+                  onCarpeaterRetry: () async {
+                    _showSnackBar(l10n.mapRetryingCarpeater);
+                    final ok = await _locationService.startCarpeater();
+                    if (!mounted) return;
+                    _showSnackBar(
+                      ok
+                          ? l10n.mapCarpeaterReconnected
+                          : l10n.mapCarpeaterRetryFailed,
+                    );
+                  },
+                ),
               ),
             if (_showQuickSettings)
               MapQuickSettingsPanel(
@@ -2310,6 +1871,12 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
+  /// Manual ping business logic with the screen's companion and DB wired in.
+  ManualPingService get _manualPingService => ManualPingService(
+    loraCompanion: _locationService.loraCompanion,
+    databaseService: _databaseService,
+  );
+
   Future<void> _manualPing() async {
     if (!_loraConnected) {
       _showSnackBar(AppLocalizations.of(context).mapConnectLoraFirst);
@@ -2327,76 +1894,22 @@ class _MapScreenState extends State<MapScreen> {
     }
 
     _showSnackBar(AppLocalizations.of(context).mapSendingPing);
-    SoundService().playPingSent();
 
-    // Send ping via LoRa companion
-    final result = await _locationService.loraCompanion.ping(
-      latitude: _currentPosition!.latitude,
-      longitude: _currentPosition!.longitude,
+    final outcome = await _manualPingService.ping(
+      position: _currentPosition!,
       timeoutSeconds: _discoveryTimeoutSeconds,
-      waitForAllResponses: true,
-      collectUntilTimeout: _thoroughResponseCollection,
+      thoroughResponseCollection: _thoroughResponseCollection,
     );
-
-    final responses = result.responses;
-    final pingSuccess =
-        result.status == PingStatus.success && responses.isNotEmpty;
-
-    if (pingSuccess) {
-      for (final response in responses) {
-        await SoundService().playForPingResult(
-          success: true,
-          snr: response.snr,
-          rssi: response.rssi,
-        );
-      }
-    } else {
-      await SoundService().playForPingResult(success: false);
-    }
-
-    // Create and save sample
-    final geohash = GeohashUtils.sampleKey(
-      _currentPosition!.latitude,
-      _currentPosition!.longitude,
-    );
-
-    if (pingSuccess) {
-      for (var index = 0; index < responses.length; index++) {
-        final response = responses[index];
-        final sample = Sample(
-          id: '${DateTime.now().microsecondsSinceEpoch}_${index}_$geohash',
-          position: _currentPosition!,
-          timestamp: DateTime.now(),
-          path: response.nodeId,
-          geohash: geohash,
-          rssi: response.rssi,
-          snr: response.snr,
-          pingSuccess: true,
-          responseTimeMs: response.responseTimeMs,
-          deviceId: _locationService.loraCompanion.connectedDeviceId,
-        );
-        await _databaseService.insertSample(sample);
-      }
-    } else {
-      final sample = Sample(
-        id: '${DateTime.now().microsecondsSinceEpoch}_$geohash',
-        position: _currentPosition!,
-        timestamp: DateTime.now(),
-        geohash: geohash,
-        pingSuccess: false,
-        responseTimeMs: result.responseTimeMs,
-        deviceId: _locationService.loraCompanion.connectedDeviceId,
-      );
-      await _databaseService.insertSample(sample);
-    }
 
     // Reload samples to update map
     await _loadSamples();
 
     // Show result
-    if (pingSuccess) {
+    final result = outcome.result;
+    if (outcome.pingSuccess) {
       if (!mounted) return;
       final l10n = AppLocalizations.of(context);
+      final responses = result.responses;
       final summary = responses.length == 1
           ? l10n.mapPingHeardBy(_shortNodeId(responses.single.nodeId))
           : l10n.mapDiscoveryComplete(responses.length);
@@ -2416,212 +1929,33 @@ class _MapScreenState extends State<MapScreen> {
     return (nodeId.length > 8 ? nodeId.substring(0, 8) : nodeId).toUpperCase();
   }
 
-  void _showConnectionDialog() async {
-    final method = await showDialog<ConnectionMethod>(
-      context: context,
-      builder: (context) => const ConnectionMethodDialog(),
-    );
-    switch (method) {
-      case ConnectionMethod.usb:
-        await _connectUsb();
-      case ConnectionMethod.bluetooth:
-        await _connectBluetooth();
-      case null:
-        return;
-    }
-  }
+  /// Companion connection facade with screen-owned state callbacks injected.
+  ConnectionFlow get _connectionFlow => ConnectionFlow(
+    context: context,
+    onShowSnackBar: _showSnackBar,
+    locationService: _locationService,
+    settingsService: _settingsService,
+    databaseService: _databaseService,
+    isConnecting: () => _isConnecting,
+    setConnecting: (connecting) => setState(() => _isConnecting = connecting),
+    loraConnected: () => _loraConnected,
+    onLoadSamples: _loadSamples,
+    onDeviceDisconnected: () => setState(() {
+      _autoPingEnabled = false;
+      _carpeaterState = CarpeaterState.disabled;
+    }),
+    onRepeatersReplaced: (repeaters) =>
+        setState(() => _mapDataController.replaceRepeaters(repeaters)),
+    onRepeatersFound: _showRepeatersDialog,
+  );
 
-  Future<void> _connectUsb() async {
-    if (_isConnecting) return;
-    setState(() => _isConnecting = true);
-    try {
-      final devices = await _locationService.loraCompanion.scanUsbDevices();
+  void _showConnectionDialog() => _connectionFlow.showConnectionDialog();
 
-      if (!mounted) return;
+  Future<void> _disconnectLoRa() => _connectionFlow.disconnectLoRa();
 
-      if (devices.isEmpty) {
-        _showSnackBar(AppLocalizations.of(context).mapNoUsbDevices);
-        return;
-      }
+  Future<void> _refreshContacts() => _connectionFlow.refreshContacts();
 
-      final selected = await showDialog<UsbDevice>(
-        context: context,
-        builder: (context) => UsbDeviceDialog(devices: devices),
-      );
-
-      if (selected != null) {
-        final connected = await _locationService.loraCompanion.connectUsb(
-          selected,
-        );
-        if (connected) {
-          if (!mounted) return;
-          _showSnackBar(AppLocalizations.of(context).mapConnectedViaUsb);
-          await _loadSamples();
-        } else {
-          if (!mounted) return;
-          _showSnackBar(AppLocalizations.of(context).mapFailedConnectUsb);
-        }
-      }
-    } catch (e) {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapUsbError('$e'));
-    } finally {
-      if (mounted) setState(() => _isConnecting = false);
-    }
-  }
-
-  Future<void> _connectBluetooth() async {
-    if (_isConnecting) return;
-    setState(() => _isConnecting = true);
-    try {
-      final recent = await _settingsService.getRecentBluetoothDevices();
-      final tracked = [
-        for (final row in await _databaseService.getAllDevices())
-          if (row['connection_type'] == 'bluetooth')
-            KnownBluetoothDevice(
-              remoteId:
-                  bluetoothRemoteIdFromStoredId('${row['public_key'] ?? ''}') ??
-                  '',
-              name: '${row['name'] ?? ''}',
-            ),
-      ].where((device) => device.remoteId.isNotEmpty).toList();
-      final bonded = await _locationService.loraCompanion
-          .getBondedCompanionDevices();
-      final known = collectKnownBluetoothDevices(
-        recent: recent,
-        tracked: tracked,
-        bonded: bonded,
-      );
-
-      if (!mounted) return;
-      final selected = await showDialog<BluetoothScanEntry>(
-        context: context,
-        builder: (context) => BluetoothDevicePickerDialog(
-          scan: _locationService.loraCompanion.watchBluetoothScan(
-            knownDevices: known,
-          ),
-        ),
-      );
-
-      if (selected == null) return;
-
-      if (!mounted) return;
-      _showSnackBar(
-        AppLocalizations.of(context).mapConnectingTo(selected.displayName),
-      );
-
-      final connected = await _locationService.loraCompanion.connectBluetooth(
-        BluetoothDevice.fromId(selected.remoteId),
-      );
-      if (connected) {
-        await _settingsService.rememberBluetoothDevice(
-          remoteId: selected.remoteId,
-          name: _locationService.loraCompanion.deviceName ?? selected.name,
-        );
-        if (!mounted) return;
-        _showSnackBar(AppLocalizations.of(context).mapConnectedViaBluetooth);
-        await _loadSamples();
-      } else {
-        if (!mounted) return;
-        _showSnackBar(AppLocalizations.of(context).mapFailedConnectBluetooth);
-      }
-    } catch (e) {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).bluetoothError('$e'));
-    } finally {
-      if (mounted) setState(() => _isConnecting = false);
-    }
-  }
-
-  Future<void> _disconnectLoRa() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => const DisconnectDeviceDialog(),
-    );
-
-    if (confirmed == true) {
-      // Disable auto-ping and carpeater
-      _locationService.disableAutoPing();
-      _locationService.carpeaterService.stop();
-      setState(() {
-        _autoPingEnabled = false;
-        _carpeaterState = CarpeaterState.disabled;
-      });
-
-      await _locationService.loraCompanion.disconnectDevice();
-      await _loadSamples();
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapLoraDisconnected);
-    }
-  }
-
-  String _localizedDuctingRisk(AppLocalizations l10n, String risk) {
-    switch (risk) {
-      case DuctingRisk.none:
-        return l10n.settingsNone;
-      case DuctingRisk.possible:
-        return l10n.mapDuctingPossible;
-      case DuctingRisk.likely:
-        return l10n.mapDuctingLikely;
-      default:
-        return l10n.settingsUnknown;
-    }
-  }
-
-  Color _getDuctingColor(String risk) {
-    switch (risk) {
-      case 'none':
-        return Colors.green;
-      case 'possible':
-        return Colors.orange;
-      case 'likely':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  Future<void> _refreshContacts() async {
-    if (!_loraConnected) {
-      _showSnackBar(AppLocalizations.of(context).mapConnectLoraFirst);
-      return;
-    }
-
-    _showSnackBar(AppLocalizations.of(context).mapRefreshingContactList);
-
-    // Request full contact list from device
-    await _locationService.loraCompanion.refreshContactList();
-
-    // Give it a moment to process
-    await Future.delayed(const Duration(seconds: 2));
-
-    if (!mounted) return;
-    _showSnackBar(AppLocalizations.of(context).mapContactListUpdated);
-  }
-
-  Future<void> _scanForRepeaters() async {
-    if (!_loraConnected) {
-      _showSnackBar(AppLocalizations.of(context).mapConnectLoraFirst);
-      return;
-    }
-
-    _showSnackBar(AppLocalizations.of(context).mapScanningForRepeaters);
-
-    final repeaters = await _locationService.loraCompanion.scanForRepeaters();
-
-    setState(() => _mapDataController.replaceRepeaters(repeaters));
-
-    if (repeaters.isEmpty) {
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapNoRepeatersFound);
-    } else {
-      if (!mounted) return;
-      _showSnackBar(
-        AppLocalizations.of(context).mapRepeatersFound(repeaters.length),
-      );
-      _showRepeatersDialog();
-    }
-  }
+  Future<void> _scanForRepeaters() => _connectionFlow.scanForRepeaters();
 
   void _openSessionHistory() {
     Navigator.push(
@@ -2661,99 +1995,32 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  String _getInterfaceThemeModeText() {
-    final l10n = AppLocalizations.of(context);
-    final appState = MyApp.of(context);
-    if (appState == null) return l10n.settingsThemeSystemDefault;
+  /// Theme/language facade with screen-owned map theme callbacks injected.
+  ThemeFlow get _themeFlow => ThemeFlow(
+    context: context,
+    locationService: _locationService,
+    settingsService: _settingsService,
+    mapThemeMode: () => _mapThemeMode,
+    onMapThemeModeChanged: (mode) => setState(() => _mapThemeMode = mode),
+  );
 
-    switch (appState.themeMode) {
-      case ThemeMode.light:
-        return l10n.settingsThemeLight;
-      case ThemeMode.dark:
-        return l10n.settingsThemeDark;
-      case ThemeMode.system:
-        return l10n.settingsThemeSystemDefault;
-    }
-  }
+  String _getInterfaceThemeModeText() => _themeFlow.interfaceThemeModeText();
 
-  Future<void> _showInterfaceThemeSelector() async {
-    final appState = MyApp.of(context);
-    if (appState == null) return;
+  Future<void> _showInterfaceThemeSelector() =>
+      _themeFlow.showInterfaceThemeSelector();
 
-    final selected = await showDialog<ThemeMode>(
-      context: context,
-      builder: (context) => const InterfaceThemeDialog(),
-    );
+  String _getAppLocalePreferenceText() => _themeFlow.appLocalePreferenceText();
 
-    if (selected != null) {
-      await appState.setThemeMode(selected);
-    }
-  }
+  Future<void> _showLanguageSelector() => _themeFlow.showLanguageSelector();
 
-  String _getAppLocalePreferenceText() {
-    final l10n = AppLocalizations.of(context);
-    switch (MyApp.of(context)?.localePreference) {
-      case AppLocalePreference.en:
-        return l10n.languageEnglish;
-      case AppLocalePreference.ru:
-        return l10n.languageRussian;
-      case AppLocalePreference.system:
-      case null:
-        return l10n.languageSystem;
-    }
-  }
+  String _getMapThemeModeText() => _themeFlow.mapThemeModeText();
 
-  Future<void> _showLanguageSelector() async {
-    final appState = MyApp.of(context);
-    if (appState == null) return;
+  bool _usesDarkMapTiles(BuildContext context) => usesDarkMapTiles(
+    mode: _mapThemeMode,
+    platformBrightness: MediaQuery.platformBrightnessOf(context),
+  );
 
-    final selected = await showDialog<AppLocalePreference>(
-      context: context,
-      builder: (context) => const AppLocaleDialog(),
-    );
-
-    if (selected != null) {
-      await appState.setAppLocalePreference(selected);
-      await _locationService.refreshNotificationCopy();
-    }
-  }
-
-  String _getMapThemeModeText() {
-    final l10n = AppLocalizations.of(context);
-    switch (_mapThemeMode) {
-      case MapThemeMode.light:
-        return l10n.settingsThemeLight;
-      case MapThemeMode.dark:
-        return l10n.settingsThemeDark;
-      case MapThemeMode.system:
-        return l10n.settingsThemeSystemDefault;
-    }
-  }
-
-  bool _usesDarkMapTiles(BuildContext context) {
-    switch (_mapThemeMode) {
-      case MapThemeMode.light:
-        return false;
-      case MapThemeMode.dark:
-        return true;
-      case MapThemeMode.system:
-        return MediaQuery.platformBrightnessOf(context) == Brightness.dark;
-    }
-  }
-
-  Future<void> _showMapThemeSelector() async {
-    final selected = await showDialog<MapThemeMode>(
-      context: context,
-      builder: (context) => const MapThemeDialog(),
-    );
-
-    if (selected != null) {
-      setState(() {
-        _mapThemeMode = selected;
-      });
-      await _settingsService.setMapThemeMode(selected);
-    }
-  }
+  Future<void> _showMapThemeSelector() => _themeFlow.showMapThemeSelector();
 
   String? _getRepeaterName(String? repeaterId) {
     if (repeaterId == null) return null;
@@ -2808,10 +2075,10 @@ class _MapScreenState extends State<MapScreen> {
         resolveRepeaterName: _getRepeaterName,
         ductingLabel: ductingRisk == null
             ? null
-            : _localizedDuctingRisk(l10n, ductingRisk),
+            : localizedDuctingRisk(l10n, ductingRisk),
         ductingColor: ductingRisk == null
             ? null
-            : _getDuctingColor(ductingRisk),
+            : ductingRiskColor(ductingRisk),
       ),
     );
   }
@@ -2896,150 +2163,42 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  Future<void> _uploadSamples() async {
-    final endpoints = await _uploadService.getUploadEndpoints();
-    final savedSelectedSites = await _uploadService.getSelectedEndpoints();
-    if (!mounted) return;
+  /// Upload facade with screen-owned snackbars and data callbacks injected.
+  UploadFlow get _uploadFlow => UploadFlow(
+    context: context,
+    onShowSnackBar: _showSnackBar,
+    uploadService: _uploadService,
+    locationService: _locationService,
+    repeaters: () => _repeaters,
+  );
 
-    final selectedSites = await showDialog<List<String>>(
-      context: context,
-      builder: (context) => UploadEndpointSelectionDialog(
-        endpoints: endpoints,
-        initiallySelectedNames: savedSelectedSites,
-      ),
-    );
-    if (!mounted || selectedSites == null || selectedSites.isEmpty) return;
+  /// Community coverage facade; applies coverage through setState.
+  CommunityCoverageFlow get _communityCoverageFlow => CommunityCoverageFlow(
+    context: context,
+    onShowSnackBar: _showSnackBar,
+    uploadService: _uploadService,
+    onCoverageLoaded: (coverage) => setState(() {
+      _communityCoverage = coverage;
+      _showCommunityCoverage = true;
+    }),
+  );
 
-    // Build repeater names map from discovered repeaters and LoRa service
-    final repeaterNames = <String, String>{};
-    for (final repeater in _repeaters) {
-      if (repeater.name != null) {
-        repeaterNames[repeater.id] = repeater.name!;
-      }
-    }
+  /// Offline tile facade reading map camera state through callbacks.
+  OfflineTileFlow get _offlineTileFlow => OfflineTileFlow(
+    context: context,
+    onShowSnackBar: _showSnackBar,
+    hasTileCache: () => _tileCacheStore != null,
+    getVisibleBounds: () => _mapController.camera.visibleBounds,
+    getCameraZoom: () => _mapController.camera.zoom,
+    usesDarkMapTiles: () => _usesDarkMapTiles(context),
+  );
 
-    final loraService = _locationService.loraCompanion;
-    for (final contact in loraService.discoveredRepeaters) {
-      if (contact.name != null && !repeaterNames.containsKey(contact.id)) {
-        repeaterNames[contact.id] = contact.name!;
-      }
-    }
+  Future<void> _uploadSamples() => _uploadFlow.uploadSamples();
 
-    final outcome = await showDialog<UploadProgressOutcome>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => UploadProgressDialog(
-        upload: (onProgress) async {
-          if (selectedSites.isNotEmpty && endpoints.isNotEmpty) {
-            return _uploadService.uploadToSelectedEndpoints(
-              endpointNames: selectedSites,
-              repeaterNames: repeaterNames,
-              onProgress: onProgress,
-            );
-          }
+  Future<void> _manageUploadSites() => _uploadFlow.manageUploadSites();
 
-          final result = await _uploadService.uploadAllSamples(
-            repeaterNames: repeaterNames,
-            onProgress: (current, total) => onProgress('', current, total),
-          );
-          return {UploadService.defaultEndpointName: result};
-        },
-      ),
-    );
-
-    if (outcome == null || !mounted) return;
-    if (outcome.error != null) {
-      _showSnackBar(
-        AppLocalizations.of(context).mapUploadError('${outcome.error}'),
-      );
-      return;
-    }
-
-    await showDialog<void>(
-      context: context,
-      builder: (context) => UploadResultsDialog(results: outcome.results!),
-    );
-  }
-
-  Future<void> _manageUploadSites() async {
-    final endpoints = await _uploadService.getUploadEndpoints();
-    final selectedNames = await _uploadService.getSelectedEndpoints();
-
-    if (!mounted) return;
-    final configuration = await showModalBottomSheet<UploadSitesConfiguration>(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => ManageUploadSitesSheet(
-        initialEndpoints: endpoints,
-        initiallySelectedNames: selectedNames,
-      ),
-    );
-
-    if (configuration == null) return;
-    await _uploadService.setUploadEndpoints(configuration.endpoints);
-    await _uploadService.setSelectedEndpoints(configuration.selectedNames);
-    if (!mounted) return;
-    _showSnackBar(AppLocalizations.of(context).mapUploadSitesUpdated);
-  }
-
-  Future<void> _showOfflineTileDownload() async {
-    if (_tileCacheStore == null) {
-      _showSnackBar(AppLocalizations.of(context).mapTileCacheNotInitialized);
-      return;
-    }
-
-    final bounds = _mapController.camera.visibleBounds;
-    final currentZoom = _mapController.camera.zoom.floor();
-    final isDarkMode = _usesDarkMapTiles(context);
-
-    final options = await showDialog<OfflineTileDownloadOptions>(
-      context: context,
-      builder: (context) =>
-          OfflineTileDownloadDialog(bounds: bounds, initialZoom: currentZoom),
-    );
-
-    if (options == null || !mounted) return;
-
-    final urlTemplate = isDarkMode
-        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
-        : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-
-    final cacheDir =
-        '${(await getApplicationDocumentsDirectory()).path}/tile_cache';
-    final downloader = TileDownloadService(cacheDir);
-    final totalTiles = TileDownloadService.estimateTileCount(
-      bounds.southWest,
-      bounds.northEast,
-      options.minZoom,
-      options.maxZoom,
-    );
-
-    if (!mounted) return;
-    final outcome = await showDialog<OfflineTileDownloadOutcome>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => OfflineTileDownloadProgressDialog(
-        totalTiles: totalTiles,
-        download: (onProgress) => downloader.downloadTiles(
-          sw: bounds.southWest,
-          ne: bounds.northEast,
-          minZoom: options.minZoom,
-          maxZoom: options.maxZoom,
-          urlTemplate: urlTemplate,
-          onProgress: onProgress,
-        ),
-        onCancel: downloader.cancel,
-      ),
-    );
-
-    if (outcome == null || !mounted) return;
-    final l10n = AppLocalizations.of(context);
-    if (outcome.cancelled) {
-      _showSnackBar(l10n.mapDownloadCancelled(outcome.completed));
-    } else {
-      _showSnackBar(l10n.mapDownloadedTiles(outcome.succeeded, totalTiles));
-    }
-  }
+  Future<void> _showOfflineTileDownload() =>
+      _offlineTileFlow.downloadOfflineTiles();
 
   Future<void> _shareCoverageMap() async {
     try {
@@ -3178,66 +2337,8 @@ class _MapScreenState extends State<MapScreen> {
     if (selected != null) _mapController.move(selected.position, 15.0);
   }
 
-  Future<void> _downloadCommunityCoverage() async {
-    // Get endpoint to download from
-    final endpoints = await _uploadService.getUploadEndpoints();
-
-    UploadEndpoint? selectedEndpoint;
-    if (endpoints.length == 1) {
-      selectedEndpoint = endpoints.first;
-    } else {
-      // Let user pick which endpoint to download from
-      if (!mounted) return;
-      selectedEndpoint = await showDialog<UploadEndpoint>(
-        context: context,
-        builder: (context) =>
-            CommunityCoverageEndpointDialog(endpoints: endpoints),
-      );
-    }
-
-    if (selectedEndpoint == null) return;
-
-    if (!mounted) return;
-    _showSnackBar(AppLocalizations.of(context).mapDownloadingCoverage);
-
-    final data = await _uploadService.downloadCoverage(
-      selectedEndpoint.url,
-      onProgress: (current, total) {
-        // Update snackbar with progress (won't stack, just shows latest)
-      },
-    );
-    if (data != null && data['coverage'] != null) {
-      final coverage = data['coverage'] as Map<String, dynamic>;
-      setState(() {
-        _communityCoverage = coverage;
-        _showCommunityCoverage = true;
-      });
-      if (!mounted) return;
-      _showSnackBar(
-        AppLocalizations.of(context)
-            .mapDownloadedCoverageCells(coverage.length),
-      );
-    } else {
-      // Try loading from cache
-      final cached = await _uploadService.loadCachedCoverage();
-      if (cached != null && cached['coverage'] != null) {
-        setState(() {
-          _communityCoverage = cached['coverage'] as Map<String, dynamic>;
-          _showCommunityCoverage = true;
-        });
-        if (!mounted) return;
-        _showSnackBar(AppLocalizations.of(context).mapLoadedCachedCoverage);
-      } else {
-        if (!mounted) return;
-        _showSnackBar(
-          AppLocalizations.of(context).mapDownloadFailed(
-            _uploadService.lastDownloadError ??
-                AppLocalizations.of(context).mapUnknownError,
-          ),
-        );
-      }
-    }
-  }
+  Future<void> _downloadCommunityCoverage() =>
+      _communityCoverageFlow.downloadCommunityCoverage();
 
   void _handleMapTap(LatLng point) {
     if (!_showCommunityCoverage || _communityCoverage == null) return;
