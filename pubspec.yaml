@@ -18,8 +18,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # of the product and file versions while build-number is used as the build suffix.
 # Fork releases use the "-x" marker on the base version (1.0.44-x+47).
 # Bump to the next fork release with: dart run tool/version.dart bump
-version: 1.0.44-x+47
-
+version: 1.0.45-x+48
 environment:
   sdk: ^3.13.0
 

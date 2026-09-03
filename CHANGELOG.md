@@ -1,5 +1,51 @@
 # Changelog
 
+## v1.0.45-x - 2026-09-03
+
+### Changed
+
+- Privacy-zone protection now also covers file exports: JSON, CSV, GPX, and
+  KML exports drop samples inside privacy zones the same way uploads already
+  did, so shared files never contain them. The SQLite database backup stays a
+  complete snapshot by design — it is the only export that keeps privacy-zone
+  data. Export snackbars and share texts report the filtered sample count.
+
+- Carpeater passwords move from plaintext settings to Android secure storage.
+  A password entered in Carpeater settings is never written to
+  SharedPreferences and is never included in settings export/import; a legacy
+  plaintext password saved by an older version migrates to secure storage on
+  its next read, so updating an existing installation keeps the saved
+  password.
+
+### Fixed
+
+- Database import on Android: the system file picker greys out `.db` files
+  because Android has no MIME mapping for that extension, making backups
+  impossible to select. The picker now accepts any file, and the picked file
+  is validated by content (SQLite signature, expected schema, schema version)
+  before anything is replaced.
+
+- Sample import (JSON) is now atomic: rows are validated before the
+  transaction and applied in a single batch, so a malformed row is skipped
+  instead of leaving a half-applied import behind. Duplicate samples are
+  skipped and the reported count reflects the rows actually imported.
+
+- Fixed resource leaks and races in the LoRa companion service; teardown on
+  disconnect and dispose is now deterministic.
+
+- Fixed dispose races in the location and Carpeater services that could crash
+  or leave listeners attached when tracking stopped mid-operation.
+
+### Technical
+
+- Continued map screen decomposition: staged initialization, extracted
+  connection/theme/upload/offline-tile/update flows, manual ping recording
+  moved into `ManualPingService`, typed callback objects for the control
+  panel and action buttons, and an extracted `MapLayerStack` widget.
+- Host-SQLite test infrastructure (`sqflite_common_ffi`) and 60+ new tests
+  covering the database backup export/restore round trip, `DatabaseService`
+  CRUD, JSON import, schema migrations, and model serialization.
+
 ## v1.0.44-x - 2026-09-01
 
 ### Breaking change
