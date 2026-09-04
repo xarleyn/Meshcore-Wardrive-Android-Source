@@ -16,7 +16,7 @@ installation and does not migrate data from `mintylinux.meshcore.wardrive`.
 
 - Real-time GPS tracking with foreground service
 - USB and Bluetooth connectivity for MeshCore companion radios
-- Auto-ping functionality with configurable intervals (50m, 200m, 0.5 miles, 1 mile)
+- Auto-ping functionality with configurable intervals (50m, 200m, 400m, 0.5 miles, 1 mile)
 - Manual ping testing
 - Success rate based coverage visualization with color coding
 - Clickable coverage squares showing detailed statistics

@@ -39,7 +39,7 @@ Settings → Carpeater:
    platform secure storage on this device and never appears in settings
    export/import or plaintext preferences.
 4. **Cycle interval** - pause between discovery cycles: None (back-to-back),
-   5 s, 10 s, 15 s, 30 s, 1 m, or 2 m.
+   5 s, 10 s, 15 s, 30 s, 60 s, or 2 m.
 
 Then start GPS tracking as usual. Carpeater sampling runs only while tracking
 is active; toggling the mode mid-tracking switches the link between ordinary

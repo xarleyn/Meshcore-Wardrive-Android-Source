@@ -94,7 +94,9 @@ The app language (System / English / Русский) is under Settings → App &
   - Age: Green (fresh) → Red (old)
 
 ### Data Management
-- **Export**: Saves all collected samples as JSON, CSV, GPX, or KML
+- **Export**: Saves collected samples as JSON, CSV, GPX, or KML. Samples
+  inside privacy zones are excluded from file exports; the database backup
+  below is the one exception
   - Save location is chosen in the system file picker (or shared via the
     Android share sheet)
   - Suggested JSON file name: `meshcore_export_YYYYMMDD_HHMMSS.json`
@@ -116,27 +118,34 @@ The app language (System / English / Русский) is under Settings → App &
 
 ## Data Format
 
-Exported JSON contains an array of samples. Ping-related fields (`rssi`,
-`snr`, `pingSuccess`, `responseTimeMs`) are `null` for samples recorded
-without a radio response:
+Exported JSON is an object with a `samples` array plus the recorded
+`sessions` (and discovered repeaters, when present); the legacy plain sample
+array is still accepted on import. Ping-related fields (`rssi`, `snr`,
+`pingSuccess`, `responseTimeMs`) are `null` for samples recorded without a
+radio response:
 ```json
-[
-  {
-    "id": "timestamp_geohash",
-    "lat": 47.7776,
-    "lon": -122.4247,
-    "timestamp": "2024-01-01T12:00:00.000Z",
-    "path": null,
-    "geohash": "c23nb2q2",
-    "rssi": -85,
-    "snr": 7,
-    "pingSuccess": true,
-    "responseTimeMs": 2350,
-    "ductingRisk": null,
-    "source": null,
-    "deviceId": null
-  }
-]
+{
+  "_format": "meshcore_wardrive_data",
+  "_version": 2,
+  "samples": [
+    {
+      "id": "timestamp_geohash",
+      "lat": 47.7776,
+      "lon": -122.4247,
+      "timestamp": "2024-01-01T12:00:00.000Z",
+      "path": null,
+      "geohash": "c23nb2q2",
+      "rssi": -85,
+      "snr": 7,
+      "pingSuccess": true,
+      "responseTimeMs": 2350,
+      "ductingRisk": null,
+      "source": null,
+      "deviceId": null
+    }
+  ],
+  "sessions": []
+}
 ```
 
 ## Troubleshooting
@@ -179,7 +188,7 @@ without a radio response:
   circles (airports and other unreachable areas) and keep the last valid
   position.
 - **Coverage Precision**: ~0.61km × 1.22km grid
-- **Sample Precision**: ~19m × 19m grid
+- **Sample Precision**: ~19m × 38m grid
 - **Initial Map View**: Centroid of stored samples at city-scale zoom; if there
   are no samples and GPS is not available yet, 47.7776, -122.4247 (Puget Sound)
 - **Max Distance**: 60 miles from center
