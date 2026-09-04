@@ -25,6 +25,9 @@ String shortNodeId(String nodeId) =>
 /// companion service and screen data, and persistent mutations (the
 /// include-only repeater filter) delegate to [onFilterRepeater].
 class EntityInfoFlow {
+  /// Camera zoom used when flying to a repeater or coverage gap.
+  static const double _focusZoom = 15.0;
+
   const EntityInfoFlow({
     required this.context,
     required this.onShowSnackBar,
@@ -149,7 +152,7 @@ class EntityInfoFlow {
     if (!context.mounted) return;
 
     if (action == RepeaterInfoAction.showOnMap) {
-      moveMapTo(repeater.position, 15.0);
+      moveMapTo(repeater.position, _focusZoom);
       return;
     }
     if (action != RepeaterInfoAction.filter || !context.mounted) return;
@@ -203,7 +206,7 @@ class EntityInfoFlow {
     );
     if (result == null || !context.mounted) return;
     if (result.action == RepeaterListAction.showOnMap) {
-      moveMapTo(result.repeater.position, 15.0);
+      moveMapTo(result.repeater.position, _focusZoom);
     } else {
       await showRepeaterInfo(result.repeater);
     }
@@ -271,7 +274,7 @@ class EntityInfoFlow {
       context: context,
       builder: (dialogContext) => CoverageGapsDialog(gaps: gaps),
     );
-    if (selected != null) moveMapTo(selected.position, 15.0);
+    if (selected != null) moveMapTo(selected.position, _focusZoom);
   }
 
   /// Community-coverage hit test behind the map's tap handler.

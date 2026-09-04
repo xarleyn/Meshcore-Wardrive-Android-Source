@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meshcore_wardrive/l10n/generated/app_localizations.dart';
 import 'package:meshcore_wardrive/screens/settings/settings_dialogs.dart';
 import 'package:meshcore_wardrive/screens/settings/sections/discovery_section.dart';
 import 'package:meshcore_wardrive/screens/settings/settings_screen.dart';

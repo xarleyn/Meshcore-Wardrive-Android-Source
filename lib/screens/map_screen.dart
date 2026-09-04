@@ -24,6 +24,8 @@ import '../utils/compass_calibration.dart';
 import '../utils/heading_utils.dart';
 import '../utils/session_map_view.dart';
 import '../utils/ducting_presentation.dart';
+import '../utils/map_tiles.dart';
+import '../utils/ping_success_stats.dart';
 import '../widgets/compass_calibration.dart';
 import 'map/dialogs/marker_dialogs.dart';
 import 'map/dialogs/theme_flows.dart';
@@ -110,6 +112,12 @@ class _MapScreenState extends State<MapScreen> {
   final MapRuntimeBindings _runtimeBindings = MapRuntimeBindings();
   late final MapSettingsController _mapSettingsController;
   int _initializationGeneration = 0;
+
+  /// How long a coarse radio-derived position stays on the map.
+  static const Duration _radioPositionLifetime = Duration(minutes: 2);
+
+  /// Minimum heading change applied to the compass arrow, in degrees.
+  static const double _headingUpdateMinDeltaDegrees = 0.25;
 
   bool _isTracking = false;
   bool _isConnecting = false;
@@ -387,7 +395,7 @@ class _MapScreenState extends State<MapScreen> {
         if (result.status == PingStatus.success) {
           _runtimeBindings.scheduleTimer(
             MapRuntimeTimer.radioPositionExpiry,
-            const Duration(minutes: 2),
+            _radioPositionLifetime,
             () {
               if (!mounted) return;
               setState(() {
@@ -817,7 +825,11 @@ class _MapScreenState extends State<MapScreen> {
       heading,
       factor: _pendingHeadingFactor,
     );
-    if (HeadingUtils.shortestDelta(_currentHeading, smoothed).abs() < 0.25) {
+    final headingDelta = HeadingUtils.shortestDelta(
+      _currentHeading,
+      smoothed,
+    ).abs();
+    if (headingDelta < _headingUpdateMinDeltaDegrees) {
       return;
     }
     setState(() {
@@ -870,11 +882,7 @@ class _MapScreenState extends State<MapScreen> {
     final connLabel = isConnected
         ? (connType == ConnectionType.usb ? 'USB' : 'BT')
         : '---';
-    final pingSamples = _samples.where((s) => s.pingSuccess != null).toList();
-    final successCount = pingSamples.where((s) => s.pingSuccess == true).length;
-    final rate = pingSamples.isNotEmpty
-        ? '${(successCount / pingSamples.length * 100).toStringAsFixed(0)}%'
-        : '--';
+    final rate = PingSuccessStats.of(_samples).ratePercent ?? '--';
     final dist = _isTracking
         ? '${_totalDistance.toStringAsFixed(1)} ${_distanceUnit == "miles" ? "mi" : "km"}'
         : '--';
@@ -1049,7 +1057,7 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  void _showMarkerInfo(Map<String, dynamic> marker) async {
+  Future<void> _showMarkerInfo(Map<String, dynamic> marker) async {
     final lat = marker['lat'] as double;
     final lon = marker['lon'] as double;
     final label = marker['label'] as String?;
@@ -1152,7 +1160,7 @@ class _MapScreenState extends State<MapScreen> {
   // DELETE MODE
   // ============================================================================
 
-  void _deleteSample(Sample sample) async {
+  Future<void> _deleteSample(Sample sample) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => DeleteSampleConfirmationDialog(sample: sample),
@@ -1165,7 +1173,7 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  void _deleteCoverageCell(Coverage coverage) async {
+  Future<void> _deleteCoverageCell(Coverage coverage) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) =>
@@ -1505,10 +1513,8 @@ class _MapScreenState extends State<MapScreen> {
       ),
       children: [
         TileLayer(
-          urlTemplate: isDarkMode
-              ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
-              : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          subdomains: isDarkMode ? const ['a', 'b', 'c', 'd'] : const [],
+          urlTemplate: tileUrlTemplate(dark: isDarkMode),
+          subdomains: isDarkMode ? cartoDarkSubdomains : const [],
           userAgentPackageName: 'io.github.xarleyn.meshcore.wardrive',
           tileProvider: _tileCacheStore != null
               ? CachedTileProvider(store: _tileCacheStore!)
@@ -1601,8 +1607,7 @@ class _MapScreenState extends State<MapScreen> {
   ) {
     final result = _latestPingResult;
     if (result == null ||
-        DateTime.now().difference(result.timestamp) >
-            const Duration(minutes: 2)) {
+        DateTime.now().difference(result.timestamp) > _radioPositionLifetime) {
       return null;
     }
 
@@ -1835,26 +1840,18 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _shareCoverageMap() => _screenshotFlow.shareCoverageMap(
     buildShareText: () {
       // Build coverage stats text
-      final pingSamples = _samples.where((s) => s.pingSuccess != null).toList();
-      final successCount = pingSamples
-          .where((s) => s.pingSuccess == true)
-          .length;
-      final failCount = pingSamples.where((s) => s.pingSuccess == false).length;
-      final totalPings = successCount + failCount;
+      final stats = PingSuccessStats.of(_samples);
       if (!mounted) return null;
       final l10n = AppLocalizations.of(context);
-      final successRate = totalPings > 0
-          ? ((successCount / totalPings) * 100).toStringAsFixed(0)
-          : l10n.mapNotAvailable;
       final coverageCount = _aggregationResult?.coverages.length ?? 0;
       return (
         subject: l10n.mapCoverageShareSubject,
         text: l10n.mapCoverageShareText(
           '${_samples.length}',
           '$coverageCount',
-          '$successCount',
-          '$failCount',
-          successRate,
+          '${stats.success}',
+          '${stats.failed}',
+          stats.ratePercent ?? l10n.mapNotAvailable,
           '${_repeaters.length}',
         ),
       );

@@ -7,6 +7,7 @@ import '../../../models/models.dart';
 import '../../../services/location_service.dart';
 import '../../../services/tile_download_service.dart';
 import '../../../services/upload_service.dart';
+import '../../../utils/map_tiles.dart';
 import '../../settings/widgets/upload_endpoint_selection_dialog.dart';
 import 'offline_tile_dialogs.dart';
 import 'upload_endpoint_dialog.dart';
@@ -268,9 +269,7 @@ class OfflineTileFlow {
 
     if (options == null || !context.mounted) return;
 
-    final urlTemplate = isDarkMode
-        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png'
-        : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+    final urlTemplate = tileUrlTemplate(dark: isDarkMode);
 
     final cacheDir =
         '${(await getApplicationDocumentsDirectory()).path}/tile_cache';
