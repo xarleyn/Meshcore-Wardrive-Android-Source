@@ -22,7 +22,8 @@ without reducing coupling.
 The [refactoring audit](refactoring-audit.md) (2026-09-02) re-measured the
 file at 3,261 lines after stages 1-4 below were completed, and defined a
 follow-up composition-root slim-down (stage 6 below). As of 2026-09-02 the
-file is 2,359 lines.
+file is 2,359 lines. Stage 6 (steps 1-12) is now complete; the file is
+~1,890 lines with the settings pages fully decoupled.
 
 ## Goals
 
@@ -53,15 +54,23 @@ lib/screens/
     map_settings_controller.dart  # typed settings snapshot and commands
     map_runtime_bindings.dart     # staged stream/timer wiring and ownership
     map_annotations_controller.dart # markers and privacy/exclusion zones
+    map_ui_snapshot.dart          # immutable settings-page values
+    map_ui_actions.dart           # typed settings-page command interface
+    map_ui_controller.dart        # applies settings commands to the screen
     tracking_permissions.dart     # Android permission pre-flight for tracking
+    tracking_flow.dart            # tracking start/stop and session settlement
+    entity_info_flow.dart         # entity info dialogs, filters, coverage gaps
+    screenshot_flow.dart          # capture/share sequence for the map screen
     connection_flow.dart          # USB/BLE connect, contacts, scanning
     data_io.dart                  # sample, settings, and database import/export
     layers/                       # independent map layers with constructor inputs
     widgets/                      # control panel, action buttons, layer stack, banners
     dialogs/                      # typed dialogs and screen workflows
+  settings/
+    map_settings_page.dart        # standalone settings UI built from snapshot + actions
+    sections/                     # settings section widgets
 lib/services/
   manual_ping_service.dart        # manual ping recording (extracted from the screen)
-lib/screens/settings/             # settings UI; settings_page.dart is still a part file
 ```
 
 ## Implementation stages
@@ -121,11 +130,11 @@ lib/screens/settings/             # settings UI; settings_page.dart is still a p
 
 ### Stage 5: settings decoupling
 
-- [ ] Replace settings extensions on `_MapScreenState` with explicit inputs,
+- [x] Replace settings extensions on `_MapScreenState` with explicit inputs,
   outputs, or a settings controller.
 - [x] Load map-related preferences as a typed snapshot.
 - [x] Apply service-side settings through explicit commands.
-- [ ] Remove `part` dependencies between the settings feature and map screen.
+- [x] Remove `part` dependencies between the settings feature and map screen.
 
 ### Stage 6: composition-root slim-down (2026-09 audit)
 
@@ -140,8 +149,8 @@ section 5.1. Each step is one commit with full verification. Status:
 - [x] 4. Tracking permission flow -> `map/tracking_permissions.dart` (e24b6b4).
 - [x] 5. Connection, contacts, and scanning -> `map/connection_flow.dart`
   (445acba).
-- [ ] 6. Deduplicate the two screenshot/share sequences ->
-  `map/screenshot_flow.dart`.
+- [x] 6. Deduplicate the two screenshot/share sequences ->
+  `map/screenshot_flow.dart` (e19e418).
 - [x] 7. Upload, community coverage, and offline tile flows ->
   `map/dialogs/upload_flows.dart` (558aeb7).
 - [x] 8. Theme/language flows and ducting helpers ->
@@ -150,17 +159,23 @@ section 5.1. Each step is one commit with full verification. Status:
   `map_runtime_bindings.dart` (203b08d).
 - [x] 10. Manual ping sample recording -> `lib/services/manual_ping_service.dart`
   (8cd89d1).
-- [ ] 11. `MapLayerStack` and typed panel callbacks ->
-  `map/widgets/map_layer_stack.dart`, `map/widgets/map_screen_actions.dart`.
-  Typed callbacks (`MapPanelCallbacks`, `MapMenuCallbacks`) are extracted and
-  wired into every call site; `MapLayerStack` is extracted but `_buildMap`
-  still assembles the layer list inline, so wiring it in remains.
-- [ ] 12. Decouple `lib/screens/settings/settings_page.dart` from
-  `_MapScreenState` via `MapUiSnapshot` + `MapUiActions` (same as stage 5).
+- [x] 11. `MapLayerStack` wired into `_buildMap`; typed callbacks
+  (`MapPanelCallbacks`, `MapMenuCallbacks`) at every call site (23438ea).
+- [x] 12. Decouple the settings pages from `_MapScreenState` via
+  `MapUiSnapshot` + `MapUiActions` (`map_ui_snapshot.dart`,
+  `map_ui_actions.dart`, `map_ui_controller.dart`,
+  `settings/map_settings_page.dart`) (b7679a7).
+
+Beyond the audit table, the same pattern produced two more screen facades:
+entity info dialogs -> `map/entity_info_flow.dart` (b0d448a) and the
+tracking/session lifecycle -> `map/tracking_flow.dart` (b3b3d17), plus an
+audit-cleanup pass (tile URL constants, `PingSuccessStats`, named timing
+constants, `Future<void>` async handlers; eba08de).
 
 Steps 1-5 and 7-10 reduce `map_screen.dart` from 3,261 to 2,359 lines.
-Step 11 targets the remaining 13-16-parameter panel invocations; step 12
-removes the last `part` file (~947 lines) and closes stage 5 as well.
+Steps 6, 11, and 12 (plus the entity-dialog and tracking-flow facades)
+bring it to ~1,890 lines and close stage 5 as well: no `part` files remain
+in `lib/`.
 
 ## Extraction rules
 

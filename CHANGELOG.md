@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### Changed
+
+- Internal refactor of the map screen (`lib/screens/map_screen.dart`,
+  2381 -> 1885 lines) completing the remaining steps of the map screen
+  refactoring plan. The inline map layer stack is replaced by the extracted
+  `MapLayerStack` widget; the duplicated screenshot/share sequence moves into
+  `ScreenshotFlow`; entity info dialogs (samples, clusters, repeaters,
+  coverage cells, filters, gaps) move into `EntityInfoFlow`; the tracking
+  start/stop lifecycle moves into `TrackingFlow`; and the settings pages are
+  decoupled from the screen's private state through a `MapUiSnapshot` +
+  `MapUiActions` boundary (the last `part` file in `lib/` is gone). No
+  user-visible behavior changes are intended.
+
 ### Added
 
 - Map LOD ("Simplify map at low zoom") gains two sliders while enabled:
