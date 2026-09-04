@@ -59,35 +59,17 @@ import 'debug_diagnostics_screen.dart';
 import 'session_history_screen.dart';
 import '../l10n/achievement_l10n.dart';
 import '../l10n/generated/app_localizations.dart';
-import '../constants/app_version.dart';
 import '../services/ducting_service.dart';
 import '../services/carpeater_service.dart';
 import '../services/manual_ping_service.dart';
 import '../services/sound_service.dart';
-import 'analytics_screen.dart';
-import 'achievements_screen.dart';
-import 'device_comparison_screen.dart';
 import '../services/achievement_service.dart';
 import '../services/radio_position_estimator.dart';
-import '../services/screen_wake_service.dart';
 import '../services/android_tracking_settings_service.dart';
-import 'settings/settings_screen.dart';
-import 'settings/settings_dialogs.dart';
-import 'settings/sections/about_section.dart';
-import 'settings/sections/app_device_section.dart';
-import 'settings/sections/backup_section.dart';
-import 'settings/sections/carpeater_section.dart';
-import 'settings/sections/diagnostics_section.dart';
-import 'settings/sections/data_management_section.dart';
-import 'settings/sections/discovery_section.dart';
-import 'settings/sections/feedback_section.dart';
-import 'settings/sections/location_section.dart';
-import 'settings/sections/location_quality_section.dart';
 import 'settings/sections/map_display_section.dart';
-import 'settings/sections/online_map_section.dart';
-import 'settings/sections/statistics_section.dart';
-
-part 'settings/settings_page.dart';
+import 'settings/map_settings_page.dart';
+import 'map/map_ui_controller.dart';
+import 'map/map_ui_snapshot.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -97,8 +79,6 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  // App version is imported from constants/app_version.dart
-
   final LocationService _locationService = LocationService();
   final DatabaseService _databaseService = DatabaseService();
   final DatabaseBackupService _databaseBackupService = DatabaseBackupService();
@@ -1748,12 +1728,7 @@ class _MapScreenState extends State<MapScreen> {
 
   String _getInterfaceThemeModeText() => _themeFlow.interfaceThemeModeText();
 
-  Future<void> _showInterfaceThemeSelector() =>
-      _themeFlow.showInterfaceThemeSelector();
-
   String _getAppLocalePreferenceText() => _themeFlow.appLocalePreferenceText();
-
-  Future<void> _showLanguageSelector() => _themeFlow.showLanguageSelector();
 
   String _getMapThemeModeText() => _themeFlow.mapThemeModeText();
 
@@ -1762,7 +1737,256 @@ class _MapScreenState extends State<MapScreen> {
     platformBrightness: MediaQuery.platformBrightnessOf(context),
   );
 
-  Future<void> _showMapThemeSelector() => _themeFlow.showMapThemeSelector();
+  // ==========================================================================
+  // SETTINGS PAGE WIRING
+  // ==========================================================================
+
+  void _showSettings() {
+    showMapSettings(
+      context,
+      snapshot: _buildUiSnapshot,
+      actions: _uiController,
+    );
+  }
+
+  /// Current settings-page values; rebuilt on every settings page build.
+  MapUiSnapshot _buildUiSnapshot() => MapUiSnapshot(
+    showSamples: _showSamples,
+    showGpsSamples: _showGpsSamples,
+    fixedSampleMarkerSizeEnabled: _fixedSampleMarkerSizeEnabled,
+    sampleMarkerRadius: _sampleMarkerRadius,
+    showCoverage: _showCoverage,
+    mapLodEnabled: _mapLodEnabled,
+    mapLodMinPrecision: _mapLodMinPrecision,
+    mapLodMaxPrecision: _mapLodMaxPrecision,
+    sampleGeohashGrouping: _sampleGeohashGrouping,
+    showEdges: _showEdges,
+    showRepeaters: _showRepeaters,
+    showPrivacyZones: _showPrivacyZones,
+    showGpsExclusionZones: _showGpsExclusionZones,
+    colorMode: _colorMode,
+    pingIntervalMeters: _pingIntervalMeters,
+    coveragePrecision: _coveragePrecision,
+    ignoredRepeaterPrefix: _ignoredRepeaterPrefix,
+    includeOnlyRepeaters: _includeOnlyRepeaters,
+    filterEdgesByWhitelist: _filterEdgesByWhitelist,
+    distanceUnit: _distanceUnit,
+    colorBlindMode: _colorBlindMode,
+    discoveryTimeoutSeconds: _discoveryTimeoutSeconds,
+    responseCollectionMode: _responseCollectionMode,
+    fuelUnit: _fuelUnit,
+    showRouteTrail: _showRouteTrail,
+    showHeatmap: _showHeatmap,
+    showPredictionRings: _showPredictionRings,
+    showRadioPosition: _showRadioPosition,
+    beaconDbWifiPositioning: _beaconDbWifiPositioning,
+    locationQualitySettings: _locationQualitySettings,
+    showDucting: _showDucting,
+    mapThemeMode: _mapThemeMode,
+    pingMode: _pingMode,
+    pingTimeInterval: _pingTimeInterval,
+    soundEnabled: _soundEnabled,
+    vibrationEnabled: _vibrationEnabled,
+    lockRotationNorth: _lockRotationNorth,
+    keepScreenOn: _keepScreenOn,
+    currentLocationMarkerStyle: _currentLocationMarkerStyle,
+    showSuccessfulOnly: _showSuccessfulOnly,
+    optimisticDisplay: _optimisticDisplay,
+    compassCalibrationQuietUntil: _compassCalibrationQuietUntil,
+    deadZoneAlertsEnabled: _deadZoneAlertsEnabled,
+    newRepeaterAlertsEnabled: _newRepeaterAlertsEnabled,
+    linkLossAlertsEnabled: _linkLossAlertsEnabled,
+    batterySaverEnabled: _batterySaverEnabled,
+    carpeaterEnabled: _carpeaterEnabled,
+    carpeaterRepeaterId: _carpeaterRepeaterId,
+    carpeaterPassword: _carpeaterPassword,
+    carpeaterInterval: _carpeaterInterval,
+    showCommunityCoverage: _showCommunityCoverage,
+    communityCoverageAvailable: _communityCoverage != null,
+    sessionFiltered: _sessionMapView.isFiltered,
+    activeSourceFilter: _activeSourceFilter,
+    plannedMarkerCount: _plannedMarkers.length,
+    privacyZoneCount: _privacyZones.length,
+    loraConnected: _loraConnected,
+    repeaterCount: _repeaters.length,
+    isTracking: _isTracking,
+    sessionDistanceMeters: _isTracking
+        ? _locationService.totalDistanceMeters
+        : 0,
+    deviceName: _settingsService.getDeviceName(),
+    foundRepeaters: _locationService.loraCompanion.knownRepeaterContacts,
+    samples: _samples,
+    currentPosition: _currentPosition,
+    interfaceThemeDescription: _getInterfaceThemeModeText(),
+    mapThemeDescription: _getMapThemeModeText(),
+    localePreferenceDescription: _getAppLocalePreferenceText(),
+  );
+
+  /// Applies a display flag from a settings toggle.
+  void _setDisplayFlag(MapDisplaySetting setting, bool value) {
+    switch (setting) {
+      case MapDisplaySetting.coverage:
+        _showCoverage = value;
+      case MapDisplaySetting.mapLod:
+        _mapLodEnabled = value;
+      case MapDisplaySetting.samples:
+        _showSamples = value;
+      case MapDisplaySetting.fixedSampleMarkerSize:
+        _fixedSampleMarkerSizeEnabled = value;
+      case MapDisplaySetting.sampleGeohashGrouping:
+        _sampleGeohashGrouping = value;
+      case MapDisplaySetting.edges:
+        _showEdges = value;
+      case MapDisplaySetting.repeaters:
+        _showRepeaters = value;
+      case MapDisplaySetting.privacyZones:
+        _showPrivacyZones = value;
+      case MapDisplaySetting.gpsExclusionZones:
+        _showGpsExclusionZones = value;
+      case MapDisplaySetting.gpsSamples:
+        _showGpsSamples = value;
+      case MapDisplaySetting.successfulOnly:
+        _showSuccessfulOnly = value;
+      case MapDisplaySetting.optimisticDisplay:
+        _optimisticDisplay = value;
+      case MapDisplaySetting.routeTrail:
+        _showRouteTrail = value;
+      case MapDisplaySetting.communityCoverage:
+        _showCommunityCoverage = value;
+      case MapDisplaySetting.heatmap:
+        _showHeatmap = value;
+      case MapDisplaySetting.predictionRings:
+        _showPredictionRings = value;
+    }
+  }
+
+  /// Applies the LOD precision bounds, keeping the floor below the ceiling
+  /// as either slider moves.
+  void _setMapLodPrecisionBounds({int? min, int? max}) {
+    if (min != null) {
+      _mapLodMinPrecision = min;
+      if (_mapLodMaxPrecision < min) _mapLodMaxPrecision = min;
+    }
+    if (max != null) {
+      _mapLodMaxPrecision = max;
+      if (_mapLodMinPrecision > max) _mapLodMinPrecision = max;
+    }
+  }
+
+  /// Settings-command controller wired to this screen's state and services.
+  MapUiController get _uiController => MapUiController(
+    context: context,
+    onShowSnackBar: _showSnackBar,
+    updateState: _updateMapState,
+    settingsService: _settingsService,
+    databaseService: _databaseService,
+    locationService: _locationService,
+    uploadService: _uploadService,
+    mapDataController: _mapDataController,
+    setDisplayFlag: _setDisplayFlag,
+    setSampleMarkerRadiusFlag: (value) => _sampleMarkerRadius = value,
+    setMapLodPrecisionBounds: _setMapLodPrecisionBounds,
+    mapLodMinPrecision: () => _mapLodMinPrecision,
+    mapLodMaxPrecision: () => _mapLodMaxPrecision,
+    setBeaconDbFlag: (value) => _beaconDbWifiPositioning = value,
+    setShowRadioPositionFlag: (value) => _showRadioPosition = value,
+    setShowDuctingFlag: (value) => _showDucting = value,
+    setCurrentDuctingRisk: (risk) => _currentDuctingRisk = risk,
+    setDiscoveryTimeoutFlag: (value) => _discoveryTimeoutSeconds = value,
+    setResponseCollectionModeFlag: (value) => _responseCollectionMode = value,
+    setIgnoredRepeaterPrefixFlag: (value) => _ignoredRepeaterPrefix = value,
+    ignoredRepeaterPrefix: () => _ignoredRepeaterPrefix,
+    setIncludeOnlyRepeatersFlag: (value) => _includeOnlyRepeaters = value,
+    includeOnlyRepeaters: () => _includeOnlyRepeaters,
+    setFilterEdgesFlag: (value) => _filterEdgesByWhitelist = value,
+    setPingModeFlag: (value) => _pingMode = value,
+    setPingTimeIntervalFlag: (value) => _pingTimeInterval = value,
+    setPingIntervalMetersFlag: (value) => _pingIntervalMeters = value,
+    setCoveragePrecisionFlag: (value) => _coveragePrecision = value,
+    coveragePrecision: () => _coveragePrecision,
+    setSoundFlag: (value) => _soundEnabled = value,
+    setVibrationFlag: (value) => _vibrationEnabled = value,
+    setDeadZoneAlertsFlag: (value) => _deadZoneAlertsEnabled = value,
+    setNewRepeaterAlertsFlag: (value) => _newRepeaterAlertsEnabled = value,
+    setLinkLossAlertsFlag: (value) => _linkLossAlertsEnabled = value,
+    setCarpeaterEnabledFlag: (value) => _carpeaterEnabled = value,
+    syncAutoPingFlag: () =>
+        _autoPingEnabled = _locationService.isAutoPingEnabled,
+    setCarpeaterRepeaterIdFlag: (value) => _carpeaterRepeaterId = value,
+    setCarpeaterPasswordFlag: (value) => _carpeaterPassword = value,
+    setCarpeaterIntervalFlag: (value) => _carpeaterInterval = value,
+    setKeepScreenOnFlag: (value) => _keepScreenOn = value,
+    setBatterySaverFlag: (value) => _batterySaverEnabled = value,
+    setLockRotationFlag: (value) {
+      _lockRotationNorth = value;
+      if (value) _followHeading = false;
+    },
+    setMarkerStyleFlag: (value) {
+      _currentLocationMarkerStyle = value;
+      if (value == CurrentLocationMarkerStyle.circle) {
+        _followHeading = false;
+      }
+    },
+    setColorModeFlag: (value) => _colorMode = value,
+    setDistanceUnitFlag: (value) {
+      _distanceUnit = value;
+      _totalDistance = value == 'miles'
+          ? _locationService.totalDistanceMiles
+          : _locationService.totalDistanceKm;
+    },
+    setFuelUnitFlag: (value) => _fuelUnit = value,
+    setColorBlindModeFlag: (value) => _colorBlindMode = value,
+    setSessionMapView: (view) => _sessionMapView = view,
+    setActiveSourceFilter: (value) => _activeSourceFilter = value,
+    activeSourceFilter: () => _activeSourceFilter,
+    hideCommunityCoverage: () {
+      _communityCoverage = null;
+      _showCommunityCoverage = false;
+    },
+    setDeleteMode: (value) => _deleteMode = value,
+    setLocationQualitySettingsFlag: (value) => _locationQualitySettings = value,
+    locationQualitySettings: () => _locationQualitySettings,
+    impossibleZones: () => _impossibleZones,
+    newZoneCenter: () => _currentPosition ?? _mapController.camera.center,
+    tileCacheStore: () => _tileCacheStore,
+    samples: () => _samples,
+    currentPosition: () => _currentPosition,
+    plannedMarkers: () => _plannedMarkers,
+    privacyZones: () => _privacyZones,
+    mapThemeMode: () => _mapThemeMode,
+    setMapThemeModeFlag: (value) => _mapThemeMode = value,
+    requestHeatmapRebuild: () => _heatmapRebuildStream.add(null),
+    resetMapRotation: () => _mapController.rotate(0),
+    syncCompassSubscription: _syncCompassSubscription,
+    requestWifiScanThrottlingDisabled: _requestWifiScanThrottlingDisabled,
+    loadMarkers: _loadMarkers,
+    loadPrivacyZones: _loadPrivacyZones,
+    loadImpossibleZones: _loadImpossibleZones,
+    reloadSamples: _loadSamples,
+    applyRepeaterFilter: _setIncludeOnlyRepeaters,
+    addPrivacyZoneAt: _addPrivacyZone,
+    calibrateCompassFlow: () => _openCompassCalibration(snoozeOnDismiss: false),
+    scanForRepeatersFlow: _scanForRepeaters,
+    refreshContactsFlow: _refreshContacts,
+    exportDataFlow: _exportData,
+    importDataFlow: _importData,
+    exportSettingsFlow: _exportSettings,
+    importSettingsFlow: _importSettings,
+    exportDatabaseFlow: _exportDatabase,
+    importDatabaseFlow: _importDatabase,
+    clearMapDataFlow: _clearData,
+    uploadSamplesFlow: _uploadSamples,
+    manageUploadSitesFlow: _manageUploadSites,
+    downloadCommunityCoverageFlow: _downloadCommunityCoverage,
+    downloadOfflineTilesFlow: _showOfflineTileDownload,
+    shareCoverageMapFlow: _shareCoverageMap,
+    showRepeaterFilterPickerFlow: _showRepeaterFilterPicker,
+    findCoverageGapsFlow: _findCoverageGaps,
+    openSessionHistoryFlow: _openSessionHistory,
+    openDebugDiagnosticsFlow: _openDebugDiagnostics,
+    checkForUpdatesFlow: _checkForUpdates,
+    openGitHubFlow: _openGitHub,
+  );
 
   /// Entity dialog facade with screen-owned data and filter persistence.
   EntityInfoFlow get _entityInfo => EntityInfoFlow(
