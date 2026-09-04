@@ -3,6 +3,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:meshcore_wardrive/models/models.dart';
 import 'package:meshcore_wardrive/screens/map/map_screen_controller.dart';
 import 'package:meshcore_wardrive/services/map_lod_service.dart';
+import 'package:meshcore_wardrive/utils/geohash_utils.dart';
 import 'package:meshcore_wardrive/utils/session_map_view.dart';
 
 void main() {
@@ -118,6 +119,79 @@ void main() {
           discoveredRepeaters: repeaters,
           coveragePrecision: 7,
           optimisticDisplay: true,
+        ),
+        isFalse,
+      );
+    });
+
+    test('changing coverage precision re-aggregates coverage', () async {
+      // Two samples inside one precision-6 neighborhood cell but in different
+      // precision-7 street cells. A 0.001° latitude offset is ~111 m from the
+      // cell center, safely inside the ~0.0055° tall precision-6 interval,
+      // and the ~222 m gap must cross at least one ~0.0007° tall
+      // precision-7 interval.
+      final cellCenter = GeohashUtils.posFromHash('ucftpv');
+      const latOffset = 0.001;
+      final north = LatLng(
+        cellCenter.latitude + latOffset,
+        cellCenter.longitude,
+      );
+      final south = LatLng(
+        cellCenter.latitude - latOffset,
+        cellCenter.longitude,
+      );
+      expect(
+        GeohashUtils.coverageKey(north.latitude, north.longitude, precision: 6),
+        GeohashUtils.coverageKey(south.latitude, south.longitude, precision: 6),
+      );
+      expect(
+        GeohashUtils.coverageKey(north.latitude, north.longitude, precision: 7),
+        isNot(
+          GeohashUtils.coverageKey(
+            south.latitude,
+            south.longitude,
+            precision: 7,
+          ),
+        ),
+      );
+
+      final store = FakeMapDataStore([
+        _sample('north', DateTime(2026, 8, 20), position: north),
+        _sample(
+          'south',
+          DateTime(2026, 8, 20, 0, 1),
+          pingSuccess: false,
+          position: south,
+        ),
+      ]);
+      final controller = MapScreenController(store: store);
+
+      expect(
+        await controller.refresh(
+          discoveredRepeaters: const [],
+          coveragePrecision: 7,
+        ),
+        isTrue,
+      );
+      expect(controller.aggregation?.coverages, hasLength(2));
+
+      // Lowering the resolution merges the street cells into one square that
+      // keeps both the success and the failure.
+      expect(
+        await controller.refresh(
+          discoveredRepeaters: const [],
+          coveragePrecision: 6,
+        ),
+        isTrue,
+      );
+      expect(controller.aggregation?.coverages, hasLength(1));
+      expect(controller.aggregation?.coverages.single.lost, greaterThan(0));
+
+      // Same precision again changes nothing and keeps the cached snapshot.
+      expect(
+        await controller.refresh(
+          discoveredRepeaters: const [],
+          coveragePrecision: 6,
         ),
         isFalse,
       );
