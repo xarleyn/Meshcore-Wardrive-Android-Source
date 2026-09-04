@@ -19,17 +19,12 @@ import '../services/database_service.dart';
 import '../services/upload_service.dart';
 import '../services/settings_service.dart';
 import '../services/screenshot_service.dart';
-import '../utils/geohash_utils.dart';
 import '../utils/initial_map_camera.dart';
 import '../utils/compass_calibration.dart';
 import '../utils/heading_utils.dart';
 import '../utils/session_map_view.dart';
-import '../utils/community_coverage.dart';
 import '../utils/ducting_presentation.dart';
-import '../utils/ping_burst.dart';
 import '../widgets/compass_calibration.dart';
-import 'map/dialogs/coverage_tools_dialogs.dart';
-import 'map/dialogs/map_entity_dialogs.dart';
 import 'map/dialogs/map_workflow_dialogs.dart';
 import 'map/dialogs/marker_dialogs.dart';
 import 'map/dialogs/theme_flows.dart';
@@ -37,6 +32,7 @@ import 'map/dialogs/update_flow.dart';
 import 'map/dialogs/upload_flows.dart';
 import 'map/connection_flow.dart';
 import 'map/data_io.dart';
+import 'map/entity_info_flow.dart';
 import 'map/map_annotations_controller.dart';
 import 'map/map_runtime_bindings.dart';
 import 'map/map_screen_controller.dart';
@@ -1769,7 +1765,7 @@ class _MapScreenState extends State<MapScreen> {
       final l10n = AppLocalizations.of(context);
       final responses = result.responses;
       final summary = responses.length == 1
-          ? l10n.mapPingHeardBy(_shortNodeId(responses.single.nodeId))
+          ? l10n.mapPingHeardBy(shortNodeId(responses.single.nodeId))
           : l10n.mapDiscoveryComplete(responses.length);
       _showSnackBar(summary);
     } else if (result.status == PingStatus.timeout) {
@@ -1781,10 +1777,6 @@ class _MapScreenState extends State<MapScreen> {
         AppLocalizations.of(context).mapPingFailed('${result.error}'),
       );
     }
-  }
-
-  String _shortNodeId(String nodeId) {
-    return (nodeId.length > 8 ? nodeId.substring(0, 8) : nodeId).toUpperCase();
   }
 
   /// Companion connection facade with screen-owned state callbacks injected.
@@ -1880,146 +1872,41 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _showMapThemeSelector() => _themeFlow.showMapThemeSelector();
 
-  String? _getRepeaterName(String? repeaterId) {
-    if (repeaterId == null) return null;
+  /// Entity dialog facade with screen-owned data and filter persistence.
+  EntityInfoFlow get _entityInfo => EntityInfoFlow(
+    context: context,
+    onShowSnackBar: _showSnackBar,
+    loraCompanion: _locationService.loraCompanion,
+    repeaters: _repeaters,
+    samples: _samples,
+    aggregationResult: _aggregationResult,
+    communityCoverage: _communityCoverage,
+    showCommunityCoverage: _showCommunityCoverage,
+    includeOnlyRepeaters: _includeOnlyRepeaters,
+    coverageLodPrecision: () => _coverageLodPrecision,
+    onFilterRepeater: _setIncludeOnlyRepeaters,
+    moveMapTo: (position, zoom) => _mapController.move(position, zoom),
+  );
 
-    // If it's a 2-char prefix, try to expand it first
-    String? fullId = repeaterId;
-    if (repeaterId.length == 2) {
-      fullId = _locationService.loraCompanion.matchRepeaterPrefix(repeaterId);
-      if (fullId == null) {
-        // No match found, return the 2-char prefix as-is
-        return repeaterId;
-      }
-    }
-
-    // First check discovered repeaters list
-    final repeater = _repeaters.firstWhere(
-      (r) => r.id == fullId,
-      orElse: () => Repeater(
-        id: fullId!,
-        position: const LatLng(0, 0),
-        timestamp: DateTime.now(),
-      ),
-    );
-    if (repeater.name != null) return repeater.name;
-
-    // Fall back to checking LoRa service's contact cache
-    final loraRepeater = _locationService.loraCompanion.getRepeaterLocation(
-      fullId,
-    );
-    return loraRepeater?.name;
-  }
-
-  void _showSampleInfo(Sample sample) {
-    final l10n = AppLocalizations.of(context);
-    final repeaterName = sample.path != null
-        ? _getRepeaterName(sample.path)
-        : null;
-    final idOrName = repeaterName ?? sample.path ?? l10n.settingsUnknown;
-    final repeaterDisplay =
-        repeaterName ??
-        (idOrName.length > 8
-            ? idOrName.substring(0, 8).toUpperCase()
-            : idOrName.toUpperCase());
-    final ductingRisk = sample.ductingRisk;
-
-    showDialog(
-      context: context,
-      builder: (context) => SampleInfoDialog(
-        sample: sample,
-        responses: PingBurst.responsesFor(sample, _samples),
-        repeaterDisplay: repeaterDisplay,
-        resolveRepeaterName: _getRepeaterName,
-        ductingLabel: ductingRisk == null
-            ? null
-            : localizedDuctingRisk(l10n, ductingRisk),
-        ductingColor: ductingRisk == null
-            ? null
-            : ductingRiskColor(ductingRisk),
-      ),
-    );
-  }
-
-  void _showSampleClusterInfo(SampleCluster cluster) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => SampleClusterInfoDialog(
-        cluster: cluster,
-        resolveRepeaterName: _getRepeaterName,
-      ),
-    );
-  }
-
-  Future<void> _showRepeaterInfo(Repeater repeater) async {
-    final action = await showDialog<RepeaterInfoAction>(
-      context: context,
-      builder: (context) => RepeaterInfoDialog(repeater: repeater),
-    );
-    if (!mounted) return;
-
-    if (action == RepeaterInfoAction.showOnMap) {
-      _mapController.move(repeater.position, 15.0);
-      return;
-    }
-    if (action != RepeaterInfoAction.filter || !mounted) return;
-
-    final shortId =
-        (repeater.id.length > 8 ? repeater.id.substring(0, 8) : repeater.id)
-            .toUpperCase();
-    final message = AppLocalizations.of(context).mapFilteringBy(shortId);
-    setState(() => _includeOnlyRepeaters = repeater.id);
-    await _settingsService.setIncludeOnlyRepeaters(repeater.id);
+  /// Persists the include-only repeater filter and reloads map data.
+  Future<void> _setIncludeOnlyRepeaters(String? repeaterId) async {
+    _updateMapState(() => _includeOnlyRepeaters = repeaterId);
+    await _settingsService.setIncludeOnlyRepeaters(repeaterId);
     await _loadSamples();
-    if (mounted) _showSnackBar(message);
   }
 
-  void _showCoverageInfo(Coverage coverage) {
-    showDialog(
-      context: context,
-      builder: (context) => CoverageInfoDialog(
-        coverage: coverage,
-        cellSamples: _coverageCellSamples(coverage.id),
-        resolveRepeaterName: _getRepeaterName,
-      ),
-    );
-  }
+  void _showSampleInfo(Sample sample) => _entityInfo.showSampleInfo(sample);
 
-  /// Samples belonging to the coverage cell with [coverageId].
-  ///
-  /// Cell ids may be LOD-coarsened, so membership is decided by geohash
-  /// prefix: a sample's full-precision key always starts with every coarser
-  /// cell key that contains it.
-  List<Sample> _coverageCellSamples(String coverageId) {
-    final precision = coverageId.length;
-    final matches = _samples.where((sample) {
-      final hash = sample.geohash;
-      if (hash.length >= precision) {
-        return hash.substring(0, precision) == coverageId;
-      }
-      return GeohashUtils.coverageKey(
-            sample.position.latitude,
-            sample.position.longitude,
-            precision: precision,
-          ) ==
-          coverageId;
-    }).toList();
-    matches.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-    return matches;
-  }
+  void _showSampleClusterInfo(SampleCluster cluster) =>
+      _entityInfo.showSampleClusterInfo(cluster);
 
-  Future<void> _showRepeatersDialog() async {
-    final result = await showDialog<RepeaterListResult>(
-      context: context,
-      builder: (context) => RepeaterListDialog(repeaters: _repeaters),
-    );
-    if (result == null || !mounted) return;
-    if (result.action == RepeaterListAction.showOnMap) {
-      _mapController.move(result.repeater.position, 15.0);
-    } else {
-      await _showRepeaterInfo(result.repeater);
-    }
-  }
+  Future<void> _showRepeaterInfo(Repeater repeater) =>
+      _entityInfo.showRepeaterInfo(repeater);
+
+  void _showCoverageInfo(Coverage coverage) =>
+      _entityInfo.showCoverageInfo(coverage);
+
+  Future<void> _showRepeatersDialog() => _entityInfo.showRepeatersDialog();
 
   /// Upload facade with screen-owned snackbars and data callbacks injected.
   UploadFlow get _uploadFlow => UploadFlow(
@@ -2087,92 +1974,12 @@ class _MapScreenState extends State<MapScreen> {
     },
   );
 
-  void _showRepeaterFilterPicker() async {
-    // Collect all known repeater IDs from coverage data and discovered repeaters
-    final Set<String> knownIds = {};
-    if (_aggregationResult != null) {
-      for (final cov in _aggregationResult!.coverages) {
-        knownIds.addAll(cov.repeaters);
-      }
-    }
-    for (final r in _repeaters) {
-      knownIds.add(r.id);
-    }
+  void _showRepeaterFilterPicker() => _entityInfo.showRepeaterFilterPicker();
 
-    if (knownIds.isEmpty) {
-      _showSnackBar(AppLocalizations.of(context).mapNoRepeatersYet);
-      return;
-    }
-
-    final sortedIds = knownIds.toList()..sort();
-
-    final result = await showDialog<RepeaterFilterResult>(
-      context: context,
-      builder: (context) => RepeaterFilterDialog(
-        repeaterIds: sortedIds,
-        repeaters: _repeaters,
-        selectedId: _includeOnlyRepeaters,
-      ),
-    );
-
-    if (result == null || !mounted) return;
-    final selectedId = result.action == RepeaterFilterAction.clear
-        ? null
-        : result.repeaterId;
-    setState(() => _includeOnlyRepeaters = selectedId);
-    await _settingsService.setIncludeOnlyRepeaters(selectedId);
-    _loadSamples();
-    if (!mounted) return;
-    final l10n = AppLocalizations.of(context);
-    final message = selectedId == null
-        ? l10n.mapRepeaterFilterCleared
-        : l10n.mapShowingCoverageFrom(
-            (selectedId.length > 8 ? selectedId.substring(0, 8) : selectedId)
-                .toUpperCase(),
-          );
-    _showSnackBar(message);
-  }
-
-  void _findCoverageGaps() async {
-    if (_aggregationResult == null || _aggregationResult!.coverages.isEmpty) {
-      _showSnackBar(AppLocalizations.of(context).mapNoCoverageYet);
-      return;
-    }
-
-    final gaps = coverageGaps(_aggregationResult!.coverages);
-
-    if (gaps.isEmpty) {
-      _showSnackBar(AppLocalizations.of(context).mapNoCoverageGaps);
-      return;
-    }
-
-    final selected = await showDialog<Coverage>(
-      context: context,
-      builder: (context) => CoverageGapsDialog(gaps: gaps),
-    );
-    if (selected != null) _mapController.move(selected.position, 15.0);
-  }
+  Future<void> _findCoverageGaps() => _entityInfo.findCoverageGaps();
 
   Future<void> _downloadCommunityCoverage() =>
       _communityCoverageFlow.downloadCommunityCoverage();
 
-  void _handleMapTap(LatLng point) {
-    if (!_showCommunityCoverage || _communityCoverage == null) return;
-
-    final cells = CommunityCoverage.aggregate(
-      _communityCoverage!,
-      precision: _coverageLodPrecision,
-    );
-    final hit = CommunityCoverage.hitTest(cells, point);
-    if (hit != null) {
-      _showCommunityCellInfo(hit);
-    }
-  }
-
-  void _showCommunityCellInfo(CommunityCoverageCell cell) {
-    showDialog(
-      context: context,
-      builder: (context) => CommunityCellInfoDialog(cell: cell),
-    );
-  }
+  void _handleMapTap(LatLng point) => _entityInfo.handleMapTap(point);
 }
