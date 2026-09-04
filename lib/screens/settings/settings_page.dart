@@ -216,8 +216,10 @@ extension _SettingsPageNavigation on _MapScreenState {
             setPageState(() {});
             await _settingsService.setResponseCollectionMode(value);
           },
-          onEditIgnoredRepeaters: () => _editIgnoredRepeaters(context),
-          onEditIncludedRepeaters: () => _editIncludedRepeaters(context),
+          onEditIgnoredRepeaters: () =>
+              _editIgnoredRepeaters(context, setPageState),
+          onEditIncludedRepeaters: () =>
+              _editIncludedRepeaters(context, setPageState),
           onFilterEdgesChanged: (value) async {
             _updateMapState(() => _filterEdgesByWhitelist = value);
             setPageState(() {});
@@ -229,14 +231,15 @@ extension _SettingsPageNavigation on _MapScreenState {
             await _settingsService.setPingMode(value);
             _locationService.setPingMode(value);
           },
-          onEditPingInterval: () => _editPingInterval(context),
+          onEditPingInterval: () => _editPingInterval(context, setPageState),
           onPingTimeIntervalChanged: (value) async {
             _updateMapState(() => _pingTimeInterval = value);
             setPageState(() {});
             await _settingsService.setPingTimeInterval(value);
             _locationService.setPingTimeInterval(value);
           },
-          onEditCoverageResolution: () => _editCoverageResolution(context),
+          onEditCoverageResolution: () =>
+              _editCoverageResolution(context, setPageState),
         ),
       ),
       _SettingsCategory(
@@ -590,11 +593,15 @@ extension _SettingsPageNavigation on _MapScreenState {
     ];
   }
 
-  Future<void> _editPingInterval(BuildContext context) async {
+  Future<void> _editPingInterval(
+    BuildContext context,
+    StateSetter setPageState,
+  ) async {
     final l10n = AppLocalizations.of(context);
     final interval = await showPingIntervalDialog(context);
     if (interval == null || !mounted) return;
     _updateMapState(() => _pingIntervalMeters = interval);
+    setPageState(() {});
     _locationService.setPingInterval(interval);
     await _settingsService.setPingInterval(interval);
     if (!mounted) return;
@@ -605,11 +612,15 @@ extension _SettingsPageNavigation on _MapScreenState {
     );
   }
 
-  Future<void> _editCoverageResolution(BuildContext context) async {
+  Future<void> _editCoverageResolution(
+    BuildContext context,
+    StateSetter setPageState,
+  ) async {
     final l10n = AppLocalizations.of(context);
     final precision = await showCoverageResolutionDialog(context);
     if (precision == null || !mounted) return;
     _updateMapState(() => _coveragePrecision = precision);
+    setPageState(() {});
     await _settingsService.setCoveragePrecision(precision);
     _mapDataController.invalidate();
     await _loadSamples();
@@ -621,7 +632,10 @@ extension _SettingsPageNavigation on _MapScreenState {
     );
   }
 
-  Future<void> _editIgnoredRepeaters(BuildContext context) async {
+  Future<void> _editIgnoredRepeaters(
+    BuildContext context,
+    StateSetter setPageState,
+  ) async {
     final l10n = AppLocalizations.of(context);
     final result = await showIgnoredRepeaterDialog(
       context,
@@ -629,12 +643,16 @@ extension _SettingsPageNavigation on _MapScreenState {
     );
     if (result == null || !mounted) return;
     _updateMapState(() => _ignoredRepeaterPrefix = result.value);
+    setPageState(() {});
     _locationService.loraCompanion.setIgnoredRepeaterPrefix(result.value);
     await _settingsService.setIgnoredRepeaterPrefix(result.value);
     if (mounted) _showSnackBar(l10n.settingsRepeaterPrefixUpdated);
   }
 
-  Future<void> _editIncludedRepeaters(BuildContext context) async {
+  Future<void> _editIncludedRepeaters(
+    BuildContext context,
+    StateSetter setPageState,
+  ) async {
     final l10n = AppLocalizations.of(context);
     final result = await showIncludedRepeaterDialog(
       context,
@@ -642,6 +660,7 @@ extension _SettingsPageNavigation on _MapScreenState {
     );
     if (result == null || !mounted) return;
     _updateMapState(() => _includeOnlyRepeaters = result.value);
+    setPageState(() {});
     await _settingsService.setIncludeOnlyRepeaters(result.value);
     if (mounted) _showSnackBar(l10n.settingsRepeaterWhitelistUpdated);
   }

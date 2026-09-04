@@ -1,5 +1,26 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Map LOD ("Simplify map at low zoom") gains two sliders while enabled:
+  minimum and maximum geohash precision. The floor stops far zooms from
+  collapsing everything into a few huge cells, and the ceiling stops close
+  zooms from splitting coverage and samples into the finest cells. The
+  bounds are persisted and included in settings exports.
+
+### Fixed
+
+- The "Ping Distance" setting (Discovery & sampling) could not change its
+  value: the dialog popped `int` results while its route expected `double`,
+  so debug builds rejected the selection silently (the dialog stayed open and
+  the tap appeared dead), while release builds corrupted the pop instead.
+  Options now return doubles, the dialog title matches the setting name, and
+  the setting's subtitle refreshes immediately after a value is chosen. The
+  same immediate refresh was applied to the coverage resolution and repeater
+  prefix editors, which had the same stale-subtitle behavior.
+
 ## v1.0.45-x - 2026-09-03
 
 ### Changed

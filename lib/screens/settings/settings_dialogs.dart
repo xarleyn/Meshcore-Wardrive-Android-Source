@@ -26,7 +26,7 @@ Future<double?> showPingIntervalDialog(BuildContext context) async {
   return showDialog<double>(
     context: context,
     builder: (context) => AlertDialog(
-      title: Text(l10n.settingsPingInterval),
+      title: Text(l10n.settingsPingDistance),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -35,22 +35,22 @@ Future<double?> showPingIntervalDialog(BuildContext context) async {
           ListTile(
             title: Text(l10n.settingsPingFrequent),
             subtitle: Text(l10n.settingsPingFrequentSubtitle),
-            onTap: () => Navigator.pop(context, 50),
+            onTap: () => Navigator.pop(context, 50.0),
           ),
           ListTile(
             title: Text(l10n.settingsPingNormal),
             subtitle: Text(l10n.settingsPingNormalSubtitle),
-            onTap: () => Navigator.pop(context, 200),
+            onTap: () => Navigator.pop(context, 200.0),
           ),
           ListTile(
             title: Text(l10n.settingsPingSparse),
             subtitle: Text(l10n.settingsPingSparseSubtitle),
-            onTap: () => Navigator.pop(context, 805),
+            onTap: () => Navigator.pop(context, 805.0),
           ),
           ListTile(
             title: Text(l10n.settingsPingVerySparse),
             subtitle: Text(l10n.settingsPingVerySparseSubtitle),
-            onTap: () => Navigator.pop(context, 1609),
+            onTap: () => Navigator.pop(context, 1609.0),
           ),
         ],
       ),
