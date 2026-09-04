@@ -29,18 +29,6 @@ import '../utils/community_coverage.dart';
 import '../utils/ducting_presentation.dart';
 import '../utils/ping_burst.dart';
 import '../widgets/compass_calibration.dart';
-import 'map/layers/coverage_prediction_layer.dart';
-import 'map/layers/coverage_layer.dart';
-import 'map/layers/community_coverage_layer.dart';
-import 'map/layers/current_position_layer.dart';
-import 'map/layers/edge_layer.dart';
-import 'map/layers/planned_marker_layer.dart';
-import 'map/layers/zone_overlay_layer.dart';
-import 'map/layers/radio_position_layer.dart';
-import 'map/layers/repeater_layer.dart';
-import 'map/layers/route_trail_layer.dart';
-import 'map/layers/sample_cluster_layer.dart';
-import 'map/layers/sample_heatmap_layer.dart';
 import 'map/dialogs/coverage_tools_dialogs.dart';
 import 'map/dialogs/map_entity_dialogs.dart';
 import 'map/dialogs/map_workflow_dialogs.dart';
@@ -58,6 +46,7 @@ import 'map/tracking_permissions.dart';
 import 'map/widgets/delete_mode_banner.dart';
 import 'map/widgets/map_action_buttons.dart';
 import 'map/widgets/map_control_panel.dart';
+import 'map/widgets/map_layer_stack.dart';
 import 'map/widgets/map_quick_settings_panel.dart';
 import 'map/widgets/map_screen_actions.dart';
 import '../services/widget_service.dart';
@@ -287,7 +276,7 @@ class _MapScreenState extends State<MapScreen> {
   List<ImpossibleZone> _impossibleZones = [];
 
   // Zone circle previewed on the map while the add-zone dialog is collapsed.
-  ({LatLng center, double radiusMeters, Color color})? _zonePreview;
+  ZonePreview? _zonePreview;
 
   // Battery saver mode
   bool _batterySaverActive = false;
@@ -1376,19 +1365,6 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-  List<SampleCluster> _sampleClustersForCurrentLod() {
-    return _mapDataController.sampleClusters(
-      zoom: _mapLodZoom,
-      lodEnabled: _mapLodEnabled,
-      groupByGeohash: _sampleGeohashGrouping,
-      showGpsSamples: _showGpsSamples,
-      showSuccessfulOnly: _showSuccessfulOnly,
-      includeOnlyRepeaters: _includeOnlyRepeaters,
-      minLodPrecision: _mapLodMinPrecision,
-      maxLodPrecision: _mapLodMaxPrecision,
-    );
-  }
-
   Future<void> _checkForUpdates() => UpdateFlow(
     context: context,
     onShowSnackBar: _showSnackBar,
@@ -1717,161 +1693,86 @@ class _MapScreenState extends State<MapScreen> {
               ? CachedTileProvider(store: _tileCacheStore!)
               : null,
         ),
-        if (_showRouteTrail)
-          RouteTrailLayer(
-            samples: _displaySamples,
-            colorBlindMode: _colorBlindMode,
-          ),
-        if (_showHeatmap)
-          SampleHeatmapLayer(
-            samples: _displaySamples,
-            reset: _heatmapRebuildStream.stream,
-          ),
-        if (_showPredictionRings)
-          CoveragePredictionLayer(
-            samples: _displaySamples,
-            repeaters: _repeaters,
-            includeOnlyRepeaters: _includeOnlyRepeaters,
-          ),
-        if (_showPrivacyZones)
-          ZoneOverlayLayer(
-            zones: [
-              for (final zone in _privacyZones)
-                ZoneOverlay(
-                  center: LatLng(
-                    (zone['lat'] as num).toDouble(),
-                    (zone['lon'] as num).toDouble(),
-                  ),
-                  radiusMeters: (zone['radius_meters'] as num).toDouble(),
-                ),
-            ],
-            color: Colors.blueGrey,
-          ),
-        if (_showGpsExclusionZones)
-          ZoneOverlayLayer(
-            zones: [
-              for (final zone in _impossibleZones)
-                ZoneOverlay(
-                  center: LatLng(zone.lat, zone.lon),
-                  radiusMeters: zone.radiusMeters,
-                ),
-            ],
-            color: Colors.deepOrange,
-          ),
-        if (_zonePreview != null)
-          ZoneOverlayLayer(
-            zones: [
-              ZoneOverlay(
-                center: _zonePreview!.center,
-                radiusMeters: _zonePreview!.radiusMeters,
-              ),
-            ],
-            color: _zonePreview!.color,
-          ),
-        if (_showCommunityCoverage && _communityCoverage != null)
-          CommunityCoverageLayer(
-            rawCoverage: _communityCoverage!,
-            precision: _coverageLodPrecision,
-            visibleBounds: _mapController.camera.visibleBounds,
-          ),
-        if (_showCoverage) ..._buildCoverageLayers(),
-        if (_showSamples) _buildSampleLayer(),
-        if (_showEdges) _buildEdgeLayer(),
-        if (_showRepeaters)
-          RepeaterLayer(
-            repeaters: _repeaters,
-            colorBlindMode: _colorBlindMode,
-            onRepeaterTap: _showRepeaterInfo,
-          ),
-        if (_showRadioPosition && _radioPositionEstimate != null)
-          RadioPositionLayer(
-            estimate: _radioPositionEstimate!,
-            onTap: _showSnackBar,
-          ),
-        PlannedMarkerLayer(
-          markers: _plannedMarkers,
+        ...MapLayerStack(
+          displaySamples: _displaySamples,
+          samples: _samples,
+          repeaters: _repeaters,
+          plannedMarkers: _plannedMarkers,
+          privacyZones: _privacyZones,
+          impossibleZones: _impossibleZones,
+          aggregationResult: _aggregationResult,
+          mapDataController: _mapDataController,
+          radioPositionEstimate: _radioPositionEstimate,
+          communityCoverage: _communityCoverage,
+          zonePreview: _zonePreview,
+          visibleBounds: _mapController.camera.visibleBounds,
+          currentPosition: _currentPosition,
+          showRouteTrail: _showRouteTrail,
+          showHeatmap: _showHeatmap,
+          showPredictionRings: _showPredictionRings,
+          showPrivacyZones: _showPrivacyZones,
+          showGpsExclusionZones: _showGpsExclusionZones,
+          showCommunityCoverage: _showCommunityCoverage,
+          showCoverage: _showCoverage,
+          showSamples: _showSamples,
+          showEdges: _showEdges,
+          showRepeaters: _showRepeaters,
+          showRadioPosition: _showRadioPosition,
+          hideUiForScreenshot: _hideUIForScreenshot,
+          mapLodZoom: _mapLodZoom,
+          mapLodEnabled: _mapLodEnabled,
+          mapLodMinPrecision: _mapLodMinPrecision,
+          mapLodMaxPrecision: _mapLodMaxPrecision,
+          coveragePrecision: _coveragePrecision,
+          coverageLodPrecision: _coverageLodPrecision,
+          showSuccessfulOnly: _showSuccessfulOnly,
+          showGpsSamples: _showGpsSamples,
+          sampleGeohashGrouping: _sampleGeohashGrouping,
+          fixedSampleMarkerSizeEnabled: _fixedSampleMarkerSizeEnabled,
+          sampleMarkerRadius: _sampleMarkerRadius,
+          filterEdgesByWhitelist: _filterEdgesByWhitelist,
+          includeOnlyRepeaters: _includeOnlyRepeaters,
+          colorMode: _colorMode,
+          colorBlindMode: _colorBlindMode,
+          currentLocationMarkerStyle: _currentLocationMarkerStyle,
+          positionSource: _positionSource,
+          currentHeading: _currentHeading,
+          showPingPulse: _showPingPulse,
+          heatmapReset: _heatmapRebuildStream.stream,
+          coverageHitNotifier: _coverageHitNotifier,
+          sampleHitNotifier: _sampleHitNotifier,
+          onCoverageTap: _handleCoverageTap,
+          onClusterTap: _handleClusterTap,
+          onRepeaterTap: _showRepeaterInfo,
+          onRadioPositionTap: _showSnackBar,
           onMarkerTap: _showMarkerInfo,
-        ),
-        if (_currentPosition != null && !_hideUIForScreenshot)
-          CurrentPositionLayer(
-            position: _currentPosition!,
-            style: _currentLocationMarkerStyle,
-            source: _positionSource,
-            heading: _currentHeading,
-            showPingPulse: _showPingPulse,
-          ),
+        ).buildLayers(),
       ],
     );
   }
 
-  List<Widget> _buildCoverageLayers() {
-    if (_aggregationResult == null) return [];
-    final lod = _mapDataController.coverageLod(
-      zoom: _mapLodZoom,
-      enabled: _mapLodEnabled,
-      maxPrecision: _coveragePrecision,
-      successfulOnly: _showSuccessfulOnly,
-      minLodPrecision: _mapLodMinPrecision,
-      maxLodPrecision: _mapLodMaxPrecision,
-    );
-    return [
-      CoverageLayer(
-        coverages: lod.coverages,
-        colorMode: _colorMode,
-        colorBlindMode: _colorBlindMode,
-        hitNotifier: _coverageHitNotifier,
-        onCoverageTap: (coverage) {
-          if (_deleteMode && _coverageLodPrecision < _coveragePrecision) {
-            _showSnackBar(AppLocalizations.of(context).mapZoomToDeleteCell);
-            return;
-          }
-          if (_deleteMode) {
-            _deleteCoverageCell(coverage);
-          } else {
-            _showCoverageInfo(coverage);
-          }
-        },
-      ),
-    ];
+  void _handleCoverageTap(Coverage coverage) {
+    if (_deleteMode && _coverageLodPrecision < _coveragePrecision) {
+      _showSnackBar(AppLocalizations.of(context).mapZoomToDeleteCell);
+      return;
+    }
+    if (_deleteMode) {
+      _deleteCoverageCell(coverage);
+    } else {
+      _showCoverageInfo(coverage);
+    }
   }
 
-  Widget _buildSampleLayer() {
-    if (_samples.isEmpty) return const SizedBox.shrink();
-    final clusters = _sampleClustersForCurrentLod();
-    return SampleClusterLayer(
-      clusters: clusters,
-      colorBlindMode: _colorBlindMode,
-      fixedRadius: _fixedSampleMarkerSizeEnabled ? _sampleMarkerRadius : null,
-      hitNotifier: _sampleHitNotifier,
-      onClusterTap: (cluster) {
-        if (_deleteMode && cluster.sampleCount == 1) {
-          _deleteSample(cluster.newestSample);
-        } else if (_deleteMode) {
-          _showSnackBar(AppLocalizations.of(context).mapZoomedPointsGrouped);
-        } else if (cluster.sampleCount == 1) {
-          _showSampleInfo(cluster.newestSample);
-        } else {
-          _showSampleClusterInfo(cluster);
-        }
-      },
-    );
-  }
-
-  Widget _buildEdgeLayer() {
-    if (_aggregationResult == null) return const SizedBox.shrink();
-    final lod = _mapDataController.coverageLod(
-      zoom: _mapLodZoom,
-      enabled: _mapLodEnabled,
-      maxPrecision: _coveragePrecision,
-      successfulOnly: _showSuccessfulOnly,
-      minLodPrecision: _mapLodMinPrecision,
-      maxLodPrecision: _mapLodMaxPrecision,
-    );
-    return EdgeLayer(
-      edges: lod.edges,
-      filterByWhitelist: _filterEdgesByWhitelist,
-      includeOnlyRepeaters: _includeOnlyRepeaters,
-    );
+  void _handleClusterTap(SampleCluster cluster) {
+    if (_deleteMode && cluster.sampleCount == 1) {
+      _deleteSample(cluster.newestSample);
+    } else if (_deleteMode) {
+      _showSnackBar(AppLocalizations.of(context).mapZoomedPointsGrouped);
+    } else if (cluster.sampleCount == 1) {
+      _showSampleInfo(cluster.newestSample);
+    } else {
+      _showSampleClusterInfo(cluster);
+    }
   }
 
   RadioPositionEstimate? _calculateRadioPositionEstimate(
