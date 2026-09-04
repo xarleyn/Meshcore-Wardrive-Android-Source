@@ -446,6 +446,18 @@ abstract class AppLocalizations {
   /// **'Group coverage and samples by geohash while zoomed out'**
   String get settingsSimplifyMapAtLowZoomSubtitle;
 
+  /// Title above the low-zoom simplification minimum geohash precision slider
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum geohash: {precision}'**
+  String settingsMapLodMinPrecision(int precision);
+
+  /// Title above the low-zoom simplification maximum geohash precision slider
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum geohash: {precision}'**
+  String settingsMapLodMaxPrecision(int precision);
+
   /// Toggle to show sample markers
   ///
   /// In en, this message translates to:

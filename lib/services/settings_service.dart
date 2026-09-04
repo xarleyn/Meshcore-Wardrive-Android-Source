@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_locale.dart';
 import '../models/location_quality_settings.dart';
 import '../utils/bluetooth_scan.dart';
+import 'map_lod_service.dart';
 import 'upload_service.dart';
 
 enum CurrentLocationMarkerStyle { circle, arrow }
@@ -139,6 +140,8 @@ class SettingsService {
   static const String _mapThemeModeKey = 'map_theme_mode';
   static const String _appLocaleKey = 'app_locale';
   static const String _mapLodEnabledKey = 'map_lod_enabled';
+  static const String _mapLodMinPrecisionKey = 'map_lod_min_precision';
+  static const String _mapLodMaxPrecisionKey = 'map_lod_max_precision';
   static const String _sampleGeohashGroupingKey = 'map_sample_geohash_grouping';
   static const String _recentBluetoothDevicesKey = 'recent_bluetooth_devices';
   static const int _maxRecentBluetoothDevices = 8;
@@ -922,6 +925,54 @@ class SettingsService {
     await prefs.setBool(_mapLodEnabledKey, value);
   }
 
+  /// Lowest geohash precision the low-zoom simplification may use while
+  /// zoomed out. Higher floors keep far zooms from collapsing everything
+  /// into a few huge cells.
+  Future<int> getMapLodMinPrecision() async {
+    final prefs = await _prefs;
+    final value = prefs.getInt(_mapLodMinPrecisionKey);
+    if (value == null) return MapLodService.defaultMinPrecision;
+    return value.clamp(
+      MapLodService.selectableMinPrecision,
+      MapLodService.selectableMaxPrecision,
+    );
+  }
+
+  Future<void> setMapLodMinPrecision(int value) async {
+    final prefs = await _prefs;
+    await prefs.setInt(
+      _mapLodMinPrecisionKey,
+      value.clamp(
+        MapLodService.selectableMinPrecision,
+        MapLodService.selectableMaxPrecision,
+      ),
+    );
+  }
+
+  /// Highest geohash precision the low-zoom simplification may use while
+  /// zoomed in. Lower ceilings keep close zooms from fragmenting coverage
+  /// into the finest cells.
+  Future<int> getMapLodMaxPrecision() async {
+    final prefs = await _prefs;
+    final value = prefs.getInt(_mapLodMaxPrecisionKey);
+    if (value == null) return MapLodService.defaultMaxPrecision;
+    return value.clamp(
+      MapLodService.selectableMinPrecision,
+      MapLodService.selectableMaxPrecision,
+    );
+  }
+
+  Future<void> setMapLodMaxPrecision(int value) async {
+    final prefs = await _prefs;
+    await prefs.setInt(
+      _mapLodMaxPrecisionKey,
+      value.clamp(
+        MapLodService.selectableMinPrecision,
+        MapLodService.selectableMaxPrecision,
+      ),
+    );
+  }
+
   /// Whether every measurement inside one geohash cell collapses into a
   /// single sample marker regardless of zoom.
   Future<bool> getSampleGeohashGrouping() async {
@@ -1086,6 +1137,8 @@ class SettingsService {
     _showSuccessfulOnlyKey,
     _optimisticDisplayKey,
     _mapLodEnabledKey,
+    _mapLodMinPrecisionKey,
+    _mapLodMaxPrecisionKey,
     _sampleGeohashGroupingKey,
     _linkLossAlertsKey,
     _deadZoneAlertsKey,

@@ -240,6 +240,24 @@
   "@settingsSimplifyMapAtLowZoomSubtitle": {
     "description": "Subtitle for map simplification toggle"
   },
+  "settingsMapLodMinPrecision": "Minimum geohash: {precision}",
+  "@settingsMapLodMinPrecision": {
+    "description": "Title above the low-zoom simplification minimum geohash precision slider",
+    "placeholders": {
+      "precision": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsMapLodMaxPrecision": "Maximum geohash: {precision}",
+  "@settingsMapLodMaxPrecision": {
+    "description": "Title above the low-zoom simplification maximum geohash precision slider",
+    "placeholders": {
+      "precision": {
+        "type": "int"
+      }
+    }
+  },
   "settingsShowSamples": "Show Samples",
   "@settingsShowSamples": {
     "description": "Toggle to show sample markers"

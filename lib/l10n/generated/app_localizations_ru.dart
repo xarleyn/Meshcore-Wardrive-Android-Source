@@ -200,6 +200,16 @@ class AppLocalizationsRu extends AppLocalizations {
       'Группировать покрытие и замеры по geohash при отдалении';
 
   @override
+  String settingsMapLodMinPrecision(int precision) {
+    return 'Минимальный geohash: $precision';
+  }
+
+  @override
+  String settingsMapLodMaxPrecision(int precision) {
+    return 'Максимальный geohash: $precision';
+  }
+
+  @override
   String get settingsShowSamples => 'Показывать замеры';
 
   @override

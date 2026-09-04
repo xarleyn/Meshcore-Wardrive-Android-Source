@@ -114,6 +114,8 @@ extension _SettingsPageNavigation on _MapScreenState {
           values: MapDisplaySettingsValues(
             showCoverage: _showCoverage,
             mapLodEnabled: _mapLodEnabled,
+            mapLodMinPrecision: _mapLodMinPrecision,
+            mapLodMaxPrecision: _mapLodMaxPrecision,
             showSamples: _showSamples,
             fixedSampleMarkerSizeEnabled: _fixedSampleMarkerSizeEnabled,
             sampleMarkerRadius: _sampleMarkerRadius,
@@ -133,6 +135,33 @@ extension _SettingsPageNavigation on _MapScreenState {
           ),
           onChanged: (setting, value) =>
               _setMapDisplaySetting(setting, value, setPageState),
+          onMapLodMinPrecisionChanged: (value) {
+            _updateMapState(() {
+              _mapLodMinPrecision = value;
+              // Keep the floor below the ceiling as either slider moves.
+              if (_mapLodMaxPrecision < value) _mapLodMaxPrecision = value;
+            });
+            setPageState(() {});
+          },
+          onMapLodMinPrecisionChangeEnd: (value) async {
+            await _settingsService.setMapLodMinPrecision(value);
+            if (_mapLodMaxPrecision < value) {
+              await _settingsService.setMapLodMaxPrecision(value);
+            }
+          },
+          onMapLodMaxPrecisionChanged: (value) {
+            _updateMapState(() {
+              _mapLodMaxPrecision = value;
+              if (_mapLodMinPrecision > value) _mapLodMinPrecision = value;
+            });
+            setPageState(() {});
+          },
+          onMapLodMaxPrecisionChangeEnd: (value) async {
+            await _settingsService.setMapLodMaxPrecision(value);
+            if (_mapLodMinPrecision > value) {
+              await _settingsService.setMapLodMinPrecision(value);
+            }
+          },
           onSampleMarkerRadiusChanged: (value) {
             _updateMapState(() => _sampleMarkerRadius = value);
             setPageState(() {});

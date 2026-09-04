@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../services/map_lod_service.dart';
 import '../../../services/settings_service.dart';
 import '../widgets/settings_section_header.dart';
 
@@ -29,6 +30,8 @@ class MapDisplaySettingsValues {
   const MapDisplaySettingsValues({
     required this.showCoverage,
     required this.mapLodEnabled,
+    required this.mapLodMinPrecision,
+    required this.mapLodMaxPrecision,
     required this.showSamples,
     required this.fixedSampleMarkerSizeEnabled,
     required this.sampleMarkerRadius,
@@ -49,6 +52,8 @@ class MapDisplaySettingsValues {
 
   final bool showCoverage;
   final bool mapLodEnabled;
+  final int mapLodMinPrecision;
+  final int mapLodMaxPrecision;
   final bool showSamples;
   final bool fixedSampleMarkerSizeEnabled;
   final double sampleMarkerRadius;
@@ -72,6 +77,10 @@ List<Widget> buildMapDisplaySettings(
   required MapDisplaySettingsValues values,
   required FutureOr<void> Function(MapDisplaySetting setting, bool value)
   onChanged,
+  required ValueChanged<int> onMapLodMinPrecisionChanged,
+  required FutureOr<void> Function(int value) onMapLodMinPrecisionChangeEnd,
+  required ValueChanged<int> onMapLodMaxPrecisionChanged,
+  required FutureOr<void> Function(int value) onMapLodMaxPrecisionChangeEnd,
   required ValueChanged<double> onSampleMarkerRadiusChanged,
   required FutureOr<void> Function(double value) onSampleMarkerRadiusChangeEnd,
   required FutureOr<void> Function() onClearCommunityCoverage,
@@ -93,6 +102,38 @@ List<Widget> buildMapDisplaySettings(
       value: values.mapLodEnabled,
       onChanged: (value) => onChanged(MapDisplaySetting.mapLod, value),
     ),
+    if (values.mapLodEnabled) ...[
+      ListTile(
+        title: Text(l10n.settingsMapLodMinPrecision(values.mapLodMinPrecision)),
+        subtitle: Slider(
+          key: const ValueKey('map-lod-min-precision-slider'),
+          min: MapLodService.selectableMinPrecision.toDouble(),
+          max: MapLodService.selectableMaxPrecision.toDouble(),
+          divisions:
+              MapLodService.selectableMaxPrecision -
+              MapLodService.selectableMinPrecision,
+          label: '${values.mapLodMinPrecision}',
+          value: values.mapLodMinPrecision.toDouble(),
+          onChanged: (value) => onMapLodMinPrecisionChanged(value.round()),
+          onChangeEnd: (value) => onMapLodMinPrecisionChangeEnd(value.round()),
+        ),
+      ),
+      ListTile(
+        title: Text(l10n.settingsMapLodMaxPrecision(values.mapLodMaxPrecision)),
+        subtitle: Slider(
+          key: const ValueKey('map-lod-max-precision-slider'),
+          min: MapLodService.selectableMinPrecision.toDouble(),
+          max: MapLodService.selectableMaxPrecision.toDouble(),
+          divisions:
+              MapLodService.selectableMaxPrecision -
+              MapLodService.selectableMinPrecision,
+          label: '${values.mapLodMaxPrecision}',
+          value: values.mapLodMaxPrecision.toDouble(),
+          onChanged: (value) => onMapLodMaxPrecisionChanged(value.round()),
+          onChangeEnd: (value) => onMapLodMaxPrecisionChangeEnd(value.round()),
+        ),
+      ),
+    ],
     SwitchListTile(
       title: Text(l10n.settingsShowSamples),
       value: values.showSamples,

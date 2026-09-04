@@ -190,6 +190,8 @@ void main() {
               values: const MapDisplaySettingsValues(
                 showCoverage: false,
                 mapLodEnabled: false,
+                mapLodMinPrecision: 3,
+                mapLodMaxPrecision: 8,
                 showSamples: false,
                 fixedSampleMarkerSizeEnabled: false,
                 sampleMarkerRadius: 10,
@@ -211,6 +213,10 @@ void main() {
                 changedSetting = setting;
                 changedValue = value;
               },
+              onMapLodMinPrecisionChanged: (_) {},
+              onMapLodMinPrecisionChangeEnd: (_) {},
+              onMapLodMaxPrecisionChanged: (_) {},
+              onMapLodMaxPrecisionChangeEnd: (_) {},
               onSampleMarkerRadiusChanged: (_) {},
               onSampleMarkerRadiusChangeEnd: (_) {},
               onClearCommunityCoverage: () {},
@@ -226,6 +232,15 @@ void main() {
     expect(changedValue, isTrue);
     expect(
       find.byKey(const ValueKey('sample-marker-size-slider')),
+      findsNothing,
+    );
+    // The LOD precision sliders only exist while simplification is enabled.
+    expect(
+      find.byKey(const ValueKey('map-lod-min-precision-slider')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const ValueKey('map-lod-max-precision-slider')),
       findsNothing,
     );
 
@@ -275,6 +290,8 @@ void main() {
               values: const MapDisplaySettingsValues(
                 showCoverage: false,
                 mapLodEnabled: false,
+                mapLodMinPrecision: 3,
+                mapLodMaxPrecision: 8,
                 showSamples: true,
                 fixedSampleMarkerSizeEnabled: true,
                 sampleMarkerRadius: 10,
@@ -293,6 +310,10 @@ void main() {
                 showPredictionRings: false,
               ),
               onChanged: (_, _) {},
+              onMapLodMinPrecisionChanged: (_) {},
+              onMapLodMinPrecisionChangeEnd: (_) {},
+              onMapLodMaxPrecisionChanged: (_) {},
+              onMapLodMaxPrecisionChangeEnd: (_) {},
               onSampleMarkerRadiusChanged: (value) => changedRadius = value,
               onSampleMarkerRadiusChangeEnd: (value) => savedRadius = value,
               onClearCommunityCoverage: () {},
@@ -311,6 +332,76 @@ void main() {
 
     expect(changedRadius, 14);
     expect(savedRadius, 14);
+  });
+
+  testWidgets('LOD precision sliders appear while simplification is on', (
+    tester,
+  ) async {
+    int? changedMin;
+    int? savedMin;
+    int? changedMax;
+    int? savedMax;
+    final l10n = await pumpWithL10n(
+      tester,
+      Builder(
+        builder: (context) => Scaffold(
+          body: ListView(
+            children: buildMapDisplaySettings(
+              context,
+              values: const MapDisplaySettingsValues(
+                showCoverage: false,
+                mapLodEnabled: true,
+                mapLodMinPrecision: 3,
+                mapLodMaxPrecision: 8,
+                showSamples: false,
+                fixedSampleMarkerSizeEnabled: false,
+                sampleMarkerRadius: 10,
+                sampleGeohashGrouping: false,
+                showEdges: false,
+                showRepeaters: false,
+                showPrivacyZones: false,
+                showGpsExclusionZones: false,
+                showGpsSamples: false,
+                showSuccessfulOnly: false,
+                optimisticDisplay: false,
+                showRouteTrail: false,
+                communityCoverageAvailable: false,
+                showCommunityCoverage: false,
+                showHeatmap: false,
+                showPredictionRings: false,
+              ),
+              onChanged: (_, _) {},
+              onMapLodMinPrecisionChanged: (value) => changedMin = value,
+              onMapLodMinPrecisionChangeEnd: (value) => savedMin = value,
+              onMapLodMaxPrecisionChanged: (value) => changedMax = value,
+              onMapLodMaxPrecisionChangeEnd: (value) => savedMax = value,
+              onSampleMarkerRadiusChanged: (_) {},
+              onSampleMarkerRadiusChangeEnd: (_) {},
+              onClearCommunityCoverage: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(l10n.settingsMapLodMinPrecision(3)), findsOneWidget);
+    expect(find.text(l10n.settingsMapLodMaxPrecision(8)), findsOneWidget);
+
+    final minSlider = tester.widget<Slider>(
+      find.byKey(const ValueKey('map-lod-min-precision-slider')),
+    );
+    minSlider.onChanged!(5);
+    minSlider.onChangeEnd!(5);
+    expect(changedMin, 5);
+    expect(savedMin, 5);
+
+    final maxSlider = tester.widget<Slider>(
+      find.byKey(const ValueKey('map-lod-max-precision-slider')),
+    );
+    maxSlider.onChanged!(6);
+    maxSlider.onChangeEnd!(6);
+    expect(changedMax, 6);
+    expect(savedMax, 6);
   });
 
   testWidgets('ping pause toggle hides the bad-fix threshold when off', (

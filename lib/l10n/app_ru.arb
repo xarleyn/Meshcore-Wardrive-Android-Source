@@ -58,6 +58,8 @@
   "settingsShowCoverageBoxes": "Показывать ячейки покрытия",
   "settingsSimplifyMapAtLowZoom": "Упрощать карту при малом масштабе",
   "settingsSimplifyMapAtLowZoomSubtitle": "Группировать покрытие и замеры по geohash при отдалении",
+  "settingsMapLodMinPrecision": "Минимальный geohash: {precision}",
+  "settingsMapLodMaxPrecision": "Максимальный geohash: {precision}",
   "settingsShowSamples": "Показывать замеры",
   "settingsFixedSampleMarkerSize": "Фиксированный размер точек",
   "settingsFixedSampleMarkerSizeSubtitle": "Использовать один размер вместо автоматического, зависящего от количества замеров",

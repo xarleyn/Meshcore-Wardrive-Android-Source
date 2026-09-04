@@ -60,6 +60,8 @@ class MapLayerStack extends StatelessWidget {
     required this.hideUiForScreenshot,
     required this.mapLodZoom,
     required this.mapLodEnabled,
+    required this.mapLodMinPrecision,
+    required this.mapLodMaxPrecision,
     required this.coveragePrecision,
     required this.coverageLodPrecision,
     required this.showSuccessfulOnly,
@@ -115,6 +117,8 @@ class MapLayerStack extends StatelessWidget {
 
   final double mapLodZoom;
   final bool mapLodEnabled;
+  final int mapLodMinPrecision;
+  final int mapLodMaxPrecision;
   final int coveragePrecision;
   final int coverageLodPrecision;
   final bool showSuccessfulOnly;
@@ -236,6 +240,8 @@ class MapLayerStack extends StatelessWidget {
       enabled: mapLodEnabled,
       maxPrecision: coveragePrecision,
       successfulOnly: showSuccessfulOnly,
+      minLodPrecision: mapLodMinPrecision,
+      maxLodPrecision: mapLodMaxPrecision,
     );
     return [
       CoverageLayer(
@@ -257,6 +263,8 @@ class MapLayerStack extends StatelessWidget {
       showGpsSamples: showGpsSamples,
       showSuccessfulOnly: showSuccessfulOnly,
       includeOnlyRepeaters: includeOnlyRepeaters,
+      minLodPrecision: mapLodMinPrecision,
+      maxLodPrecision: mapLodMaxPrecision,
     );
     return SampleClusterLayer(
       clusters: clusters,
@@ -274,6 +282,8 @@ class MapLayerStack extends StatelessWidget {
       enabled: mapLodEnabled,
       maxPrecision: coveragePrecision,
       successfulOnly: showSuccessfulOnly,
+      minLodPrecision: mapLodMinPrecision,
+      maxLodPrecision: mapLodMaxPrecision,
     );
     return EdgeLayer(
       edges: lod.edges,

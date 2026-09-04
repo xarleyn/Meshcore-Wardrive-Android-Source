@@ -202,6 +202,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Group coverage and samples by geohash while zoomed out';
 
   @override
+  String settingsMapLodMinPrecision(int precision) {
+    return 'Minimum geohash: $precision';
+  }
+
+  @override
+  String settingsMapLodMaxPrecision(int precision) {
+    return 'Maximum geohash: $precision';
+  }
+
+  @override
   String get settingsShowSamples => 'Show Samples';
 
   @override

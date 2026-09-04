@@ -160,6 +160,68 @@ void main() {
       expect(clusters.single.newestSample.id, 'success');
     });
 
+    test('LOD precision honors the configured bounds', () async {
+      final store = FakeMapDataStore([_sample('one', DateTime(2026, 8, 20))]);
+      final controller = MapScreenController(store: store);
+      await controller.refresh(
+        discoveredRepeaters: const [],
+        coveragePrecision: 7,
+      );
+
+      // A raised floor keeps far zooms from merging into huge cells.
+      expect(
+        controller.coverageLodPrecision(
+          zoom: 6,
+          enabled: true,
+          maxPrecision: 7,
+          minLodPrecision: 5,
+          maxLodPrecision: 7,
+        ),
+        5,
+      );
+      // A lowered ceiling keeps close zooms from fragmenting samples.
+      expect(
+        controller.sampleLodPrecision(
+          zoom: 18,
+          enabled: true,
+          minLodPrecision: 3,
+          maxLodPrecision: 6,
+        ),
+        6,
+      );
+      // The LOD ceiling never exceeds the per-layer maximum.
+      expect(
+        controller.coverageLodPrecision(
+          zoom: 18,
+          enabled: true,
+          maxPrecision: 5,
+          minLodPrecision: 3,
+          maxLodPrecision: 8,
+        ),
+        5,
+      );
+      // Disabled LOD ignores the bounds entirely.
+      expect(
+        controller.coverageLodPrecision(
+          zoom: 6,
+          enabled: false,
+          maxPrecision: 7,
+          minLodPrecision: 5,
+          maxLodPrecision: 7,
+        ),
+        7,
+      );
+      expect(
+        controller.sampleLodPrecision(
+          zoom: 6,
+          enabled: false,
+          minLodPrecision: 5,
+          maxLodPrecision: 7,
+        ),
+        8,
+      );
+    });
+
     test('successful-pings-only hides dead-zone coverage squares', () async {
       final start = DateTime(2026, 8, 20);
       final store = FakeMapDataStore([

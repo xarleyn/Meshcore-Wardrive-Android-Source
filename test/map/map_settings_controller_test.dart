@@ -20,6 +20,8 @@ void main() {
         'distance_unit': 'miles',
         'location_max_horizontal_accuracy_meters': 42.0,
         'map_theme_mode': 'dark',
+        'map_lod_min_precision': 5,
+        'map_lod_max_precision': 7,
         'ping_mode': 'distance',
         'keep_screen_on': true,
         'current_location_marker_style': 'arrow',
@@ -49,6 +51,8 @@ void main() {
       expect(snapshot.distanceUnit, 'miles');
       expect(snapshot.locationQualitySettings.maxHorizontalAccuracyMeters, 42);
       expect(snapshot.mapThemeMode, MapThemeMode.dark);
+      expect(snapshot.mapLodMinPrecision, 5);
+      expect(snapshot.mapLodMaxPrecision, 7);
       expect(snapshot.pingMode, 'distance');
       expect(snapshot.keepScreenOn, isTrue);
       expect(
@@ -86,6 +90,8 @@ void main() {
     expect(snapshot.showPrivacyZones, isTrue);
     expect(snapshot.showGpsExclusionZones, isFalse);
     expect(snapshot.mapLodEnabled, isTrue);
+    expect(snapshot.mapLodMinPrecision, 3);
+    expect(snapshot.mapLodMaxPrecision, 8);
     expect(snapshot.optimisticDisplay, isFalse);
     expect(snapshot.distanceUnit, 'km');
     expect(snapshot.mapThemeMode, MapThemeMode.system);

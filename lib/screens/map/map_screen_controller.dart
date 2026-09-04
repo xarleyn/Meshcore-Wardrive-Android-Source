@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import '../../models/models.dart';
 import '../../services/aggregation_service.dart';
 import '../../services/database_service.dart';
@@ -212,14 +214,29 @@ class MapScreenController {
     required double zoom,
     required bool enabled,
     required int maxPrecision,
+    int minLodPrecision = MapLodService.defaultMinPrecision,
+    int maxLodPrecision = MapLodService.defaultMaxPrecision,
   }) {
     if (!enabled) return maxPrecision;
-    return MapLodService.precisionForZoom(zoom, maxPrecision: maxPrecision);
+    return MapLodService.precisionForZoom(
+      zoom,
+      maxPrecision: math.min(maxPrecision, maxLodPrecision),
+      minPrecision: minLodPrecision,
+    );
   }
 
-  int sampleLodPrecision({required double zoom, required bool enabled}) {
+  int sampleLodPrecision({
+    required double zoom,
+    required bool enabled,
+    int minLodPrecision = MapLodService.defaultMinPrecision,
+    int maxLodPrecision = MapLodService.defaultMaxPrecision,
+  }) {
     if (!enabled) return 8;
-    return MapLodService.precisionForZoom(zoom, maxPrecision: 8);
+    return MapLodService.precisionForZoom(
+      zoom,
+      maxPrecision: math.min(8, maxLodPrecision),
+      minPrecision: minLodPrecision,
+    );
   }
 
   MapCoverageLod coverageLod({
@@ -227,12 +244,16 @@ class MapScreenController {
     required bool enabled,
     required int maxPrecision,
     required bool successfulOnly,
+    int minLodPrecision = MapLodService.defaultMinPrecision,
+    int maxLodPrecision = MapLodService.defaultMaxPrecision,
   }) {
     final aggregation = _aggregation;
     final precision = coverageLodPrecision(
       zoom: zoom,
       enabled: enabled,
       maxPrecision: maxPrecision,
+      minLodPrecision: minLodPrecision,
+      maxLodPrecision: maxLodPrecision,
     );
     if (aggregation == null) {
       return MapCoverageLod(
@@ -288,13 +309,20 @@ class MapScreenController {
     required bool showGpsSamples,
     required bool showSuccessfulOnly,
     required String? includeOnlyRepeaters,
+    int minLodPrecision = MapLodService.defaultMinPrecision,
+    int maxLodPrecision = MapLodService.defaultMaxPrecision,
   }) {
     // Geohash grouping always buckets by the native sample key, so every
     // measurement recorded inside one geohash cell shares one marker even
     // while zoomed in and while low-zoom simplification stays off.
     final precision = groupByGeohash
         ? 8
-        : sampleLodPrecision(zoom: zoom, enabled: lodEnabled);
+        : sampleLodPrecision(
+            zoom: zoom,
+            enabled: lodEnabled,
+            minLodPrecision: minLodPrecision,
+            maxLodPrecision: maxLodPrecision,
+          );
     final filterKey = [
       showGpsSamples,
       showSuccessfulOnly,

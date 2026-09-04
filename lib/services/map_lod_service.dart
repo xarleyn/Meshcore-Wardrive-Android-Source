@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:latlong2/latlong.dart';
 
 import '../models/models.dart';
@@ -7,16 +9,38 @@ import 'aggregation_service.dart';
 /// Builds zoom-dependent map data so map layers do not need to render every
 /// stored observation while the camera is zoomed out.
 class MapLodService {
-  static const int _minimumPrecision = 3;
+  /// Lowest geohash precision selectable as the LOD floor.
+  static const int selectableMinPrecision = 1;
+
+  /// Highest geohash precision selectable as the LOD ceiling.
+  static const int selectableMaxPrecision = 8;
+
+  /// Default LOD floor. Matches the hard-coded floor used before the bounds
+  /// became configurable, so upgrading installations keep their rendering.
+  static const int defaultMinPrecision = 3;
+
+  /// Default LOD ceiling. Sits above every per-layer maximum, so it caps
+  /// nothing until the user lowers it.
+  static const int defaultMaxPrecision = selectableMaxPrecision;
 
   /// Chooses a geohash precision whose cells stay roughly 30-100 pixels wide.
   ///
   /// A new precision is selected only every two zoom levels. This keeps the
   /// rendered object count low and avoids rebuilding layers continuously while
-  /// pinch-zooming.
-  static int precisionForZoom(double zoom, {required int maxPrecision}) {
+  /// pinch-zooming. [minPrecision] and [maxPrecision] clamp the result into
+  /// the user-configured LOD bounds; swapped bounds are normalized so the
+  /// clamp can never throw.
+  static int precisionForZoom(
+    double zoom, {
+    required int maxPrecision,
+    int minPrecision = defaultMinPrecision,
+  }) {
     final zoomPrecision = (zoom / 2).floor();
-    return zoomPrecision.clamp(_minimumPrecision, maxPrecision).toInt();
+    final lower = math.min(
+      math.max(minPrecision, selectableMinPrecision),
+      maxPrecision,
+    );
+    return zoomPrecision.clamp(lower, maxPrecision).toInt();
   }
 
   static List<Coverage> aggregateCoverages(

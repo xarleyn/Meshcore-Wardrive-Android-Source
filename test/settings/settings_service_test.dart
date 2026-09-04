@@ -161,6 +161,44 @@ void main() {
     });
   });
 
+  group('map LOD precision bounds', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('defaults keep the pre-configurable LOD behavior', () async {
+      final settings = SettingsService();
+
+      expect(await settings.getMapLodMinPrecision(), 3);
+      expect(await settings.getMapLodMaxPrecision(), 8);
+    });
+
+    test('persists bounds and clamps stored values into range', () async {
+      final settings = SettingsService();
+
+      await settings.setMapLodMinPrecision(5);
+      await settings.setMapLodMaxPrecision(6);
+      expect(await settings.getMapLodMinPrecision(), 5);
+      expect(await settings.getMapLodMaxPrecision(), 6);
+
+      await settings.setMapLodMinPrecision(0);
+      await settings.setMapLodMaxPrecision(99);
+      expect(await settings.getMapLodMinPrecision(), 1);
+      expect(await settings.getMapLodMaxPrecision(), 8);
+    });
+
+    test('includes LOD bounds in settings backup', () async {
+      final settings = SettingsService();
+      await settings.setMapLodMinPrecision(4);
+      await settings.setMapLodMaxPrecision(7);
+
+      final exported = await settings.exportSettings();
+
+      expect(exported['map_lod_min_precision'], 4);
+      expect(exported['map_lod_max_precision'], 7);
+    });
+  });
+
   group('map zone overlay settings', () {
     setUp(() {
       SharedPreferences.setMockInitialValues({});

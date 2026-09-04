@@ -14,6 +14,38 @@ void main() {
       expect(MapLodService.precisionForZoom(18, maxPrecision: 7), 7);
     });
 
+    test('applies the configured minimum and maximum bounds', () {
+      // A raised floor stops far zooms from collapsing everything into
+      // a few huge cells.
+      expect(
+        MapLodService.precisionForZoom(5, maxPrecision: 8, minPrecision: 5),
+        5,
+      );
+      expect(
+        MapLodService.precisionForZoom(2, maxPrecision: 8, minPrecision: 6),
+        6,
+      );
+      // A lowered ceiling stops close zooms from fragmenting coverage
+      // into the finest cells.
+      expect(
+        MapLodService.precisionForZoom(16, maxPrecision: 8, minPrecision: 3),
+        8,
+      );
+      expect(
+        MapLodService.precisionForZoom(18, maxPrecision: 6, minPrecision: 3),
+        6,
+      );
+      // Swapped or out-of-range bounds are normalized instead of throwing.
+      expect(
+        MapLodService.precisionForZoom(10, maxPrecision: 5, minPrecision: 7),
+        5,
+      );
+      expect(
+        MapLodService.precisionForZoom(10, maxPrecision: 8, minPrecision: 0),
+        5,
+      );
+    });
+
     test('merges coverage statistics and repeater IDs', () {
       final older = DateTime.utc(2026, 1, 1);
       final newer = DateTime.utc(2026, 2, 1);

@@ -12,6 +12,8 @@ class MapSettingsSnapshot {
     required this.sampleMarkerRadius,
     required this.showCoverage,
     required this.mapLodEnabled,
+    required this.mapLodMinPrecision,
+    required this.mapLodMaxPrecision,
     required this.sampleGeohashGrouping,
     required this.showEdges,
     required this.showRepeaters,
@@ -62,6 +64,8 @@ class MapSettingsSnapshot {
   final double sampleMarkerRadius;
   final bool showCoverage;
   final bool mapLodEnabled;
+  final int mapLodMinPrecision;
+  final int mapLodMaxPrecision;
   final bool sampleGeohashGrouping;
   final bool showEdges;
   final bool showRepeaters;
@@ -158,6 +162,8 @@ class MapSettingsController {
       sampleMarkerRadius: await settingsService.getSampleMarkerRadius(),
       showCoverage: await settingsService.getShowCoverage(),
       mapLodEnabled: await settingsService.getMapLodEnabled(),
+      mapLodMinPrecision: await settingsService.getMapLodMinPrecision(),
+      mapLodMaxPrecision: await settingsService.getMapLodMaxPrecision(),
       sampleGeohashGrouping: await settingsService.getSampleGeohashGrouping(),
       showEdges: await settingsService.getShowEdges(),
       showRepeaters: await settingsService.getShowRepeaters(),

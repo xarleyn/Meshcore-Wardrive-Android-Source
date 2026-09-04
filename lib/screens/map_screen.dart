@@ -164,6 +164,9 @@ class _MapScreenState extends State<MapScreen> {
       false; // Coverage stays green on any success, ignoring losses
   bool _showCoverage = true; // Show coverage boxes
   bool _mapLodEnabled = true; // Coarsen coverage/samples at low zoom
+  // User-configured geohash precision bounds for the LOD simplification.
+  int _mapLodMinPrecision = MapLodService.defaultMinPrecision;
+  int _mapLodMaxPrecision = MapLodService.defaultMaxPrecision;
   bool _sampleGeohashGrouping =
       false; // Merge samples per geohash cell into one tappable marker
   bool _showEdges = true;
@@ -681,6 +684,8 @@ class _MapScreenState extends State<MapScreen> {
       _sampleMarkerRadius = settings.sampleMarkerRadius;
       _showCoverage = settings.showCoverage;
       _mapLodEnabled = settings.mapLodEnabled;
+      _mapLodMinPrecision = settings.mapLodMinPrecision;
+      _mapLodMaxPrecision = settings.mapLodMaxPrecision;
       _sampleGeohashGrouping = settings.sampleGeohashGrouping;
       _showEdges = settings.showEdges;
       _showRepeaters = settings.showRepeaters;
@@ -1324,6 +1329,8 @@ class _MapScreenState extends State<MapScreen> {
       zoom: _mapLodZoom,
       enabled: _mapLodEnabled,
       maxPrecision: _coveragePrecision,
+      minLodPrecision: _mapLodMinPrecision,
+      maxLodPrecision: _mapLodMaxPrecision,
     );
   }
 
@@ -1331,6 +1338,8 @@ class _MapScreenState extends State<MapScreen> {
     return _mapDataController.sampleLodPrecision(
       zoom: _mapLodZoom,
       enabled: _mapLodEnabled,
+      minLodPrecision: _mapLodMinPrecision,
+      maxLodPrecision: _mapLodMaxPrecision,
     );
   }
 
@@ -1346,10 +1355,14 @@ class _MapScreenState extends State<MapScreen> {
       zoom: zoom,
       enabled: true,
       maxPrecision: _coveragePrecision,
+      minLodPrecision: _mapLodMinPrecision,
+      maxLodPrecision: _mapLodMaxPrecision,
     );
     final newSamplePrecision = _mapDataController.sampleLodPrecision(
       zoom: zoom,
       enabled: true,
+      minLodPrecision: _mapLodMinPrecision,
+      maxLodPrecision: _mapLodMaxPrecision,
     );
 
     if (oldCoveragePrecision == newCoveragePrecision &&
@@ -1371,6 +1384,8 @@ class _MapScreenState extends State<MapScreen> {
       showGpsSamples: _showGpsSamples,
       showSuccessfulOnly: _showSuccessfulOnly,
       includeOnlyRepeaters: _includeOnlyRepeaters,
+      minLodPrecision: _mapLodMinPrecision,
+      maxLodPrecision: _mapLodMaxPrecision,
     );
   }
 
@@ -1796,6 +1811,8 @@ class _MapScreenState extends State<MapScreen> {
       enabled: _mapLodEnabled,
       maxPrecision: _coveragePrecision,
       successfulOnly: _showSuccessfulOnly,
+      minLodPrecision: _mapLodMinPrecision,
+      maxLodPrecision: _mapLodMaxPrecision,
     );
     return [
       CoverageLayer(
@@ -1847,6 +1864,8 @@ class _MapScreenState extends State<MapScreen> {
       enabled: _mapLodEnabled,
       maxPrecision: _coveragePrecision,
       successfulOnly: _showSuccessfulOnly,
+      minLodPrecision: _mapLodMinPrecision,
+      maxLodPrecision: _mapLodMaxPrecision,
     );
     return EdgeLayer(
       edges: lod.edges,
