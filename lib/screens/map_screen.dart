@@ -25,7 +25,6 @@ import '../utils/heading_utils.dart';
 import '../utils/session_map_view.dart';
 import '../utils/ducting_presentation.dart';
 import '../widgets/compass_calibration.dart';
-import 'map/dialogs/map_workflow_dialogs.dart';
 import 'map/dialogs/marker_dialogs.dart';
 import 'map/dialogs/theme_flows.dart';
 import 'map/dialogs/update_flow.dart';
@@ -37,6 +36,7 @@ import 'map/map_annotations_controller.dart';
 import 'map/map_runtime_bindings.dart';
 import 'map/map_screen_controller.dart';
 import 'map/map_settings_controller.dart';
+import 'map/tracking_flow.dart';
 import 'map/tracking_permissions.dart';
 import 'map/widgets/delete_mode_banner.dart';
 import 'map/widgets/map_action_buttons.dart';
@@ -909,140 +909,27 @@ class _MapScreenState extends State<MapScreen> {
     _loadSamples();
   }
 
-  Future<bool?> _confirmSaveEmptySession() {
-    return showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const SaveEmptySessionDialog(),
-    );
-  }
+  /// Tracking lifecycle facade with screen-owned state applied via setState.
+  TrackingFlow get _trackingFlow => TrackingFlow(
+    context: context,
+    onShowSnackBar: _showSnackBar,
+    locationService: _locationService,
+    settingsService: _settingsService,
+    mapDataController: _mapDataController,
+    isTracking: () => _isTracking,
+    currentSessionView: () => _sessionMapView,
+    loraConnected: _loraConnected,
+    carpeaterEnabled: _carpeaterEnabled,
+    setTrackingState: (tracking, autoPing) => _updateMapState(() {
+      _isTracking = tracking;
+      if (autoPing != null) _autoPingEnabled = autoPing;
+    }),
+    applySessionView: _applySessionMapView,
+    prepareAndroidTracking: _prepareAndroidTracking,
+  );
 
-  Future<void> _handleStoppedSession(int? sessionId) async {
-    if (sessionId == null || !mounted) return;
-
-    final sessions = await _mapDataController.getSessions();
-    if (!mounted) return;
-    WSession? finalized;
-    for (final session in sessions) {
-      if (session.id == sessionId) {
-        finalized = session;
-        break;
-      }
-    }
-    if (finalized == null) return;
-
-    if (!SessionMapView.isEmptySession(finalized.sampleCount)) {
-      _applySessionMapView(_sessionMapView.afterStopWithSamples(finalized));
-      return;
-    }
-
-    final save = await _confirmSaveEmptySession();
-    if (!mounted) return;
-    if (save != false) {
-      if (_sessionMapView.scope == SessionMapScope.session) {
-        _applySessionMapView(SessionMapView.session(finalized));
-      }
-      return;
-    }
-
-    await _mapDataController.deleteSession(sessionId);
-    final remaining = await _mapDataController.getSessions();
-    if (!mounted) return;
-    if (_sessionMapView.scope != SessionMapScope.session) return;
-
-    _applySessionMapView(_sessionMapView.afterDiscardingEmpty(remaining));
-    final l10n = AppLocalizations.of(context);
-    if (remaining.isEmpty) {
-      _showSnackBar(l10n.mapSessionDiscarded);
-    } else {
-      _showSnackBar(l10n.mapSessionDiscardedShowingLast);
-    }
-  }
-
-  Future<void> _toggleTracking({bool freshSession = false}) async {
-    if (_isTracking) {
-      // Persist session distance before stopping
-      final sessionMeters = _locationService.totalDistanceMeters;
-      if (sessionMeters > 0) {
-        await _settingsService.addToTotalDistanceDriven(sessionMeters);
-      }
-      final sessionId = _locationService.currentSessionId;
-      // Stop tracking and auto-ping
-      await _locationService.stopTracking();
-      _locationService.disableAutoPing();
-      setState(() {
-        _isTracking = false;
-        _autoPingEnabled = false;
-      });
-      await _handleStoppedSession(sessionId);
-      // Check for newly unlocked achievements
-      AchievementService().checkAndUnlock();
-    } else {
-      if (!await _prepareAndroidTracking()) return;
-
-      // Start tracking
-      final started = await _locationService.startTracking();
-      if (started) {
-        if (!mounted) return;
-        final l10n = AppLocalizations.of(context);
-        String startMessage = l10n.mapLocationTrackingStarted;
-        // Auto-enable ping or Carpeater if LoRa is connected
-        if (_loraConnected && _carpeaterEnabled) {
-          _locationService.setCarpeaterMode(true);
-          final carpeaterStarted = await _locationService.startCarpeater();
-          setState(() {
-            _isTracking = true;
-            _autoPingEnabled = false;
-          });
-          startMessage = carpeaterStarted
-              ? l10n.mapCarpeaterModeStarted
-              : l10n.mapCarpeaterFailedCheckSettings;
-        } else if (_loraConnected) {
-          _locationService.enableAutoPing();
-          setState(() {
-            _isTracking = true;
-            _autoPingEnabled = true;
-          });
-          startMessage = l10n.mapLocationTrackingAndAutoPingStarted;
-        } else {
-          setState(() {
-            _isTracking = true;
-          });
-        }
-        _onTrackingStarted(
-          freshSession: freshSession,
-          startMessage: startMessage,
-        );
-      } else {
-        if (!mounted) return;
-        _showSnackBar(
-          _locationService.lastStartError ??
-              AppLocalizations.of(context).mapFailedToStartTracking,
-        );
-      }
-    }
-  }
-
-  void _onTrackingStarted({
-    required bool freshSession,
-    required String startMessage,
-  }) {
-    if (freshSession) {
-      final sessionId = _locationService.currentSessionId;
-      final startTime = _locationService.sessionStartTime;
-      if (sessionId != null && startTime != null) {
-        _applySessionMapView(
-          _sessionMapView.afterFreshStart(
-            WSession(id: sessionId, startTime: startTime),
-          ),
-        );
-        _showSnackBar(AppLocalizations.of(context).mapNewSessionShowingTrip);
-        return;
-      }
-    }
-    _applySessionMapView(_sessionMapView.afterShortPressStart());
-    _showSnackBar(startMessage);
-  }
+  Future<void> _toggleTracking({bool freshSession = false}) =>
+      _trackingFlow.toggleTracking(freshSession: freshSession);
 
   /// Android tracking permission facade with screen dependencies injected.
   TrackingPermissions get _trackingPermissions => TrackingPermissions(
