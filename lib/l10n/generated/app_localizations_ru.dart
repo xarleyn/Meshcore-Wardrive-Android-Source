@@ -559,15 +559,21 @@ class AppLocalizationsRu extends AppLocalizations {
       'Сколько ждать ответов репитеров';
 
   @override
-  String get settingsThoroughResponseCollection => 'Полный сбор ответов';
+  String get settingsResponseCollection => 'Сбор ответов';
 
   @override
-  String get settingsThoroughOn =>
-      'Полный: собирать ответы до таймаута обнаружения';
+  String get settingsResponseCollectionFast => 'Быстрый';
 
   @override
-  String get settingsThoroughOff =>
-      'Быстрый: завершать через 3 секунды после первого ответа';
+  String get settingsResponseCollectionFull => 'Полный';
+
+  @override
+  String get settingsResponseCollectionFastDescription =>
+      'Завершать через 3 секунды после первого ответа';
+
+  @override
+  String get settingsResponseCollectionFullDescription =>
+      'Собирать ответы до таймаута обнаружения';
 
   @override
   String get settingsIgnoreRepeaters => 'Игнорировать репитеры';

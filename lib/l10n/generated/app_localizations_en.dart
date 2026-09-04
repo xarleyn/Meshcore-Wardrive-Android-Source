@@ -555,16 +555,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'How long to wait for repeater responses';
 
   @override
-  String get settingsThoroughResponseCollection =>
-      'Thorough Response Collection';
+  String get settingsResponseCollection => 'Response Collection';
 
   @override
-  String get settingsThoroughOn =>
-      'Thorough: collect responses until the discovery timeout';
+  String get settingsResponseCollectionFast => 'Fast';
 
   @override
-  String get settingsThoroughOff =>
-      'Fast: finish 3 seconds after the first response';
+  String get settingsResponseCollectionFull => 'Full';
+
+  @override
+  String get settingsResponseCollectionFastDescription =>
+      'Finish 3 seconds after the first response';
+
+  @override
+  String get settingsResponseCollectionFullDescription =>
+      'Collect responses until the discovery timeout';
 
   @override
   String get settingsIgnoreRepeaters => 'Ignore Repeaters';

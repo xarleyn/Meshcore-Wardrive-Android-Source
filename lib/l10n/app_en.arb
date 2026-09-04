@@ -671,17 +671,25 @@
   "@settingsDiscoveryTimeoutSubtitle": {
     "description": "Subtitle for discovery timeout"
   },
-  "settingsThoroughResponseCollection": "Thorough Response Collection",
-  "@settingsThoroughResponseCollection": {
-    "description": "Toggle for waiting until discovery timeout"
+  "settingsResponseCollection": "Response Collection",
+  "@settingsResponseCollection": {
+    "description": "Dropdown for how long ping responses are collected"
   },
-  "settingsThoroughOn": "Thorough: collect responses until the discovery timeout",
-  "@settingsThoroughOn": {
-    "description": "Subtitle when thorough collection is enabled"
+  "settingsResponseCollectionFast": "Fast",
+  "@settingsResponseCollectionFast": {
+    "description": "Fast mode label: finish shortly after the first response"
   },
-  "settingsThoroughOff": "Fast: finish 3 seconds after the first response",
-  "@settingsThoroughOff": {
-    "description": "Subtitle when thorough collection is disabled"
+  "settingsResponseCollectionFull": "Full",
+  "@settingsResponseCollectionFull": {
+    "description": "Full mode label: collect until the discovery timeout"
+  },
+  "settingsResponseCollectionFastDescription": "Finish 3 seconds after the first response",
+  "@settingsResponseCollectionFastDescription": {
+    "description": "Subtitle describing the fast mode"
+  },
+  "settingsResponseCollectionFullDescription": "Collect responses until the discovery timeout",
+  "@settingsResponseCollectionFullDescription": {
+    "description": "Subtitle describing the full mode"
   },
   "settingsIgnoreRepeaters": "Ignore Repeaters",
   "@settingsIgnoreRepeaters": {

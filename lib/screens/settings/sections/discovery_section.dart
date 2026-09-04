@@ -3,13 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../services/settings_service.dart';
 import '../../../widgets/discovery_timeout_options.dart';
 import '../widgets/settings_section_header.dart';
 
 class DiscoverySettingsValues {
   const DiscoverySettingsValues({
     required this.timeoutSeconds,
-    required this.thoroughResponseCollection,
+    required this.responseCollectionMode,
     required this.ignoredRepeaterPrefix,
     required this.includeOnlyRepeaters,
     required this.filterEdgesByWhitelist,
@@ -20,7 +21,7 @@ class DiscoverySettingsValues {
   });
 
   final int timeoutSeconds;
-  final bool thoroughResponseCollection;
+  final String responseCollectionMode;
   final String? ignoredRepeaterPrefix;
   final String? includeOnlyRepeaters;
   final bool filterEdgesByWhitelist;
@@ -34,7 +35,7 @@ List<Widget> buildDiscoverySettings(
   BuildContext context, {
   required DiscoverySettingsValues values,
   required FutureOr<void> Function(int value) onTimeoutChanged,
-  required FutureOr<void> Function(bool value) onThoroughChanged,
+  required FutureOr<void> Function(String value) onCollectionModeChanged,
   required VoidCallback onEditIgnoredRepeaters,
   required VoidCallback onEditIncludedRepeaters,
   required FutureOr<void> Function(bool value) onFilterEdgesChanged,
@@ -59,15 +60,34 @@ List<Widget> buildDiscoverySettings(
         onChanged: onTimeoutChanged,
       ),
     ),
-    SwitchListTile(
-      title: Text(l10n.settingsThoroughResponseCollection),
+    ListTile(
+      title: Text(l10n.settingsResponseCollection),
       subtitle: Text(
-        values.thoroughResponseCollection
-            ? l10n.settingsThoroughOn
-            : l10n.settingsThoroughOff,
+        values.responseCollectionMode ==
+                SettingsService.responseCollectionModeFull
+            ? l10n.settingsResponseCollectionFullDescription
+            : l10n.settingsResponseCollectionFastDescription,
       ),
-      value: values.thoroughResponseCollection,
-      onChanged: onThoroughChanged,
+      trailing: DropdownButton<String>(
+        value:
+            values.responseCollectionMode ==
+                SettingsService.responseCollectionModeFull
+            ? SettingsService.responseCollectionModeFull
+            : SettingsService.responseCollectionModeFast,
+        items: [
+          DropdownMenuItem(
+            value: SettingsService.responseCollectionModeFast,
+            child: Text(l10n.settingsResponseCollectionFast),
+          ),
+          DropdownMenuItem(
+            value: SettingsService.responseCollectionModeFull,
+            child: Text(l10n.settingsResponseCollectionFull),
+          ),
+        ],
+        onChanged: (value) {
+          if (value != null) onCollectionModeChanged(value);
+        },
+      ),
     ),
     ListTile(
       title: Text(l10n.settingsIgnoreRepeaters),

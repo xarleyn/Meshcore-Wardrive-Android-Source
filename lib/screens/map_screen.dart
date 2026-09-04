@@ -200,7 +200,7 @@ class _MapScreenState extends State<MapScreen> {
 
   // Discovery timeout (5-30 seconds)
   int _discoveryTimeoutSeconds = 10;
-  bool _thoroughResponseCollection = false;
+  String _responseCollectionMode = SettingsService.responseCollectionModeFast;
 
   // Fuel unit ('imperial' for MPG/gal, 'metric' for L/100km/L)
   String _fuelUnit = 'metric';
@@ -695,7 +695,7 @@ class _MapScreenState extends State<MapScreen> {
       _distanceUnit = settings.distanceUnit;
       _colorBlindMode = settings.colorBlindMode;
       _discoveryTimeoutSeconds = settings.discoveryTimeoutSeconds;
-      _thoroughResponseCollection = settings.thoroughResponseCollection;
+      _responseCollectionMode = settings.responseCollectionMode;
       _fuelUnit = settings.fuelUnit;
       _showRouteTrail = settings.showRouteTrail;
       _showHeatmap = settings.showHeatmap;
@@ -1898,7 +1898,7 @@ class _MapScreenState extends State<MapScreen> {
     final outcome = await _manualPingService.ping(
       position: _currentPosition!,
       timeoutSeconds: _discoveryTimeoutSeconds,
-      thoroughResponseCollection: _thoroughResponseCollection,
+      responseCollectionMode: _responseCollectionMode,
     );
 
     // Reload samples to update map

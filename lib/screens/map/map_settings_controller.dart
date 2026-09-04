@@ -26,7 +26,7 @@ class MapSettingsSnapshot {
     required this.distanceUnit,
     required this.colorBlindMode,
     required this.discoveryTimeoutSeconds,
-    required this.thoroughResponseCollection,
+    required this.responseCollectionMode,
     required this.fuelUnit,
     required this.showRouteTrail,
     required this.showHeatmap,
@@ -76,7 +76,7 @@ class MapSettingsSnapshot {
   final String distanceUnit;
   final String colorBlindMode;
   final int discoveryTimeoutSeconds;
-  final bool thoroughResponseCollection;
+  final String responseCollectionMode;
   final String fuelUnit;
   final bool showRouteTrail;
   final bool showHeatmap;
@@ -172,8 +172,7 @@ class MapSettingsController {
       distanceUnit: await settingsService.getDistanceUnit(),
       colorBlindMode: await settingsService.getColorBlindMode(),
       discoveryTimeoutSeconds: await settingsService.getDiscoveryTimeout(),
-      thoroughResponseCollection: await settingsService
-          .getThoroughResponseCollection(),
+      responseCollectionMode: await settingsService.getResponseCollectionMode(),
       fuelUnit: await settingsService.getFuelUnit(),
       showRouteTrail: await settingsService.getShowRouteTrail(),
       showHeatmap: await settingsService.getShowHeatmap(),

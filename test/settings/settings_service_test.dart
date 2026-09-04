@@ -375,17 +375,49 @@ void main() {
       expect(await settings.getDistanceUnit(), 'km');
       expect(await settings.getFuelUnit(), 'metric');
       expect(await settings.getDiscoveryTimeout(), 10);
-      expect(await settings.getThoroughResponseCollection(), isFalse);
+      expect(
+        await settings.getResponseCollectionMode(),
+        SettingsService.responseCollectionModeFast,
+      );
       expect(await settings.getPingMode(), 'time');
       expect(await settings.getPingTimeInterval(), 30);
     });
 
-    test('persists thorough response collection', () async {
+    test('persists the full response collection mode', () async {
       final settings = SettingsService();
 
-      await settings.setThoroughResponseCollection(true);
+      await settings.setResponseCollectionMode(
+        SettingsService.responseCollectionModeFull,
+      );
 
-      expect(await settings.getThoroughResponseCollection(), isTrue);
+      expect(
+        await settings.getResponseCollectionMode(),
+        SettingsService.responseCollectionModeFull,
+      );
+    });
+
+    test('migrates the legacy thorough toggle to the full mode', () async {
+      SharedPreferences.setMockInitialValues({
+        'thorough_response_collection': true,
+      });
+      final settings = SettingsService();
+
+      expect(
+        await settings.getResponseCollectionMode(),
+        SettingsService.responseCollectionModeFull,
+      );
+    });
+
+    test('migrates the legacy thorough toggle to the fast mode', () async {
+      SharedPreferences.setMockInitialValues({
+        'thorough_response_collection': false,
+      });
+      final settings = SettingsService();
+
+      expect(
+        await settings.getResponseCollectionMode(),
+        SettingsService.responseCollectionModeFast,
+      );
     });
   });
 

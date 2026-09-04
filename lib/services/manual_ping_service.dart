@@ -4,6 +4,7 @@ import '../models/models.dart';
 import '../utils/geohash_utils.dart';
 import 'database_service.dart';
 import 'lora_companion_service.dart';
+import 'settings_service.dart';
 import 'sound_service.dart';
 
 /// Outcome of a manual ping, for the caller to present to the user.
@@ -37,7 +38,7 @@ class ManualPingService {
   Future<ManualPingOutcome> ping({
     required LatLng position,
     required int timeoutSeconds,
-    required bool thoroughResponseCollection,
+    required String responseCollectionMode,
   }) async {
     SoundService().playPingSent();
 
@@ -47,7 +48,8 @@ class ManualPingService {
       longitude: position.longitude,
       timeoutSeconds: timeoutSeconds,
       waitForAllResponses: true,
-      collectUntilTimeout: thoroughResponseCollection,
+      collectUntilTimeout:
+          responseCollectionMode == SettingsService.responseCollectionModeFull,
     );
 
     final responses = result.responses;

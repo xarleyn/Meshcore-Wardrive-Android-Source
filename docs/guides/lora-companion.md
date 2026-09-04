@@ -154,8 +154,9 @@ quick settings panel on the map screen.
 
 Settings → Discovery → **Discovery timeout**: how long the app collects
 repeater responses after a ping, from 5 to 30 seconds (default 10 s). The
-**Thorough response collection** toggle next to it keeps collecting until the
-timeout instead of finishing early.
+**Response collection** dropdown next to it selects how long the app keeps
+listening: **Fast** finishes three seconds after the first response, **Full**
+collects until the timeout.
 
 ### Ignore / Include Repeaters
 

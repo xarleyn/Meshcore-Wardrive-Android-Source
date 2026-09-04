@@ -1070,23 +1070,35 @@ abstract class AppLocalizations {
   /// **'How long to wait for repeater responses'**
   String get settingsDiscoveryTimeoutSubtitle;
 
-  /// Toggle for waiting until discovery timeout
+  /// Dropdown for how long ping responses are collected
   ///
   /// In en, this message translates to:
-  /// **'Thorough Response Collection'**
-  String get settingsThoroughResponseCollection;
+  /// **'Response Collection'**
+  String get settingsResponseCollection;
 
-  /// Subtitle when thorough collection is enabled
+  /// Fast mode label: finish shortly after the first response
   ///
   /// In en, this message translates to:
-  /// **'Thorough: collect responses until the discovery timeout'**
-  String get settingsThoroughOn;
+  /// **'Fast'**
+  String get settingsResponseCollectionFast;
 
-  /// Subtitle when thorough collection is disabled
+  /// Full mode label: collect until the discovery timeout
   ///
   /// In en, this message translates to:
-  /// **'Fast: finish 3 seconds after the first response'**
-  String get settingsThoroughOff;
+  /// **'Full'**
+  String get settingsResponseCollectionFull;
+
+  /// Subtitle describing the fast mode
+  ///
+  /// In en, this message translates to:
+  /// **'Finish 3 seconds after the first response'**
+  String get settingsResponseCollectionFastDescription;
+
+  /// Subtitle describing the full mode
+  ///
+  /// In en, this message translates to:
+  /// **'Collect responses until the discovery timeout'**
+  String get settingsResponseCollectionFullDescription;
 
   /// Tile and dialog to ignore repeater prefixes
   ///

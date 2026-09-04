@@ -191,7 +191,7 @@ extension _SettingsPageNavigation on _MapScreenState {
           context,
           values: DiscoverySettingsValues(
             timeoutSeconds: _discoveryTimeoutSeconds,
-            thoroughResponseCollection: _thoroughResponseCollection,
+            responseCollectionMode: _responseCollectionMode,
             ignoredRepeaterPrefix: _ignoredRepeaterPrefix,
             includeOnlyRepeaters: _includeOnlyRepeaters,
             filterEdgesByWhitelist: _filterEdgesByWhitelist,
@@ -211,10 +211,10 @@ extension _SettingsPageNavigation on _MapScreenState {
             setPageState(() {});
             await _settingsService.setDiscoveryTimeout(value);
           },
-          onThoroughChanged: (value) async {
-            _updateMapState(() => _thoroughResponseCollection = value);
+          onCollectionModeChanged: (value) async {
+            _updateMapState(() => _responseCollectionMode = value);
             setPageState(() {});
-            await _settingsService.setThoroughResponseCollection(value);
+            await _settingsService.setResponseCollectionMode(value);
           },
           onEditIgnoredRepeaters: () => _editIgnoredRepeaters(context),
           onEditIncludedRepeaters: () => _editIncludedRepeaters(context),

@@ -74,8 +74,18 @@ class SettingsService {
   static const String _distanceUnitKey = 'distance_unit';
   static const String _colorBlindModeKey = 'color_blind_mode';
   static const String _discoveryTimeoutKey = 'discovery_timeout_seconds';
+  static const String _responseCollectionModeKey = 'response_collection_mode';
+
+  /// Legacy boolean key of the former "thorough response collection" toggle,
+  /// read only to migrate existing installs to the string-based mode.
   static const String _thoroughResponseCollectionKey =
       'thorough_response_collection';
+
+  /// Collect responses until three seconds after the first response.
+  static const String responseCollectionModeFast = 'fast';
+
+  /// Collect responses until the discovery timeout expires.
+  static const String responseCollectionModeFull = 'full';
   static const String _totalDistanceDrivenKey = 'total_distance_driven_meters';
   static const String _vehicleMpgKey = 'vehicle_mpg';
   static const String _gasPriceKey = 'gas_price_per_gallon';
@@ -404,18 +414,29 @@ class SettingsService {
     await prefs.setInt(_discoveryTimeoutKey, value);
   }
 
-  /// Whether discovery should keep collecting responses until its timeout.
+  /// How long to keep collecting responses after a ping: either
+  /// [responseCollectionModeFast] (default) or [responseCollectionModeFull].
   ///
-  /// Disabled by default to preserve the fast mode, which completes the
-  /// collection three seconds after the first response.
-  Future<bool> getThoroughResponseCollection() async {
+  /// Migrates the former boolean "thorough" toggle: a stored `true` maps to
+  /// the full mode, everything else falls back to fast.
+  Future<String> getResponseCollectionMode() async {
     final prefs = await _prefs;
-    return prefs.getBool(_thoroughResponseCollectionKey) ?? false;
+    final stored = prefs.getString(_responseCollectionModeKey);
+    if (stored != null) {
+      return stored == responseCollectionModeFull
+          ? responseCollectionModeFull
+          : responseCollectionModeFast;
+    }
+    final legacyThorough =
+        prefs.getBool(_thoroughResponseCollectionKey) ?? false;
+    return legacyThorough
+        ? responseCollectionModeFull
+        : responseCollectionModeFast;
   }
 
-  Future<void> setThoroughResponseCollection(bool value) async {
+  Future<void> setResponseCollectionMode(String value) async {
     final prefs = await _prefs;
-    await prefs.setBool(_thoroughResponseCollectionKey, value);
+    await prefs.setString(_responseCollectionModeKey, value);
   }
 
   /// Get total distance driven across all sessions (in meters)
