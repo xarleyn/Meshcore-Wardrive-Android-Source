@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_compass/flutter_compass.dart';
@@ -51,14 +50,12 @@ import 'map/widgets/map_quick_settings_panel.dart';
 import 'map/widgets/map_screen_actions.dart';
 import '../services/widget_service.dart';
 
-import 'package:share_plus/share_plus.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:flutter_map_cache/flutter_map_cache.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:dio_cache_interceptor_file_store/dio_cache_interceptor_file_store.dart';
 
-import 'dart:typed_data';
-
+import 'map/screenshot_flow.dart';
 import 'debug_log_screen.dart';
 import 'debug_diagnostics_screen.dart';
 import 'session_history_screen.dart';
@@ -1420,76 +1417,17 @@ class _MapScreenState extends State<MapScreen> {
     _mapController.rotate(HeadingUtils.mapRotationForHeading(_currentHeading));
   }
 
-  Future<void> _captureScreenshot() async {
-    try {
-      // Hide UI elements
-      setState(() {
-        _hideUIForScreenshot = true;
-      });
+  /// Screenshot capture/share facade with the screen's UI toggle injected.
+  ScreenshotFlow get _screenshotFlow => ScreenshotFlow(
+    context: context,
+    onShowSnackBar: _showSnackBar,
+    screenshotController: _screenshotController,
+    screenshotService: _screenshotService,
+    setUiHidden: (hidden) =>
+        _updateMapState(() => _hideUIForScreenshot = hidden),
+  );
 
-      // Wait for UI to update
-      await Future.delayed(const Duration(milliseconds: 300));
-
-      // Capture screenshot
-      final Uint8List? imageBytes = await _screenshotController.capture(
-        pixelRatio: 2.0, // Higher quality
-      );
-
-      // Restore UI
-      setState(() {
-        _hideUIForScreenshot = false;
-      });
-
-      if (imageBytes == null) {
-        if (!mounted) return;
-        _showSnackBar(
-          AppLocalizations.of(context).mapFailedToCaptureScreenshot,
-        );
-        return;
-      }
-
-      // Save to gallery
-      final String fileName =
-          'meshcore_wardrive_${DateTime.now().millisecondsSinceEpoch}.png';
-      final saved = await _screenshotService.saveToGallery(
-        imageBytes,
-        fileName,
-      );
-
-      if (saved) {
-        if (!mounted) return;
-        _showSnackBar(AppLocalizations.of(context).mapScreenshotSavedToGallery);
-
-        // Ask if user wants to share
-        if (!mounted) return;
-        final shouldShare = await showDialog<bool>(
-          context: context,
-          builder: (context) => const ShareScreenshotDialog(),
-        );
-        if (shouldShare != true || !mounted) return;
-        final shareText = AppLocalizations.of(context).mapScreenshotShareText;
-        final tempDir = await getTemporaryDirectory();
-        final file = File('${tempDir.path}/meshcore_screenshot.png');
-        await file.writeAsBytes(imageBytes);
-        if (!mounted) return;
-        await SharePlus.instance.share(
-          ShareParams(files: [XFile(file.path)], text: shareText),
-        );
-      } else {
-        if (!mounted) return;
-        _showSnackBar(AppLocalizations.of(context).mapFailedToSaveScreenshot);
-      }
-    } catch (e) {
-      // Restore UI on error
-      setState(() {
-        _hideUIForScreenshot = false;
-      });
-      if (!mounted) return;
-      _showSnackBar(
-        AppLocalizations.of(context).mapErrorCapturingScreenshot('$e'),
-      );
-    }
-  }
+  Future<void> _captureScreenshot() => _screenshotFlow.saveToGallery();
 
   @override
   void dispose() {
@@ -2120,76 +2058,34 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _showOfflineTileDownload() =>
       _offlineTileFlow.downloadOfflineTiles();
 
-  Future<void> _shareCoverageMap() async {
-    try {
-      // Hide UI elements for clean screenshot
-      setState(() {
-        _hideUIForScreenshot = true;
-      });
-      await Future.delayed(const Duration(milliseconds: 300));
-
-      final Uint8List? imageBytes = await _screenshotController.capture(
-        pixelRatio: 2.0,
-      );
-
-      setState(() {
-        _hideUIForScreenshot = false;
-      });
-
-      if (imageBytes == null) {
-        if (!mounted) return;
-        _showSnackBar(
-          AppLocalizations.of(context).mapFailedToCaptureScreenshot,
-        );
-        return;
-      }
-
-      // Build stats text
+  Future<void> _shareCoverageMap() => _screenshotFlow.shareCoverageMap(
+    buildShareText: () {
+      // Build coverage stats text
       final pingSamples = _samples.where((s) => s.pingSuccess != null).toList();
       final successCount = pingSamples
           .where((s) => s.pingSuccess == true)
           .length;
       final failCount = pingSamples.where((s) => s.pingSuccess == false).length;
       final totalPings = successCount + failCount;
-      if (!mounted) return;
+      if (!mounted) return null;
       final l10n = AppLocalizations.of(context);
       final successRate = totalPings > 0
           ? ((successCount / totalPings) * 100).toStringAsFixed(0)
           : l10n.mapNotAvailable;
       final coverageCount = _aggregationResult?.coverages.length ?? 0;
-
-      final statsText = l10n.mapCoverageShareText(
-        '${_samples.length}',
-        '$coverageCount',
-        '$successCount',
-        '$failCount',
-        successRate,
-        '${_repeaters.length}',
-      );
-
-      // Save temp file and share
-      final tempDir = await getTemporaryDirectory();
-      final file = File(
-        '${tempDir.path}/meshcore_coverage_${DateTime.now().millisecondsSinceEpoch}.png',
-      );
-      await file.writeAsBytes(imageBytes);
-
-      if (!mounted) return;
-      await SharePlus.instance.share(
-        ShareParams(
-          files: [XFile(file.path)],
-          subject: AppLocalizations.of(context).mapCoverageShareSubject,
-          text: statsText,
+      return (
+        subject: l10n.mapCoverageShareSubject,
+        text: l10n.mapCoverageShareText(
+          '${_samples.length}',
+          '$coverageCount',
+          '$successCount',
+          '$failCount',
+          successRate,
+          '${_repeaters.length}',
         ),
       );
-    } catch (e) {
-      setState(() {
-        _hideUIForScreenshot = false;
-      });
-      if (!mounted) return;
-      _showSnackBar(AppLocalizations.of(context).mapShareFailed('$e'));
-    }
-  }
+    },
+  );
 
   void _showRepeaterFilterPicker() async {
     // Collect all known repeater IDs from coverage data and discovered repeaters
