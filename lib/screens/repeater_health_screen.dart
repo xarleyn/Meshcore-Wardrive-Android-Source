@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../l10n/generated/app_localizations.dart';
 import '../models/models.dart';
-import '../utils/geohash_utils.dart';
+import '../services/repeater_stats_service.dart';
 
 /// Repeater Health Dashboard — per-repeater drill-down with charts,
 /// degradation alerts, coverage cells, and recent ping history.
@@ -21,7 +21,7 @@ class _RepeaterHealthScreenState extends State<RepeaterHealthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final byRepeater = _groupByRepeater(widget.samples);
+    final byRepeater = RepeaterStatsService.groupByRepeater(widget.samples);
 
     if (byRepeater.isEmpty) {
       return Scaffold(
@@ -39,7 +39,7 @@ class _RepeaterHealthScreenState extends State<RepeaterHealthScreen> {
     }
 
     final stats = byRepeater.entries
-        .map((e) => _computeStats(e.key, e.value))
+        .map((e) => RepeaterStatsService.compute(e.key, e.value))
         .toList();
 
     switch (_sortBy) {
@@ -183,103 +183,15 @@ class _RepeaterHealthScreenState extends State<RepeaterHealthScreen> {
     );
   }
 
-  void _openDetail(_RepeaterStats stats, List<Sample> samples) {
+  void _openDetail(RepeaterStats stats, List<Sample> samples) {
+    final ordered = [...samples]
+      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) =>
-            _RepeaterDetailScreen(stats: stats, samples: samples),
+            _RepeaterDetailScreen(stats: stats, samples: ordered),
       ),
-    );
-  }
-
-  Map<String, List<Sample>> _groupByRepeater(List<Sample> samples) {
-    final Map<String, List<Sample>> map = {};
-    for (final s in samples) {
-      if (s.pingSuccess != null && s.path != null && s.path!.isNotEmpty) {
-        map.putIfAbsent(s.path!, () => []);
-        map[s.path!]!.add(s);
-      }
-    }
-    return map;
-  }
-
-  _RepeaterStats _computeStats(String id, List<Sample> samples) {
-    final successes = samples.where((s) => s.pingSuccess == true).length;
-    final totalPings = samples.length;
-    final responseRate = totalPings > 0 ? successes / totalPings : 0.0;
-
-    final responseTimes = samples
-        .where((s) => s.responseTimeMs != null)
-        .map((s) => s.responseTimeMs!.toDouble())
-        .toList();
-
-    double? avgResponse;
-    if (responseTimes.isNotEmpty) {
-      avgResponse =
-          responseTimes.reduce((a, b) => a + b) / responseTimes.length;
-    }
-
-    // Trend: 7-day vs 30-day
-    final now = DateTime.now();
-    final sevenDays = now.subtract(const Duration(days: 7));
-    final thirtyDays = now.subtract(const Duration(days: 30));
-
-    final recent7 = samples
-        .where((s) => s.timestamp.isAfter(sevenDays))
-        .toList();
-    final recent30 = samples
-        .where((s) => s.timestamp.isAfter(thirtyDays))
-        .toList();
-
-    double? rate7, rate30;
-    if (recent7.length >= 3) {
-      rate7 =
-          recent7.where((s) => s.pingSuccess == true).length / recent7.length;
-    }
-    if (recent30.length >= 3) {
-      rate30 =
-          recent30.where((s) => s.pingSuccess == true).length / recent30.length;
-    }
-
-    String trend = 'stable';
-    bool isDegrading = false;
-    if (rate7 != null && rate30 != null) {
-      if (rate7 - rate30 > 0.1) {
-        trend = 'improving';
-      } else if (rate30 - rate7 > 0.15) {
-        trend = 'degrading';
-        isDegrading = true;
-      }
-    }
-
-    samples.sort((a, b) => a.timestamp.compareTo(b.timestamp));
-
-    // Count unique coverage cells
-    final cells = <String>{};
-    for (final s in samples) {
-      cells.add(GeohashUtils.truncate(s.geohash, 6));
-    }
-
-    // Offline detection: not seen in 7 days with 10+ pings total
-    final daysSinceSeen = now.difference(samples.last.timestamp).inDays;
-    final isOffline = daysSinceSeen >= 7 && totalPings >= 10;
-
-    return _RepeaterStats(
-      id: id,
-      totalPings: totalPings,
-      successCount: successes,
-      responseRate: responseRate,
-      avgResponseMs: avgResponse,
-      trend: trend,
-      isDegrading: isDegrading,
-      isOffline: isOffline,
-      daysSinceSeen: daysSinceSeen,
-      rate7day: rate7,
-      rate30day: rate30,
-      firstSeen: samples.first.timestamp,
-      lastSeen: samples.last.timestamp,
-      coverageCells: cells.length,
     );
   }
 }
@@ -289,7 +201,7 @@ class _RepeaterHealthScreenState extends State<RepeaterHealthScreen> {
 // =============================================================================
 
 class _RepeaterCard extends StatelessWidget {
-  final _RepeaterStats stats;
+  final RepeaterStats stats;
   final VoidCallback onTap;
 
   const _RepeaterCard({required this.stats, required this.onTap});
@@ -445,7 +357,7 @@ class _RepeaterCard extends StatelessWidget {
 // =============================================================================
 
 class _RepeaterDetailScreen extends StatelessWidget {
-  final _RepeaterStats stats;
+  final RepeaterStats stats;
   final List<Sample> samples;
 
   const _RepeaterDetailScreen({required this.stats, required this.samples});
@@ -933,7 +845,7 @@ class _RepeaterDetailScreen extends StatelessWidget {
 // Stats Model
 // =============================================================================
 
-class _RepeaterStats {
+class RepeaterStats {
   final String id;
   final int totalPings;
   final int successCount;
@@ -949,7 +861,7 @@ class _RepeaterStats {
   final DateTime lastSeen;
   final int coverageCells;
 
-  _RepeaterStats({
+  RepeaterStats({
     required this.id,
     required this.totalPings,
     required this.successCount,

@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
@@ -10,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 import '../models/models.dart';
 import '../services/aggregation_service.dart';
 import '../services/database_service.dart';
+import '../services/repeater_stats_service.dart';
 import '../services/settings_service.dart';
 import '../utils/distance_units.dart';
 import '../utils/geohash_utils.dart';
@@ -1414,13 +1413,7 @@ class _RepeaterReliabilityTabState extends State<_RepeaterReliabilityTab> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     // Group samples by repeater (path)
-    final Map<String, List<Sample>> byRepeater = {};
-    for (final s in widget.samples) {
-      if (s.pingSuccess != null && s.path != null && s.path!.isNotEmpty) {
-        byRepeater.putIfAbsent(s.path!, () => []);
-        byRepeater[s.path!]!.add(s);
-      }
-    }
+    final byRepeater = RepeaterStatsService.groupByRepeater(widget.samples);
 
     if (byRepeater.isEmpty) {
       return Center(
@@ -1434,7 +1427,7 @@ class _RepeaterReliabilityTabState extends State<_RepeaterReliabilityTab> {
 
     // Compute stats per repeater
     final stats = byRepeater.entries
-        .map((e) => _computeRepeaterStats(e.key, e.value))
+        .map((e) => RepeaterStatsService.compute(e.key, e.value))
         .toList();
 
     // Sort
@@ -1590,8 +1583,8 @@ class _RepeaterReliabilityTabState extends State<_RepeaterReliabilityTab> {
                 ),
                 _miniStat(
                   l10n.analyticsMiniConsistency,
-                  stats.consistencyScore != null
-                      ? stats.consistencyScore!.toStringAsFixed(0)
+                  stats.responseStddevMs != null
+                      ? stats.responseStddevMs!.toStringAsFixed(0)
                       : '—',
                 ),
                 _miniStat(
@@ -1626,97 +1619,5 @@ class _RepeaterReliabilityTabState extends State<_RepeaterReliabilityTab> {
         ],
       ),
     );
-  }
-
-  _RepeaterStats _computeRepeaterStats(String id, List<Sample> samples) {
-    final successes = samples.where((s) => s.pingSuccess == true).length;
-    final totalPings = samples.length;
-    final responseRate = totalPings > 0 ? successes / totalPings : 0.0;
-
-    // Response times
-    final responseTimes = samples
-        .where((s) => s.responseTimeMs != null)
-        .map((s) => s.responseTimeMs!.toDouble())
-        .toList();
-
-    double? avgResponse;
-    double? stddev;
-    if (responseTimes.isNotEmpty) {
-      avgResponse =
-          responseTimes.reduce((a, b) => a + b) / responseTimes.length;
-      final variance =
-          responseTimes
-              .map((t) => (t - avgResponse!) * (t - avgResponse))
-              .reduce((a, b) => a + b) /
-          responseTimes.length;
-      stddev = sqrt(variance);
-    }
-
-    // Trend: compare last 7 days vs prior 7 days
-    final now = DateTime.now();
-    final sevenDaysAgo = now.subtract(const Duration(days: 7));
-    final fourteenDaysAgo = now.subtract(const Duration(days: 14));
-
-    final recent = samples
-        .where((s) => s.timestamp.isAfter(sevenDaysAgo))
-        .toList();
-    final prior = samples
-        .where(
-          (s) =>
-              s.timestamp.isAfter(fourteenDaysAgo) &&
-              s.timestamp.isBefore(sevenDaysAgo),
-        )
-        .toList();
-
-    String trend = 'stable';
-    if (recent.length >= 3 && prior.length >= 3) {
-      final recentRate =
-          recent.where((s) => s.pingSuccess == true).length / recent.length;
-      final priorRate =
-          prior.where((s) => s.pingSuccess == true).length / prior.length;
-      if (recentRate - priorRate > 0.1) {
-        trend = 'improving';
-      } else if (priorRate - recentRate > 0.1) {
-        trend = 'degrading';
-      }
-    }
-
-    // First/last seen
-    samples.sort((a, b) => a.timestamp.compareTo(b.timestamp));
-    final firstSeen = samples.first.timestamp;
-    final lastSeen = samples.last.timestamp;
-
-    return _RepeaterStats(
-      id: id,
-      totalPings: totalPings,
-      responseRate: responseRate,
-      avgResponseMs: avgResponse,
-      consistencyScore: stddev,
-      trend: trend,
-      firstSeen: firstSeen,
-      lastSeen: lastSeen,
-    );
-  }
-}
-
-class _RepeaterStats {
-  final String id;
-  final int totalPings;
-  final double responseRate;
-  final double? avgResponseMs;
-  final double? consistencyScore; // stddev of response times
-  final String trend; // 'improving', 'stable', 'degrading'
-  final DateTime firstSeen;
-  final DateTime lastSeen;
-
-  _RepeaterStats({
-    required this.id,
-    required this.totalPings,
-    required this.responseRate,
-    this.avgResponseMs,
-    this.consistencyScore,
-    required this.trend,
-    required this.firstSeen,
-    required this.lastSeen,
   });
 }
