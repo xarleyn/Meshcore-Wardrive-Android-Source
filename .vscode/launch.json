@@ -17,22 +17,6 @@
       }
     },
     {
-      "name": "Android: Debug (Redmi Note 9S)",
-      "request": "launch",
-      "type": "dart",
-      "program": "lib/main.dart",
-      "flutterMode": "debug",
-      "deviceId": "d9904acb",
-      "preLaunchTask": "Flutter: Get dependencies",
-      "env": {
-        "JAVA_HOME": "${workspaceFolder}\\.toolchain\\jdk17",
-        "ANDROID_HOME": "${workspaceFolder}\\.toolchain\\android-sdk",
-        "ANDROID_SDK_ROOT": "${workspaceFolder}\\.toolchain\\android-sdk",
-        "PUB_CACHE": "${workspaceFolder}\\.toolchain\\pub-cache",
-        "GRADLE_USER_HOME": "${workspaceFolder}\\.toolchain\\gradle-cache"
-      }
-    },
-    {
       "name": "Android: Profile (selected device)",
       "request": "launch",
       "type": "dart",
