@@ -48,8 +48,11 @@ class TrackingFlow {
   /// Session-scoped map view the screen currently displays.
   final SessionMapView Function() currentSessionView;
 
-  final bool loraConnected;
-  final bool carpeaterEnabled;
+  /// Live connection flags, read when tracking starts. The screen builds
+  /// this flow once, so they resolve through getters instead of captured
+  /// values that would go stale across reconnects and setting changes.
+  final bool Function() loraConnected;
+  final bool Function() carpeaterEnabled;
 
   /// Applies the tracking flag; [autoPing] `null` leaves the current
   /// auto-ping flag untouched.
@@ -108,14 +111,14 @@ class TrackingFlow {
     final l10n = AppLocalizations.of(context);
     String startMessage = l10n.mapLocationTrackingStarted;
     // Auto-enable ping or Carpeater if LoRa is connected
-    if (loraConnected && carpeaterEnabled) {
+    if (loraConnected() && carpeaterEnabled()) {
       locationService.setCarpeaterMode(true);
       final carpeaterStarted = await locationService.startCarpeater();
       setTrackingState(true, false);
       startMessage = carpeaterStarted
           ? l10n.mapCarpeaterModeStarted
           : l10n.mapCarpeaterFailedCheckSettings;
-    } else if (loraConnected) {
+    } else if (loraConnected()) {
       locationService.enableAutoPing();
       setTrackingState(true, true);
       startMessage = l10n.mapLocationTrackingAndAutoPingStarted;

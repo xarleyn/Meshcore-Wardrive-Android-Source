@@ -907,8 +907,8 @@ class _MapScreenState extends State<MapScreen> {
     mapDataController: _mapDataController,
     isTracking: () => _isTracking,
     currentSessionView: () => _sessionMapView,
-    loraConnected: _loraConnected,
-    carpeaterEnabled: _carpeaterEnabled,
+    loraConnected: () => _loraConnected,
+    carpeaterEnabled: () => _carpeaterEnabled,
     setTrackingState: (tracking, autoPing) => _updateMapState(() {
       _isTracking = tracking;
       if (autoPing != null) _autoPingEnabled = autoPing;

@@ -195,6 +195,9 @@ turned out to be irreducible wiring rather than extractable features.
   typed result is returned to the caller.
 - A controller may coordinate existing services but must not become a second
   monolithic copy of `_MapScreenState`.
+- A flow facade is constructed once (`late final` on the screen), so every
+  mutable screen value it reads must resolve through a callback getter
+  (`bool Function()`, `List<T> Function()`, ...), never a captured value.
 - New behavior receives tests before or alongside extraction.
 
 ## Verification for every milestone
