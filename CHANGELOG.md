@@ -20,6 +20,31 @@
   `MapUiActions` boundary (the last `part` file in `lib/` is gone). No
   user-visible behavior changes are intended.
 
+### Technical
+
+- Repository hygiene: dropped a 1.5 MB icon draft (`image_c64f531b.png`) and
+  an unused legacy icon committed by mistake, untracked a leaked Gradle
+  report, and extended `.gitignore` so `android/build/` and local `builds/`
+  stay out of version control. CI re-enabled the `flutter analyze` gate and
+  the launcher-icon source moved to `assets/icon/app_icon.png`.
+- Follow-up map screen cleanup: the thirteen facade objects (tracking,
+  permissions, data I/O, annotations, screenshot, manual ping, connection,
+  theme, settings controller, entity dialogs, upload, community coverage,
+  offline tiles) are now built once as `late final` fields instead of being
+  re-allocated on every access.
+- Shared `RepeaterStatsService` replaces the two private repeater statistics
+  pipelines in the Analytics and Repeater Health screens. The trend now
+  compares the last 7 days against the last 30 days on both screens (the
+  Analytics screen previously used two consecutive 7-day windows).
+- Ping domain types (`PingStatus`, `PingResponse`, `PingResult`) move to
+  `lib/models/ping_result.dart`, with `PingResponseTracker` and the
+  reconnect policy extracted into their own service files.
+- Small dedup: `GeohashUtils.truncate`/`latitudeStepDegrees`,
+  a shared `DistanceUnits.metersPerMile` constant, a shared
+  Cancel/Confirm dialog helper, `SecureCredentialsStore` extracted from
+  `SettingsService`, and concurrent per-device stats loading in the device
+  comparison screen.
+
 ### Added
 
 - Map LOD ("Simplify map at low zoom") gains two sliders while enabled:
