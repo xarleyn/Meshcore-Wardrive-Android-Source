@@ -6,6 +6,7 @@ import '../models/models.dart';
 import '../services/database_service.dart';
 import '../services/settings_service.dart';
 import '../utils/distance_units.dart';
+import '../widgets/confirm_dialog.dart';
 
 TextStyle sessionMapHintStyle(BuildContext context) {
   return TextStyle(
@@ -80,25 +81,12 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
 
   Future<void> _deleteSession(WSession session) async {
     final l10n = AppLocalizations.of(context);
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.sessionDeleteTitle),
-        content: Text(l10n.sessionDeleteBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.settingsCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              l10n.mapDelete,
-              style: const TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
+    final confirmed = await showConfirmDialog(
+      context,
+      title: l10n.sessionDeleteTitle,
+      content: l10n.sessionDeleteBody,
+      confirmLabel: l10n.mapDelete,
+      destructive: true,
     );
 
     if (confirmed == true && session.id != null) {

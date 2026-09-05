@@ -5,6 +5,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../../models/impossible_zone.dart';
 import '../../../models/location_quality_settings.dart';
 import '../../map/dialogs/marker_dialogs.dart';
+import '../../../widgets/confirm_dialog.dart';
 import '../settings_screen.dart';
 
 Future<void> showLocationQualitySettings(
@@ -232,25 +233,12 @@ List<Widget> _buildLocationQualitySettings(
         subtitle: Text(l10n.settingsRemoveAllZones(zones.length)),
         leading: const Icon(Icons.delete_outline, color: Colors.red),
         onTap: () async {
-          final confirmed = await showDialog<bool>(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text(l10n.settingsClearImpossibleZones),
-              content: Text(l10n.settingsClearImpossibleZonesConfirm),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: Text(l10n.settingsCancel),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: Text(
-                    l10n.settingsClear,
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                ),
-              ],
-            ),
+          final confirmed = await showConfirmDialog(
+            context,
+            title: l10n.settingsClearImpossibleZones,
+            content: l10n.settingsClearImpossibleZonesConfirm,
+            confirmLabel: l10n.settingsClear,
+            destructive: true,
           );
           if (confirmed == true) await onClearZones();
         },

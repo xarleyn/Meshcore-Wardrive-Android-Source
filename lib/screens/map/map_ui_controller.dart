@@ -12,6 +12,7 @@ import '../../services/settings_service.dart';
 import '../../services/sound_service.dart';
 import '../../services/upload_service.dart';
 import '../../utils/session_map_view.dart';
+import '../../widgets/confirm_dialog.dart';
 import '../settings/sections/location_quality_section.dart';
 import '../settings/sections/map_display_section.dart';
 import '../settings/sections/statistics_section.dart';
@@ -841,25 +842,12 @@ class MapUiController implements MapUiActions {
     required String title,
     required String confirm,
   }) {
-    return showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(title),
-        content: Text(confirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(AppLocalizations.of(dialogContext).settingsCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(
-              AppLocalizations.of(dialogContext).settingsClear,
-              style: const TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
+    return showConfirmDialog(
+      context,
+      title: title,
+      content: confirm,
+      confirmLabel: AppLocalizations.of(context).settingsClear,
+      destructive: true,
     );
   }
 }

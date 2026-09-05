@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../utils/distance_units.dart';
+import '../../../widgets/confirm_dialog.dart';
 import '../widgets/settings_section_header.dart';
 import '../widgets/settings_text_input_dialog.dart';
 
@@ -65,22 +66,11 @@ List<Widget> buildStatisticsSettings(
                 icon: const Icon(Icons.restart_alt, size: 20),
                 tooltip: l10n.settingsResetTooltip,
                 onPressed: () async {
-                  final confirmed = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text(l10n.settingsResetDistance),
-                      content: Text(l10n.settingsResetDistanceConfirm),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, false),
-                          child: Text(l10n.settingsCancel),
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, true),
-                          child: Text(l10n.settingsReset),
-                        ),
-                      ],
-                    ),
+                  final confirmed = await showConfirmDialog(
+                    context,
+                    title: l10n.settingsResetDistance,
+                    content: l10n.settingsResetDistanceConfirm,
+                    confirmLabel: l10n.settingsReset,
                   );
                   if (confirmed == true) await onResetDistance();
                 },

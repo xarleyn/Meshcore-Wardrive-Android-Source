@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../l10n/generated/app_localizations.dart';
 import '../services/location_service.dart';
+import '../widgets/confirm_dialog.dart';
 
 import 'package:path_provider/path_provider.dart';
 
@@ -78,22 +79,11 @@ class _DebugDiagnosticsScreenState extends State<DebugDiagnosticsScreen> {
 
   Future<void> _deleteLogFile(File file) async {
     final l10n = AppLocalizations.of(context);
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.debugDiagnosticsDeleteTitle),
-        content: Text(l10n.debugDiagnosticsDeleteBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(l10n.settingsCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.mapDelete),
-          ),
-        ],
-      ),
+    final confirm = await showConfirmDialog(
+      context,
+      title: l10n.debugDiagnosticsDeleteTitle,
+      content: l10n.debugDiagnosticsDeleteBody,
+      confirmLabel: l10n.mapDelete,
     );
 
     if (confirm == true) {
