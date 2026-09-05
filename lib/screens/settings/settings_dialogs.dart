@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../l10n/generated/app_localizations.dart';
+import '../../utils/distance_units.dart';
 import 'widgets/settings_text_input_dialog.dart';
 
 class NullableTextSettingResult {
@@ -17,7 +18,9 @@ String pingIntervalDescription(BuildContext context, double intervalMeters) {
   if (intervalMeters < 1000) {
     return l10n.settingsPingIntervalMeters(intervalMeters.toInt());
   }
-  final miles = (intervalMeters / 1609.34).toStringAsFixed(1);
+  final miles = (intervalMeters / DistanceUnits.metersPerMile).toStringAsFixed(
+    1,
+  );
   return l10n.settingsPingIntervalMiles(miles, intervalMeters.toInt());
 }
 

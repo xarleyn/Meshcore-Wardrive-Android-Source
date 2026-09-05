@@ -23,7 +23,7 @@ import '../utils/initial_map_camera.dart';
 import '../utils/compass_calibration.dart';
 import '../utils/heading_utils.dart';
 import '../utils/session_map_view.dart';
-import '../utils/ducting_presentation.dart';
+import 'map/ducting_presentation.dart';
 import '../utils/map_tiles.dart';
 import '../utils/ping_success_stats.dart';
 import '../widgets/compass_calibration.dart';

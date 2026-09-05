@@ -7,7 +7,7 @@ import '../../services/aggregation_service.dart';
 import '../../services/lora_companion_service.dart';
 import '../../services/map_lod_service.dart';
 import '../../utils/community_coverage.dart';
-import '../../utils/ducting_presentation.dart';
+import 'ducting_presentation.dart';
 import '../../utils/geohash_utils.dart';
 import '../../utils/ping_burst.dart';
 import 'dialogs/coverage_tools_dialogs.dart';

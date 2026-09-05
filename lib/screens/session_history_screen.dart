@@ -5,6 +5,7 @@ import '../l10n/generated/app_localizations.dart';
 import '../models/models.dart';
 import '../services/database_service.dart';
 import '../services/settings_service.dart';
+import '../utils/distance_units.dart';
 
 TextStyle sessionMapHintStyle(BuildContext context) {
   return TextStyle(
@@ -72,7 +73,7 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
       final km = meters / 1000.0;
       return l10n.sessionDistanceKm(km.toStringAsFixed(1));
     } else {
-      final miles = meters / 1609.34;
+      final miles = meters / DistanceUnits.metersPerMile;
       return l10n.sessionDistanceMi(miles.toStringAsFixed(1));
     }
   }

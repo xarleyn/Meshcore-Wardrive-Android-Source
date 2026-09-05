@@ -181,10 +181,14 @@ class MapLodService {
     double longitude,
     int precision,
   ) {
-    if (existingHash.length >= precision) {
-      return existingHash.substring(0, precision);
+    if (existingHash.length < precision) {
+      return GeohashUtils.coverageKey(
+        latitude,
+        longitude,
+        precision: precision,
+      );
     }
-    return GeohashUtils.coverageKey(latitude, longitude, precision: precision);
+    return GeohashUtils.truncate(existingHash, precision);
   }
 
   static DateTime? _latest(DateTime? first, DateTime? second) {

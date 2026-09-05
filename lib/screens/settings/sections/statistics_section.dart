@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../utils/distance_units.dart';
 import '../widgets/settings_section_header.dart';
 import '../widgets/settings_text_input_dialog.dart';
 
@@ -44,7 +45,7 @@ List<Widget> buildStatisticsSettings(
         final gasPrice = loaded?.gasPricePerGallon ?? 3.50;
         final grandTotalMeters = totalMeters + sessionMeters;
         final distanceDisplay = distanceUnit == 'miles'
-            ? '${(grandTotalMeters / 1609.34).toStringAsFixed(2)} mi'
+            ? '${(grandTotalMeters / DistanceUnits.metersPerMile).toStringAsFixed(2)} mi'
             : '${(grandTotalMeters / 1000).toStringAsFixed(2)} km';
         final fuelDisplay = _formatFuelUsage(
           l10n,
@@ -198,7 +199,7 @@ String? _formatFuelUsage(
   required String fuelUnit,
 }) {
   if (vehicleMpg == null || vehicleMpg <= 0) return null;
-  final gallonsUsed = (totalMeters / 1609.34) / vehicleMpg;
+  final gallonsUsed = (totalMeters / DistanceUnits.metersPerMile) / vehicleMpg;
   if (fuelUnit == 'metric') {
     final litresUsed = gallonsUsed * 3.78541;
     final pricePerLitre = gasPricePerGallon / 3.78541;

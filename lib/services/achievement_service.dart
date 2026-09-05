@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'database_service.dart';
 import 'settings_service.dart';
+import '../utils/distance_units.dart';
+import '../utils/geohash_utils.dart';
 
 class Achievement {
   final String id;
@@ -56,9 +58,6 @@ class AchievementService {
   /// achievement. Matched case-insensitively.
   static const List<String> _legendNamePrefixes = ['ya_', 'yakut', 'якут'];
 
-  /// Meters per mile, used when distance thresholds are compared in miles.
-  static const double _metersPerMile = 1609.34;
-
   /// Converts a stored total in meters into the user-selected [distanceUnit]
   /// ('miles' or 'km').
   ///
@@ -66,7 +65,9 @@ class AchievementService {
   /// (100 miles == 100 km): the total is only rescaled into the selected unit,
   /// never converted across units.
   static double totalDistanceInUnits(double meters, String distanceUnit) {
-    return distanceUnit == 'km' ? meters / 1000.0 : meters / _metersPerMile;
+    return distanceUnit == 'km'
+        ? meters / 1000.0
+        : meters / DistanceUnits.metersPerMile;
   }
 
   /// Whether [name] — the connected companion radio's own advert name —
@@ -123,9 +124,7 @@ class AchievementService {
     for (final s in samples) {
       if (s.pingSuccess != null) {
         // Use first 6 chars of geohash as coverage key (precision 6)
-        cells.add(
-          s.geohash.substring(0, s.geohash.length >= 6 ? 6 : s.geohash.length),
-        );
+        cells.add(GeohashUtils.truncate(s.geohash, 6));
       }
     }
 

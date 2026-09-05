@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 class DiscoveryTimeoutOptions {
   const DiscoveryTimeoutOptions._();
 
@@ -11,11 +9,4 @@ class DiscoveryTimeoutOptions {
   }
 
   static String labelFor(int seconds) => '${seconds}s';
-
-  static List<DropdownMenuItem<int>> menuItems(int current) {
-    return [
-      for (final value in valuesFor(current))
-        DropdownMenuItem<int>(value: value, child: Text(labelFor(value))),
-    ];
-  }
 }

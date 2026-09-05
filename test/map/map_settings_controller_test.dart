@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meshcore_wardrive/screens/map/map_settings_controller.dart';
+import 'package:meshcore_wardrive/services/secure_credentials_store.dart';
 import 'package:meshcore_wardrive/services/settings_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

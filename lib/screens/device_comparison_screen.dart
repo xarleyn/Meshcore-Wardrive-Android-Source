@@ -27,12 +27,13 @@ class _DeviceComparisonScreenState extends State<DeviceComparisonScreen> {
   Future<void> _load() async {
     final db = DatabaseService();
     final devices = await db.getAllDevices();
-    final stats = <String, Map<String, dynamic>>{};
-
-    for (final d in devices) {
-      final key = d['public_key'] as String;
-      stats[key] = await db.getDeviceStats(key);
-    }
+    final keys = [for (final d in devices) d['public_key'] as String];
+    final statsList = await Future.wait([
+      for (final key in keys) db.getDeviceStats(key),
+    ]);
+    final stats = <String, Map<String, dynamic>>{
+      for (var i = 0; i < keys.length; i++) keys[i]: statsList[i],
+    };
 
     setState(() {
       _devices = devices;

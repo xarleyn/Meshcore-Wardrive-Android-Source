@@ -1,4 +1,7 @@
 import 'package:geohash_plus/geohash_plus.dart' as geohash;
+
+import 'geohash_utils.dart';
+
 import 'package:latlong2/latlong.dart';
 
 class CommunityCoverageCell {
@@ -62,9 +65,7 @@ class CommunityCoverage {
 
     raw.forEach((hash, cellData) {
       if (cellData is! Map<String, dynamic> || hash.isEmpty) return;
-      final key = hash.length <= precision
-          ? hash
-          : hash.substring(0, precision);
+      final key = GeohashUtils.truncate(hash, precision);
       final acc = aggregated.putIfAbsent(key, _CommunityCellAccumulator.new);
       acc.add(cellData);
     });

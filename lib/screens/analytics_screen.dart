@@ -11,6 +11,7 @@ import '../models/models.dart';
 import '../services/aggregation_service.dart';
 import '../services/database_service.dart';
 import '../services/settings_service.dart';
+import '../utils/distance_units.dart';
 import '../utils/geohash_utils.dart';
 import '../l10n/generated/app_localizations.dart';
 
@@ -789,7 +790,7 @@ class _CoverageGoalTabState extends State<_CoverageGoalTab> {
     final west = distance.offset(center, _goalRadiusMeters, 270);
 
     // Step size based on precision (approximate cell size in degrees)
-    final stepDeg = _geohashStepDegrees(widget.coveragePrecision);
+    final stepDeg = GeohashUtils.latitudeStepDegrees(widget.coveragePrecision);
 
     for (double lat = south.latitude; lat <= north.latitude; lat += stepDeg) {
       for (double lon = west.longitude; lon <= east.longitude; lon += stepDeg) {
@@ -855,27 +856,11 @@ class _CoverageGoalTabState extends State<_CoverageGoalTab> {
     );
   }
 
-  double _geohashStepDegrees(int precision) {
-    // Approximate latitude step for each geohash precision level
-    switch (precision) {
-      case 4:
-        return 0.18; // ~20km
-      case 5:
-        return 0.044; // ~5km
-      case 6:
-        return 0.011; // ~1.2km
-      case 7:
-        return 0.0014; // ~153m
-      case 8:
-        return 0.00034; // ~38m
-      default:
-        return 0.011;
-    }
-  }
-
   String _formatRadius(AppLocalizations l10n, double meters) {
-    if (meters >= 1609) {
-      return l10n.analyticsRadiusMiles((meters / 1609.34).toStringAsFixed(1));
+    if (meters >= DistanceUnits.metersPerMile) {
+      return l10n.analyticsRadiusMiles(
+        (meters / DistanceUnits.metersPerMile).toStringAsFixed(1),
+      );
     }
     return l10n.analyticsRadiusMeters(meters.toStringAsFixed(0));
   }
@@ -1201,10 +1186,12 @@ class _CoverageComparisonTabState extends State<_CoverageComparisonTab> {
             _compRow(
               l10n.analyticsDistance,
               l10n.analyticsDistanceMiles(
-                (_result!.distanceA / 1609.34).toStringAsFixed(1),
+                (_result!.distanceA / DistanceUnits.metersPerMile)
+                    .toStringAsFixed(1),
               ),
               l10n.analyticsDistanceMiles(
-                (_result!.distanceB / 1609.34).toStringAsFixed(1),
+                (_result!.distanceB / DistanceUnits.metersPerMile)
+                    .toStringAsFixed(1),
               ),
             ),
             const SizedBox(height: 16),

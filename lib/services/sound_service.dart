@@ -62,7 +62,10 @@ class SoundService {
         'tone': tone,
         'durationMs': durationMs,
       });
-    } catch (_) {}
+    } catch (_) {
+      // Feedback must never break the flow that triggered it; a missing
+      // platform channel (e.g. in tests) is not an error worth surfacing.
+    }
   }
 
   /// Vibrate via Android Vibrator

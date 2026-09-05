@@ -9,6 +9,7 @@ import 'package:permission_handler/permission_handler.dart' hide ServiceStatus;
 
 import '../models/models.dart';
 import '../models/location_quality_settings.dart';
+import '../utils/distance_units.dart';
 import 'database_service.dart';
 import 'lora_companion_service.dart';
 import 'meshcore_protocol.dart';
@@ -297,7 +298,8 @@ class LocationService {
     final rate = _sessionPingCount > 0
         ? ((_sessionSuccessCount / _sessionPingCount) * 100).toStringAsFixed(0)
         : '--';
-    final dist = (_totalDistanceMeters / 1609.34).toStringAsFixed(1);
+    final dist = (_totalDistanceMeters / DistanceUnits.metersPerMile)
+        .toStringAsFixed(1);
     await _setNotificationText(
       (l10n) => l10n.notificationLiveStats(rate, _sessionPingCount, dist),
     );
@@ -1049,7 +1051,8 @@ class LocationService {
   double get totalDistanceMeters => _totalDistanceMeters;
 
   /// Get total distance traveled in miles
-  double get totalDistanceMiles => _totalDistanceMeters / 1609.34;
+  double get totalDistanceMiles =>
+      _totalDistanceMeters / DistanceUnits.metersPerMile;
 
   /// Get total distance traveled in kilometers
   double get totalDistanceKm => _totalDistanceMeters / 1000.0;

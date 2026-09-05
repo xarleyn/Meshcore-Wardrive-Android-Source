@@ -1,11 +1,10 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 
 import '../l10n/generated/app_localizations.dart';
 import '../models/models.dart';
+import '../utils/geohash_utils.dart';
 
 /// Repeater Health Dashboard — per-repeater drill-down with charts,
 /// degradation alerts, coverage cells, and recent ping history.
@@ -259,7 +258,7 @@ class _RepeaterHealthScreenState extends State<RepeaterHealthScreen> {
     // Count unique coverage cells
     final cells = <String>{};
     for (final s in samples) {
-      cells.add(s.geohash.substring(0, min(6, s.geohash.length)));
+      cells.add(GeohashUtils.truncate(s.geohash, 6));
     }
 
     // Offline detection: not seen in 7 days with 10+ pings total

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../l10n/generated/app_localizations.dart';
-import '../services/ducting_service.dart';
+import '../../l10n/generated/app_localizations.dart';
+import '../../services/ducting_service.dart';
 
 /// Presentation helpers for ducting risk values.
 

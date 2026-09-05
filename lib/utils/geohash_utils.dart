@@ -23,6 +23,32 @@ class GeohashUtils {
     return geohash.GeoHash.encode(lat, lon, precision: precision).hash;
   }
 
+  /// Shorten an existing geohash to [precision] characters. Hashes shorter
+  /// than [precision] are returned unchanged.
+  static String truncate(String hash, int precision) {
+    if (hash.length <= precision) return hash;
+    return hash.substring(0, precision);
+  }
+
+  /// Approximate latitude span of one geohash cell at [precision], used for
+  /// coarse distance estimates without decoding a cell.
+  static double latitudeStepDegrees(int precision) {
+    switch (precision) {
+      case 4:
+        return 0.18; // ~20km
+      case 5:
+        return 0.044; // ~5km
+      case 6:
+        return 0.011; // ~1.2km
+      case 7:
+        return 0.0014; // ~153m
+      case 8:
+        return 0.00034; // ~38m
+      default:
+        return 0.011;
+    }
+  }
+
   /// Get position from geohash
   static LatLng posFromHash(String hash) {
     final decoded = geohash.GeoHash.decode(hash);
