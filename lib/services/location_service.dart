@@ -12,6 +12,7 @@ import '../models/location_quality_settings.dart';
 import '../utils/distance_units.dart';
 import 'database_service.dart';
 import 'lora_companion_service.dart';
+import '../models/ping_result.dart';
 import 'meshcore_protocol.dart';
 import 'location_quality_filter.dart';
 import 'bad_fix_monitor.dart';

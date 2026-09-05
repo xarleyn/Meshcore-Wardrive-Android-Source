@@ -4,6 +4,7 @@ import '../models/models.dart';
 import '../utils/geohash_utils.dart';
 import 'database_service.dart';
 import 'lora_companion_service.dart';
+import '../models/ping_result.dart';
 import 'settings_service.dart';
 import 'sound_service.dart';
 

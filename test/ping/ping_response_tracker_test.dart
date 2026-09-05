@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meshcore_wardrive/services/lora_companion_service.dart';
+import 'package:meshcore_wardrive/services/ping_response_tracker.dart';
+import 'package:meshcore_wardrive/models/ping_result.dart';
 
 void main() {
   group('PingResponseTracker', () {

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meshcore_wardrive/services/lora_companion_service.dart';
+import 'package:meshcore_wardrive/services/reconnect_policy.dart';
 import 'package:usb_serial/usb_serial.dart';
 
 UsbDevice _usb(

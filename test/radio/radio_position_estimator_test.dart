@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:meshcore_wardrive/models/models.dart';
-import 'package:meshcore_wardrive/services/lora_companion_service.dart';
+import 'package:meshcore_wardrive/models/ping_result.dart';
 import 'package:meshcore_wardrive/services/radio_position_estimator.dart';
 
 void main() {

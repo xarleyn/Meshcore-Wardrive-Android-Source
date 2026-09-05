@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:latlong2/latlong.dart';
 
 import '../models/models.dart';
-import 'lora_companion_service.dart';
+import '../models/ping_result.dart';
 
 /// A deliberately coarse position inferred from signals received by fixed
 /// repeaters. It must never be treated as a replacement for a GPS fix.

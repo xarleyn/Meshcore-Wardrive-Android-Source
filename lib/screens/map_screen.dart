@@ -11,6 +11,7 @@ import '../models/models.dart';
 import '../models/location_quality_settings.dart';
 import '../models/impossible_zone.dart';
 import '../services/location_service.dart';
+import '../models/ping_result.dart';
 import '../services/aggregation_service.dart';
 import '../services/database_backup_service.dart';
 import '../services/map_lod_service.dart';
