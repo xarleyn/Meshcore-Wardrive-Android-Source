@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'l10n/app_locale.dart';
 import 'l10n/generated/app_localizations.dart';
@@ -32,11 +31,17 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
-  ThemeMode _themeMode = ThemeMode.system;
+  InterfaceThemeMode _interfaceTheme = InterfaceThemeMode.system;
   AppLocalePreference _localePreference = AppLocalePreference.system;
   late final InternetConnectivityService _connectivityService;
 
-  ThemeMode get themeMode => _themeMode;
+  /// Material theme mode derived from the persisted interface preference;
+  /// exposed for [ThemeFlow] dialogs.
+  ThemeMode get themeMode => switch (_interfaceTheme) {
+    InterfaceThemeMode.system => ThemeMode.system,
+    InterfaceThemeMode.light => ThemeMode.light,
+    InterfaceThemeMode.dark => ThemeMode.dark,
+  };
 
   AppLocalePreference get localePreference => _localePreference;
 
@@ -64,14 +69,10 @@ class MyAppState extends State<MyApp> {
   }
 
   Future<void> _loadThemeMode() async {
-    final prefs = await SharedPreferences.getInstance();
-    final themeModeString = prefs.getString('theme_mode') ?? 'system';
+    final preference = await SettingsService().getInterfaceThemeMode();
     if (!mounted) return;
     setState(() {
-      _themeMode = ThemeMode.values.firstWhere(
-        (e) => e.name == themeModeString,
-        orElse: () => ThemeMode.system,
-      );
+      _interfaceTheme = preference;
     });
   }
 
@@ -89,11 +90,15 @@ class MyAppState extends State<MyApp> {
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
+    final preference = switch (mode) {
+      ThemeMode.system => InterfaceThemeMode.system,
+      ThemeMode.light => InterfaceThemeMode.light,
+      ThemeMode.dark => InterfaceThemeMode.dark,
+    };
     setState(() {
-      _themeMode = mode;
+      _interfaceTheme = preference;
     });
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('theme_mode', mode.name);
+    await SettingsService().setInterfaceThemeMode(preference);
   }
 
   Future<void> setAppLocalePreference(AppLocalePreference preference) async {
@@ -114,7 +119,7 @@ class MyAppState extends State<MyApp> {
         connectivity: _connectivityService,
         child: child ?? const SizedBox.shrink(),
       ),
-      themeMode: _themeMode,
+      themeMode: themeMode,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.blue,

@@ -13,6 +13,10 @@ enum CurrentLocationMarkerStyle { circle, arrow }
 
 enum MapThemeMode { system, light, dark }
 
+/// App-wide (interface) theme preference. Kept separate from [MapThemeMode]
+/// so the two surfaces stay independently selectable.
+enum InterfaceThemeMode { system, light, dark }
+
 class SettingsService {
   SettingsService({SecureCredentialsStore? credentialsStore})
     : _credentials = credentialsStore ?? const FlutterSecureCredentialsStore();
@@ -101,6 +105,10 @@ class SettingsService {
   static const String _linkLossAlertsKey = 'link_loss_alerts_enabled';
   static const String _batterySaverEnabledKey = 'battery_saver_enabled';
   static const String _mapThemeModeKey = 'map_theme_mode';
+
+  /// Legacy key predating the interface/map theme split; still the storage
+  /// location for the app-wide interface theme.
+  static const String _interfaceThemeModeKey = 'theme_mode';
   static const String _appLocaleKey = 'app_locale';
   static const String _mapLodEnabledKey = 'map_lod_enabled';
   static const String _mapLodMinPrecisionKey = 'map_lod_min_precision';
@@ -1030,6 +1038,23 @@ class SettingsService {
   Future<void> setMapThemeMode(MapThemeMode value) async {
     final prefs = await _prefs;
     await prefs.setString(_mapThemeModeKey, value.name);
+  }
+
+  /// Returns the app-wide interface theme.
+  Future<InterfaceThemeMode> getInterfaceThemeMode() async {
+    final prefs = await _prefs;
+    final value =
+        prefs.getString(_interfaceThemeModeKey) ??
+        InterfaceThemeMode.system.name;
+    return InterfaceThemeMode.values.firstWhere(
+      (candidate) => candidate.name == value,
+      orElse: () => InterfaceThemeMode.system,
+    );
+  }
+
+  Future<void> setInterfaceThemeMode(InterfaceThemeMode value) async {
+    final prefs = await _prefs;
+    await prefs.setString(_interfaceThemeModeKey, value.name);
   }
 
   Future<AppLocalePreference> getAppLocalePreference() async {
