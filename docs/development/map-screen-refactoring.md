@@ -1,5 +1,12 @@
 # Map screen refactoring plan
 
+> **Status: complete (2026-09-05).** All stages below are done. The remaining
+> follow-up candidates live in the [refactoring audit](refactoring-audit.md)
+> (service phase-splitting in §5.2, manifest hygiene in §3.9).
+> `lib/screens/map_screen.dart` stands at 2,093 lines at the time of closing;
+> the composition root deliberately kept the facades wiring, so the original
+> aspirational 600-900-line target was dropped as unnecessary.
+
 ## Context
 
 `lib/screens/map_screen.dart` started as the application's main integration
@@ -22,8 +29,8 @@ without reducing coupling.
 The [refactoring audit](refactoring-audit.md) (2026-09-02) re-measured the
 file at 3,261 lines after stages 1-4 below were completed, and defined a
 follow-up composition-root slim-down (stage 6 below). As of 2026-09-02 the
-file is 2,359 lines. Stage 6 (steps 1-12) is now complete; the file is
-~1,890 lines with the settings pages fully decoupled.
+file was 2,359 lines. Stage 6 (steps 1-12) is complete; the file settled at
+2,093 lines with the settings pages fully decoupled.
 
 ## Goals
 
@@ -34,7 +41,6 @@ file is 2,359 lines. Stage 6 (steps 1-12) is now complete; the file is
   subscriptions, and asynchronous cleanup.
 - Replace loosely typed dialog and map data where practical with typed values.
 - Preserve existing behavior throughout incremental, reviewable commits.
-- Reduce `map_screen.dart` to roughly 600-900 lines after the full refactoring.
 
 ## Non-goals
 
@@ -173,9 +179,11 @@ audit-cleanup pass (tile URL constants, `PingSuccessStats`, named timing
 constants, `Future<void>` async handlers; eba08de).
 
 Steps 1-5 and 7-10 reduce `map_screen.dart` from 3,261 to 2,359 lines.
-Steps 6, 11, and 12 (plus the entity-dialog and tracking-flow facades)
-bring it to ~1,890 lines and close stage 5 as well: no `part` files remain
-in `lib/`.
+Steps 6, 11, and 12 (plus the entity-dialog and tracking-flow facades) bring
+it to 2,093 lines and close stage 5 as well: no `part` files remain in
+`lib/`. The composition root intentionally keeps the facade wiring and build
+method; the earlier 600-900-line goal was dropped when the remaining code
+turned out to be irreducible wiring rather than extractable features.
 
 ## Extraction rules
 

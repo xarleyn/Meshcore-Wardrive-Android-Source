@@ -5,7 +5,8 @@ local database; nothing is sent anywhere.
 
 ## Coverage analytics
 
-The Analytics screen (from the map menu) has five tabs:
+The Analytics screen opens from Settings → Data Management → Analytics and
+has five tabs:
 
 - **Score** - an overall coverage score for your recordings with the
   underlying stats, and a shareable summary.
@@ -19,7 +20,7 @@ The Analytics screen (from the map menu) has five tabs:
 
 ## Repeater health
 
-Settings → Statistics opens the Repeater Health screen: success rates per
+Settings → Diagnostics opens the Repeater Health screen: success rates per
 repeater with 7-day vs 30-day trend direction, and a detail screen per
 repeater with its response history.
 

@@ -211,6 +211,33 @@ rules:
     direction: code-to-docs
     relation: related
 
+  # The ducting forecast viewer and the atmospheric ducting monitor have
+  # their own guide; the location section hosts both settings tiles.
+  - id: ducting-guide
+    description: Ducting forecast and monitor guide
+    code:
+      - lib/screens/ducting_forecast_screen.dart
+      - lib/services/ducting_service.dart
+      - lib/screens/settings/sections/location_section.dart
+    docs:
+      - docs/guides/ducting-forecast.md
+    direction: code-to-docs
+    relation: documents
+
+  # The home screen widget guide documents the widget bridge, provider, and
+  # layout.
+  - id: home-widget-guide
+    description: Android home screen widget guide
+    code:
+      - lib/services/widget_service.dart
+      - android/app/src/main/kotlin/io/github/xarleyn/meshcore/wardrive/WardriveWidgetProvider.kt
+      - android/app/src/main/res/layout/wardrive_widget_layout.xml
+      - android/app/src/main/res/xml/wardrive_widget_info.xml
+    docs:
+      - docs/guides/home-widget.md
+    direction: code-to-docs
+    relation: documents
+
   # AGENTS.md points at analysis_options.yaml as the lint convention.
   - id: agent-conventions
     description: Repository lint conventions in AGENTS.md

@@ -53,8 +53,8 @@ that file to your Android device and install it.
 - **Start/Stop Button** (large green/red): Toggles location tracking. Long-press
   while stopped starts a fresh session that only shows this trip. After you
   stop, the map stays on that session until you short-press Play (show all) or
-  pick another session in Settings → Session History. Stopping with no GPS
-  points asks whether to save the empty session. See the
+  pick another session in Settings → Data Management → Session History.
+  Stopping with no GPS points asks whether to save the empty session. See the
   [sessions guide](guides/recording-sessions.md).
 - **Quick Settings** (double-tap the play button): Compact panel with ping and
   display controls
@@ -187,7 +187,7 @@ radio response:
   supported. Optional Impossible Zones discard fixes inside user-defined
   circles (airports and other unreachable areas) and keep the last valid
   position.
-- **Coverage Precision**: ~0.61km × 1.22km grid
+- **Coverage Precision**: ~150 m grid cells (geohash precision 7 by default)
 - **Sample Precision**: ~19m × 38m grid
 - **Initial Map View**: Centroid of stored samples at city-scale zoom; if there
   are no samples and GPS is not available yet, 47.7776, -122.4247 (Puget Sound)

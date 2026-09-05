@@ -37,6 +37,14 @@ installation and does not migrate data from `mintylinux.meshcore.wardrive`.
 - Debug terminal with logging
 - Independent light/dark/system themes for the interface and map
 - Impossible Zones: discard GPS jumps into places you cannot physically be
+- Carpeater mode: log into a repeater and map its neighbours
+- Coverage analytics with achievements and device comparison
+- Repeater health dashboard with degradation alerts
+- Tropospheric ducting forecast with 23 global regions
+- Community coverage overlay from shared wardrive data
+- Full database backup/restore (Settings → Backup)
+- Android home screen widget with live tracking stats
+- Russian localization (System / English / Русский)
 
 ## 🛠️ Development Setup
 
@@ -98,17 +106,27 @@ lib/
 │   ├── impossible_zone.dart         # Impossible Zones
 │   └── location_quality_settings.dart # GPS quality filter thresholds
 ├── screens/
-│   ├── map_screen.dart              # Main map interface
+│   ├── map_screen.dart              # Main map interface (composition root)
 │   ├── map/                         # Map screen building blocks
 │   │   ├── map_screen_controller.dart   # Map data store, caching, level of detail
 │   │   ├── map_settings_controller.dart # Settings snapshot handling
 │   │   ├── map_runtime_bindings.dart    # Stream/timer wiring
+│   │   ├── map_ui_snapshot.dart         # Immutable settings-page values
+│   │   ├── map_ui_actions.dart          # Typed settings-page command interface
+│   │   ├── map_ui_controller.dart       # Applies settings commands to the screen
+│   │   ├── map_annotations_controller.dart # Markers and privacy/exclusion zones
+│   │   ├── tracking_permissions.dart    # Android permission pre-flight
+│   │   ├── tracking_flow.dart           # Tracking start/stop and session settlement
+│   │   ├── entity_info_flow.dart        # Entity info dialogs, filters, gaps
+│   │   ├── screenshot_flow.dart         # Capture/share sequence
+│   │   ├── connection_flow.dart         # USB/BLE connect, contacts, scanning
+│   │   ├── data_io.dart                 # Sample, settings, and database import/export
 │   │   ├── dialogs/                 # Marker, coverage, connection, upload, and tile dialogs
 │   │   ├── layers/                  # Coverage, sample, repeater, route, and overlay layers
 │   │   └── widgets/                 # Control panels, action buttons, banners
 │   ├── settings/                    # Settings UI
 │   │   ├── settings_screen.dart     # Settings screen shell
-│   │   ├── settings_page.dart       # Settings page content
+│   │   ├── map_settings_page.dart   # Standalone settings page from snapshot + actions
 │   │   ├── settings_dialogs.dart    # Shared settings dialogs
 │   │   ├── sections/                # Grouped settings sections (discovery, map display, ...)
 │   │   └── widgets/                 # Settings dialogs and section headers

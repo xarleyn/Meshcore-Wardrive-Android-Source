@@ -4,8 +4,13 @@
 
 ### Changed
 
+- Discovery response collection is now a "Response collection" dropdown with
+  **Fast** and **Full** options instead of a separate thorough-collection
+  toggle; the previously saved choice migrates automatically. (This entry
+  covers commit 0342d59 from 2026-09-04, which was missing here.)
+
 - Internal refactor of the map screen (`lib/screens/map_screen.dart`,
-  2381 -> 1885 lines) completing the remaining steps of the map screen
+  2381 -> 2093 lines) completing the remaining steps of the map screen
   refactoring plan. The inline map layer stack is replaced by the extracted
   `MapLayerStack` widget; the duplicated screenshot/share sequence moves into
   `ScreenshotFlow`; entity info dialogs (samples, clusters, repeaters,

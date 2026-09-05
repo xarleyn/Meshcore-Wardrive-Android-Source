@@ -1,5 +1,9 @@
 # Localization Implementation Plan
 
+> **Status: executed and shipped.** Localization (gen_l10n, EN+RU catalogs,
+> in-app language switcher) went out in v1.0.43; the `- [ ]` checkboxes below
+> are kept as written in the original plan.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Ship official Flutter gen_l10n with English + Russian catalogs, an in-app language switcher, and all user-visible copy moved off string literals.

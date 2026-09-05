@@ -41,11 +41,9 @@ at runtime.
 
 ## First Time Setup
 
-### Join #meshwar Channel
-1. Open the **MeshCore app** on your device
-2. Get the **#meshwar QR code** from another user
-3. Scan the QR code to join the channel
-4. The channel will now appear in your channels list
+No channel or QR setup is required: this fork pings through the MeshCore
+Discovery protocol, which reaches every repeater in range without joining a
+channel.
 
 ### Connect LoRa Device
 
@@ -65,10 +63,10 @@ at runtime.
 5. Wait for connection (green indicator)
 
 ### Start Wardriving
-1. Press the **green play button** to start GPS tracking
-2. Toggle **Auto-Ping switch** to enable automatic pinging
-3. Drive/walk through your area
-4. Watch the map fill with coverage data!
+1. Press the **green play button** to start GPS tracking; automatic pinging
+   starts together with it once a LoRa device is connected
+2. Drive/walk through your area
+3. Watch the map fill with coverage data!
 
 ## Troubleshooting
 

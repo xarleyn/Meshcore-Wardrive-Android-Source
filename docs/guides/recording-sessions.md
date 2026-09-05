@@ -21,15 +21,15 @@ session begins from an accurate fix.
 
 - After you stop a long-press session, the map stays on that trip until you
   short-press Play (show all) or pick another session in
-  Settings → Session History.
+  Settings → Data Management → Session History.
 - Stopping with no GPS points asks whether to keep the empty session.
 - Deleting the session currently on the map falls back to the latest remaining
   saved session, or to a blank map when none remain.
 
 ## Session History
 
-Settings → Session History lists every session, newest first. Each card
-shows:
+Settings → Data Management → Session History lists every session, newest
+first. Each card shows:
 
 - start and end time, recording duration, and distance;
 - sample (GPS points) count, ping count, heard count, and success rate with a
