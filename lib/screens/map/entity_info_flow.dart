@@ -51,16 +51,19 @@ class EntityInfoFlow {
   final void Function(String message) onShowSnackBar;
 
   final LoRaCompanionService loraCompanion;
-  final List<Repeater> repeaters;
-  final List<Sample> samples;
-  final AggregationResult? aggregationResult;
+
+  /// Read-through getters: the map screen state changes while this flow is
+  /// alive, so every access resolves the current value.
+  final List<Repeater> Function() repeaters;
+  final List<Sample> Function() samples;
+  final AggregationResult? Function() aggregationResult;
 
   /// Downloaded community coverage and its display toggle.
-  final Map<String, dynamic>? communityCoverage;
-  final bool showCommunityCoverage;
+  final Map<String, dynamic>? Function() communityCoverage;
+  final bool Function() showCommunityCoverage;
 
   /// Current include-only repeater filter, shown by the filter picker.
-  final String? includeOnlyRepeaters;
+  final String? Function() includeOnlyRepeaters;
 
   /// Current coverage LOD precision for community-coverage hit testing.
   final int Function() coverageLodPrecision;
@@ -86,7 +89,7 @@ class EntityInfoFlow {
     }
 
     // First check discovered repeaters list
-    final repeater = repeaters.firstWhere(
+    final repeater = repeaters().firstWhere(
       (candidate) => candidate.id == fullId,
       orElse: () => Repeater(
         id: fullId!,
@@ -119,7 +122,7 @@ class EntityInfoFlow {
       context: context,
       builder: (dialogContext) => SampleInfoDialog(
         sample: sample,
-        responses: PingBurst.responsesFor(sample, samples),
+        responses: PingBurst.responsesFor(sample, samples()),
         repeaterDisplay: repeaterDisplay,
         resolveRepeaterName: getRepeaterName,
         ductingLabel: ductingRisk == null
@@ -182,7 +185,7 @@ class EntityInfoFlow {
   /// cell key that contains it.
   List<Sample> coverageCellSamples(String coverageId) {
     final precision = coverageId.length;
-    final matches = samples.where((sample) {
+    final matches = samples().where((sample) {
       final hash = sample.geohash;
       if (hash.length >= precision) {
         return hash.substring(0, precision) == coverageId;
@@ -202,7 +205,7 @@ class EntityInfoFlow {
   Future<void> showRepeatersDialog() async {
     final result = await showDialog<RepeaterListResult>(
       context: context,
-      builder: (dialogContext) => RepeaterListDialog(repeaters: repeaters),
+      builder: (dialogContext) => RepeaterListDialog(repeaters: repeaters()),
     );
     if (result == null || !context.mounted) return;
     if (result.action == RepeaterListAction.showOnMap) {
@@ -216,13 +219,13 @@ class EntityInfoFlow {
   Future<void> showRepeaterFilterPicker() async {
     // Collect all known repeater IDs from coverage data and discovered repeaters
     final Set<String> knownIds = {};
-    final aggregation = aggregationResult;
+    final aggregation = aggregationResult();
     if (aggregation != null) {
       for (final cov in aggregation.coverages) {
         knownIds.addAll(cov.repeaters);
       }
     }
-    for (final repeater in repeaters) {
+    for (final repeater in repeaters()) {
       knownIds.add(repeater.id);
     }
 
@@ -237,8 +240,8 @@ class EntityInfoFlow {
       context: context,
       builder: (dialogContext) => RepeaterFilterDialog(
         repeaterIds: sortedIds,
-        repeaters: repeaters,
-        selectedId: includeOnlyRepeaters,
+        repeaters: repeaters(),
+        selectedId: includeOnlyRepeaters(),
       ),
     );
 
@@ -257,7 +260,7 @@ class EntityInfoFlow {
 
   /// Lists coverage holes and flies to the one the user picks.
   Future<void> findCoverageGaps() async {
-    final aggregation = aggregationResult;
+    final aggregation = aggregationResult();
     if (aggregation == null || aggregation.coverages.isEmpty) {
       onShowSnackBar(AppLocalizations.of(context).mapNoCoverageYet);
       return;
@@ -279,8 +282,8 @@ class EntityInfoFlow {
 
   /// Community-coverage hit test behind the map's tap handler.
   void handleMapTap(LatLng point) {
-    final coverage = communityCoverage;
-    if (!showCommunityCoverage || coverage == null) return;
+    final coverage = communityCoverage();
+    if (!showCommunityCoverage() || coverage == null) return;
 
     final cells = CommunityCoverage.aggregate(
       coverage,

@@ -898,7 +898,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   /// Tracking lifecycle facade with screen-owned state applied via setState.
-  TrackingFlow get _trackingFlow => TrackingFlow(
+  late final TrackingFlow _trackingFlow = TrackingFlow(
     context: context,
     onShowSnackBar: _showSnackBar,
     locationService: _locationService,
@@ -920,7 +920,7 @@ class _MapScreenState extends State<MapScreen> {
       _trackingFlow.toggleTracking(freshSession: freshSession);
 
   /// Android tracking permission facade with screen dependencies injected.
-  TrackingPermissions get _trackingPermissions => TrackingPermissions(
+  late final TrackingPermissions _trackingPermissions = TrackingPermissions(
     context: context,
     androidTrackingSettings: _androidTrackingSettings,
     beaconDbWifiPositioning: () => _beaconDbWifiPositioning,
@@ -933,7 +933,7 @@ class _MapScreenState extends State<MapScreen> {
       _trackingPermissions.requestWifiScanThrottlingDisabled();
 
   /// Data I/O facade with the screen's services and reload hooks injected.
-  MapDataIo get _dataIo => MapDataIo(
+  late final MapDataIo _dataIo = MapDataIo(
     context: context,
     onShowSnackBar: _showSnackBar,
     locationService: _locationService,
@@ -972,7 +972,7 @@ class _MapScreenState extends State<MapScreen> {
   // ============================================================================
 
   /// Annotation CRUD facade with screen-owned update callbacks injected.
-  MapAnnotationsController get _annotations => MapAnnotationsController(
+  late final MapAnnotationsController _annotations = MapAnnotationsController(
     databaseService: _databaseService,
     onMarkersLoaded: (markers) async {
       if (!mounted) return;
@@ -1289,7 +1289,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   /// Screenshot capture/share facade with the screen's UI toggle injected.
-  ScreenshotFlow get _screenshotFlow => ScreenshotFlow(
+  late final ScreenshotFlow _screenshotFlow = ScreenshotFlow(
     context: context,
     onShowSnackBar: _showSnackBar,
     screenshotController: _screenshotController,
@@ -1598,7 +1598,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   /// Manual ping business logic with the screen's companion and DB wired in.
-  ManualPingService get _manualPingService => ManualPingService(
+  late final ManualPingService _manualPingService = ManualPingService(
     loraCompanion: _locationService.loraCompanion,
     databaseService: _databaseService,
   );
@@ -1652,7 +1652,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   /// Companion connection facade with screen-owned state callbacks injected.
-  ConnectionFlow get _connectionFlow => ConnectionFlow(
+  late final ConnectionFlow _connectionFlow = ConnectionFlow(
     context: context,
     onShowSnackBar: _showSnackBar,
     locationService: _locationService,
@@ -1718,7 +1718,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   /// Theme/language facade with screen-owned map theme callbacks injected.
-  ThemeFlow get _themeFlow => ThemeFlow(
+  late final ThemeFlow _themeFlow = ThemeFlow(
     context: context,
     locationService: _locationService,
     settingsService: _settingsService,
@@ -1874,7 +1874,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   /// Settings-command controller wired to this screen's state and services.
-  MapUiController get _uiController => MapUiController(
+  late final MapUiController _uiController = MapUiController(
     context: context,
     onShowSnackBar: _showSnackBar,
     updateState: _updateMapState,
@@ -1989,16 +1989,16 @@ class _MapScreenState extends State<MapScreen> {
   );
 
   /// Entity dialog facade with screen-owned data and filter persistence.
-  EntityInfoFlow get _entityInfo => EntityInfoFlow(
+  late final EntityInfoFlow _entityInfo = EntityInfoFlow(
     context: context,
     onShowSnackBar: _showSnackBar,
     loraCompanion: _locationService.loraCompanion,
-    repeaters: _repeaters,
-    samples: _samples,
-    aggregationResult: _aggregationResult,
-    communityCoverage: _communityCoverage,
-    showCommunityCoverage: _showCommunityCoverage,
-    includeOnlyRepeaters: _includeOnlyRepeaters,
+    repeaters: () => _repeaters,
+    samples: () => _samples,
+    aggregationResult: () => _aggregationResult,
+    communityCoverage: () => _communityCoverage,
+    showCommunityCoverage: () => _showCommunityCoverage,
+    includeOnlyRepeaters: () => _includeOnlyRepeaters,
     coverageLodPrecision: () => _coverageLodPrecision,
     onFilterRepeater: _setIncludeOnlyRepeaters,
     moveMapTo: (position, zoom) => _mapController.move(position, zoom),
@@ -2025,7 +2025,7 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _showRepeatersDialog() => _entityInfo.showRepeatersDialog();
 
   /// Upload facade with screen-owned snackbars and data callbacks injected.
-  UploadFlow get _uploadFlow => UploadFlow(
+  late final UploadFlow _uploadFlow = UploadFlow(
     context: context,
     onShowSnackBar: _showSnackBar,
     uploadService: _uploadService,
@@ -2034,18 +2034,19 @@ class _MapScreenState extends State<MapScreen> {
   );
 
   /// Community coverage facade; applies coverage through setState.
-  CommunityCoverageFlow get _communityCoverageFlow => CommunityCoverageFlow(
-    context: context,
-    onShowSnackBar: _showSnackBar,
-    uploadService: _uploadService,
-    onCoverageLoaded: (coverage) => setState(() {
-      _communityCoverage = coverage;
-      _showCommunityCoverage = true;
-    }),
-  );
+  late final CommunityCoverageFlow _communityCoverageFlow =
+      CommunityCoverageFlow(
+        context: context,
+        onShowSnackBar: _showSnackBar,
+        uploadService: _uploadService,
+        onCoverageLoaded: (coverage) => setState(() {
+          _communityCoverage = coverage;
+          _showCommunityCoverage = true;
+        }),
+      );
 
   /// Offline tile facade reading map camera state through callbacks.
-  OfflineTileFlow get _offlineTileFlow => OfflineTileFlow(
+  late final OfflineTileFlow _offlineTileFlow = OfflineTileFlow(
     context: context,
     onShowSnackBar: _showSnackBar,
     hasTileCache: () => _tileCacheStore != null,

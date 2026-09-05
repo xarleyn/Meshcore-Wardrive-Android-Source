@@ -1503,7 +1503,7 @@ class _RepeaterReliabilityTabState extends State<_RepeaterReliabilityTab> {
     );
   }
 
-  Widget _buildRepeaterCard(_RepeaterStats stats) {
+  Widget _buildRepeaterCard(RepeaterStats stats) {
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).toString();
     final displayId = stats.id.length > 8
@@ -1619,5 +1619,5 @@ class _RepeaterReliabilityTabState extends State<_RepeaterReliabilityTab> {
         ],
       ),
     );
-  });
+  }
 }
