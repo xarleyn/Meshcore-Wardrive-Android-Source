@@ -198,6 +198,10 @@ turned out to be irreducible wiring rather than extractable features.
 - A flow facade is constructed once (`late final` on the screen), so every
   mutable screen value it reads must resolve through a callback getter
   (`bool Function()`, `List<T> Function()`, ...), never a captured value.
+- Nothing may touch `MapController` (`move`, `rotate`, `camera`) before
+  `MapOptions.onMapReady` sets `_mapReady`: stream-driven accesses guard on
+  `_mapReady`, build-time camera reads fall back to world bounds, and
+  startup snackbars defer to a post-frame callback so a Scaffold exists.
 - New behavior receives tests before or alongside extraction.
 
 ## Verification for every milestone

@@ -433,14 +433,14 @@ class _MapScreenState extends State<MapScreen> {
 
         if (shouldCenterMap) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
+            if (mounted && _mapReady) {
               _mapController.move(position, InitialMapCamera.fallbackZoom);
             }
           });
         }
 
         // Auto-follow if enabled (throttled to reduce map redraws)
-        if (_followLocation) {
+        if (_followLocation && _mapReady) {
           final now = DateTime.now();
           if (now.difference(_lastAutoFollowMove) >= _autoFollowInterval) {
             _lastAutoFollowMove = now;
@@ -1172,9 +1172,14 @@ class _MapScreenState extends State<MapScreen> {
 
   void _showSnackBar(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
-    );
+    // Startup alerts can arrive before the first frame builds the Scaffold;
+    // defer so ScaffoldMessenger has a descendant to present to.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
+      );
+    });
   }
 
   void _updateMapState(VoidCallback callback) {
@@ -1286,6 +1291,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _rotateMapToHeading() {
+    if (!_mapReady) return;
     _mapController.rotate(HeadingUtils.mapRotationForHeading(_currentHeading));
   }
 
@@ -1513,7 +1519,11 @@ class _MapScreenState extends State<MapScreen> {
           radioPositionEstimate: _radioPositionEstimate,
           communityCoverage: _communityCoverage,
           zonePreview: _zonePreview,
-          visibleBounds: _mapController.camera.visibleBounds,
+          // The controller has no camera before the first FlutterMap build;
+          // culling with world bounds until then keeps the first frame safe.
+          visibleBounds: _mapReady
+              ? _mapController.camera.visibleBounds
+              : LatLngBounds(const LatLng(-85, -180), const LatLng(85, 180)),
           currentPosition: _currentPosition,
           showRouteTrail: _showRouteTrail,
           showHeatmap: _showHeatmap,

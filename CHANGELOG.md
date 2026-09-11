@@ -55,6 +55,14 @@
 
 ### Fixed
 
+- The map screen no longer crashes on cold start before the first FlutterMap
+  frame. The layer stack now culls with world bounds until the map reports
+  ready, the first location fix and heading rotation wait for the map, and
+  startup alert snackbars are deferred until a Scaffold exists. Any of the
+  three alone could take the whole screen down ("You need to have the
+  FlutterMap widget rendered at least once before using the MapController" in
+  debug builds, a grey screen in release/profile ones).
+
 - The "Ping Distance" setting (Discovery & sampling) could not change its
   value: the dialog popped `int` results while its route expected `double`,
   so debug builds rejected the selection silently (the dialog stayed open and
